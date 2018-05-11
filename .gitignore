@@ -8,4 +8,5 @@ web/tests_fox/image/img2.jpg
 /src/github.com
 /src/golang.org
 /src/pm/debug
+/pkg/
 run
