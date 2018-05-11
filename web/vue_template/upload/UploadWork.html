@@ -1,0 +1,49 @@
+<!--work 上传附件-->
+<div class="commonDialog uploadWork" :wid="wid">
+    <div class="head">
+        <div class="title">上传附件</div>
+        <div class="close" @click="onClose">x</div>
+        <input class="hidden inputFile" type="file" @change="onChangeInputFile" multiple="multiple">
+        <!-- accept="image/bmp,image/png,image/jpeg"  -->
+    </div>
+    <transition-group name="upload_list" tag="ul" class="fileBox">
+        <li v-for="(item,index) in items" :key="item.TempId" :class="['file','upload_list-item',{border_dashed:item.state==0||item.state==1||item.state==4,border_solid:item.state==2||item.state==3},{cursor_pointer:item.state==1&&uploadingSum==0}]"
+            @click="onSelectFileStart($event,index)">
+            <!-- 这里cursor_pointer是为了增加按钮添加的,  因为URL状态时有 <a 增加手型标志,所以不需要加 -->
+            <div v-if="item.state==1&&uploadingSum==0" class="btn_add1" title="(`选择/拖拽/粘贴`图片)">增加</div>
+            <div class="no-mbp div-img">
+                <!-- <a v-if="item.state==3 || item.state==2" target="_blank" href="javascript:void(0);" @click="onImageClick(index)"> -->
+                <img v-if="item.state==3 || item.state==2" class="img" :src="item.src" style="cursor: pointer;" :title="item.Name" alt=" "
+                    @click="onImageClick(index)" />
+                <!-- </a> -->
+                <!-- <img v-else-if="item.state==2" class="img" :src="item.src" /> -->
+            </div>
+            <button class="no-mbp  miniDelete cursor_pointer" v-if="(item.state==2||item.state==3)&&uploadingSum==0" @click.stop="onDeleteFile(index)" title="删除">x</button>
+            <!-- <div class="no-mbp loading" v-if="item.loading">
+                ▲
+            </div> -->
+        </li>
+    </transition-group>
+    <div class="foot">
+        <div class="buttons">
+            <div class="process" v-if="uploadTaskState==2">
+                <div class="process-bar" :style="{'width':(uploadingPercent)+'%'}" v-if="uploadTaskState==2">
+                </div>
+                <div class="process-percent">
+                    {{uploadingPercent}}%
+                </div>
+            </div>
+            <div class="process_complete" v-if="uploadTaskState==3">
+                <span>
+                    上传完成
+                </span>
+                <br/>
+                <span v-if="false">
+                    (1秒后自动关闭)
+                </span>
+            </div>
+            <button :class="['confirm',{'menu_disabled':!submitEnabled}]" :disabled="!submitEnabled" @click="onSubmit">确定</button>
+            <button class="cancel" @click="onClose">取消</button>
+        </div>
+    </div>
+</div>

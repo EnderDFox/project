@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "target": "es5",
+    "module": "umd",
+    "lib": [
+      "es5",
+      "dom",
+    ],
+    "newLine": "LF",
+    "noImplicitReturns": true,
+    "noImplicitThis": true,
+    "strictFunctionTypes": false,
+    "strict": false,
+    "allowJs": false,
+    "sourceMap": true,
+    "removeComments": false,
+    "outDir": "js"
+  },
+  "include": [
+    "ts/**/*",
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}

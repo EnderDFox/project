@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>tests_fox</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <style>
+        html {
+            font-size: 24px;
+        }
+
+        a {
+            display: block;
+            margin-bottom: 10px;
+        }
+    </style>
+    <script type="text/javascript" src="../js/lib/jquery-3.2.1.min.js"></script>
+    <script type="text/javascript">
+        function onScroll(e) {
+            console.log("[debug]", "onScroll!!!", e);
+        }
+        function bodyOnClick(index) {
+            switch (index) {
+                case 1:
+                    console.log("[debug]", "body on click")
+                    var dom = document.getElementById('frameid')
+                    dom.contentWindow.addEventListener("scroll", onScroll);
+                    // console.log("[debug]", $(dom.contentWindow).scrollTop())
+                    console.log("[debug]",window.scrollY)
+                    break;
+                case 2:
+                    var dom = document.getElementById('frameid')
+                    dom.src = "http://www.baidu.com"
+                    break;
+            }
+        }
+    </script>
+</head>
+
+<body onclick="bodyOnClick">
+    <button onclick="bodyOnClick(2)" style="width: 100px;height: 60px;">btn2</button>
+    <iframe src="test1.html" scrolling="no" width="200" height="400" id="frameid" style="transform: scale(0.3,0.3)"></iframe>
+    <!-- <div id="div1" style="width: 1000px;height: 1000px; background: aqua;transform: scale(0.3,0.3);position: absolute;top: 0px;left: 0px;"></div> -->
+    <div id="div1" style="width: 1000px;height: 1000px; background: aqua;"></div>
+    <button onclick="bodyOnClick(1)" style="width: 100px;height: 60px;">btn1</button>
+</body>

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>hello_fox</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <style>
+        html {
+            font-size: 24px;
+        }
+
+        * {
+            margin: 0px;
+            padding: 0px;
+            border: 0px;
+            outline: darkturquoise 1px solid;
+        }
+
+        a {
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .div1 {
+            background-color: darksalmon;
+            width: 380px;
+            height: 150px;
+            text-align: center;
+        }
+        .div1 *{
+            position: absolute;
+        }
+        .div1 button{
+            position: static;
+            margin-left: 10px;
+            margin-top: 10px;
+            z-index: 10;
+        }
+
+        .div2 {
+            background-color: darkslategray;
+            width: 180px;
+            height: 60px;
+            /* position: absolute; */
+            /* float: right; */
+            /* top:10px; */
+            /* right: 10px; */
+            margin-top: 10px;
+            margin-left: 10px;
+        }
+
+        .div3 {
+            background-color: darkorange;
+            width: 180px;
+            height: 60px;
+            clear: both;
+            /* position:static; */
+            /* float: right; */
+            /* top:10px; */
+            /* right: 10px; */
+            /* margin-left: 50px; */
+            margin-left: 50px;
+            margin-top: 22px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="div1" style="height: 400px;">
+    </div>
+    <div class="div1">
+        <button>btn1</button>
+        <span>dfad;fsaddsafdsfffffffff
+            <br/>sdfdsfdsf</span>
+        <div class="div2">
+            <button>x</button>
+        </div>
+        <div class="div3">
+            <button>x</button>
+        </div>
+    </div>
+</body>

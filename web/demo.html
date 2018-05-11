@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>QA白盒工具</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<script src="js/lib/jquery-3.2.1.min.js"></script>
+	<script src="js/lib/vue.js"></script>
+	<style>
+	input{height:26px;width:150px;}
+
+.list-complete-item {
+  transition: all 1s;
+  display: inline-block;
+  margin-right: 10px;
+}
+.list-complete-enter, .list-complete-leave-to
+/* .list-complete-leave-active for below version 2.1.8 */ {
+  opacity: 0;
+  transform: translateY(30px);
+}
+.list-complete-leave-active {
+  position: absolute;
+}
+	</style>
+</head>
+
+<body>
+<div id="d1"><hr/></div>
+	<div id="list-complete-demo" class="demo">
+		<button v-on:click="shuffle">Shuffle</button>
+		<button v-on:click="add">Add</button>
+		<button v-on:click="remove">Remove</button>
+		<transition-group name="list-complete" tag="p">
+		  <span
+			v-for="item in items"
+			v-bind:key="item"
+			class="list-complete-item"
+		  >
+			{{ item }}
+		  </span>
+		</transition-group>
+	  </div>
+	
+
+</body>
+<script>
+	new Vue({
+  data: {
+    items: [1,2,3,4,5,6,7,8,9],
+    nextNum: 10
+  },
+  methods: {
+    randomIndex: function () {
+      return Math.floor(Math.random() * this.items.length)
+    },
+    add: function () {
+      this.items.splice(this.randomIndex(), 0, this.nextNum++)
+    },
+    remove: function () {
+      this.items.splice(this.randomIndex(), 1)
+    },
+    shuffle: function () {
+		var temp = this.items[2]
+		this.items[2] = this.items[4]
+		this.items[4] = temp
+		this.items = this.items;
+		this.items.splice(this.randomIndex(), 0)
+    //   this.items = _.shuffle(this.items)
+    }
+  }
+}).$mount('#list-complete-demo').$before('#d1')
+</script>
+</html>

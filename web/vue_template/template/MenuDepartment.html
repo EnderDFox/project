@@ -1,0 +1,7 @@
+<!-- 选择部门的菜单 -->
+<div class="commonMenu" id="menuDepartment">
+    <div class="row extends" v-for="d in departments" @click="onClick(d.Did)">
+        <div class="ico"></div>
+        <div class="txt">{{d.Name}}</div>
+    </div>
+</div>

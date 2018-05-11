@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>hello_fox</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <style>
+        html {
+            /* font-size: 14px; */
+        }
+
+        * {
+            /* margin: 0px;
+            padding: 0px;
+            border: 0px; */
+            /* outline: darkturquoise 1px solid; */
+        }
+    </style>
+    <script src="../js/lib/wangEditor.js"></script>
+    <!-- <script src="../css/wangEditor.css"></script> -->
+    <style>
+        /* 覆盖wangEditor.js中的默认css 必须写在<script后覆盖wangEditor.js*/
+
+        /* 导航条 */
+
+        /* 为了让导航栏显示2行, 官方不支持*/
+
+        .w-e-toolbar {
+            display: block;
+            /* height: 160px; */
+        }
+
+        .w-e-menu {
+            display: inline-block;
+            height: 40px;
+        }
+
+        /* 输入框 */
+
+        .w-e-text-container {
+            height: 100px !important;
+        }
+    </style>
+    <script>
+        var editor
+        function init() {
+            editor = new window.wangEditor('#divB1', '#divB2')
+            editor.create()
+            editor = new window.wangEditor('#div3')
+            editor.customConfig.menus = [
+                'head',  // 标题
+                'bold',  // 粗体
+                'fontSize',  // 字号
+                // 'fontName',  // 字体
+                'italic',  // 斜体
+                'underline',  // 下划线
+                'strikeThrough',  // 删除线
+                'foreColor',  // 文字颜色
+                'backColor',  // 背景颜色
+                'link',  // 插入链接
+                'list',  // 列表
+                'justify',  // 对齐方式
+                'quote',  // 引用
+                // 'emoticon',  // 表情
+                // 'image',  // 插入图片
+                // 'video',  // 插入视频
+                'code',  // 插入代码
+                'table',  // 表格
+                'undo',  // 撤销
+                'redo'  // 重复
+            ]
+            // 下面两个配置，使用其中一个即可显示“上传图片”的tab。但是两者不要同时使用！！！
+            editor.customConfig.uploadImgShowBase64 = true   // 使用 base64 保存图片
+            // editor.customConfig.uploadImgServer = '/upload'  // 上传图片到服务器
+            // 隐藏“网络图片”tab
+            // editor.customConfig.showLinkImg = false
+            editor.create()
+        }
+        var oldContent
+        function btn_onClick(index) {
+            switch (index) {
+                case 1:
+                    console.log("[debug]", oldContent = editor.txt.html());
+                    document.getElementById('div_out').innerHTML = oldContent
+                    break;
+                case 2:
+                    if (oldContent) {
+                        editor.txt.html(oldContent)
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+    </script>
+</head>
+
+<body onload="init()">
+    <div id="divB1" class="toolbar">
+    </div>
+    <div style="padding: 5px 0; color: #ccc">中间隔离带</div>
+    <div id="divB2" class="text">
+        <!--可使用 min-height 实现编辑区域自动增加高度-->
+        <p>请输入内容</p>
+    </div>
+    <hr/>
+    <div id="div3" style="width: 500px;">
+    </div>
+
+    <button onclick="btn_onClick(1)">btn1</button>
+    <button onclick="btn_onClick(2)">btn2</button>
+    <div id="div_out">
+
+    </div>
+    <div align=right>
+        TS中使用
+    </div>
+</body>

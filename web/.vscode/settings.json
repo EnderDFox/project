@@ -1,0 +1,14 @@
+{
+    "todo-tree.flat": true,
+    "search.exclude": {  
+        "**/bootstrap-4.0.0": true,
+        "**/file": true,
+        "upload":true
+    },  
+    "files.exclude": {  
+        "**/.idea": true,  
+        "**/bootstrap-4.0.0": true,
+        "**/file": true,
+        "upload":true
+    }
+}
