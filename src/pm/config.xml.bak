@@ -2,7 +2,7 @@
 <root>
 	<db>
 		<name>mysql</name>
-		<host>localhost</host>
+		<host>10.18.97.231</host>
 		<port>3306</port>
 		<user>wangy</user>
 		<pass>123456</pass>
@@ -10,6 +10,6 @@
 	</db>
 	<mg>manager</mg>
 	<pm>pm</pm>
-	<web>../../web</web>
-	<upload>../../web/upload</upload>
+	<web>./web</web>
+	<upload>./web/upload</upload>
 </root>

@@ -60,18 +60,21 @@ var ProcessPanel = {
 			if(e.button !== Main.MouseDir) {
 				return false
 			}
-			if(!User.IsWrite){
-				return false
-			}
 			var type = $(this).attr('type')
 			switch(type){
 				case 'step':
-					ProcessPanel.ShowMenuStep(this,e)
+					ProcessPanel.ShowMenuStep(this,e,User.IsWrite)
 					break
 				case 'duty':
+					if(!User.IsWrite){
+						return false
+					}
 					ProcessPanel.ShowMenuUser(this,e)
 					break
 				case 'link':
+					if(!User.IsWrite){
+						return false
+					}
 					ProcessPanel.ShowMenuLink(this,e)
 					break
 			}
@@ -385,7 +388,8 @@ var ProcessPanel = {
 		TemplateManager.BindTplSelect("#place_tplModeSelect")
 	},
 	//内容菜单
-	ShowMenuStep:function(o,e){
+	//IsWrite: true:管理员 false:非管理员
+	ShowMenuStep:function(o,e,IsWrite){
 		var top = e.pageY + 1
 		var left = e.pageX + 1
 		var grid = $(o).data('grid')
@@ -394,6 +398,9 @@ var ProcessPanel = {
 			$('#menuDay').find("[type=upload],[type=score],[type=clear]").find('.txt').removeClass('menu_disabled')
 		}else{
 			$('#menuDay').find("[type=upload],[type=score],[type=clear]").find('.txt').addClass('menu_disabled')
+		}
+		if(!IsWrite){
+			$('#menuDay').find(".extends,[type=work],[type=finish],[type=delay],[type=wait],[type=rest],[type=optimize],[type=edit],[type=score],[type=clear]").hide()
 		}
 		//
 		$('#menuDay').css({left:left,top:top}).unbind().delegate('.row[type!="status"]','click',function(){
@@ -494,7 +501,7 @@ var ProcessPanel = {
 		plan.find('.cancel,.close').unbind().click(function(){
 			plan.fadeOut(Config.FadeTime)
 		})
-	},		
+	},	
 	//流程菜单
 	ShowMenuLink:function(o,e){
 		var cur = $(o).parent()
