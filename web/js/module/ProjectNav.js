@@ -11,6 +11,7 @@ var ProjectNav = {
 		CollateFilter.Init()
 		//初始化
 		ProcessPanel.Init()
+		VersionManager.Init()
 		TemplateManager.Init()
 		//初始化
 		CollatePanel.Init()

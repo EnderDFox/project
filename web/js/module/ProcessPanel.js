@@ -349,6 +349,13 @@ var ProcessPanel = {
 		var plan = $('#editMode').css({left:e.pageX,top:e.pageY}).show().adjust(-5)
 		var name = plan.find('textarea').val('').focus()
 		var ver = plan.find('.ver').val('')
+		if(Loader.isDebug){
+			plan.find('.version_edit').show().unbind().click(function(e){
+				VersionManager.ShowEditList(e)
+			})
+		}else{
+			plan.find('.version_edit').hide()
+		}
 		if(cid == C2L.C2L_PROCESS_MODE_EDIT){
 			name.val(mode.Name).select()
 			ver.val(mode.Ver)

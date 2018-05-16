@@ -1,0 +1,20 @@
+<!-- 编辑模板-功能列表 -->
+<div class="commonDialog editTplMode" id="editTplModeList">
+    <div class="head">
+        <div class="title">编辑版本-列表&nbsp;&nbsp;</div>
+        <div class="close">x</div>
+    </div>
+    <transition-group name="list-complete" tag="ul">
+        <li class="body list-complete-item" v-for="item in versions" :key="item.Vid">
+            <input type="text" class="ver" placeholder="空" :value="item.Name"
+                @blur="onEditName($event,item)"
+                @keyup.enter="onEditName($event,item)" />
+            <button class="confirm btnSmall3" title="编辑版本内容" v-on:click="onEdit($event,item)">编辑</button>
+            <button class="cancel btnSmall1" title="删除" @click="onDel($event,item)">X</button>
+        </li>
+    </transition-group>
+    <div class="body" v-if="versions.length<5">
+        <input type="text" class="ver" placeholder="新版本名称" v-model="newName" @keyup.enter="onAdd" />
+        <button class="confirm btnSmall3" @click="onAdd()">增加</button>
+    </div>
+</div>

@@ -77,7 +77,8 @@
 .editMode .text{text-align:center;}
 .editMode .text textarea{height:80px;width:85%;padding:5px;margin:12px 0px 5px 0px;}
 .editMode .ver{width:80px;margin-left:10px;text-align:center;height:20px;font-size:14px;}
-.editMode .num{margin-left:15px;font-size:14px;}
+.editMode .div_version_edit{float: left;margin-left: 6px;}
+.editMode .num{float: left;margin-left:15px;font-size:14px;}
 .editMode div .tpl_label{float: left; margin-left:15px;font-size:14px;}
 .editMode select{min-height:30px;height: 30px; margin-left: 6px;width:200px}
 .editMode .tpl_li{margin-top: 4px;}
@@ -104,6 +105,18 @@
 .editTplMode .btnSmall2{width: 72px;}
 .editTplMode .btnSmall3{width: 72px;}
 .editTplMode .leftBlock{margin-left: 30px;}
+
+/*版本编辑*/
+.versionEditDetail{
+  min-width:280px;width:280px;
+}
+.versionEditDetail li{
+  margin-top: 10px;
+}
+.versionEditDetail .date{
+  margin-left: 20px;
+  min-width:100px;width:100px;text-align: center;
+}
 
 /*编辑日程*/
 .editInfo .text{text-align:center;}

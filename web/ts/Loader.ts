@@ -23,7 +23,7 @@ var Loader = {
                 'CollateData', 'CollateManager', 'CollatePanel', 'CollateFilter',
                 'NoticeData', 'NoticeManager', 'NoticePanel',
                 'ProfileData', 'ProfileManager', 'ProfilePanel', 
-                'TemplateManager','PopManager','UploadManager']
+                'TemplateManager','PopManager','UploadManager','VersionManager']
         },
         {
             path:"tests",files:[]
@@ -52,6 +52,8 @@ var Loader = {
         ProcessManager.RegisterFunc()
         //模板管理
         TemplateManager.RegisterFunc()
+        //版本管理
+        VersionManager.RegisterFunc()
         //晨会管理
         CollateManager.RegisterFunc()
         //内容管理

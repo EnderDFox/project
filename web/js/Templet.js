@@ -250,11 +250,19 @@ var Templet = {
 		<div class="text"><textarea placeholder="填写功能名称"></textarea></div> \
 	</li> \
 	<li class="body"> \
-		<div class="row"><div class="num">版本<input type="text" class="ver" placeholder="版号" /></div></div> \
+		<div class="row"> \
+			<div class="num">版本 \
+				<input type="text" class="ver" placeholder="版号" /> \
+			</div> \
+			<div class="div_version_edit"> \
+				<button class="version_edit" title="编辑版本">编辑</button> \
+			</div> \
+		</div> \
 	</li> \
 	<li class="body tpl_li"> \
 		<div class="row"> \
-			<div class="tpl_label">模板 \</select><span id="place_tplModeSelect"/>\
+			<div class="tpl_label">模板 \
+				<span id="place_tplModeSelect"/>\
 			</div> \
 			<div class="div_tpl_edit"> \
 				<button class="tpl_edit" title="编辑模板">编辑</button> \
