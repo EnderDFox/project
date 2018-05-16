@@ -214,10 +214,10 @@ func (this *Collate) StepAdd(date string, uid uint64, name string, inspect uint6
 
 //编辑进度
 func (this *Collate) StepEdit(wid, inspect uint64) bool {
-	stmt, err := db.GetDb().Prepare(`UPDATE ` + config.Pm + `.pm_work SET inspect = ?,inspect_time = ? WHERE wid = ?`)
+	stmt, err := db.GetDb().Prepare(`UPDATE ` + config.Pm + `.pm_work SET inspect = ?,inspect_time = ?,inspect_uid = ? WHERE wid = ?`)
 	defer stmt.Close()
 	db.CheckErr(err)
-	_, err = stmt.Exec(inspect, time.Now().Unix(), wid)
+	_, err = stmt.Exec(inspect, time.Now().Unix(), this.owner.GetUid(), wid)
 	db.CheckErr(err)
 	stmt, err = db.GetDb().Prepare(`SELECT wid,lid,date,status,min_num,max_num,tag,tips,inspect FROM ` + config.Pm + `.pm_work WHERE wid = ?`)
 	db.CheckErr(err)

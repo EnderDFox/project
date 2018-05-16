@@ -49,7 +49,7 @@ func main() {
 	//写回通道
 	go handleMessages()
 	//开启监听
-	err := http.ListenAndServe(":8080", nil)
+	err := http.ListenAndServe(config.Ws.Host+":"+config.Ws.Port, nil)
 	if err != nil {
 		log.Println("ListenAndServe", err)
 	}

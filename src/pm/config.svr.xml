@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <root>
+	<ws>
+		<host>localhost</host>
+		<port>8080</port>
+	</ws>
 	<db>
 		<name>mysql</name>
 		<host>10.18.97.231</host>
@@ -10,6 +14,6 @@
 	</db>
 	<mg>manager</mg>
 	<pm>pm</pm>
-	<web>./web</web>
-	<upload>./web/upload</upload>
+	<web>../../web</web>
+	<upload>../../web/upload</upload>
 </root>

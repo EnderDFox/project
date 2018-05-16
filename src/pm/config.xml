@@ -1,10 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <root>
+	<ws>
+		<host>localhost</host>
+		<port>8080</port>
+	</ws>
 	<db>
 		<name>mysql</name>
 		<host>localhost</host>
 		<port>3306</port>
-		<user>wangy</user>
+		<user>root</user>
 		<pass>123456</pass>
 		<char>utf8</char>
 	</db>

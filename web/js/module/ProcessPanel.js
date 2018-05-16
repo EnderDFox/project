@@ -400,7 +400,8 @@ var ProcessPanel = {
 			$('#menuDay').find("[type=upload],[type=score],[type=clear]").find('.txt').addClass('menu_disabled')
 		}
 		if(!IsWrite){
-			$('#menuDay').find(".extends,[type=work],[type=finish],[type=delay],[type=wait],[type=rest],[type=optimize],[type=edit],[type=score],[type=clear]").hide()
+			//$('#menuDay').find(".extends,[type=work],[type=finish],[type=delay],[type=wait],[type=rest],[type=optimize],[type=edit],[type=score],[type=clear]").hide()
+			$('#menuDay .row[type!=upload]').hide()
 		}
 		//
 		$('#menuDay').css({left:left,top:top}).unbind().delegate('.row[type!="status"]','click',function(){

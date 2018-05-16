@@ -7,6 +7,10 @@ import (
 )
 
 type Config struct {
+	Ws struct {
+		Host string `xml:"host"`
+		Port string `xml:"port"`
+	} `xml:"ws"`
 	Db struct {
 		Name string `xml:"name"`
 		Host string `xml:"host"`

@@ -52,14 +52,12 @@ func (this *Session) Login(client *websocket.Conn, account, verify string) bool 
 			Ret:  COMMON_OK,
 		}
 		client.WriteJSON(msg)
-		fmt.Println(account, " is login error")
+		log.Println(account, " is login error")
 		return false
 	}
 	stmt, err := db.GetDb().Prepare(`SELECT uid FROM ` + config.Mg + `.mag_user WHERE rtx_account = ?`)
-	if err != nil {
-		log.Println("session.Login  GetDb err:", err)
-		return false
-	}
+	defer stmt.Close()
+	db.CheckErr(err)
 	var uid uint64
 	row := stmt.QueryRow(account)
 	row.Scan(&uid)
@@ -67,15 +65,16 @@ func (this *Session) Login(client *websocket.Conn, account, verify string) bool 
 		return false
 	}
 	user := this.GetUser(uid)
-	if user != nil {
-		user.Login(client)
-		return true
+	if user == nil {
+		user = NewUser()
+	} else {
+		//踢掉老用户
+		//user.GetClient().Close()
 	}
 	stmt, err = db.GetDb().Prepare(`SELECT uid, pid, gid, did, name, vip, is_del, is_hide, rtx_name, rtx_account, rtx_group, reg_time, login_count, login_time FROM ` + config.Mg + `.mag_user WHERE uid = ?`)
 	if err != nil {
 		return false
 	}
-	user = NewUser()
 	row = stmt.QueryRow(uid)
 	row.Scan(&user.Uid, &user.Pid, &user.Gid, &user.Did, &user.Name, &user.Vip, &user.Is_del, &user.Is_hide, &user.Rtx_name, &user.Rtx_account, &user.Rtx_group, &user.Reg_time, &user.Login_count, &user.Login_time)
 	this.AddUser(user)
