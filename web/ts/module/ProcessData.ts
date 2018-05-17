@@ -1,21 +1,22 @@
 //进度数据
 class ProcessDataClass {
 	//项目信息
-	Project={}
+	Project: ProjectSingle
 	//工作内容
-	WorkMap:{[key:number]:WorkSingle}={}
+	WorkMap: { [key: number]: WorkSingle }
 	//流程内容
-	LinkMap={}
+	LinkMap: { [key: number]: LinkSingle }
 	//功能内容
-	ModeMap={}
+	ModeMap: { [key: number]: ModeSingle }
 	//评分内容
-	ScoreMap={}
+	ScoreMap: { [key: number]: ScoreSingle }
 	//版本内容
-	VerMap={}
+	VerMap: { [key: number]: VerSingle }
 	//流程工作
-	LinkWorkMap:{}
+	LinkWorkMap: { [key: number]: { [key: string]: WorkSingle } }
 	//数据初始化
-	Init(data){
+	Init(data: { Project: ProjectSingle, ModeList: ModeSingle[], LinkList: LinkSingle[], WorkList: WorkSingle[], ScoreList: ScoreSingle[], VerList: VerSingle[], }) {
+		//初始化
 		this.Project = data.Project
 		this.WorkMap = {}
 		this.LinkMap = {}
@@ -23,111 +24,105 @@ class ProcessDataClass {
 		this.ScoreMap = {}
 		this.VerMap = {}
 		this.LinkWorkMap = {}
-		//流程
-		var checkMode = {}
-		//用户
-		var checkUser = Data.DepartmentUserMap[ProjectNav.FilterDid]
-		//console.log(checkUser)
-		//环节
-		$.each(data.LinkList,function(k,v){
+		//过滤可用流程 key:LinkSingle.Mid	item:LinkSingle
+		var checkMode: { [key: number]: number } = {}
+		//过滤可用用户 key:UserSingle.Uid
+		var checkUser: { [key: number]: UserSingle } = Data.DepartmentUserMap[ProjectNav.FilterDid]
+		//环节过滤
+		$.each(data.LinkList, (k, v: LinkSingle) => {
 			//流程名查询
-			if(v.Name.indexOf(ProcessFilter.Pack.LinkName) == -1){
+			if (v.Name.indexOf(ProcessFilter.Pack.LinkName) == -1) {
 				return true
 			}
 			//负责人查询
-			if(Data.GetUser(v.Uid).Name.indexOf(ProcessFilter.Pack.LinkUserName) == -1){
+			if (Data.GetUser(v.Uid).Name.indexOf(ProcessFilter.Pack.LinkUserName) == -1) {
 				return true
 			}
 			//是否归档
-			if(ProcessFilter.Pack.LinkStatus != -1 && v.Status != ProcessFilter.Pack.LinkStatus){
+			if (ProcessFilter.Pack.LinkStatus != -1 && v.Status != ProcessFilter.Pack.LinkStatus) {
 				return true
 			}
-			
-			
 			//策划特例
-			if(ProjectNav.FilterDid == 1){
+			if (ProjectNav.FilterDid == DidField.DESIGN) {
 				//用户检查			
-				if(checkUser && !checkUser[v.Uid]){
+				if (checkUser && !checkUser[v.Uid]) {
 					return true
 				}
 				//环节保存
-				ProcessData.LinkMap[v.Lid] = v
-			}else{
+				this.LinkMap[v.Lid] = v
+			} else {
 				//环节保存
-				ProcessData.LinkMap[v.Lid] = v
+				this.LinkMap[v.Lid] = v
 				//用户检查			
-				if(checkUser && !checkUser[v.Uid]){
+				if (checkUser && !checkUser[v.Uid]) {
 					return true
 				}
 			}
-			
+
 			//环节保存
-			ProcessData.LinkMap[v.Lid] = v
+			this.LinkMap[v.Lid] = v
 			//用户检查			
-			if(checkUser && !checkUser[v.Uid]){
+			if (checkUser && !checkUser[v.Uid]) {
 				return true
 			}
 			//有效模块
 			checkMode[v.Mid] = v.Mid
 			return true
 		})
-		//模块
-		$.each(data.ModeList,function(k,v){
+		//模块过滤
+		$.each(data.ModeList, (k, v: ModeSingle) => {
 			//功能类型
 			/*
-			if(ProjectNav.FilterDid != -1 && ProjectNav.FilterDid != v.Did){
+			if(ProjectNav.FilterDid != DidValue.ALL && ProjectNav.FilterDid != v.Did){
 				return true
 			}
 			*/
 			//查看版本
-			if(ProjectNav.FilterDid == 0 && ProjectNav.FilterDid != v.Did){
+			if (ProjectNav.FilterDid == DidField.VERSION && DidField.VERSION != v.Did) {
 				return true
 			}
-			if(ProjectNav.FilterDid == 6 && ProjectNav.FilterDid != v.Did){
+			if (ProjectNav.FilterDid == DidField.QA && DidField.QA != v.Did) {
 				return true
 			}
 			//版本号查询
-			if(v.Ver.indexOf(ProcessFilter.Pack.Ver) == -1){
+			if (v.Ver.indexOf(ProcessFilter.Pack.Ver) == -1) {
 				return true
 			}
 			//功能名查询
-			if(v.Name.indexOf(ProcessFilter.Pack.ModeName) == -1){
+			if (v.Name.indexOf(ProcessFilter.Pack.ModeName) == -1) {
 				return true
 			}
 			//是否归档
-			if(ProcessFilter.Pack.ModeStatus != -1 && v.Status != ProcessFilter.Pack.ModeStatus){
+			if (ProcessFilter.Pack.ModeStatus != -1 && v.Status != ProcessFilter.Pack.ModeStatus) {
 				return true
 			}
 			//过滤无效功能
-			if(!checkMode[v.Mid]){
+			if (!checkMode[v.Mid]) {
 				return true
 			}
-			ProcessData.ModeMap[v.Mid] = v
+			this.ModeMap[v.Mid] = v
 			return true
 		})
-		//console.log(checkMode)
-		//console.log(ProcessData.ModeMap)
-		
 		//进度
-		$.each(data.WorkList,function(k,dom){
-			var v:WorkSingle = <WorkSingle><any>dom
-			ProcessData.WorkMap[v.Wid] = v
-			if(!ProcessData.LinkWorkMap[v.Lid]){
-				ProcessData.LinkWorkMap[v.Lid] = {}
+		$.each(data.WorkList, (k, v: WorkSingle) => {
+			this.WorkMap[v.Wid] = v
+			if (!this.LinkWorkMap[v.Lid]) {
+				this.LinkWorkMap[v.Lid] = {}
 			}
-			ProcessData.LinkWorkMap[v.Lid][v.Date] = v
+			this.LinkWorkMap[v.Lid][v.Date] = v
 		})
 		//评分
-		$.each(data.ScoreList,function(k,v){
-			if(v.Score == 0){
+		$.each(data.ScoreList, (k, v: ScoreSingle) => {
+			/*旧代码, 但没有score啊
+			 if(v.Score == 0){
 				return true
-			}
-			ProcessData.ScoreMap[v.Wid] = v
+			} */
+			this.ScoreMap[v.Wid] = v
 			return true
 		})
 		//版本
-		$.each(data.VerList,function(k,v){
-			ProcessData.VerMap[v.DateLine] = v
+		$.each(data.VerList, (k, v: VerSingle) => {
+			this.VerMap[v.DateLine] = v
 		})
 	}
 }

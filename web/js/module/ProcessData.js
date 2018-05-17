@@ -1,21 +1,11 @@
 //进度数据
 var ProcessDataClass = /** @class */ (function () {
     function ProcessDataClass() {
-        //项目信息
-        this.Project = {};
-        //工作内容
-        this.WorkMap = {};
-        //流程内容
-        this.LinkMap = {};
-        //功能内容
-        this.ModeMap = {};
-        //评分内容
-        this.ScoreMap = {};
-        //版本内容
-        this.VerMap = {};
     }
     //数据初始化
     ProcessDataClass.prototype.Init = function (data) {
+        var _this = this;
+        //初始化
         this.Project = data.Project;
         this.WorkMap = {};
         this.LinkMap = {};
@@ -23,12 +13,11 @@ var ProcessDataClass = /** @class */ (function () {
         this.ScoreMap = {};
         this.VerMap = {};
         this.LinkWorkMap = {};
-        //流程
+        //过滤可用流程 key:LinkSingle.Mid	item:LinkSingle
         var checkMode = {};
-        //用户
+        //过滤可用用户 key:UserSingle.Uid
         var checkUser = Data.DepartmentUserMap[ProjectNav.FilterDid];
-        //console.log(checkUser)
-        //环节
+        //环节过滤
         $.each(data.LinkList, function (k, v) {
             //流程名查询
             if (v.Name.indexOf(ProcessFilter.Pack.LinkName) == -1) {
@@ -43,24 +32,24 @@ var ProcessDataClass = /** @class */ (function () {
                 return true;
             }
             //策划特例
-            if (ProjectNav.FilterDid == 1) {
+            if (ProjectNav.FilterDid == DidField.DESIGN) {
                 //用户检查			
                 if (checkUser && !checkUser[v.Uid]) {
                     return true;
                 }
                 //环节保存
-                ProcessData.LinkMap[v.Lid] = v;
+                _this.LinkMap[v.Lid] = v;
             }
             else {
                 //环节保存
-                ProcessData.LinkMap[v.Lid] = v;
+                _this.LinkMap[v.Lid] = v;
                 //用户检查			
                 if (checkUser && !checkUser[v.Uid]) {
                     return true;
                 }
             }
             //环节保存
-            ProcessData.LinkMap[v.Lid] = v;
+            _this.LinkMap[v.Lid] = v;
             //用户检查			
             if (checkUser && !checkUser[v.Uid]) {
                 return true;
@@ -69,19 +58,19 @@ var ProcessDataClass = /** @class */ (function () {
             checkMode[v.Mid] = v.Mid;
             return true;
         });
-        //模块
+        //模块过滤
         $.each(data.ModeList, function (k, v) {
             //功能类型
             /*
-            if(ProjectNav.FilterDid != -1 && ProjectNav.FilterDid != v.Did){
+            if(ProjectNav.FilterDid != DidValue.ALL && ProjectNav.FilterDid != v.Did){
                 return true
             }
             */
             //查看版本
-            if (ProjectNav.FilterDid == 0 && ProjectNav.FilterDid != v.Did) {
+            if (ProjectNav.FilterDid == DidField.VERSION && DidField.VERSION != v.Did) {
                 return true;
             }
-            if (ProjectNav.FilterDid == 6 && ProjectNav.FilterDid != v.Did) {
+            if (ProjectNav.FilterDid == DidField.QA && DidField.QA != v.Did) {
                 return true;
             }
             //版本号查询
@@ -100,31 +89,29 @@ var ProcessDataClass = /** @class */ (function () {
             if (!checkMode[v.Mid]) {
                 return true;
             }
-            ProcessData.ModeMap[v.Mid] = v;
+            _this.ModeMap[v.Mid] = v;
             return true;
         });
-        //console.log(checkMode)
-        //console.log(ProcessData.ModeMap)
         //进度
-        $.each(data.WorkList, function (k, dom) {
-            var v = dom;
-            ProcessData.WorkMap[v.Wid] = v;
-            if (!ProcessData.LinkWorkMap[v.Lid]) {
-                ProcessData.LinkWorkMap[v.Lid] = {};
+        $.each(data.WorkList, function (k, v) {
+            _this.WorkMap[v.Wid] = v;
+            if (!_this.LinkWorkMap[v.Lid]) {
+                _this.LinkWorkMap[v.Lid] = {};
             }
-            ProcessData.LinkWorkMap[v.Lid][v.Date] = v;
+            _this.LinkWorkMap[v.Lid][v.Date] = v;
         });
         //评分
         $.each(data.ScoreList, function (k, v) {
-            if (v.Score == 0) {
-                return true;
-            }
-            ProcessData.ScoreMap[v.Wid] = v;
+            /*旧代码, 但没有score啊
+             if(v.Score == 0){
+                return true
+            } */
+            _this.ScoreMap[v.Wid] = v;
             return true;
         });
         //版本
         $.each(data.VerList, function (k, v) {
-            ProcessData.VerMap[v.DateLine] = v;
+            _this.VerMap[v.DateLine] = v;
         });
     };
     return ProcessDataClass;

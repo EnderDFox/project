@@ -15,7 +15,7 @@ var Loader = {
     //需要加载的js文件列表  jquery必须提前加载
     //< script src = "js/Loader1.js?v=v1.3.59" > </script>
     JsList: [
-        { path: "", files: [ 'JQueryExtend', 'Protocol', 'Config', 'WSConn', 'Commond', 'Common', 'DateTime', 'Search', 'Templet', 'Data', 'Main'] },
+        { path: "", files: [ 'Define','JQueryExtend', 'Protocol', 'Config', 'WSConn', 'Commond', 'Common', 'DateTime', 'Search', 'Templet', 'Data', 'Main'] },
         { path: "lib", files: ['vue', 'Echarts.min', 'Cookie','jquery.md5'] },
         {
             path: "module", files: ['User', 'ProjectNav', 'FileManager',

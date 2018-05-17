@@ -33,8 +33,10 @@ var Data = {
 		Data.LoopDepartment(Data.DepartmentLoop,0)
 	},
 	//部门递归
+	//loop 是空的, 会用push补满
 	LoopDepartment:function(loop,fid){
 		$.each(Data.DepartmentList,function(k,v){
+			//v:DepartmentSingle{Did Fid Name} 
 			if(v.Fid == fid){
 				var data = {'info':v,'list':[],'user':[]}
 				loop.push(data)
@@ -44,6 +46,7 @@ var Data = {
 		})
 	},
 	//添加用户
+	//dpt:DepartmentSingle
 	AddUser:function(loop,dpt){
 		var RootId = dpt.Fid
 		if(RootId == 0){
@@ -52,6 +55,7 @@ var Data = {
 		if(!Data.DepartmentUserMap[RootId]){
 			Data.DepartmentUserMap[RootId] = {}
 		}
+		//v:UserSingle
 		$.each(Data.UserList,function(k,v){
 			if(v.Did ==  dpt.Did){
 				Data.DepartmentUserMap[RootId][v.Uid] = v
