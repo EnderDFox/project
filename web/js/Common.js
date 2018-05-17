@@ -115,6 +115,9 @@ if(!Array.from){
 }
 //------Date扩展
 Date.prototype.format = function(format) {
+	if(!format){
+		format = 'yyyy-MM-dd'
+	}
 	var date = {
 		   "M+": this.getMonth() + 1,
 		   "d+": this.getDate(),

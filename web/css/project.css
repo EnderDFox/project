@@ -106,17 +106,38 @@
 .editTplMode .btnSmall3{width: 72px;}
 .editTplMode .leftBlock{margin-left: 30px;}
 
+/*版本列表*/
+.editVersionList{
+  min-width:480px;width:480px;
+}
+.editVersionList .ver{
+  width: 65px;
+  min-width: 65px;
+  max-width: 65px;
+}
 /*版本编辑*/
-.versionEditDetail{
-  min-width:280px;width:280px;
+.editVersionDetail{
+  min-width:262px;width:262px;
 }
-.versionEditDetail li{
-  margin-top: 10px;
+.editVersionDetail li{
+  margin-top: 4px;
+  padding-left: 16px;
 }
-.versionEditDetail .date{
+.editVersionDetail .name{
+  vertical-align: middle;
+}
+.editVersionDetail .date{
+  cursor: pointer;
   margin-left: 20px;
-  min-width:100px;width:100px;text-align: center;
+  min-width:140px;width:140px;text-align: center;
 }
+
+.editVersionDetail .sk_1{color:#7030a0;}		/*版本开始*/
+.editVersionDetail .sk_2{color:#2e75b5;}		/*版本完结*/
+.editVersionDetail .sk_3{color:#c55a11;}		/*版本封存*/
+.editVersionDetail .sk_4{color:#ff0000;}		/*版本延期*/
+.editVersionDetail .sk_5{color:#538135;}		/*版本发布*/
+.editVersionDetail .sk_6{color:#ff3399;}		/*版本总结*/
 
 /*编辑日程*/
 .editInfo .text{text-align:center;}

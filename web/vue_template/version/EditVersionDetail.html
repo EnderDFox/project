@@ -1,45 +1,14 @@
 <!-- 编辑模板-功能中的流程列表 -->
-<div class="commonDialog versionEditDetail">
+<div class="commonDialog editTplMode editVersionDetail">
     <div class="head">
-        <div class="title">编辑版本-{{version.Ver}}({{version.Name}})</div>
-        <div class="close">x</div>
+        <div class="title">编辑版本-{{version.Ver}}{{version.Name?'('+version.Name+')':''}}</div>
+        <div class="close" @click="onClose()">x</div>
     </div>
     <ul>
-        <li>
-            <span class="name">开始日期</span>
+        <li v-for="item,index in version.Publishs">
+            <span :class="['name sk_'+(index+1)]">{{publishName(index+1)}}日期</span>
             <span class="info">
-                <input type="text" class="date" placeholder="选择开始日期" name="BeginDate" :value="version.PublishBegin.DateLine" readonly />
-            </span>
-        </li>
-        <li>
-            <span class="name">完结日期</span>
-            <span class="info">
-                <input type="text" class="date" placeholder="选择结束日期" name="EndDate" :value="version.PublishBegin.DateLine" readonly />
-            </span>
-        </li>
-        <li>
-            <span class="name">封存日期</span>
-            <span class="info">
-                <input type="text" class="date" placeholder="选择封存日期" name="SealDate" :value="version.PublishSeal.DateLine" readonly />
-            </span>
-        </li>
-        <li>
-            <span class="name" style="color: rgb(255, 94, 0);">延迟日期</span>
-            <span class="info">
-                <input type="text" class="date" placeholder="选择封存日期" name="DelayDate" :value="version.PublishDelay.DateLine" readonly />
-            </span>
-        </li>
-        <li>
-            <span class="name">发布日期</span>
-            <span class="info">
-                <input type="text" class="date" placeholder="选择封存日期" name="PubDate" :value="version.PublishPub.DateLine" readonly />
-            </span>
-        </li>
-        <li>
-            <span class="name">总结日期</span>
-            <span class="info">
-                <input type="text" class="date" placeholder="选择封存日期" name="SummaryDate" :value="version.PublishSummary.DateLine" readonly
-                />
+                <input type="text" class="date" :placeholder="'选择'+publishName(index+1)+'日期'" :value="item.DateLine" readonly @click="onDateClick(index+1)" />
             </span>
         </li>
         <!-- <li class="body list-complete-item" v-for="(link,index) in mode.Links" :key="link.Tlid">

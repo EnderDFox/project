@@ -14,7 +14,11 @@ interface Array<T> {
 }
 //------Date扩展
 interface Date {
-    //'yyyy-MM-dd h:m:s'
+    /**
+     * 
+     * @param format yyyy-MM-dd h:m:s
+     */
+    format():string
     format(format:string):string
 }
 

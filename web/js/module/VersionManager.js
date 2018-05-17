@@ -1,6 +1,7 @@
 var VersionManagerClass = /** @class */ (function () {
     function VersionManagerClass() {
         this.AuePath = "version/"; //模板所在目录
+        this.PublishNames = ['开始', '完结', '封存', '延期', '发布', '总结'];
     }
     //初始化
     VersionManagerClass.prototype.Init = function () {
@@ -16,86 +17,120 @@ var VersionManagerClass = /** @class */ (function () {
         //真正执行显示面板的函数
         var _show = function () {
             var pageX, pageY;
-            var editMode = $('#editMode');
-            if (editMode.is(":visible")) {
-                pageX = editMode.x() + editMode.width() + 5;
-                pageY = editMode.y();
+            var uiEditMode = $('#editMode');
+            if (uiEditMode.isShow()) {
+                pageX = uiEditMode.x() + uiEditMode.width() + 5;
+                pageY = uiEditMode.y();
             }
-            if (!pageX) {
+            if (!pageX)
                 pageX = e.pageX;
-            }
-            if (!pageY) {
+            if (!pageY)
                 pageY = e.pageY;
-            }
             var plan = $(_this.VueEditList.$el).xy(pageX, pageY).show().adjust(-5);
-            plan.find('.close').unbind().click(function () {
-                _this.HideVersionList();
-                ProcessPanel.HideMenu();
-            });
         };
         Loader.LoadVueTemplate(this.AuePath + "EditVersionList", function (txt) {
             _this.VueEditList = new Vue({
                 template: txt,
                 data: {
+                    newVer: '',
                     newName: '',
                     versions: [
                         {
                             Vid: 1,
                             Ver: '1.0.1',
                             Name: '测试版本A',
-                            PublishBegin: {
-                                DateLine: '2018-04-01',
-                            },
-                            PublishEnd: {
-                                DateLine: '2018-04-03',
-                            },
-                            PublishSeal: {
-                                DateLine: '2018-04-05',
-                            },
-                            PublishDelay: {
-                                DateLine: '2018-04-07',
-                            },
-                            PublishPub: {
-                                DateLine: '2018-04-09',
-                            },
-                            PublishSummary: {
-                                DateLine: '2018-04-11',
-                            },
+                            Publishs: [{
+                                    DateLine: '2018-04-01',
+                                },
+                                {
+                                    DateLine: '2018-04-03',
+                                },
+                                {
+                                    DateLine: '2018-04-05',
+                                },
+                                {
+                                    DateLine: '2018-04-07',
+                                },
+                                {
+                                    DateLine: '2018-04-09',
+                                },
+                                {
+                                    DateLine: '2018-04-11',
+                                },]
                         },
                         {
                             Vid: 2,
                             Ver: '1.0.2',
                             Name: '测试版本B',
-                            PublishBegin: {
-                                DateLine: '2018-05-01',
-                            },
-                            PublishEnd: {
-                                DateLine: '2018-05-03',
-                            },
-                            PublishSeal: {
-                                DateLine: '2018-05-05',
-                            },
-                            PublishDelay: {
-                                DateLine: '2018-05-07',
-                            },
-                            PublishPub: {
-                                DateLine: '2018-05-09',
-                            },
-                            PublishSummary: {
-                                DateLine: '2018-05-11',
-                            },
+                            Publishs: [{
+                                    DateLine: '2018-05-01',
+                                },
+                                {
+                                    DateLine: '2018-05-03',
+                                },
+                                {
+                                    DateLine: '2018-05-05',
+                                },
+                                {
+                                    DateLine: '2018-05-07',
+                                },
+                                {
+                                    DateLine: '2018-05-09',
+                                },
+                                {
+                                    DateLine: '2018-05-11',
+                                },]
                         },
                     ]
                 },
                 methods: {
+                    onAddVer: function (isEnter) {
+                        if (isEnter === void 0) { isEnter = false; }
+                        _this.VueEditList.newVer = _this.FormatVer(_this.VueEditList.newVer);
+                        if (isEnter) {
+                            $('#editVersionList_newName').get(0).focus();
+                        }
+                    },
                     onAdd: function () {
+                        var vid = _this.VueEditList.versions.length > 0 ? _this.VueEditList.versions[_this.VueEditList.versions.length - 1].Vid + 1 : 1;
+                        _this.VueEditList.versions.push({
+                            Vid: vid,
+                            Ver: _this.VueEditList.newVer,
+                            Name: _this.VueEditList.newName,
+                            Publishs: [{ Vid: vid, DateLine: '', DateLineTimestamp: 0 },
+                                { Vid: vid, DateLine: '', DateLineTimestamp: 0 },
+                                { Vid: vid, DateLine: '', DateLineTimestamp: 0 },
+                                { Vid: vid, DateLine: '', DateLineTimestamp: 0 },
+                                { Vid: vid, DateLine: '', DateLineTimestamp: 0 },
+                                { Vid: vid, DateLine: '', DateLineTimestamp: 0 },]
+                        });
+                        // console.log("[info]","onAdd")
                     },
-                    onEditName: function () {
+                    onEditVer: function (e, item) {
+                        var newVer = _this.FormatVer(e.target.value);
+                        if (newVer != item.Ver.toString()) {
+                            item.Ver = newVer;
+                        }
+                        else {
+                            if (newVer != e.target.value) {
+                                item.Ver = 't'; //vue值相同 赋值是不会触发html变化,需要现赋另一个值
+                                item.Ver = newVer;
+                            } //else 完全没变化,不需要管
+                        }
+                        // console.log("[info]",item.Ver,e.target.value)
                     },
-                    onDel: function () {
+                    onEditName: function (e, item) {
+                        item.Name = e.target.value;
+                    },
+                    onDel: function (e, item, index) {
+                        _this.VueEditList.versions.splice(index, 1);
                     },
                     onEdit: function (e, item) {
                         _this.ShowVersionDetail(item);
+                    },
+                    onClose: function () {
+                        _this.HideVersionList();
+                        ProcessPanel.HideMenu();
                     },
                 }
             }).$mount();
@@ -142,9 +177,21 @@ var VersionManagerClass = /** @class */ (function () {
                 pageY = uiList.y();
             }
             var plan = $(_this.VueEditDetail.$el).xy(pageX, pageY).show().adjust(-5);
-            plan.find('.close').unbind().click(function () {
-                _this.HideVersionDetail();
-                // ProcessPanel.HideMenu()
+            //关闭日期
+            plan.unbind().mousedown(function (e) {
+                if ($(e.target).attr('class') != 'date') {
+                    DateTime.HideDate();
+                }
+                /*  if ($(e.target).attr('class') != 'select') {
+                 $('#storeMenu').hide()
+                 } */
+            });
+            //日期绑定
+            plan.find('.date').unbind().click(function () {
+                var _this = this;
+                DateTime.Open(this, $(this).val(), function (date) {
+                    $(_this).val(date);
+                });
             });
         };
         Loader.LoadVueTemplate(this.AuePath + "EditVersionDetail", function (txt) {
@@ -153,7 +200,25 @@ var VersionManagerClass = /** @class */ (function () {
                 data: {
                     version: version
                 },
-                methods: {}
+                /*  filters: {
+                     publishName:function(){
+                         return 'iopioi'
+                     },
+                     // publishName: this.GetPublishName.bind(this),
+                 }, */
+                methods: {
+                    publishName: _this.GetPublishName.bind(_this),
+                    onDateClick: function (genre) {
+                        switch (genre) {
+                            case 1:
+                                break;
+                        }
+                    },
+                    onClose: function () {
+                        _this.HideVersionDetail();
+                        // ProcessPanel.HideMenu()
+                    }
+                }
             }).$mount();
             Common.InsertBeforeDynamicDom(_this.VueEditDetail.$el);
             _show();
@@ -176,6 +241,16 @@ var VersionManagerClass = /** @class */ (function () {
     VersionManagerClass.prototype.Hide = function () {
         this.HideVersionList();
         this.HideVersionDetail();
+    };
+    /**
+     * 格式化版本号   只能是 数字和. 例如 1.3   4.5.6
+     * @param ori
+     */
+    VersionManagerClass.prototype.FormatVer = function (ori) {
+        return ori.replace(/[^0-9\.]/g, '');
+    };
+    VersionManagerClass.prototype.GetPublishName = function (genre) {
+        return this.PublishNames[genre - 1];
     };
     return VersionManagerClass;
 }());

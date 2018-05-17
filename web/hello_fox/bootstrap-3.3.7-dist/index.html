@@ -35,6 +35,14 @@
       font-weight: bold;
       font-size: 16px;
     }
+
+    .regexp li span:first-child {
+      display: inline-block;
+      text-align: center;
+      width: 50px;
+      border-right: 2px solid #bbbbbb;
+      margin-right: 4px;
+    }
   </style>
 
 </head>
@@ -175,9 +183,90 @@
     </ul>
   </section>
   <section style="float: left;">
-    <img src="../image/黄金比例.png"/>
+    <img src="../image/黄金比例.png" />
   </section>
-  <hr style="clear: both;"/>
+  <section>
+    <ul class="list-group regexp" style="float: left;">
+      <li class="list-group-item">
+        <span>\</span>
+        <span>转义</span>
+      </li>
+      <li class="list-group-item">
+        <span>^</span>
+        <span>行首</span>
+      </li>
+      <li class="list-group-item">
+        <span>$</span>
+        <span>行尾;Multiline=true,也匹配\n或\r之前的位置</span>
+      </li>
+      <li class="list-group-item">
+        匹配限制符
+      </li>
+      <li class="list-group-item">
+        <span>*</span>
+        <span>匹配任意次</span>
+      </li>
+      <li class="list-group-item">
+        <span>+</span>
+        <span>匹配大于等于1次</span>
+      </li>
+      <li class="list-group-item">
+        <span>?</span>
+        <span>匹配0或1次</span>
+      </li>
+      <li class="list-group-item">
+        <span>{n}</span>
+        <span>匹配n次</span>
+      </li>
+      <li class="list-group-item">
+        <span>{n,}</span>
+        <span>匹配至少n次</span>
+      </li>
+      <li class="list-group-item">
+        <span>{n,m}</span>
+        <span>匹配最少n,最多m次</span>
+      </li>
+      <li class="list-group-item">
+        <span>?</span>
+        <span>在限制符后,则为非贪婪模式</span>
+      </li>
+      <li class="list-group-item">
+        <span>.</span>
+        <span>\r\n外的任意单个字符</span>
+      </li>
+      <li class="list-group-item">
+        <span>x|y</span>
+        <span>匹配x或y</span>
+      </li>
+      <li class="list-group-item">
+        <span>[xyz]</span>
+        <span>匹配包含的任意一个字符</span>
+      </li>
+      <li class="list-group-item">
+        <span>[^xyz]</span>
+        <span>匹配未包含的任意字符</span>
+      </li>
+      <li class="list-group-item">
+        <span>[a-z]</span>
+        <span>匹配范围内的任意字符</span>
+      </li>
+      <li class="list-group-item">
+        <span>[^a-z]</span>
+        <span>匹配不再范围内的任意字符</span>
+      </li>
+      <li class="list-group-item">
+        <span>\b</span>
+        <span>单词边界,例:`er\b`能匹配`never`的`er`,不能匹配`verb`的</span>
+      </li>
+      <li class="list-group-item">
+        <span>\B</span>
+        <span>非单词边界,例:`er\b`能匹配`verb`的`er`,不能匹配`never`的</span>
+      </li>
+    </ul>
+  </section>
+
+  <hr style="clear: both;" />
+
   <h1>你好，世界！</h1>
   <h2>h2</h2>
   <h3>h3</h3>
