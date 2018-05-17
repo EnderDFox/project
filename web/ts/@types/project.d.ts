@@ -14,6 +14,8 @@ declare interface FileSingle{
 
 
 declare interface WorkSingle{
+    Lid?:number
+    Date?:string
     Wid?:number
     FileList?:FileSingle[]
     uploading?:boolean  //是否正在上传
@@ -33,11 +35,6 @@ declare class DataClass {
     RegisterFunc(): void
 }
 declare var Data;
-
-declare class ProcessDataClass{
-    WorkMap:{[key:number]:WorkSingle}
-}
-declare var ProcessData:ProcessDataClass
 
 declare class DepartmentInfo {
     Did: number
@@ -90,3 +87,13 @@ declare class ProcessPanelClass {
     HideMenu(): void
 }
 declare var ProcessPanel: ProcessPanelClass
+
+declare class ProjectNavClass{
+    FilterDid:number
+}
+declare var ProjectNav:ProjectNavClass
+
+declare class ProcessFilterClass{
+    Pack:any
+}
+declare var ProcessFilter:ProcessFilterClass

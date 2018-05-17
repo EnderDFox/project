@@ -122,13 +122,13 @@ var ProcessPanel = {
 			}
 			ProcessPanel.ShowMenuPub(this,e)
 		}).delegate('td','mouseenter',function(e){
-			e.stopPropagation()
+			/* e.stopPropagation()
 			if($(this).find('.stroke').length == 1){
 				var top = $(this).offset().top - 7
 				var left = $(this).offset().left + $(this).width() + 8
 				var genre = $(this).find('.stroke').attr('genre')
 				$('#workTips').css({top:top,left:left}).show().adjust(-5).html('<div>'+CollateData.VerList[genre]+'</div>')
-			}
+			} */
 		}).delegate('td','mouseleave',function(e){
 			e.stopPropagation()
 			$('#workTips').hide()

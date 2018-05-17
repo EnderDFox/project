@@ -119,6 +119,9 @@
 .editVersionDetail{
   min-width:262px;width:262px;
 }
+.editVersionDetail ul{
+  margin-bottom: 0px;
+}
 .editVersionDetail li{
   margin-top: 4px;
   padding-left: 16px;
@@ -128,8 +131,10 @@
 }
 .editVersionDetail .date{
   cursor: pointer;
-  margin-left: 20px;
-  min-width:140px;width:140px;text-align: center;
+  margin-left: 13px;
+  min-width:147px;
+  width:147px;
+  text-align: center;
 }
 
 .editVersionDetail .sk_1{color:#7030a0;}		/*版本开始*/
