@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>
+        <%=title%>
+    </title>
+</head>
+
+<body>
+    <ul>
+        <% children.forEach(function(child){ %>
+            <li>
+                <a href="<%=child.name%>">
+                    <%=child.name%>
+                </a>
+            </li>
+            <% }); %>
+    </ul>
+</body>
+
+</html>

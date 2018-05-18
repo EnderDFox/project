@@ -7,6 +7,8 @@ var pngjs_1 = require("pngjs");
 var ColorUtil_1 = require("./utils/ColorUtil");
 function getPixels(url, callback) {
     //TODO:
+    // old use `import * as getPixels from "get-pixels";`
+    // but can not find @types/get-pixels
 }
 var ImgToMap = /** @class */ (function () {
     function ImgToMap() {

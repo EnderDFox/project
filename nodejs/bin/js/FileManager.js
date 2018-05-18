@@ -6,6 +6,7 @@ var path = require("path");
 var parseArgs = require("minimist");
 var child_process = require("child_process");
 var express = require("express");
+var ejs = require("ejs");
 var bodyParser = require("body-parser");
 var MathUtil_1 = require("./utils/MathUtil");
 var FileManager = /** @class */ (function () {
@@ -18,19 +19,24 @@ var FileManager = /** @class */ (function () {
         this.initServer();
     }
     FileManager.prototype.initServer = function () {
+        var _this = this;
         var args = parseArgs(process.argv.slice(2), {
             alias: {
                 'dir': 'd',
                 "port": 'p',
+                "folder": 'f',
             }
         });
+        this.args = args;
         //
-        console.log("[info]", "`args.dir`:", args.dir);
-        console.log("[info]", "`args.port`:", args.port);
+        console.log("[info]", "`args.dir(-d)`:", args.dir);
+        console.log("[info]", "`args.port(-p)`:", args.port);
+        console.log("[info]", "`args.folder(-f)`:", args.folder);
         console.log("[info]", "`__dirname`:", __dirname);
         console.log("[info]", "`process.cwd()`:", process.cwd());
-        this.rootPath = path.resolve(process.cwd(), args.dir || "");
-        console.log("[info]", "`rootPath`:", this.rootPath);
+        var staticPath = path.resolve(process.cwd(), args.dir || "");
+        console.log("[info]", "`staticPath`:", staticPath);
+        this.staticPath = staticPath;
         //
         var app = express();
         this.app = app;
@@ -38,15 +44,17 @@ var FileManager = /** @class */ (function () {
         // 
         this.initGetPostAll();
         //static
-        console.log("[info]", "static path", process.cwd() + '/../web');
-        app.use(express.static(process.cwd() + '/../web'));
+        app.use(express.static(staticPath));
         //can't find
         app.use(function (req, res, next) {
             if (path.extname(req.url) == FileManager.Ext_map || req.url == '/favicon.ico') {
                 res.send({ success: true });
             }
+            else if (_this.showFolderContent(req, res)) {
+            }
             else {
                 console.log("404", req.url);
+                res.sendStatus(404);
             }
         });
         app.use(function (err, req, res, next) {
@@ -58,6 +66,27 @@ var FileManager = /** @class */ (function () {
             console.log('Express started on http://localhost:' +
                 port + ' ; press Ctrl-C to terminate.');
         });
+    };
+    /** 没有定位到的,如果是目录,则显示目录列表 */
+    FileManager.prototype.showFolderContent = function (req, res) {
+        var reqUrl = req.url;
+        if (reqUrl.indexOf('/') == 0) {
+            reqUrl = reqUrl.replace('/', '');
+        }
+        var folder = path.resolve(this.staticPath, reqUrl);
+        console.log("[debug]", "will showFolderContent:", folder);
+        var stat = fs.lstatSync(folder);
+        if (stat.isDirectory()) {
+            var t = fs.readFileSync(path.resolve(process.cwd(), 'bin/template/index.template.html')).toString();
+            var children = [];
+            t = ejs.render(t, { title: 'Folder List', children: this.getChildFiles(folder, null) });
+            // console.log("[info]", "t:", t)
+            res.end(t);
+            return true;
+        }
+        else {
+            return false;
+        }
     };
     FileManager.prototype.initGetPostAll = function () {
         var app = this.app;
@@ -80,7 +109,7 @@ var FileManager = /** @class */ (function () {
     FileManager.prototype.cs_list = function (req, res) {
         var currPath = req.query.currPath;
         if (currPath == null) {
-            currPath = this.rootPath;
+            currPath = path.resolve(process.cwd(), this.args.folder || "");
         }
         //
         var data = {
@@ -93,7 +122,14 @@ var FileManager = /** @class */ (function () {
         };
         //获取random files
         data.randomItems = this.getRandomFiles(currPath);
-        data.childItems = this.getChildFiles(currPath);
+        data.childItems = this.getChildFiles(currPath, function (file) {
+            if (file.indexOf(".") == 0 || file.indexOf("$") == 0) {
+                return true;
+            }
+            else {
+                return false;
+            }
+        });
         //
         res.send(data);
     };
@@ -104,7 +140,7 @@ var FileManager = /** @class */ (function () {
         res.send(data);
     };
     //解析文件夹, 获取里面的文件和文件夹
-    FileManager.prototype.getChildFiles = function (dir) {
+    FileManager.prototype.getChildFiles = function (dir, ignoreFunc) {
         var fileList = [];
         if (dir == null || dir.trim() == "") {
             return [];
@@ -121,7 +157,8 @@ var FileManager = /** @class */ (function () {
             // console.log("parseDir item:", fullname, file);
             try {
                 var stat = fs.lstatSync(fullname);
-                if (file.indexOf(".") == 0 || file.indexOf("$") == 0) {
+                if (ignoreFunc != null && ignoreFunc(file)) {
+                    // if(file.indexOf(".") == 0 || file.indexOf("$") == 0) {
                     // console.info("[info]", "过滤掉以 . 开头的File");
                 }
                 else {

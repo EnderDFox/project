@@ -4,30 +4,36 @@ import * as path from "path";
 import * as parseArgs from "minimist";
 import * as child_process from "child_process";
 import * as express from "express";
+import * as ejs from "ejs";
 import * as bodyParser from "body-parser";
 import { MathUtil } from "./utils/MathUtil";
 
 class FileManager {
-    static Ext_map = ".map";
-    rootPath: string;
+    static Ext_map = ".map"
+    args: parseArgs.ParsedArgs
+    app: express.Express;
+    staticPath: string
     constructor() {
         this.initServer()
     }
-    app: express.Express;
     initServer() {
         var args = parseArgs(process.argv.slice(2), {
             alias: {
                 'dir': 'd',
                 "port": 'p',
+                "folder": 'f',
             }
         });
+        this.args = args
         //
-        console.log("[info]", "`args.dir`:", args.dir)
-        console.log("[info]", "`args.port`:", args.port)
+        console.log("[info]", "`args.dir(-d)`:", args.dir)
+        console.log("[info]", "`args.port(-p)`:", args.port)
+        console.log("[info]", "`args.folder(-f)`:", args.folder)
         console.log("[info]", "`__dirname`:", __dirname)
         console.log("[info]", "`process.cwd()`:", process.cwd())
-        this.rootPath = path.resolve(process.cwd(), args.dir || "");
-        console.log("[info]", "`rootPath`:", this.rootPath);
+        var staticPath = path.resolve(process.cwd(), args.dir || "");
+        console.log("[info]", "`staticPath`:", staticPath);
+        this.staticPath = staticPath
         //
         var app: express.Express = express();
         this.app = app;
@@ -35,25 +41,46 @@ class FileManager {
         // 
         this.initGetPostAll()
         //static
-        console.log("[info]","static path",process.cwd() + '/../web')
-        app.use(express.static(process.cwd() + '/../web'));
+        app.use(express.static(staticPath));
         //can't find
-        app.use(function (req, res, next) {
+        app.use((req, res, next) => {
             if (path.extname(req.url) == FileManager.Ext_map || req.url == '/favicon.ico') {
                 res.send({ success: true });
+            } else if (this.showFolderContent(req, res)) {
             } else {
                 console.log("404", req.url);
+                res.sendStatus(404)
             }
         });
-        app.use(function (err, req, res, next) {
+        app.use((err, req, res, next) => {
             console.error("err:", err.stack);
         });
         //start server
         var port = args.port || 80
-        app.listen(port, function () {
+        app.listen(port, () => {
             console.log('Express started on http://localhost:' +
                 port + ' ; press Ctrl-C to terminate.');
         });
+    }
+    /** 没有定位到的,如果是目录,则显示目录列表 */
+    showFolderContent(req: express.Request, res: express.Response): boolean {
+        var reqUrl: string = req.url;
+        if (reqUrl.indexOf('/') == 0) {
+            reqUrl = reqUrl.replace('/', '')
+        }
+        var folder = path.resolve(this.staticPath, reqUrl)
+        console.log("[debug]", "will showFolderContent:", folder)
+        var stat = fs.lstatSync(folder);
+        if (stat.isDirectory()) {
+            var t = fs.readFileSync(path.resolve(process.cwd(), 'bin/template/index.template.html')).toString()
+            var children: string[] = []
+            t = ejs.render(t, { title: 'Folder List', children: this.getChildFiles(folder, null) })
+            // console.log("[info]", "t:", t)
+            res.end(t)
+            return true;
+        } else {
+            return false;
+        }
     }
     initGetPostAll() {
         var app = this.app
@@ -76,7 +103,7 @@ class FileManager {
     cs_list(req: express.Request, res: express.Response): void {
         var currPath: string = req.query.currPath
         if (currPath == null) {
-            currPath = this.rootPath
+            currPath = path.resolve(process.cwd(), this.args.folder || "");
         }
         //
         var data: IVueData = {
@@ -89,7 +116,13 @@ class FileManager {
         }
         //获取random files
         data.randomItems = this.getRandomFiles(currPath)
-        data.childItems = this.getChildFiles(currPath)
+        data.childItems = this.getChildFiles(currPath, (file: string): boolean => {
+            if (file.indexOf(".") == 0 || file.indexOf("$") == 0) {
+                return true
+            } else {
+                return false
+            }
+        })
         //
         res.send(data);
     }
@@ -100,7 +133,7 @@ class FileManager {
         res.send(data)
     }
     //解析文件夹, 获取里面的文件和文件夹
-    getChildFiles(dir: string): IChildFile[] {
+    getChildFiles(dir: string, ignoreFunc: (file: string) => boolean): IChildFile[] {
         var fileList: IChildFile[] = []
         if (dir == null || dir.trim() == "") {
             return [];
@@ -117,7 +150,8 @@ class FileManager {
             // console.log("parseDir item:", fullname, file);
             try {
                 var stat = fs.lstatSync(fullname);
-                if (file.indexOf(".") == 0 || file.indexOf("$") == 0) {
+                if (ignoreFunc != null && ignoreFunc(file)) {
+                    // if(file.indexOf(".") == 0 || file.indexOf("$") == 0) {
                     // console.info("[info]", "过滤掉以 . 开头的File");
                 } else {
                     fileList.push(
@@ -141,7 +175,7 @@ class FileManager {
     /*     ignoreExtnames = ["torrent", "jpg", "png", "txt", "mp3", "lnk", "url", "pdf",
             "js", "html", "css",
             "zip", "rar", "7z"]; */
-    needExtNames = ["mp4","rm","rmvb","mkv","wmv","avi"]
+    needExtNames = ["mp4", "rm", "rmvb", "mkv", "wmv", "avi"]
     //得到随机文件
     getRandomFiles(dir: string): IChildFile[] {
         var filesAll = this.getFileAll(dir);
@@ -180,7 +214,7 @@ class FileManager {
                 }
                 var ext = path.extname(fullname).toLowerCase();
                 // if (this.ignoreExtnames.indexOf('.'+ext) > -1) continue;
-                if (this.needExtNames.indexOf('.'+ext) == -1) continue;
+                if (this.needExtNames.indexOf('.' + ext) == -1) continue;
                 if (stat.isDirectory()) {
                     fileAll = fileAll.concat(this.getFileAll(fullname));//recursive children folders
                 } else {

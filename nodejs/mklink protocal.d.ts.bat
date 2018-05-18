@@ -1,2 +1,3 @@
-mklink /H web\ts\@types\protocal.d.ts src\@types\protocal.d.ts
+del ..\web\ts\@types\protocal.d.ts
+mklink /H ..\web\ts\@types\protocal.d.ts ts\@types\protocal.d.ts
 pause
