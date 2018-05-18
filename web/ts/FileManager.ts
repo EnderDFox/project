@@ -10,6 +10,8 @@ class FileManager {
         if (this.vueAll == null) {
             this.vueAll = new Vue({
                 data: {
+                    msg:'',
+                    error:'',
                     showRandom: true,
                     showChildren: true,
                     currPath: '',
@@ -95,6 +97,8 @@ class FileManager {
         }
         //set data
         data.currPath = data.currPath.replace(/\//g, `\\`)
+        this.vueAll.msg = data.msg
+        this.vueAll.error = data.error
         this.vueAll.currPath = data.currPath
         this.vueAll.canBackCurrPath = data.currPath.indexOf('\\') > -1
         this.vueAll.randomItems = data.randomItems

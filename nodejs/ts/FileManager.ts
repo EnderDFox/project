@@ -114,16 +114,19 @@ class FileManager {
             childrenSelectedAll: true,
             childItems: []
         }
-        //获取random files
-        data.randomItems = this.getRandomFiles(currPath)
-        data.childItems = this.getChildFiles(currPath, (file: string): boolean => {
-            if (file.indexOf(".") == 0 || file.indexOf("$") == 0) {
-                return true
-            } else {
-                return false
-            }
-        })
-        //
+        if(fs.existsSync(currPath)){
+            //获取random files
+            data.randomItems = this.getRandomFiles(currPath)
+            data.childItems = this.getChildFiles(currPath, (file: string): boolean => {
+                if (file.indexOf(".") == 0 || file.indexOf("$") == 0) {
+                    return true
+                } else {
+                    return false
+                }
+            })
+        }else{
+            data.error = `${currPath} is not exists`
+        }
         res.send(data);
     }
     cs_getRandomFiles(req: express.Request, res: express.Response): void {

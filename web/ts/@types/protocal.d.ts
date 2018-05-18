@@ -1,8 +1,10 @@
 interface IVueData {
+    msg?: string
+    error?: string
     showRandom?: boolean
     showChildren?: boolean
     currPath?: string
-    canBackCurrPath?:boolean
+    canBackCurrPath?: boolean
     randomItems?: IRandomFile[]
     childrenSelectedAll?: boolean
     childItems?: IChildFile[]
@@ -16,7 +18,7 @@ interface IChildFile {
     uuid?: number
     name?: string
     parent?: string
-    isDir?:boolean
+    isDir?: boolean
     newName?: string
     selected?: boolean
 }
