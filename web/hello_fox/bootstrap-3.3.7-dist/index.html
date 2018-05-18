@@ -36,12 +36,41 @@
       font-size: 16px;
     }
 
+    .common_size{
+      height: 100px;
+      line-height: 100px;
+      text-align: left;
+      vertical-align: middle;
+    }
+
+    .regexp li {
+      padding: 4px;
+    }
+
     .regexp li span:first-child {
       display: inline-block;
+      width: 60px;
       text-align: center;
-      width: 50px;
+      font-weight: bold;
+      font-size: 125%;
       border-right: 2px solid #bbbbbb;
       margin-right: 4px;
+    }
+
+    .regexp_eg{
+      margin-top: -70px;
+    }
+
+    .regexp_eg li span:nth-child(2) {
+      font-weight: bold;
+      font-size: 125%;
+      margin-left: 12px;
+    }
+
+    .regexp_eg li span:nth-child(4) {
+      font-weight: bold;
+      font-size: 125%;
+      margin-left: 32px;
     }
   </style>
 
@@ -182,15 +211,16 @@
       </li>
     </ul>
   </section>
-  <section>
+  <section class="col-sm-6 common_size">
     A4: 210毫米×297毫米 1050x1485 (1:1.4143) (0.7071:1)
   </section>
-  <section class="col-sm-6" style="float: left;height: 520px;">
+  <section class="col-sm-6">
     <img src="../image/黄金比例.png" />
   </section>
-  <section class="col-sm-6">
+  <hr style="clear: both;" />
+  <section class="col-sm-6 regexp">
     <h3>正则表达式</h3>
-    <ul class="list-group regexp" style="float: left;">
+    <ul class="list-group" style="float: left;">
       <li class="list-group-item">
         <h4>定位符</h4>
       </li>
@@ -243,8 +273,8 @@
       </li>
     </ul>
   </section>
-  <section class="col-sm-6">
-    <ul class="list-group regexp" style="float: left;">
+  <section class="col-sm-6 regexp" style="margin-top: -134px;">
+    <ul class="list-group" style="float: left;">
       <li class="list-group-item">
         <h4>匹配符</h4>
       </li>
@@ -322,46 +352,56 @@
       </li>
     </ul>
   </section>
-  <section class="col-sm-6">
+  <section class="col-sm-10 regexp_eg">
     <h3>常用示例</h3>
     <ul class="list-group" style="float: left;">
       <li class="list-group-item">
-        <span>匹配任何字符,不包括换行 `.*?`</span>
+        <span>匹配任何字符,不包括换行</span>
+        <span>.*?</span>
       </li>
       <li class="list-group-item">
-        <span>匹配任何字符,包括换行 `[\w\W]*?`</span>
+        <span>匹配任何字符,包括换行</span>
+        <span>[\w\W]*?</span>
       </li>
       <li class="list-group-item">
-        <span>用户名 /^[a-z0-9_-]{3,16}$/</span>
+        <span>用户名</span>
+        <span>/^[a-z0-9_-]{3,16}$/</span>
       </li>
       <li class="list-group-item">
-        <span>密码 /^[a-z0-9_-]{6,18}$/</span>
+        <span>密码</span>
+        <span>/^[a-z0-9_-]{6,18}$/</span>
       </li>
       <li class="list-group-item">
-        <span>十六进制值 /^#?([a-f0-9]{6}|[a-f0-9]{3})$/</span>
+        <span>十六进制值</span>
+        <span>/^#?([a-f0-9]{6}|[a-f0-9]{3})$/</span>
       </li>
       <li class="list-group-item">
-        <span>电子邮箱 /^([a-z0-9_\.-]+)@([\da-z\.-]+)\.([a-z\.]{2,6})$/ /^[a-z\d]+(\.[a-z\d]+)*@([\da-z](-[\da-z])?)+(\.{1,2}[a-z]+)+$/
-        </span>
+        <span>电子邮箱</span>
+        <span>/^([a-z0-9_\.-]+)@([\da-z\.-]+)\.([a-z\.]{2,6})$/</span>
+        <br/>
+        <span>/^[a-z\d]+(\.[a-z\d]+)*@([\da-z](-[\da-z])?)+(\.{1,2}[a-z]+)+$/</span>
       </li>
       <li class="list-group-item">
-        <span>URL /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/</span>
+        <span>URL</span>
+        <span>/^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/</span>
       </li>
       <li class="list-group-item">
-        <span>IP 地址 /((2[0-4]\d|25[0-5]|[01]?\d\d?)\.){3}(2[0-4]\d|25[0-5]|[01]?\d\d?)/ /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/
-        </span>
+        <span>IP地址</span>
+        <span>/((2[0-4]\d|25[0-5]|[01]?\d\d?)\.){3}(2[0-4]\d|25[0-5]|[01]?\d\d?)/</span>
+        <br/>
+        <span>/^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/</span>
       </li>
       <li class="list-group-item">
-        <span>HTML 标签 /^
-          <([a-z]+)([^<]+)*(?:>(.*)
-            <\/\1>|\s+\/>)$/</span>
+        <span>HTML标签</span>
+        <span>/^&lt;([a-z]+)([^&lt;]+)*(?:&gt;(.*)&lt;\/\1&gt;|\s+\/&gt;)$/</span>
       </li>
       <li class="list-group-item">
-        <span>删除代码\\注释 (?
-          <!http:|\S)//.*$</span>
+        <span>删除代码\\注释</span>
+        <span>(?&lt;!http:|\S)//.*$</span>
       </li>
       <li class="list-group-item">
-        <span>Unicode编码中的汉字范围 /^[\u2E80-\u9FFF]+$/</span>
+        <span>Unicode编码中的汉字范围</span>
+        <span>/^[\u2E80-\u9FFF]+$/</span>
       </li>
     </ul>
   </section>
