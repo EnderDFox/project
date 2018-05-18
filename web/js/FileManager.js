@@ -37,7 +37,7 @@ var FileManager = /** @class */ (function () {
                         $.get('openFolder', { folder: item.parent });
                     },
                     onRandomPlay: function (e, item) {
-                        $.get('playFile', { fullname: item.parent + '/' + item.name });
+                        $.get('playFile', { fullname: _this.getFullname(item.parent, item.name) });
                     },
                     onChildrenSelectAll: function (e) {
                         _this.vueAll.childrenSelectedAll = !_this.vueAll.childrenSelectedAll;
@@ -62,13 +62,13 @@ var FileManager = /** @class */ (function () {
                         _this.vueAll.childrenSelectedAll = _selectAll;
                     },
                     onChildFilePlay: function (e, item) {
-                        $.get('playFile', { fullname: item.parent + '/' + item.name });
+                        $.get('playFile', { fullname: _this.getFullname(item.parent, item.name) });
                     },
                     onChildFolderOpen: function (e, item) {
-                        $.get('openFolder', { folder: item.isDir ? item.parent + '/' + item.name : item.parent });
+                        $.get('openFolder', { folder: item.isDir ? _this.getFullname(item.parent, item.name) : item.parent });
                     },
                     onChildFolderEnter: function (e, item) {
-                        $.get("list", { currPath: item.parent + '/' + item.name }, _this.onList.bind(_this), 'json');
+                        $.get("list", { currPath: _this.getFullname(item.parent, item.name) }, _this.onList.bind(_this), 'json');
                     },
                     onReset: this.onReset.bind(this),
                     onSubmit: this.onSubmit.bind(this),
@@ -133,7 +133,7 @@ var FileManager = /** @class */ (function () {
             return;
         }
         if (item.name != item.newName) {
-            $.get('rename', { fullname: item.parent + '/' + item.name, newFullname: item.parent + '/' + item.newName }, function (newName) {
+            $.get('rename', { fullname: this.getFullname(item.parent, item.name), newFullname: this.getFullname(item.parent, item.newName) }, function (newName) {
                 item.name = item.newName;
             });
         }
@@ -192,6 +192,13 @@ var FileManager = /** @class */ (function () {
             currNameSp.reverse();
             item.newName = currNameSp.join("-");
         }
+    };
+    FileManager.prototype.getFullname = function () {
+        var args = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            args[_i] = arguments[_i];
+        }
+        return path.resolve.apply(this, args);
     };
     return FileManager;
 }());

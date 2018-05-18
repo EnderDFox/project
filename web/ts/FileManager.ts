@@ -37,7 +37,7 @@ class FileManager {
                         $.get('openFolder', { folder: item.parent });
                     },
                     onRandomPlay: (e: Event, item: IRandomFile) => {
-                        $.get('playFile', { fullname: item.parent + '/' + item.name });
+                        $.get('playFile', { fullname: this.getFullname(item.parent, item.name) });
                     },
                     onChildrenSelectAll: (e: Event) => {
                         this.vueAll.childrenSelectedAll = !this.vueAll.childrenSelectedAll;
@@ -62,13 +62,13 @@ class FileManager {
                         this.vueAll.childrenSelectedAll = _selectAll
                     },
                     onChildFilePlay: (e: Event, item: IChildFile) => {
-                        $.get('playFile', { fullname: item.parent + '/' + item.name });
+                        $.get('playFile', { fullname: this.getFullname(item.parent, item.name) });
                     },
                     onChildFolderOpen: (e: Event, item: IChildFile) => {
-                        $.get('openFolder', { folder: item.isDir ? item.parent + '/' + item.name : item.parent });
+                        $.get('openFolder', { folder: item.isDir ? this.getFullname(item.parent, item.name) : item.parent });
                     },
                     onChildFolderEnter: (e: Event, item: IChildFile) => {
-                        $.get("list", { currPath: item.parent + '/' + item.name }, this.onList.bind(this), 'json')
+                        $.get("list", { currPath: this.getFullname(item.parent, item.name) }, this.onList.bind(this), 'json')
                     },
                     onReset: this.onReset.bind(this),
                     onSubmit: this.onSubmit.bind(this),
@@ -128,7 +128,7 @@ class FileManager {
             return;
         }
         if (item.name != item.newName) {
-            $.get('rename', { fullname: item.parent + '/' + item.name, newFullname: item.parent + '/' + item.newName }, (newName: string) => {
+            $.get('rename', { fullname: this.getFullname(item.parent, item.name), newFullname: this.getFullname(item.parent, item.newName) }, (newName: string) => {
                 item.name = item.newName
             })
         }
@@ -187,6 +187,9 @@ class FileManager {
             currNameSp.reverse()
             item.newName = currNameSp.join("-");
         }
+    }
+    getFullname(...args:string[]):string {
+        return path.resolve.apply(this, args)
     }
 }
 

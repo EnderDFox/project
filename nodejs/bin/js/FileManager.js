@@ -25,10 +25,10 @@ var FileManager = /** @class */ (function () {
             }
         });
         //
-        console.log("[info]", "`__dirname`:", __dirname);
-        console.log("[info]", "`process.cwd()`:", process.cwd());
         console.log("[info]", "`args.dir`:", args.dir);
         console.log("[info]", "`args.port`:", args.port);
+        console.log("[info]", "`__dirname`:", __dirname);
+        console.log("[info]", "`process.cwd()`:", process.cwd());
         this.rootPath = path.resolve(process.cwd(), args.dir || "");
         console.log("[info]", "`rootPath`:", this.rootPath);
         //
@@ -38,7 +38,8 @@ var FileManager = /** @class */ (function () {
         // 
         this.initGetPostAll();
         //static
-        app.use(express.static(process.cwd() + '/web'));
+        console.log("[info]", "static path", process.cwd() + '/../web');
+        app.use(express.static(process.cwd() + '/../web'));
         //can't find
         app.use(function (req, res, next) {
             if (path.extname(req.url) == FileManager.Ext_map || req.url == '/favicon.ico') {

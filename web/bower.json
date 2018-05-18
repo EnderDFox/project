@@ -1,0 +1,20 @@
+{
+  "name": "NodeJsTool.Web",
+  "description": "",
+  "main": "index.html",
+  "authors": [
+    "Ender.Fox"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/EnderDFox/project",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "path": "^3.46.1"
+  }
+}
