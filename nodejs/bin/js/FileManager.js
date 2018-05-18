@@ -74,7 +74,7 @@ var FileManager = /** @class */ (function () {
             reqUrl = reqUrl.replace('/', '');
         }
         var folder = path.resolve(this.staticPath, reqUrl);
-        console.log("[debug]", "will showFolderContent:", folder);
+        // console.log("[debug]", "will showFolderContent:", folder)
         var stat = fs.lstatSync(folder);
         if (stat.isDirectory()) {
             var t = fs.readFileSync(path.resolve(process.cwd(), 'bin/template/index.template.html')).toString();
