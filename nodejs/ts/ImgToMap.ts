@@ -3,10 +3,17 @@ import * as fs from "fs";
 import * as express from "express";
 import * as path from "path";
 import * as parseArgs from "minimist";
-import * as getPixels from "get-pixels";
+// import * as getPixels from "get-pixels";
 import { PNG } from "pngjs";
 import { ColorUtil, IRGB, IHSB } from "./utils/ColorUtil"
+import { StreamState } from "http2";
 
+
+function getPixels(url:string,callback:Function):void{
+    //TODO: 
+    // old use `import * as getPixels from "get-pixels";`
+    // but can not find @types/get-pixels
+}
 
 class ImgToMap {
     cellW:number;

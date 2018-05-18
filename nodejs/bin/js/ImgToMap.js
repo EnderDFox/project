@@ -2,9 +2,12 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 var fs = require("fs");
 var path = require("path");
-var getPixels = require("get-pixels");
+// import * as getPixels from "get-pixels";
 var pngjs_1 = require("pngjs");
 var ColorUtil_1 = require("./utils/ColorUtil");
+function getPixels(url, callback) {
+    //TODO:
+}
 var ImgToMap = /** @class */ (function () {
     function ImgToMap() {
     }

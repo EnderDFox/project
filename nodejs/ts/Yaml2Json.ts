@@ -2,7 +2,6 @@ import * as fs from "fs";
 import * as yaml from "js-yaml";
 import * as path from "path";
 import * as parseArgs from "minimist";
-import { json } from "../node_modules/_@types_body-parser@1.16.8@@types/body-parser";
 
 console.log("[info]", process.cwd(), "`process.cwd()`");
 var args = parseArgs(process.argv.slice(2), {
@@ -41,7 +40,7 @@ function doYaml2Json(file:string){
         // yamlStr = yamlStr.replace(/\t/g,"  ");
         // fs.writeFileSync(file,yamlStr);
         let obj;
-        try { //异常捕获
+        try { //异常杕获
             obj = yaml.load(yamlStr);
 		} catch (err) {
             console.log("[error]",err);

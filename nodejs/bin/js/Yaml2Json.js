@@ -39,7 +39,7 @@ function doYaml2Json(file) {
         // yamlStr = yamlStr.replace(/\t/g,"  ");
         // fs.writeFileSync(file,yamlStr);
         var obj = void 0;
-        try { //异常捕获
+        try { //异常杕获
             obj = yaml.load(yamlStr);
         }
         catch (err) {
