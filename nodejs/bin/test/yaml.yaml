@@ -1,0 +1,91 @@
+# sound file list
+---
+SoundEffects:
+    Baoji:
+        file:   "sound/Baoji.ogg"
+    BigFishDead0:
+        file:   "sound/BigFishDead0.ogg"
+    BigFishDead1:
+        file:   "sound/BigFishDead1.ogg"
+    BigFishDead10:
+        file:   "sound/BigFishDead10.ogg"
+    BigFishDead11:
+        file:   "sound/BigFishDead11.ogg"
+    BigFishDead12:
+        file:   "sound/BigFishDead12.ogg"
+    BigFishDead13:
+        file:   "sound/BigFishDead13.ogg"
+    BigFishDead14:
+        file:   "sound/BigFishDead14.ogg"
+    BigFishDead2:
+        file:   "sound/BigFishDead2.ogg"
+    BigFishDead3:
+        file:   "sound/BigFishDead3.ogg"
+    BigFishDead4:
+        file:   "sound/BigFishDead4.ogg"
+    BigFishDead5:
+        file:   "sound/BigFishDead5.ogg"
+    BigFishDead6:
+        file:   "sound/BigFishDead6.ogg"
+    BigFishDead7:
+        file:   "sound/BigFishDead7.ogg"
+    BigFishDead8:
+        file:   "sound/BigFishDead8.ogg"
+    BigFishDead9:
+        file:   "sound/BigFishDead9.ogg"
+    Boom:
+        file:   "sound/Boom.ogg"
+    BoosComing:
+        file:   "sound/BoosComing.ogg"
+    ChangeCannon:
+        file:   "sound/ChangeCannon.ogg"
+    ClickClose:
+        file:   "sound/ClickClose.ogg"
+    ClickCommon:
+        file:   "sound/ClickCommon.ogg"
+    ColourTurn:
+        file:   "sound/ColourTurn.ogg"
+    Facaile:
+        file:   "sound/Facaile.ogg"
+    Fight:
+        file:   "sound/Fight.ogg"
+    FightBgm0:
+        file:   "sound/FightBgm0.ogg"
+    FightBgm1:
+        file:   "sound/FightBgm1.ogg"
+    FightBgm2:
+        file:   "sound/FightBgm2.ogg"
+    FightBgm3:
+        file:   "sound/FightBgm3.ogg"
+    FightBgm4:
+        file:   "sound/FightBgm4.ogg"
+    Fire:
+        file:   "sound/Fire.ogg"
+    fullboom:
+        file:   "sound/fullboom.ogg"
+    GoldLag:
+        file:   "sound/GoldLag.ogg"
+    GoldMIni:
+        file:   "sound/GoldMIni.ogg"
+    GoldUp:
+        file:   "sound/GoldUp.ogg"
+    Haolihai:
+        file:   "sound/Haolihai.ogg"
+    Lang:
+        file:   "sound/Lang.ogg"
+    LevelUp:
+        file:   "sound/LevelUp.ogg"
+    Lightming:
+        file:   "sound/Lightming.ogg"
+    MainBgm:
+        file:   "sound/MainBgm.ogg"
+    Mechanic:
+        file:   "sound/Mechanic.ogg"
+    Nbomb:
+        file:   "sound/Nbomb.ogg"
+    NoBullets:
+        file:   "sound/NoBullets.ogg"
+    PutongTurn:
+        file:   "sound/PutongTurn.ogg"
+    Taibangle:
+        file:   "sound/Taibangle.ogg"

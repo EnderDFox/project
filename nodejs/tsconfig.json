@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "target": "es5",
+    "module": "commonjs",
+    // "sourceRoot": "${workspaceRoot}/src",
+    // "sourceRoot": "src/test1s",
+    "outDir": "bin/js",
+    // "outFile": "bin/ProtobufJsHelper.js",
+    "newLine": "LF",
+    "noImplicitReturns": true,
+    "noImplicitThis": true,
+    "strictFunctionTypes": false,
+    "strict": false,
+    "allowJs": false,
+    "removeComments": false,
+    // "watch": true,
+    "sourceMap": true
+  },
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}

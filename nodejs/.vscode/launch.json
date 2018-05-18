@@ -1,0 +1,147 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Launch SrtParser",
+            "program": "${workspaceFolder}/src/SrtParser.ts",
+            "args": [
+                "-i","test/srt/Zootopia.srt",
+                "-o","test/srt/Zootopia.srt.json"
+            ],
+            "outFiles": [
+                "${workspaceFolder}/bin/js/*.js"
+            ]
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Launch Yaml2Json",
+            "program": "${workspaceFolder}/bin/js/Yaml2Json.js",
+            "args": [
+                "--dir",
+                "bin/test"
+            ],
+            "outFiles": [
+                "${workspaceFolder}/*/*.js"
+            ]
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Launch StaticServer",
+            "program": "${workspaceFolder}/src/StaticServer.ts",
+            "args": [
+                "-p","4399",
+                "-d","C:/fox/projects/MKGProject1/tb_client"
+                // "--dir","C:/fox/projects/performance/egret"
+                // "-p","831"
+            ],
+            "outFiles": [
+                "${workspaceFolder}/bin/js/*.js"
+            ]
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Launch FileManager",
+            "program": "${workspaceFolder}/src/FileManager.ts",
+            "args": [
+                "-p","833",
+                "-d","D:/download"
+            ],
+            "outFiles": [
+                "${workspaceFolder}/bin/js/*.js"
+            ],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Launch ImgToMap",
+            "program": "${workspaceFolder}/src/ImgToMap.ts",
+            // "program": "${workspaceFolder}/bin/js/ImgToMap.js",
+            "args": [
+                "-p","4501",
+                "-d","C:/fox/projects/MKGProject1/tb_client"
+                // "--dir","C:/fox/projects/performance/egret"
+                // "-p","831"
+            ],
+            "outFiles": [
+                "${workspaceFolder}/bin/js/*.js"
+            ]
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Launch ImageToBase64",
+            "program": "${workspaceFolder}/bin/js/ImageToBase64.js",
+            "args": [
+                "-d",
+                "test",
+                "-i",
+                "fox_2.png",
+                "-o",
+                "fox_2.txt"
+            ],
+            "outFiles": [
+                "${workspaceFolder}/*/*.js"
+            ]
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Launch ProtobufJsHelper",
+            "program": "${workspaceFolder}/bin/js/ProtobufJsHelper.js",
+            "args": [
+                // "-h",
+                "-d",
+                "test",
+                "-p",
+                "pb.proto",
+                "-j",
+                "pb.js",
+                "-t",
+                "pb.d.ts"
+            ],
+            "outFiles": [
+                "${workspaceFolder}/*/*.js"
+            ]
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Launch AutoReferencePath",
+            "program": "${workspaceFolder}/src/AutoReferencePath.ts",
+            "args": [
+                // "-h",
+                "-d",
+                // "C:/fox/H5/projects/Hello_TypeScript/src/test1s"
+                // "C:/fox/H5/projects/TankBattle/Laya/src",
+                // "C:/fox/projects/MKGProject1/tb_client/src",
+                "C:/fox/projects/MKGProject1/tb_client/src/fuis/battles_1",
+                "-e",
+                "GameMain.ts Main.ts"
+            ],
+            "outFiles": [
+                "${workspaceFolder}/bin/js/*.js"
+            ],
+            "port": 9229,
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Launch TestA",
+            "program": "${workspaceFolder}/src/TestA.ts",
+            "args": [
+            ],
+            "outFiles": [
+                "${workspaceFolder}/bin/js/*.js"
+            ]
+        }
+    ]
+}

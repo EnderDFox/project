@@ -1,0 +1,26 @@
+syntax = "proto2";
+package pb;
+
+enum cmd{
+    NONE = 0;
+    CONNECT_SUCCESS = 101;
+    CONNECT_EXCEPTION = 102;
+    CONNECT_BREAK = 103;
+    CONNECT_FAILURE = 104;
+    // 通用协议段: 1000 - 2000
+    //错误信息
+    COMMON_MSG 		= 	1000;
+    //---战斗协议段
+    BATTLE_ENTER = 5001;
+    BATTLE_TANK_MOVE = 5002;
+}
+message Login {
+    required string account = 1;
+    required string password = 2;
+}
+
+message createRole {
+    required string name = 1;
+    required int32 sex = 2;
+}
+
