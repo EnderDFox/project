@@ -10,7 +10,7 @@ import { StreamState } from "http2";
 
 
 function getPixels(url:string,callback:Function):void{
-    //TODO: 
+    //TODO:
     // old use `import * as getPixels from "get-pixels";`
     // but can not find @types/get-pixels
 }
