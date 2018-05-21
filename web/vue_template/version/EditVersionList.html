@@ -12,7 +12,7 @@
             <button class="cancel btnSmall1" title="删除" @click="onDel($event,item,index)">X</button>
         </li>
     </transition-group>
-    <div class="body" v-if="versions.length<5">
+    <div class="body">
         <input type="text" class="name ver" placeholder="新版本号" v-model="newVer" @keyup.enter="onAddVer(true)" @blur="onAddVer(false)">
         <input type="text" id="editVersionList_newName" class="name" placeholder="新版本名称" v-model="newName" @keyup.enter="onAdd()">
         <button class="confirm btnSmall3" @click="onAdd()">增加</button>

@@ -113,6 +113,41 @@ var ProcessDataClass = /** @class */ (function () {
         $.each(data.VerList, function (k, v) {
             _this.VerMap[v.DateLine] = v;
         });
+        //
+        this.ParseVersionData(data.VersionList);
+    };
+    //处理版本数据
+    ProcessDataClass.prototype.ParseVersionData = function (versionList) {
+        var _this = this;
+        this.VersionList = [];
+        this.VersionMap = {};
+        this.VersionDateLineMap = {};
+        //
+        $.each(versionList, function (k, v) {
+            _this.VersionList.push(v); //后端会直接用create_time排好序, 所以这里不再排序了
+            _this.VersionMap[v.Vid] = v;
+            if (!v.PublishList) {
+                v.PublishList = [];
+            }
+            //补齐不足的genre数据
+            {
+                var _publishMap = {}; //key: genre
+                v.PublishList.forEach(function (p) {
+                    _publishMap[p.Genre] = p;
+                });
+                for (var genre = GenreField.BEGIN; genre <= GenreField.SUMMARY; genre++) {
+                    var p;
+                    p = _publishMap[genre];
+                    if (!p) {
+                        p = { Genre: genre, DateLine: '' };
+                    }
+                    p.Vid = v.Vid; //后端传来的都没有vid, 需要自己加上
+                    if (p.DateLine) {
+                        _this.VersionDateLineMap[p.DateLine] = p;
+                    }
+                }
+            }
+        });
     };
     return ProcessDataClass;
 }());

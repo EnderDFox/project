@@ -44,6 +44,11 @@ const (
 	L2C_TPL_LINK_DELETE        = 51025
 	L2C_UPLOAD_ADD             = 80001
 	L2C_UPLOAD_DELETE          = 80002
+	L2C_VERSION_ADD            = 80101
+	L2C_VERSION_DELETE         = 80102
+	L2C_VERSION_CHANGE_VER     = 80103
+	L2C_VERSION_CHANGE_NAME    = 80104
+	L2C_VERSION_CHANGE_PUBLISH = 80105
 )
 
 type L2C_SessionLogin struct {
@@ -87,12 +92,13 @@ type L2C_ProcessScoreNotice struct {
 }
 
 type L2C_ProcessView struct {
-	ModeList  []*ModeSingle
-	LinkList  []*LinkSingle
-	WorkList  []*WorkSingle
-	ScoreList []*ScoreSingle
-	VerList   []*VerSingle
-	Project   *ProjectSingle
+	ModeList    []*ModeSingle
+	LinkList    []*LinkSingle
+	WorkList    []*WorkSingle
+	ScoreList   []*ScoreSingle
+	VerList     []*VerSingle
+	Project     *ProjectSingle
+	VersionList []*VersionSingle
 }
 
 type L2C_CollateView struct {
@@ -161,5 +167,31 @@ type L2C_ProcessPublishEdit struct {
 }
 
 type L2C_ProcessPublishDelete struct {
+	DateLine string
+}
+
+type L2C_VersionAdd struct {
+	Vid  uint64
+	Ver  string
+	Name string
+}
+
+type L2C_VersionDelete struct {
+	Vid uint64
+}
+
+type L2C_VersionChangeVer struct {
+	Vid uint64
+	Ver string
+}
+
+type L2C_VersionChangeName struct {
+	Vid  uint64
+	Name string
+}
+
+type L2C_VersionChangePublish struct {
+	Vid      uint64
+	Genre    uint32
 	DateLine string
 }

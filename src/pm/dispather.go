@@ -8,6 +8,7 @@ var (
 	collate_manager  = NewCollateManager()
 	save_manager     = NewSaveManager()
 	upload           = NewUpload()
+	version_manager  = NewVersionManager()
 )
 
 type Dispather struct {
@@ -33,4 +34,6 @@ func (this *Dispather) Retister() {
 	save_manager.RegisterFunction()
 	//上传业务
 	upload.RegisterFunction()
+	//版本控制
+	version_manager.RegisterFunction()
 }

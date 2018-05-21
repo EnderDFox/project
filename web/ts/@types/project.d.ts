@@ -76,7 +76,21 @@ interface FileSingle {
     Kind?: number
     CreateTime?: number  //仅已上传时可用, 是创建时间
     Name?: string
-    buffer?:any[]  //二进制数据
+    buffer?: any[]  //二进制数据
+}
+
+interface VersionSingle {
+    Vid?: uint64
+    Ver?: string
+    Name?: string
+    PublishList?: PublishSingle[]
+}
+
+interface PublishSingle {
+    Vid?: uint64
+    Genre?: uint32
+    DateLine?: string
+    DateLineTimestamp?:number
 }
 
 //===class and instance

@@ -118,3 +118,16 @@ type ScoreSingle struct {
 	Efficiency uint64
 	Manner     uint64
 }
+
+type VersionSingle struct {
+	Vid         uint64
+	Ver         string
+	Name        string
+	publishList []*PublishSingle
+}
+
+type PublishSingle struct {
+	Vid      uint64
+	Genre    uint64
+	DateLine string
+}

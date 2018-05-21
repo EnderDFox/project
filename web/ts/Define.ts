@@ -18,3 +18,13 @@ enum DidField {
     SUPERVISOR = 14, //监修
     TOOL = 16,       //工具
 }
+
+enum GenreField {
+    // '开始', '完结', '封存', '延期', '发布', '总结'
+    BEGIN = 1,
+    END = 2,
+    SEAL = 3,
+    DELAY = 4,
+    PUB = 5,
+    SUMMARY = 6,
+}

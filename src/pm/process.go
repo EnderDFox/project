@@ -758,12 +758,13 @@ func (this *Process) View(BeginDate, EndDate string) bool {
 	//版本
 	verList := this.GetVerList()
 	data := &L2C_ProcessView{
-		ModeList:  modeList,
-		LinkList:  linkList,
-		WorkList:  workList,
-		ScoreList: scoreList,
-		VerList:   verList,
-		Project:   project,
+		ModeList:    modeList,
+		LinkList:    linkList,
+		WorkList:    workList,
+		ScoreList:   scoreList,
+		VerList:     verList,
+		Project:     project,
+		VersionList: this.owner.Version().VersionList(),
 	}
 	this.owner.SendTo(L2C_PROCESS_VIEW, data)
 	return true

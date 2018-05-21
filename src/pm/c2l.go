@@ -40,6 +40,11 @@ const (
 	C2L_TPL_LINK_DELETE        = 51025
 	C2L_UPLOAD_ADD             = 80001
 	C2L_UPLOAD_DELETE          = 80002
+	C2L_VERSION_ADD            = 80101
+	C2L_VERSION_DELETE         = 80102
+	C2L_VERSION_CHANGE_VER     = 80103
+	C2L_VERSION_CHANGE_NAME    = 80104
+	C2L_VERSION_CHANGE_PUBLISH = 80105
 )
 
 type C2L_SessionLogin struct {
@@ -195,4 +200,29 @@ type C2L_SaveCollate struct {
 }
 
 type C2L_ProfileView struct {
+}
+
+type C2L_VersionAdd struct {
+	Ver  string
+	Name string
+}
+
+type C2L_VersionDelete struct {
+	Vid uint64
+}
+
+type C2L_VersionChangeVer struct {
+	Vid uint64
+	Ver string
+}
+
+type C2L_VersionChangeName struct {
+	Vid  uint64
+	Name string
+}
+
+type C2L_VersionChangePublish struct {
+	Vid      uint64
+	Genre    uint32
+	DateLine string
 }

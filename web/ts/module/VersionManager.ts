@@ -1,27 +1,13 @@
-interface IVersionSimple {
-    Vid?: number
-    Ver?: string
-    Name?: string
-    Publishs?: IPublishSimple[]    //版本开始
-}
-interface IPublishSimple {
-    Vid?: number
-    // genre?:number
-    DateLine?: string
-    DateLineTimestamp?: number
-}
-
 class VersionManagerClass {
     AuePath: string = "version/" //模板所在目录
     //初始化
     Init() {
-        // WSConn.sendMsg(C2L.C2L_TPL_MODE_VIEW, {})
     }
     //注册函数
     RegisterFunc() {
     }
     //编辑 模板-功能列表
-    VueEditList: CombinedVueInstance1<{ newVer: string, newName: string, versions: IVersionSimple[] }>
+    VueEditList: CombinedVueInstance1<{ newVer: string, newName: string, versions: VersionSingle[] }>
     ShowEditList(e) {
         this.HideVersionList(false)
         ProcessPanel.HideMenu()
@@ -43,54 +29,7 @@ class VersionManagerClass {
                 data: {
                     newVer: '',
                     newName: '',
-                    versions: [
-                        {
-                            Vid: 1,
-                            Ver: '1.0.1',
-                            Name: '测试版本A',
-                            Publishs: [{
-                                DateLine: '2018-04-01',
-                            },
-                            {
-                                DateLine: '2018-04-03',
-                            },
-                            {
-                                DateLine: '2018-04-05',
-                            },
-                            {
-                                DateLine: '2018-04-07',
-                            },
-                            {
-                                DateLine: '2018-04-09',
-                            },
-                            {
-                                DateLine: '2018-04-11',
-                            },]
-                        },
-                        {
-                            Vid: 2,
-                            Ver: '1.0.2',
-                            Name: '测试版本B',
-                            Publishs: [{
-                                DateLine: '2018-05-01',
-                            },
-                            {
-                                DateLine: '2018-05-03',
-                            },
-                            {
-                                DateLine: '2018-05-05',
-                            },
-                            {
-                                DateLine: '2018-05-07',
-                            },
-                            {
-                                DateLine: '2018-05-09',
-                            },
-                            {
-                                DateLine: '2018-05-11',
-                            },]
-                        },
-                    ]
+                    versions: ProcessData.VersionList,
                 },
                 methods: {
                     onAddVer: (isEnter: boolean = false) => {
@@ -101,20 +40,22 @@ class VersionManagerClass {
                     },
                     onAdd: () => {
                         var vid = this.VueEditList.versions.length > 0 ? this.VueEditList.versions[this.VueEditList.versions.length - 1].Vid + 1 : 1
-                        this.VueEditList.versions.push({
+                        this.VueEditList.versions.unshift({
                             Vid: vid,
                             Ver: this.VueEditList.newVer,
                             Name: this.VueEditList.newName,
-                            Publishs: [{ Vid: vid, DateLine: '', DateLineTimestamp: 0 },
-                            { Vid: vid, DateLine: '', DateLineTimestamp: 0 },
-                            { Vid: vid, DateLine: '', DateLineTimestamp: 0 },
-                            { Vid: vid, DateLine: '', DateLineTimestamp: 0 },
-                            { Vid: vid, DateLine: '', DateLineTimestamp: 0 },
-                            { Vid: vid, DateLine: '', DateLineTimestamp: 0 },]
+                            PublishList: [
+                                { Vid: vid, Genre: GenreField.BEGIN, DateLine: '' },
+                                { Vid: vid, Genre: GenreField.END, DateLine: '' },
+                                { Vid: vid, Genre: GenreField.SEAL, DateLine: '' },
+                                { Vid: vid, Genre: GenreField.DELAY, DateLine: '' },
+                                { Vid: vid, Genre: GenreField.PUB, DateLine: '' },
+                                { Vid: vid, Genre: GenreField.SUMMARY, DateLine: '' },
+                            ]
                         })
                         // console.log("[info]","onAdd")
                     },
-                    onEditVer: (e, item: IVersionSimple) => {
+                    onEditVer: (e, item: VersionSingle) => {
                         var newVer = this.FormatVer(e.target.value)
                         if (newVer != item.Ver.toString()) {
                             item.Ver = newVer
@@ -126,13 +67,13 @@ class VersionManagerClass {
                         }
                         // console.log("[info]",item.Ver,e.target.value)
                     },
-                    onEditName: (e, item: IVersionSimple) => {
+                    onEditName: (e, item: VersionSingle) => {
                         item.Name = e.target.value
                     },
-                    onDel: (e, item: IVersionSimple, index: number) => {
+                    onDel: (e, item: VersionSingle, index: number) => {
                         this.VueEditList.versions.splice(index, 1)
                     },
-                    onEdit: (e, item: IVersionSimple) => {
+                    onEdit: (e, item: VersionSingle) => {
                         this.ShowVersionDetail(item)
                     },
                     onClose: () => {
@@ -159,10 +100,10 @@ class VersionManagerClass {
         }
     }
     //版本编辑内容
-    VueEditDetail: CombinedVueInstance1<{ version: IVersionSimple }>
-    ShowVersionDetail(arg: number | IVersionSimple) {
+    VueEditDetail: CombinedVueInstance1<{ version: VersionSingle }>
+    ShowVersionDetail(arg: number | VersionSingle) {
         this.HideVersionDetail(false)
-        var version: IVersionSimple
+        var version: VersionSingle
         if (typeof (arg) == 'number') {
             version = this.VueEditList.versions.filter((item) => {
                 if (item.Vid == arg as number) {
@@ -171,7 +112,7 @@ class VersionManagerClass {
                 return false
             })[0]
         } else {
-            version = arg as IVersionSimple
+            version = arg as VersionSingle
         }
         //
         var _show = () => {
@@ -193,7 +134,7 @@ class VersionManagerClass {
                  } */
             })
             //日期绑定
-            plan.find('.date').unbind().click(function (this:HTMLInputElement) {
+            plan.find('.date').unbind().click(function (this: HTMLInputElement) {
                 DateTime.Open(this, $(this).val(), (date) => {
                     $(this).val(date)
                 })
@@ -214,10 +155,7 @@ class VersionManagerClass {
                 methods: {
                     publishName: this.GetPublishName.bind(this),
                     onDateClick: (genre: number) => {
-                        switch (genre) {
-                            case 1:
-                                break;
-                        }
+                        //TODO: 
                     },
                     onClose: () => {
                         this.HideVersionDetail()
@@ -252,9 +190,10 @@ class VersionManagerClass {
     FormatVer(ori: string): string {
         return ori.replace(/[^0-9\.]/g, '')
     }
-    PublishNames: string[] = ['开始', '完结', '封存', '延期', '发布', '总结']
+    //
+    PublishGenreNameList: string[] = ['开始', '完结', '封存', '延期', '发布', '总结']
     GetPublishName(genre: number): string {
-        return this.PublishNames[genre - 1]
+        return this.PublishGenreNameList[genre - 1]
     }
 }
 var VersionManager = new VersionManagerClass()

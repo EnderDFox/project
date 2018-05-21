@@ -5,7 +5,7 @@
         <div class="close" @click="onClose()">x</div>
     </div>
     <ul>
-        <li v-for="item,index in version.Publishs">
+        <li v-for="item,index in version.PublishList">
             <span :class="['name sk_'+(index+1)]">{{publishName(index+1)}}日期</span>
             <span class="info">
                 <input type="text" class="date" :placeholder="'选择'+publishName(index+1)+'日期'" :value="item.DateLine" readonly @click="onDateClick(index+1)" />

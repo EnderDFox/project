@@ -1,11 +1,11 @@
 var VersionManagerClass = /** @class */ (function () {
     function VersionManagerClass() {
         this.AuePath = "version/"; //模板所在目录
-        this.PublishNames = ['开始', '完结', '封存', '延期', '发布', '总结'];
+        //
+        this.PublishGenreNameList = ['开始', '完结', '封存', '延期', '发布', '总结'];
     }
     //初始化
     VersionManagerClass.prototype.Init = function () {
-        // WSConn.sendMsg(C2L.C2L_TPL_MODE_VIEW, {})
     };
     //注册函数
     VersionManagerClass.prototype.RegisterFunc = function () {
@@ -34,54 +34,7 @@ var VersionManagerClass = /** @class */ (function () {
                 data: {
                     newVer: '',
                     newName: '',
-                    versions: [
-                        {
-                            Vid: 1,
-                            Ver: '1.0.1',
-                            Name: '测试版本A',
-                            Publishs: [{
-                                    DateLine: '2018-04-01',
-                                },
-                                {
-                                    DateLine: '2018-04-03',
-                                },
-                                {
-                                    DateLine: '2018-04-05',
-                                },
-                                {
-                                    DateLine: '2018-04-07',
-                                },
-                                {
-                                    DateLine: '2018-04-09',
-                                },
-                                {
-                                    DateLine: '2018-04-11',
-                                },]
-                        },
-                        {
-                            Vid: 2,
-                            Ver: '1.0.2',
-                            Name: '测试版本B',
-                            Publishs: [{
-                                    DateLine: '2018-05-01',
-                                },
-                                {
-                                    DateLine: '2018-05-03',
-                                },
-                                {
-                                    DateLine: '2018-05-05',
-                                },
-                                {
-                                    DateLine: '2018-05-07',
-                                },
-                                {
-                                    DateLine: '2018-05-09',
-                                },
-                                {
-                                    DateLine: '2018-05-11',
-                                },]
-                        },
-                    ]
+                    versions: ProcessData.VersionList,
                 },
                 methods: {
                     onAddVer: function (isEnter) {
@@ -93,16 +46,18 @@ var VersionManagerClass = /** @class */ (function () {
                     },
                     onAdd: function () {
                         var vid = _this.VueEditList.versions.length > 0 ? _this.VueEditList.versions[_this.VueEditList.versions.length - 1].Vid + 1 : 1;
-                        _this.VueEditList.versions.push({
+                        _this.VueEditList.versions.unshift({
                             Vid: vid,
                             Ver: _this.VueEditList.newVer,
                             Name: _this.VueEditList.newName,
-                            Publishs: [{ Vid: vid, DateLine: '', DateLineTimestamp: 0 },
-                                { Vid: vid, DateLine: '', DateLineTimestamp: 0 },
-                                { Vid: vid, DateLine: '', DateLineTimestamp: 0 },
-                                { Vid: vid, DateLine: '', DateLineTimestamp: 0 },
-                                { Vid: vid, DateLine: '', DateLineTimestamp: 0 },
-                                { Vid: vid, DateLine: '', DateLineTimestamp: 0 },]
+                            PublishList: [
+                                { Vid: vid, Genre: GenreField.BEGIN, DateLine: '' },
+                                { Vid: vid, Genre: GenreField.END, DateLine: '' },
+                                { Vid: vid, Genre: GenreField.SEAL, DateLine: '' },
+                                { Vid: vid, Genre: GenreField.DELAY, DateLine: '' },
+                                { Vid: vid, Genre: GenreField.PUB, DateLine: '' },
+                                { Vid: vid, Genre: GenreField.SUMMARY, DateLine: '' },
+                            ]
                         });
                         // console.log("[info]","onAdd")
                     },
@@ -209,10 +164,7 @@ var VersionManagerClass = /** @class */ (function () {
                 methods: {
                     publishName: _this.GetPublishName.bind(_this),
                     onDateClick: function (genre) {
-                        switch (genre) {
-                            case 1:
-                                break;
-                        }
+                        //TODO: 
                     },
                     onClose: function () {
                         _this.HideVersionDetail();
@@ -250,7 +202,7 @@ var VersionManagerClass = /** @class */ (function () {
         return ori.replace(/[^0-9\.]/g, '');
     };
     VersionManagerClass.prototype.GetPublishName = function (genre) {
-        return this.PublishNames[genre - 1];
+        return this.PublishGenreNameList[genre - 1];
     };
     return VersionManagerClass;
 }());

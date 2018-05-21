@@ -11,11 +11,15 @@ class ProcessDataClass {
 	//评分内容
 	ScoreMap: { [key: number]: ScoreSingle }
 	//版本内容
-	VerMap: { [key: number]: VerSingle }
+	VerMap: { [key: number]: VerSingle }	//key: DateLine
+	//版本和版本时间
+	VersionList: VersionSingle[]
+	VersionMap: { [key: number]: VersionSingle }	//key: Vid
+	VersionDateLineMap: { [key: number]: PublishSingle[] }	//key: DateLine
 	//流程工作
 	LinkWorkMap: { [key: number]: { [key: string]: WorkSingle } }
 	//数据初始化
-	Init(data: { Project: ProjectSingle, ModeList: ModeSingle[], LinkList: LinkSingle[], WorkList: WorkSingle[], ScoreList: ScoreSingle[], VerList: VerSingle[], }) {
+	Init(data: { Project: ProjectSingle, ModeList: ModeSingle[], LinkList: LinkSingle[], WorkList: WorkSingle[], ScoreList: ScoreSingle[], VerList: VerSingle[], VersionList: VersionSingle[], }) {
 		//初始化
 		this.Project = data.Project
 		this.WorkMap = {}
@@ -123,6 +127,40 @@ class ProcessDataClass {
 		//版本
 		$.each(data.VerList, (k, v: VerSingle) => {
 			this.VerMap[v.DateLine] = v
+		})
+		//
+		this.ParseVersionData(data.VersionList)
+	}
+	//处理版本数据
+	ParseVersionData(versionList: VersionSingle[]) {
+		this.VersionList = []
+		this.VersionMap = {}
+		this.VersionDateLineMap = {}
+		//
+		$.each(versionList, (k, v: VersionSingle) => {
+			this.VersionList.push(v);//后端会直接用create_time排好序, 所以这里不再排序了
+			this.VersionMap[v.Vid] = v;
+			if (!v.PublishList) {
+				v.PublishList = []
+			}
+			//补齐不足的genre数据
+			{
+				var _publishMap: { [key: number]: PublishSingle } = {} //key: genre
+				v.PublishList.forEach((p: PublishSingle) => {
+					_publishMap[p.Genre] = p
+				});
+				for (var genre = GenreField.BEGIN; genre <= GenreField.SUMMARY; genre++) {
+					var p: PublishSingle
+					p = _publishMap[genre]
+					if (!p) {
+						p = { Genre: genre, DateLine: '' }
+					}
+					p.Vid = v.Vid//后端传来的都没有vid, 需要自己加上
+					if (p.DateLine) {
+						this.VersionDateLineMap[p.DateLine] = p
+					}
+				}
+			}
 		})
 	}
 }
