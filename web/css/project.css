@@ -118,24 +118,36 @@
 }
 /*版本编辑*/
 .editVersionDetail{
-  min-width:262px;width:262px;
+  min-width:750px;width:750px;
+  height: 116px;
 }
 .editVersionDetail ul{
   margin-bottom: 0px;
+  margin-left: 8px;
 }
 .editVersionDetail li{
+  float: left;
   margin-top: 4px;
-  padding-left: 16px;
+  /* padding-left: 16px; */
+}
+.editVersionDetail .arrow{
+  position: absolute;
+  margin-top: 40px;
+  margin-left: 0px;
 }
 .editVersionDetail .name{
+  text-align: center;
   vertical-align: middle;
+  margin-top: 10px;
+  margin-left: 6px;
 }
 .editVersionDetail .date{
   cursor: pointer;
   margin-left: 13px;
-  min-width:147px;
-  width:147px;
+  min-width:100px;
+  width:100px;
   text-align: center;
+  padding-left: 0px;
 }
 
 .editVersionDetail .sk_1{color:#7030a0;}		/*版本开始*/

@@ -6,10 +6,11 @@
     </div>
     <ul>
         <li v-for="item,index in version.PublishList">
-            <span :class="['name sk_'+(index+1)]">{{publishName(index+1)}}日期</span>
-            <span class="info">
+            <div :class="['arrow']" v-if="index>0">➤</div>
+            <div class="info">
                 <input type="text" class="date" :placeholder="'选择'+publishName(index+1)+'日期'" :value="item.DateLine" readonly @click="onDateClick($event,item)" />
-            </span>
+            </div>
+            <div :class="['name sk_'+(index+1)]">{{publishName(index+1)}}日期</div>
         </li>
         <!-- <li class="body list-complete-item" v-for="(link,index) in mode.Links" :key="link.Tlid">
             <input type=" text " class="ver " placeholder="空 " :value="link.Name " :id=" 'editTplModeDetail_'+link.Tlid+
