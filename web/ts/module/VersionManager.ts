@@ -126,6 +126,28 @@ class VersionManagerClass {
             }
         }
     }
+    //选择器
+    VueSelect: CombinedVueInstance1<{}>
+    BindSelect(domId: string, callback: Function) {
+        if (this.VueSelect == null) {
+            Loader.LoadVueTemplate(this.AuePath + "VersionSelect", (txt: string) => {
+                this.VueSelect = new Vue({
+                    el: domId,
+                    template: txt,
+                    data: {
+                        versions: ProcessData.VersionList,
+                    }
+                })
+                if (callback != null) {
+                    callback(this.VueSelect.$el)
+                }
+            })
+        } else {
+            if (callback != null) {
+                callback(this.VueSelect.$el)
+            }
+        }
+    }
     //编辑 模板-功能列表
     VueEditList: CombinedVueInstance1<{ newVer: string, newName: string, versions: VersionSingle[] }>
     ShowEditList(e) {
@@ -222,19 +244,19 @@ class VersionManagerClass {
         }
     }
     //版本编辑内容
-    VueEditDetail: CombinedVueInstance1<{ version: VersionSingle }>
+    VueEditDetail: CombinedVueInstance1<{ versionList: VersionSingle }>
     ShowVersionDetail(arg: number | VersionSingle) {
         this.HideVersionDetail(false)
-        var version: VersionSingle
+        var versionList: VersionSingle
         if (typeof (arg) == 'number') {
-            version = this.VueEditList.versions.filter((item) => {
+            versionList = this.VueEditList.versions.filter((item) => {
                 if (item.Vid == arg as number) {
                     return true
                 }
                 return false
             })[0]
         } else {
-            version = arg as VersionSingle
+            versionList = arg as VersionSingle
         }
         //
         var _show = () => {
@@ -269,7 +291,7 @@ class VersionManagerClass {
             this.VueEditDetail = new Vue({
                 template: txt,
                 data: {
-                    version: version
+                    versionList: versionList
                 },
                 /*  filters: {
                      publishName:function(){

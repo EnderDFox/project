@@ -82,6 +82,28 @@ var VersionManagerClass = /** @class */ (function () {
             }
         }
     };
+    VersionManagerClass.prototype.BindSelect = function (domId, callback) {
+        var _this = this;
+        if (this.VueSelect == null) {
+            Loader.LoadVueTemplate(this.AuePath + "VersionSelect", function (txt) {
+                _this.VueSelect = new Vue({
+                    el: domId,
+                    template: txt,
+                    data: {
+                        versions: ProcessData.VersionList,
+                    }
+                });
+                if (callback != null) {
+                    callback(_this.VueSelect.$el);
+                }
+            });
+        }
+        else {
+            if (callback != null) {
+                callback(this.VueSelect.$el);
+            }
+        }
+    };
     VersionManagerClass.prototype.ShowEditList = function (e) {
         var _this = this;
         this.HideVersionList(false);
@@ -184,9 +206,9 @@ var VersionManagerClass = /** @class */ (function () {
     VersionManagerClass.prototype.ShowVersionDetail = function (arg) {
         var _this = this;
         this.HideVersionDetail(false);
-        var version;
+        var versionList;
         if (typeof (arg) == 'number') {
-            version = this.VueEditList.versions.filter(function (item) {
+            versionList = this.VueEditList.versions.filter(function (item) {
                 if (item.Vid == arg) {
                     return true;
                 }
@@ -194,7 +216,7 @@ var VersionManagerClass = /** @class */ (function () {
             })[0];
         }
         else {
-            version = arg;
+            versionList = arg;
         }
         //
         var _show = function () {
@@ -230,7 +252,7 @@ var VersionManagerClass = /** @class */ (function () {
             _this.VueEditDetail = new Vue({
                 template: txt,
                 data: {
-                    version: version
+                    versionList: versionList
                 },
                 /*  filters: {
                      publishName:function(){

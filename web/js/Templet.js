@@ -252,7 +252,8 @@ var Templet = {
 	<li class="body"> \
 		<div class="row"> \
 			<div class="num">版本 \
-				<input type="text" class="ver" placeholder="版号" /> \
+				<span id="place_versionSelect"/>\
+				<!--<input type="text" class="ver" placeholder="版号" />--> \
 			</div> \
 			<div class="div_version_edit"> \
 				<button class="version_edit" title="编辑版本">编辑</button> \

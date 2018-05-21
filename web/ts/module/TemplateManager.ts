@@ -163,7 +163,7 @@ class TemplateManagerClass {
     }
     //绑定到select选择器
     vue_tplSelect: CombinedVueInstance1<{modes:ITplModeSimple[]}>
-    BindTplSelect(domId) {
+    BindTplSelect(domId:string) {
         if (TemplateManager.vue_tplSelect == null) {
             Loader.LoadVueTemplate(TemplateManager.AuePath + "TplModeSelect", function (txt) {
                 TemplateManager.vue_tplSelect = new Vue({
