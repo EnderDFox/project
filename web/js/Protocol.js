@@ -42,6 +42,12 @@ var C2L = /** @class */ (function () {
     //文件上传
     C2L.C2L_UPLOAD_ADD = 80001;
     C2L.C2L_UPLOAD_DELETE = 80002;
+    //版本
+    C2L.C2L_VERSION_ADD = 80101;
+    C2L.C2L_VERSION_DELETE = 80102;
+    C2L.C2L_VERSION_CHANGE_VER = 80103;
+    C2L.C2L_VERSION_CHANGE_NAME = 80104;
+    C2L.C2L_VERSION_CHANGE_PUBLISH = 80105;
     return C2L;
 }());
 //======================L2C协议=======================
@@ -92,6 +98,12 @@ var L2C = /** @class */ (function () {
     //文件上传
     L2C.L2C_UPLOAD_ADD = 80001;
     L2C.L2C_UPLOAD_DELETE = 80002;
+    //版本
+    L2C.L2C_VERSION_ADD = 80101;
+    L2C.L2C_VERSION_DELETE = 80102;
+    L2C.L2C_VERSION_CHANGE_VER = 80103;
+    L2C.L2C_VERSION_CHANGE_NAME = 80104;
+    L2C.L2C_VERSION_CHANGE_PUBLISH = 80105;
     return L2C;
 }());
 //# sourceMappingURL=Protocol.js.map

@@ -44,6 +44,12 @@ class C2L {
     //文件上传
     static C2L_UPLOAD_ADD = 80001
     static C2L_UPLOAD_DELETE = 80002
+    //版本
+    static C2L_VERSION_ADD            = 80101
+	static C2L_VERSION_DELETE         = 80102
+	static C2L_VERSION_CHANGE_VER     = 80103
+	static C2L_VERSION_CHANGE_NAME    = 80104
+	static C2L_VERSION_CHANGE_PUBLISH = 80105
 }
 
 //======================L2C协议=======================
@@ -96,4 +102,10 @@ class L2C {
     //文件上传
     static L2C_UPLOAD_ADD = 80001
     static L2C_UPLOAD_DELETE = 80002
+    //版本
+    static L2C_VERSION_ADD            = 80101
+	static L2C_VERSION_DELETE         = 80102
+	static L2C_VERSION_CHANGE_VER     = 80103
+	static L2C_VERSION_CHANGE_NAME    = 80104
+	static L2C_VERSION_CHANGE_PUBLISH = 80105
 }

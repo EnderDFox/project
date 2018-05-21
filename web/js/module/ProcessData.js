@@ -119,6 +119,9 @@ var ProcessDataClass = /** @class */ (function () {
     //处理版本数据
     ProcessDataClass.prototype.ParseVersionData = function (versionList) {
         var _this = this;
+        if (versionList == null) {
+            versionList = []; //没数据时 后端会传空数据过来
+        }
         this.VersionList = [];
         this.VersionMap = {};
         this.VersionDateLineMap = {};
@@ -140,12 +143,18 @@ var ProcessDataClass = /** @class */ (function () {
                     p = _publishMap[genre];
                     if (!p) {
                         p = { Genre: genre, DateLine: '' };
+                        v.PublishList.push(p);
                     }
                     p.Vid = v.Vid; //后端传来的都没有vid, 需要自己加上
                     if (p.DateLine) {
                         _this.VersionDateLineMap[p.DateLine] = p;
                     }
                 }
+                v.PublishList.sort(function (a, b) {
+                    if (a.Genre < b.Genre)
+                        return -1;
+                    return 0;
+                });
             }
         });
     };

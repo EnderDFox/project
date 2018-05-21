@@ -5,6 +5,7 @@ type int64 = number
 type uint = number
 type uint32 = number
 type uint64 = number
+type char = string
 
 //db.manager.department.did
 enum DidField {

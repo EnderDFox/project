@@ -45,6 +45,7 @@ var ProcessPanel = {
 			e.stopPropagation()
 			ProcessPanel.HideMenu()
 			TemplateManager.Hide()
+			VersionManager.Hide()
 			if(e.button !== Main.MouseDir) {
 				return false
 			}
@@ -57,6 +58,7 @@ var ProcessPanel = {
 			//流程区域绑定
 			ProcessPanel.HideMenu()
 			TemplateManager.Hide()
+			VersionManager.Hide()
 			if(e.button !== Main.MouseDir) {
 				return false
 			}
@@ -110,6 +112,7 @@ var ProcessPanel = {
 			//流程区域绑定
 			ProcessPanel.HideMenu()
 			TemplateManager.Hide()
+			VersionManager.Hide()
 			if(e.button !== Main.MouseDir) {
 				return false
 			}
@@ -344,6 +347,7 @@ var ProcessPanel = {
 	//编辑功能
 	ShowEditMode:function(o,e,cid){
 		TemplateManager.Hide();
+		VersionManager.Hide()
 		var mid = $(o).attr('mid')
 		var mode = ProcessData.ModeMap[mid]
 		var plan = $('#editMode').css({left:e.pageX,top:e.pageY}).show().adjust(-5)
@@ -376,10 +380,12 @@ var ProcessPanel = {
 			WSConn.sendMsg(cid,data)
 			plan.hide()
 			TemplateManager.Hide()
+			VersionManager.Hide()
 		})
 		plan.find('.cancel,.close').unbind().click(function(){
 			plan.fadeOut(Config.FadeTime)
 			TemplateManager.Hide()
+			VersionManager.Hide()
 		})
 	},
 	//选择模板的下拉框

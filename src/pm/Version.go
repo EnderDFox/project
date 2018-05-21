@@ -28,7 +28,7 @@ func (this *Version) VersionList() []*VersionSingle {
 	for rows.Next() {
 		single := &VersionSingle{}
 		rows.Scan(&single.Vid, &single.Ver, &single.Name)
-		single.publishList = this.PublishList(single.Vid)
+		single.PublishList = this.PublishList(single.Vid)
 		versionList = append(versionList, single)
 	}
 	return versionList
@@ -68,7 +68,7 @@ func (this *Version) VersionAdd(ver string, name string) bool {
 }
 
 func (this *Version) VersionDelete(vid uint64) bool {
-	stmt, err := db.GetDb().Prepare(`UPDATE ` + config.Pm + `.pm_file_join SET is_del = 1 WHERE vid=?`)
+	stmt, err := db.GetDb().Prepare(`UPDATE ` + config.Pm + `.pm_version SET is_del = 1 WHERE vid=?`)
 	defer stmt.Close()
 	db.CheckErr(err)
 	_, err = stmt.Exec(vid)
@@ -82,7 +82,7 @@ func (this *Version) VersionDelete(vid uint64) bool {
 }
 
 func (this *Version) VersionChangeVer(vid uint64, ver string) bool {
-	stmt, err := db.GetDb().Prepare(`UPDATE ` + config.Pm + `.pm_file_join SET ver = ? WHERE vid=?`)
+	stmt, err := db.GetDb().Prepare(`UPDATE ` + config.Pm + `.pm_version SET ver = ? WHERE vid=?`)
 	defer stmt.Close()
 	db.CheckErr(err)
 	_, err = stmt.Exec(ver, vid)
@@ -97,7 +97,7 @@ func (this *Version) VersionChangeVer(vid uint64, ver string) bool {
 }
 
 func (this *Version) VersionChangeName(vid uint64, name string) bool {
-	stmt, err := db.GetDb().Prepare(`UPDATE ` + config.Pm + `.pm_file_join SET name = ? WHERE vid=?`)
+	stmt, err := db.GetDb().Prepare(`UPDATE ` + config.Pm + `.pm_version SET name = ? WHERE vid=?`)
 	defer stmt.Close()
 	db.CheckErr(err)
 	_, err = stmt.Exec(name, vid)

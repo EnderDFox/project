@@ -123,7 +123,7 @@ type VersionSingle struct {
 	Vid         uint64
 	Ver         string
 	Name        string
-	publishList []*PublishSingle
+	PublishList []*PublishSingle
 }
 
 type PublishSingle struct {

@@ -133,6 +133,9 @@ class ProcessDataClass {
 	}
 	//处理版本数据
 	ParseVersionData(versionList: VersionSingle[]) {
+		if(versionList==null){
+			versionList = []//没数据时 后端会传空数据过来
+		}
 		this.VersionList = []
 		this.VersionMap = {}
 		this.VersionDateLineMap = {}
@@ -154,12 +157,17 @@ class ProcessDataClass {
 					p = _publishMap[genre]
 					if (!p) {
 						p = { Genre: genre, DateLine: '' }
+						v.PublishList.push(p)
 					}
 					p.Vid = v.Vid//后端传来的都没有vid, 需要自己加上
 					if (p.DateLine) {
 						this.VersionDateLineMap[p.DateLine] = p
 					}
 				}
+				v.PublishList.sort((a,b):number=>{
+					if(a.Genre<b.Genre) return -1
+					return 0
+				})
 			}
 		})
 	}

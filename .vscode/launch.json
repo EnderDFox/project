@@ -12,7 +12,7 @@
             // "program": "${fileDirname}",
             "program": "${workspaceFolder}/src/pm/main.go",
             "env": {
-                "GOPATH":"D:/AmazingGame/tool_svn"
+                // "GOPATH":"D:/AmazingGame/tool_svn"
             },
             // "cwd": "${workspaceFolder}",
             "args": [],

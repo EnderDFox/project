@@ -8,7 +8,7 @@
         <li v-for="item,index in version.PublishList">
             <span :class="['name sk_'+(index+1)]">{{publishName(index+1)}}日期</span>
             <span class="info">
-                <input type="text" class="date" :placeholder="'选择'+publishName(index+1)+'日期'" :value="item.DateLine" readonly @click="onDateClick(index+1)" />
+                <input type="text" class="date" :placeholder="'选择'+publishName(index+1)+'日期'" :value="item.DateLine" readonly @click="onDateClick($event,item)" />
             </span>
         </li>
         <!-- <li class="body list-complete-item" v-for="(link,index) in mode.Links" :key="link.Tlid">
@@ -23,7 +23,7 @@
             <button :class="{'confirm':true,'btnSmall1':true}" title="删除" @click="onDel($event,link.Tlid)">X</button>
         </li> -->
     </ul>
-    <div class="foot">
+    <div class="foot" v-if="false">
         <div class="buttons">
             <button class="confirm">确定</button>
             <button class="cancel">取消</button>

@@ -90,7 +90,6 @@ interface PublishSingle {
     Vid?: uint64
     Genre?: uint32
     DateLine?: string
-    DateLineTimestamp?:number
 }
 
 //===class and instance

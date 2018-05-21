@@ -6,9 +6,81 @@ var VersionManagerClass = /** @class */ (function () {
     }
     //初始化
     VersionManagerClass.prototype.Init = function () {
+        Commond.Register(L2C.L2C_VERSION_ADD, this.L2C_VersionAdd.bind(this));
+        Commond.Register(L2C.L2C_VERSION_DELETE, this.L2C_VersionDelete.bind(this));
+        Commond.Register(L2C.L2C_VERSION_CHANGE_VER, this.L2C_VersionChangeVer.bind(this));
+        Commond.Register(L2C.L2C_VERSION_CHANGE_NAME, this.L2C_VersionChangeName.bind(this));
+        Commond.Register(L2C.L2C_VERSION_CHANGE_PUBLISH, this.L2C_VersionChangePublish.bind(this));
     };
     //注册函数
     VersionManagerClass.prototype.RegisterFunc = function () {
+    };
+    Object.defineProperty(VersionManagerClass.prototype, "VersionList", {
+        get: function () {
+            return ProcessData.VersionList;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    VersionManagerClass.prototype.L2C_VersionAdd = function (data) {
+        var v = {
+            Vid: data.Vid,
+            Ver: data.Ver,
+            Name: data.Name,
+            PublishList: []
+        };
+        for (var genre = GenreField.BEGIN; genre <= GenreField.SUMMARY; genre++) {
+            v.PublishList.push({ Vid: v.Vid, Genre: genre, DateLine: '' });
+        }
+        //
+        this.VersionList.unshift(v);
+        ProcessData.VersionMap[v.Vid] = v;
+    };
+    VersionManagerClass.prototype.L2C_VersionDelete = function (data) {
+        var index = ArrayUtil.IndexOfAttr(this.VersionList, "Vid", data.Vid);
+        if (index >= -1) {
+            this.VersionList.splice(index, 1);
+        }
+        var v = ProcessData.VersionMap[data.Vid];
+        delete ProcessData.VersionMap[data.Vid];
+        if (v && v.PublishList) {
+            var len = v.PublishList.length;
+            for (var i = 0; i < len; i++) {
+                var p = v.PublishList[i];
+                if (p.DateLine) {
+                    delete ProcessData.VersionDateLineMap[p.DateLine];
+                }
+            }
+        }
+    };
+    VersionManagerClass.prototype.L2C_VersionChangeVer = function (data) {
+        var v = ProcessData.VersionMap[data.Vid];
+        if (v) {
+            v.Ver = 'temp'; //FormatVer会导致newVer和input.value不一致,但可能newVer和item.Ver一样,需要把item.Ver设置为item.Ver, 此时如果vue值相同, 赋值是不会触发html变化,需要先赋另一个值
+            v.Ver = data.Ver;
+        }
+    };
+    VersionManagerClass.prototype.L2C_VersionChangeName = function (data) {
+        var v = ProcessData.VersionMap[data.Vid];
+        if (v) {
+            v.Name = data.Name;
+        }
+    };
+    VersionManagerClass.prototype.L2C_VersionChangePublish = function (data) {
+        var v = ProcessData.VersionMap[data.Vid];
+        if (v && v.PublishList) {
+            var len = v.PublishList.length;
+            for (var i = 0; i < len; i++) {
+                var p = v.PublishList[i];
+                if (p.Genre == data.Genre) {
+                    p.DateLine = data.DateLine;
+                    if (p.DateLine) {
+                        ProcessData.VersionDateLineMap[p.DateLine] = p;
+                    }
+                    break;
+                }
+            }
+        }
     };
     VersionManagerClass.prototype.ShowEditList = function (e) {
         var _this = this;
@@ -45,46 +117,48 @@ var VersionManagerClass = /** @class */ (function () {
                         }
                     },
                     onAdd: function () {
-                        var vid = _this.VueEditList.versions.length > 0 ? _this.VueEditList.versions[_this.VueEditList.versions.length - 1].Vid + 1 : 1;
-                        _this.VueEditList.versions.unshift({
-                            Vid: vid,
-                            Ver: _this.VueEditList.newVer,
-                            Name: _this.VueEditList.newName,
-                            PublishList: [
-                                { Vid: vid, Genre: GenreField.BEGIN, DateLine: '' },
-                                { Vid: vid, Genre: GenreField.END, DateLine: '' },
-                                { Vid: vid, Genre: GenreField.SEAL, DateLine: '' },
-                                { Vid: vid, Genre: GenreField.DELAY, DateLine: '' },
-                                { Vid: vid, Genre: GenreField.PUB, DateLine: '' },
-                                { Vid: vid, Genre: GenreField.SUMMARY, DateLine: '' },
-                            ]
-                        });
-                        // console.log("[info]","onAdd")
+                        console.log("[debug]", "new Ver", _this.VueEditList.newVer.trim().toString());
+                        var data = { Ver: _this.VueEditList.newVer.trim().toString(), Name: _this.VueEditList.newName.trim().toString() };
+                        WSConn.sendMsg(C2L.C2L_VERSION_ADD, data);
+                        _this.VueEditList.newVer = "";
+                        _this.VueEditList.newName = "";
                     },
                     onEditVer: function (e, item) {
+                        //格式化为 正确的版本格式
                         var newVer = _this.FormatVer(e.target.value);
+                        if (newVer == "") { //再次修改就别设置 ""了
+                            newVer = item.Ver.toString();
+                        }
                         if (newVer != item.Ver.toString()) {
                             item.Ver = newVer;
+                            var data = { Vid: item.Vid, Ver: newVer };
+                            WSConn.sendMsg(C2L.C2L_VERSION_CHANGE_VER, data);
                         }
-                        else {
-                            if (newVer != e.target.value) {
-                                item.Ver = 't'; //vue值相同 赋值是不会触发html变化,需要现赋另一个值
-                                item.Ver = newVer;
-                            } //else 完全没变化,不需要管
+                        else if (newVer != e.target.value) {
+                            item.Ver = 'temp'; //FormatVer会导致newVer和input.value不一致,但可能newVer和item.Ver一样,需要把item.Ver设置为item.Ver, 此时如果vue值相同, 赋值是不会触发html变化,需要先赋另一个值
+                            item.Ver = newVer;
                         }
-                        // console.log("[info]",item.Ver,e.target.value)
                     },
                     onEditName: function (e, item) {
-                        item.Name = e.target.value;
+                        var newName = e.target.value;
+                        newName = newName.trim();
+                        if (item.Name != newName) {
+                            var data = { Vid: item.Vid, Name: newName };
+                            WSConn.sendMsg(C2L.C2L_VERSION_CHANGE_NAME, data);
+                        }
                     },
                     onDel: function (e, item, index) {
-                        _this.VueEditList.versions.splice(index, 1);
+                        Common.Warning(null, e, function () {
+                            var data = { Vid: item.Vid };
+                            WSConn.sendMsg(C2L.C2L_VERSION_DELETE, data);
+                        }, '删除后不可恢复，确认删除吗？');
                     },
                     onEdit: function (e, item) {
                         _this.ShowVersionDetail(item);
                     },
                     onClose: function () {
                         _this.HideVersionList();
+                        _this.HideVersionDetail();
                         ProcessPanel.HideMenu();
                     },
                 }
@@ -145,7 +219,10 @@ var VersionManagerClass = /** @class */ (function () {
             plan.find('.date').unbind().click(function () {
                 var _this = this;
                 DateTime.Open(this, $(this).val(), function (date) {
+                    // console.log("[debug]","DateTime:",date)
                     $(_this).val(date);
+                    // $(this).trigger('change')
+                    $(_this).click(); //change无法触发,只好用click
                 });
             });
         };
@@ -163,8 +240,13 @@ var VersionManagerClass = /** @class */ (function () {
                  }, */
                 methods: {
                     publishName: _this.GetPublishName.bind(_this),
-                    onDateClick: function (genre) {
-                        //TODO: 
+                    onDateClick: function (e, item) {
+                        // console.log("[info]","onClick Date",e.target.value)
+                        if (e.target.value && item.DateLine != e.target.value) {
+                            // console.log("[info]","onClick Date send",e.target.value)
+                            var data = { Vid: item.Vid, Genre: item.Genre, DateLine: e.target.value };
+                            WSConn.sendMsg(C2L.C2L_VERSION_CHANGE_PUBLISH, data);
+                        }
                     },
                     onClose: function () {
                         _this.HideVersionDetail();
@@ -195,11 +277,11 @@ var VersionManagerClass = /** @class */ (function () {
         this.HideVersionDetail();
     };
     /**
-     * 格式化版本号   只能是 数字和. 例如 1.3   4.5.6
+     * 格式化版本号   只能是 数字和`.` 例如 1.3   4.5.6
      * @param ori
      */
     VersionManagerClass.prototype.FormatVer = function (ori) {
-        return ori.replace(/[^0-9\.]/g, '');
+        return ori.replace(/[^0-9\.]/g, '').trim();
     };
     VersionManagerClass.prototype.GetPublishName = function (genre) {
         return this.PublishGenreNameList[genre - 1];

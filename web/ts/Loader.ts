@@ -86,10 +86,14 @@ var Loader = {
     },
     //调试 初始化
     InitForDebug: function () {
-        //$.cookie("set",{duration:0,name:'Account',value:'wangy'})
-        //$.cookie("set",{duration:0,name:'Verify',value:'cfd4ce79ef36c539b63d0e54143abf2d'})
-        $.cookie("set", { duration: 0, name: 'Account', value: 'fengjw' })
-        $.cookie("set", { duration: 0, name: 'Verify', value: 'f96f8007f6566300c90cbc09555cf17b' })
+        console.log("[debug]",window.location.href.toLowerCase())
+        if(window.location.href.toLowerCase().indexOf('debugacc=wangy')>-1){
+            $.cookie("set",{duration:0,name:'Account',value:'wangy'})
+            $.cookie("set",{duration:0,name:'Verify',value:'cfd4ce79ef36c539b63d0e54143abf2d'})
+        }else{
+            $.cookie("set", { duration: 0, name: 'Account', value: 'fengjw' })
+            $.cookie("set", { duration: 0, name: 'Verify', value: 'f96f8007f6566300c90cbc09555cf17b' })
+        }
     },
     //脚本加载完毕
     ScriptComplete: function () {
