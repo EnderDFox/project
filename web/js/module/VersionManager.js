@@ -206,9 +206,9 @@ var VersionManagerClass = /** @class */ (function () {
     VersionManagerClass.prototype.ShowVersionDetail = function (arg) {
         var _this = this;
         this.HideVersionDetail(false);
-        var versionList;
+        var version;
         if (typeof (arg) == 'number') {
-            versionList = this.VueEditList.versions.filter(function (item) {
+            version = this.VueEditList.versions.filter(function (item) {
                 if (item.Vid == arg) {
                     return true;
                 }
@@ -216,7 +216,7 @@ var VersionManagerClass = /** @class */ (function () {
             })[0];
         }
         else {
-            versionList = arg;
+            version = arg;
         }
         //
         var _show = function () {
@@ -252,7 +252,7 @@ var VersionManagerClass = /** @class */ (function () {
             _this.VueEditDetail = new Vue({
                 template: txt,
                 data: {
-                    versionList: versionList
+                    version: version
                 },
                 /*  filters: {
                      publishName:function(){

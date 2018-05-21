@@ -244,19 +244,19 @@ class VersionManagerClass {
         }
     }
     //版本编辑内容
-    VueEditDetail: CombinedVueInstance1<{ versionList: VersionSingle }>
+    VueEditDetail: CombinedVueInstance1<{ version: VersionSingle }>
     ShowVersionDetail(arg: number | VersionSingle) {
         this.HideVersionDetail(false)
-        var versionList: VersionSingle
+        var version: VersionSingle
         if (typeof (arg) == 'number') {
-            versionList = this.VueEditList.versions.filter((item) => {
+            version = this.VueEditList.versions.filter((item) => {
                 if (item.Vid == arg as number) {
                     return true
                 }
                 return false
             })[0]
         } else {
-            versionList = arg as VersionSingle
+            version = arg as VersionSingle
         }
         //
         var _show = () => {
@@ -291,7 +291,7 @@ class VersionManagerClass {
             this.VueEditDetail = new Vue({
                 template: txt,
                 data: {
-                    versionList: versionList
+                    version: version
                 },
                 /*  filters: {
                      publishName:function(){

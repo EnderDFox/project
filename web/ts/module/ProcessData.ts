@@ -166,6 +166,7 @@ class ProcessDataClass {
 				}
 				v.PublishList.sort((a,b):number=>{
 					if(a.Genre<b.Genre) return -1
+					if(a.Genre>b.Genre) return 1
 					return 0
 				})
 			}

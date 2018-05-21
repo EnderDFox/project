@@ -153,6 +153,8 @@ var ProcessDataClass = /** @class */ (function () {
                 v.PublishList.sort(function (a, b) {
                     if (a.Genre < b.Genre)
                         return -1;
+                    if (a.Genre > b.Genre)
+                        return 1;
                     return 0;
                 });
             }
