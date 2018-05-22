@@ -73,10 +73,17 @@ var VersionManagerClass = /** @class */ (function () {
             for (var i = 0; i < len; i++) {
                 var p = v.PublishList[i];
                 if (p.Genre == data.Genre) {
+                    var DateLineOld = p.DateLine.toString();
                     p.DateLine = data.DateLine;
                     if (p.DateLine) {
                         ProcessData.VersionDateLineMap[p.DateLine] = p;
                         ProcessManager.PublishEdit(p);
+                    }
+                    else {
+                        if (DateLineOld) {
+                            delete ProcessData.VersionDateLineMap[DateLineOld];
+                            ProcessManager.PublishDelete(DateLineOld);
+                        }
                     }
                     break;
                 }
@@ -281,6 +288,10 @@ var VersionManagerClass = /** @class */ (function () {
                             var data = { Vid: item.Vid, Genre: item.Genre, DateLine: e.target.value };
                             WSConn.sendMsg(C2L.C2L_VERSION_CHANGE_PUBLISH, data);
                         }
+                    },
+                    onDelete: function (item) {
+                        var data = { Vid: item.Vid, Genre: item.Genre, DateLine: '' };
+                        WSConn.sendMsg(C2L.C2L_VERSION_CHANGE_PUBLISH, data);
                     },
                     onClose: function () {
                         _this.HideVersionDetail();

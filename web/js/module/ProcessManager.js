@@ -290,17 +290,17 @@ var ProcessManager = {
 		// ProcessData.VersionDateLineMap[data.DateLine] = data		//VersionManager中设置了 这里不需要了
 	},
 	/**
-	 * @data PublishSingle 
+	 * @dateLine PublishSingle.DateLine
 	 */
-	PublishDelete:function(data){
+	PublishDelete:function(dateLine){
 		$.each(ProcessPanel.DateList.list,function(k,v){
-			if(data.DateLine != v.s){
+			if(dateLine != v.s){
 				return true
 			}
 			$('#content .title td:eq('+(k+3)+')').find('.stroke').remove()
 			return false
 		})
 		//数据变化
-		delete ProcessData.VersionDateLineMap[data.DateLine]
+		// delete ProcessData.VersionDateLineMap[data.DateLine]
 	}
 }

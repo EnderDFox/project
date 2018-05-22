@@ -81,7 +81,7 @@
 .editMode .version_edit{width:50px;}
 .editMode .num{float: left;margin-left:15px;font-size:14px;}
 .editMode div .tpl_label{float: left; margin-left:15px;font-size:14px;}
-.editMode select{min-height:30px;height: 30px; margin-left: 6px;width:200px}
+.editMode select{min-height:30px;height: 30px; margin-left: 6px;width:195px}
 .editMode .tpl_li{margin-top: 4px;}
 .editMode .div_tpl_edit{float: left;margin-left: 6px;}
 .editMode .tpl_edit{width:50px;}
@@ -134,6 +134,22 @@
   position: absolute;
   margin-top: 40px;
   margin-left: 0px;
+}
+.editVersionDetail .miniDelete{
+  position: absolute;
+  margin-top: 8px;
+  margin-left: 108px;
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  line-height: 12px;
+  font-size: 12px;
+  /* font-family: Arial, Helvetica, sans-serif; */
+  /* font-weight: normal; */
+  color: #FFFFFF;
+  background-color: rgba(0, 0, 0, 0.612);
+  padding: 0px 0px 0px 0px;
+  z-index:100;
 }
 .editVersionDetail .name{
   text-align: center;

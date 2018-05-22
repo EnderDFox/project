@@ -141,7 +141,7 @@ declare class ProcessManagerClass {
     RegisterFunc(): void
     WorkEdit(data: WorkSingle): void
     PublishEdit(publish:PublishSingle):void
-    PublishDelete(publish:PublishSingle):void
+    PublishDelete(dateLine:string):void
 }
 declare var ProcessManager: ProcessManagerClass
 /** */

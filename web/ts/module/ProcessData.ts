@@ -154,6 +154,10 @@ class ProcessDataClass {
 					if (!p) {
 						p = { Genre: genre, DateLine: '' }
 						v.PublishList.push(p)
+					} else {
+						if (p.DateLine == '0000-00-00') {
+							p.DateLine = ''
+						}
 					}
 					p.Vid = v.Vid//后端传来的都没有vid, 需要自己加上
 					if (p.DateLine) {

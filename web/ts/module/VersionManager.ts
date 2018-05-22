@@ -117,10 +117,16 @@ class VersionManagerClass {
             for (var i = 0; i < len; i++) {
                 var p = v.PublishList[i]
                 if (p.Genre == data.Genre) {
+                    var DateLineOld = p.DateLine.toString()
                     p.DateLine = data.DateLine
                     if (p.DateLine) {
                         ProcessData.VersionDateLineMap[p.DateLine] = p
                         ProcessManager.PublishEdit(p)
+                    } else {
+                        if(DateLineOld){
+                            delete ProcessData.VersionDateLineMap[DateLineOld]
+                            ProcessManager.PublishDelete(DateLineOld)
+                        }
                     }
                     break
                 }
@@ -158,7 +164,7 @@ class VersionManagerClass {
     /** 
      * @showVid 默认打开的Vid
      */
-    ShowVersionList(showVid=0) {
+    ShowVersionList(showVid = 0) {
         this.HideVersionList(false)
         ProcessPanel.HideMenu()
         //真正执行显示面板的函数
@@ -168,12 +174,12 @@ class VersionManagerClass {
             if (uiEditMode.isShow()) {
                 pageX = uiEditMode.x() + uiEditMode.width() + 5
                 pageY = uiEditMode.y()
-            }else{
+            } else {
                 pageX = 160
                 pageY = 150
             }
             var plan = $(this.VueVersionList.$el).xy(pageX, pageY).show().adjust(-5)
-            if(showVid){
+            if (showVid) {
                 this.ShowVersionDetail(showVid)
             }
         }
@@ -321,6 +327,10 @@ class VersionManagerClass {
                             WSConn.sendMsg(C2L.C2L_VERSION_CHANGE_PUBLISH, data)
                         }
                     },
+                    onDelete: (item: PublishSingle) => {
+                        var data: C2L_VersionChangePublish = { Vid: item.Vid, Genre: item.Genre, DateLine: '' }
+                        WSConn.sendMsg(C2L.C2L_VERSION_CHANGE_PUBLISH, data)
+                    },
                     onClose: () => {
                         this.HideVersionDetail()
                         // ProcessPanel.HideMenu()
@@ -348,11 +358,11 @@ class VersionManagerClass {
         this.HideVersionDetail()
     }
     /**根据日期决定打开的面板 */
-    ShowVersionByDateLine(dateLine:string){
-        var p:PublishSingle = ProcessData.VersionDateLineMap[dateLine]
-        if(p){
+    ShowVersionByDateLine(dateLine: string) {
+        var p: PublishSingle = ProcessData.VersionDateLineMap[dateLine]
+        if (p) {
             this.ShowVersionList(p.Vid)
-        }else{
+        } else {
             this.ShowVersionList()
         }
     }
