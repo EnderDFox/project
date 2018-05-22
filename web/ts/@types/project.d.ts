@@ -97,16 +97,16 @@ interface PublishSingle {
     DateLine?: string
 }
 
-interface ProcessFilterPack{
-    BeginDate:string
-    EndDate:string
-    ModeName:string
-    Vid:number
+interface ProcessFilterPack {
+    BeginDate: string
+    EndDate: string
+    ModeName: string
+    Vid: number
     // Ver:string
-    ModeStatus:number
-    LinkStatus:number
-    LinkName:string
-    LinkUserName:string
+    ModeStatus: number
+    LinkStatus: number
+    LinkName: string
+    LinkUserName: string
 
 }
 
