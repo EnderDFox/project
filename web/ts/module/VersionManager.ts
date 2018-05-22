@@ -120,6 +120,7 @@ class VersionManagerClass {
                     p.DateLine = data.DateLine
                     if (p.DateLine) {
                         ProcessData.VersionDateLineMap[p.DateLine] = p
+                        ProcessManager.PublishEdit(p)
                     }
                     break
                 }
@@ -351,6 +352,7 @@ class VersionManagerClass {
     GetPublishName(genre: number): string {
         return this.PublishGenreNameList[genre - 1]
     }
+    //
     GetVersionVer(vid: number): string {
         var versionVer = ''
         if (vid) {

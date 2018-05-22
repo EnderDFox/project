@@ -76,6 +76,7 @@ var VersionManagerClass = /** @class */ (function () {
                     p.DateLine = data.DateLine;
                     if (p.DateLine) {
                         ProcessData.VersionDateLineMap[p.DateLine] = p;
+                        ProcessManager.PublishEdit(p);
                     }
                     break;
                 }
@@ -312,6 +313,7 @@ var VersionManagerClass = /** @class */ (function () {
     VersionManagerClass.prototype.GetPublishName = function (genre) {
         return this.PublishGenreNameList[genre - 1];
     };
+    //
     VersionManagerClass.prototype.GetVersionVer = function (vid) {
         var versionVer = '';
         if (vid) {

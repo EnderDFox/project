@@ -273,7 +273,9 @@ var ProcessManager = {
 			$('#content tr[lid="'+data.Lid+'"]').remove()
 		}
 	},
-	//封版本
+	/**
+	 * @data PublishSingle 
+	 */
 	PublishEdit:function(data){
 		$.each(ProcessPanel.DateList.list,function(k,v){
 			if(data.DateLine != v.s){
@@ -285,9 +287,11 @@ var ProcessManager = {
 			return false
 		})
 		//数据变化
-		ProcessData.VerMap[data.DateLine] = data
+		// ProcessData.VersionDateLineMap[data.DateLine] = data		//VersionManager中设置了 这里不需要了
 	},
-	//删版本
+	/**
+	 * @data PublishSingle 
+	 */
 	PublishDelete:function(data){
 		$.each(ProcessPanel.DateList.list,function(k,v){
 			if(data.DateLine != v.s){
@@ -297,6 +301,6 @@ var ProcessManager = {
 			return false
 		})
 		//数据变化
-		delete ProcessData.VerMap[data.DateLine]
+		delete ProcessData.VersionDateLineMap[data.DateLine]
 	}
 }

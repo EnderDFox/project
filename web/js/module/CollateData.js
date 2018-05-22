@@ -14,14 +14,10 @@ var CollateData = {
 	ExtraMap:{},
 	//时间补充内容
 	DateExtraMap:{},
-	//版本内容
-	VerMap:{},
 	//状态描述
 	StatusList:[{'Info':'持续','Tag':''},{'Info':'延期','Tag':'延'},{'Info':'等待','Tag':'待'},{'Info':'完成','Tag':'完'},{'Info':'休息','Tag':'休'},{'Info':'优化','Tag':'优'}],
 	//检查描述
 	InspectList:['未知','完成','持续','未完成'],
-	//版本描述
-	VerList:['','版本开始','版本完结','版本封存','版本延期','版本发布','版本总结','版本删除'],
 	//数据初始化
 	Init:function(data){
 		this.WorkMap = {}
@@ -31,7 +27,6 @@ var CollateData = {
 		this.ExtraMap = {}
 		this.DateUserMap = {}
 		this.DateExtraMap = {}
-		this.VerMap = {}
 		//功能内容
 		$(data.ModeList).each(function(){
 			CollateData.ModeMap[this.Mid] = this
@@ -65,10 +60,6 @@ var CollateData = {
 				CollateData.DateExtraMap[this.Date][this.Uid] = []
 			}
 			CollateData.DateExtraMap[this.Date][this.Uid].push(this)
-		})
-		//版本
-		$(data.VerList).each(function(k,v){
-			CollateData.VerMap[v.DateLine] = v
 		})
 	}
 }

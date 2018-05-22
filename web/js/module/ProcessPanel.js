@@ -125,13 +125,13 @@ var ProcessPanel = {
 			}
 			ProcessPanel.ShowMenuPub(this, e)
 		}).delegate('td', 'mouseenter', function (e) {
-			/* e.stopPropagation()
+			e.stopPropagation()
 			if($(this).find('.stroke').length == 1){
 				var top = $(this).offset().top - 7
 				var left = $(this).offset().left + $(this).width() + 8
 				var genre = $(this).find('.stroke').attr('genre')
-				$('#workTips').css({top:top,left:left}).show().adjust(-5).html('<div>'+CollateData.VerList[genre]+'</div>')
-			} */
+				$('#workTips').css({top:top,left:left}).show().adjust(-5).html('<div>版本'+VersionManager.GetPublishName(genre)+'</div>')
+			}
 		}).delegate('td', 'mouseleave', function (e) {
 			e.stopPropagation()
 			$('#workTips').hide()
@@ -164,8 +164,9 @@ var ProcessPanel = {
 				html += '<td>'
 			}
 			html += '<div class="info">' + info.d + '</div>'
-			if (ProcessData.VerMap[info.s]) {
-				html += '<div class="stroke sk_' + ProcessData.VerMap[info.s].Genre + '" genre="' + ProcessData.VerMap[info.s].Genre + '"></div>'
+			if (ProcessData.VersionDateLineMap[info.s]) {
+				var _genre = ProcessData.VersionDateLineMap[info.s].Genre
+				html += '<div class="stroke sk_' + _genre + '" genre="' + _genre + '"></div>'
 			}
 			html += '</td>'
 		})

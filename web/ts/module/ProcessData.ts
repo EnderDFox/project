@@ -10,8 +10,6 @@ class ProcessDataClass {
 	ModeMap: { [key: number]: ModeSingle }
 	//评分内容
 	ScoreMap: { [key: number]: ScoreSingle }
-	//版本内容
-	VerMap: { [key: number]: VerSingle }	//key: DateLine
 	//版本和版本时间
 	VersionList: VersionSingle[]
 	VersionMap: { [key: number]: VersionSingle }	//key: Vid
@@ -19,14 +17,13 @@ class ProcessDataClass {
 	//流程工作
 	LinkWorkMap: { [key: number]: { [key: string]: WorkSingle } }
 	//数据初始化
-	Init(data: { Project: ProjectSingle, ModeList: ModeSingle[], LinkList: LinkSingle[], WorkList: WorkSingle[], ScoreList: ScoreSingle[], VerList: VerSingle[], VersionList: VersionSingle[], }) {
+	Init(data: { Project: ProjectSingle, ModeList: ModeSingle[], LinkList: LinkSingle[], WorkList: WorkSingle[], ScoreList: ScoreSingle[], VersionList: VersionSingle[], }) {
 		//初始化
 		this.Project = data.Project
 		this.WorkMap = {}
 		this.LinkMap = {}
 		this.ModeMap = {}
 		this.ScoreMap = {}
-		this.VerMap = {}
 		this.LinkWorkMap = {}
 		//过滤可用流程 key:LinkSingle.Mid	item:LinkSingle
 		var checkMode: { [key: number]: number } = {}
@@ -126,10 +123,6 @@ class ProcessDataClass {
 			} */
 			this.ScoreMap[v.Wid] = v
 			return true
-		})
-		//版本
-		$.each(data.VerList, (k, v: VerSingle) => {
-			this.VerMap[v.DateLine] = v
 		})
 		//
 		this.ParseVersionData(data.VersionList)

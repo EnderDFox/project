@@ -11,7 +11,6 @@ var ProcessDataClass = /** @class */ (function () {
         this.LinkMap = {};
         this.ModeMap = {};
         this.ScoreMap = {};
-        this.VerMap = {};
         this.LinkWorkMap = {};
         //过滤可用流程 key:LinkSingle.Mid	item:LinkSingle
         var checkMode = {};
@@ -111,10 +110,6 @@ var ProcessDataClass = /** @class */ (function () {
             } */
             _this.ScoreMap[v.Wid] = v;
             return true;
-        });
-        //版本
-        $.each(data.VerList, function (k, v) {
-            _this.VerMap[v.DateLine] = v;
         });
         //
         this.ParseVersionData(data.VersionList);
