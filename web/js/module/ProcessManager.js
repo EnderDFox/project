@@ -121,7 +121,7 @@ var ProcessManager = {
 			}
 			if(data.Date == grid.s){
 				grid.wid = data.Wid
-				ProcessPanel.ShowWorkGrid.call(this,grid,data)
+				ProcessPanel.ShowWorkGrid(this,grid,data)
 				/* var info = data.Tag
 				if(info == ''){
 					info = CollateData.StatusList[data.Status].Tag

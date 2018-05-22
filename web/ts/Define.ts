@@ -1,4 +1,4 @@
-//===一些枚举需要提前写
+//一些枚举需要提前写
 type int = number
 type int32 = number
 type int64 = number
@@ -7,7 +7,8 @@ type uint32 = number
 type uint64 = number
 type char = string
 
-//db.manager.department.did
+//# 数据库中的字段
+/**db.manager.department.did*/
 enum DidField {
     VERSION = 0,    //版本
     ALL = -1,       //全部
@@ -19,7 +20,7 @@ enum DidField {
     SUPERVISOR = 14, //监修
     TOOL = 16,       //工具
 }
-
+/**db.pm.publish.genre*/
 enum GenreField {
     // '开始', '完结', '封存', '延期', '发布', '总结'
     BEGIN = 1,

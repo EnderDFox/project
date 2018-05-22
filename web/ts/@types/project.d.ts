@@ -1,4 +1,8 @@
 //===data struck
+interface IXY {
+    x: number
+    y: number
+}
 
 interface UserSingle {
     Uid?: number
@@ -156,14 +160,6 @@ declare class CommondClass {
     Register(cid: number, callback: Function): void
 }
 declare var Commond: CommondClass
-
-declare class CommonClass {
-    Warning(o: any, e: Event, callback: Function, txt: string): void
-    /**添加AueDom到$dynamicDom */
-    InsertBeforeDynamicDom(newDom: HTMLElement): void
-    IsIE(): boolean
-}
-declare var Common: CommonClass
 
 declare class MainClass {
     Init(): void

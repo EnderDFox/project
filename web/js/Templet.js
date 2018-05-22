@@ -361,7 +361,8 @@ var Templet = {
 		<ul class="search"> \
 			<li> \
 				<div class="name">功能版本</div> \
-				<div class="info"><input type="text" placeholder="输入版本号" name="Vid" /></div> \
+				<!--<div class="info"><input type="text" placeholder="输入版本号" name="Vid" /></div>--> \
+				<div class="info"><input type="text" class="select" stype="Vid" readonly value="版本号" ></div> \
 			</li> \
 			<li> \
 				<div class="name">功能名称</div> \

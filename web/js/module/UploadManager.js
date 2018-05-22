@@ -610,7 +610,7 @@ var UploadManagerClass = /** @class */ (function () {
     UploadManagerClass.prototype.ShowImageShowcase = function (images, currPage) {
         var _this = this;
         if (this.vueImageShowcase == null) {
-            Loader.LoadVueTemplate('common/' + 'ImageShowcase', function (txt) {
+            Loader.LoadVueTemplate(Common.AuePath + 'ImageShowcase', function (txt) {
                 _this.vueImageShowcase = new Vue({
                     template: txt,
                     data: {

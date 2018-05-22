@@ -77,7 +77,7 @@ var ProcessDataClass = /** @class */ (function () {
             if (v.Ver.indexOf(ProcessFilter.Pack.Ver) == -1) {
                 return true
             } */
-            if (ProcessFilter.Pack.Vid && ProcessFilter.Pack.Vid == v.Vid) {
+            if (ProcessFilter.Pack.Vid && ProcessFilter.Pack.Vid != v.Vid) {
                 return true;
             }
             //功能名查询

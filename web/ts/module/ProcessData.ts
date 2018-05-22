@@ -92,7 +92,7 @@ class ProcessDataClass {
 			if (v.Ver.indexOf(ProcessFilter.Pack.Ver) == -1) {
 				return true
 			} */
-			if(ProcessFilter.Pack.Vid && ProcessFilter.Pack.Vid==v.Vid){
+			if (ProcessFilter.Pack.Vid && ProcessFilter.Pack.Vid != v.Vid) {
 				return true
 			}
 			//功能名查询
@@ -136,7 +136,7 @@ class ProcessDataClass {
 	}
 	//处理版本数据
 	ParseVersionData(versionList: VersionSingle[]) {
-		if(versionList==null){
+		if (versionList == null) {
 			versionList = []//没数据时 后端会传空数据过来
 		}
 		this.VersionList = []
@@ -167,9 +167,9 @@ class ProcessDataClass {
 						this.VersionDateLineMap[p.DateLine] = p
 					}
 				}
-				v.PublishList.sort((a,b):number=>{
-					if(a.Genre<b.Genre) return -1
-					if(a.Genre>b.Genre) return 1
+				v.PublishList.sort((a, b): number => {
+					if (a.Genre < b.Genre) return -1
+					if (a.Genre > b.Genre) return 1
 					return 0
 				})
 			}

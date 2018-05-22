@@ -263,7 +263,7 @@ var ProcessPanel = {
 			if (linkWork && linkWork[grid.s]) {
 				grid.wid = linkWork[grid.s].Wid
 				var work = ProcessData.WorkMap[grid.wid]
-				ProcessPanel.ShowWorkGrid.call(this, grid, work)
+				ProcessPanel.ShowWorkGrid(this, grid, work)
 			}
 			//绑定grid
 			$.data(this, 'grid', grid)
@@ -272,7 +272,7 @@ var ProcessPanel = {
 		$(e).data('lid', lid)
 	},
 	//显示一个work格子内容
-	ShowWorkGrid: function (grid, work) {
+	ShowWorkGrid: function (dom,grid, work) {
 		var info = work.Tag
 		if (info == '') {
 			info = CollateData.StatusList[work.Status].Tag
@@ -292,7 +292,7 @@ var ProcessPanel = {
 			info += '<div class="arrow-right-bottom"></div>'
 		}
 		//
-		$(this).attr({ 'class': 'ss_' + work.Status }).html(info)
+		$(dom).attr({ 'class': 'ss_' + work.Status }).html(info)
 	},
 	//功能菜单
 	ShowMenuMode: function (o, e) {
@@ -346,6 +346,7 @@ var ProcessPanel = {
 	},
 	//编辑功能
 	ShowEditMode: function (o, e, cid) {
+		ProcessFilter.HideFilter()
 		TemplateManager.Hide();
 		VersionManager.Hide()
 		var mid = $(o).attr('mid')

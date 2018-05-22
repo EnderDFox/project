@@ -90,15 +90,19 @@ var VersionManagerClass = /** @class */ (function () {
                     el: domId,
                     template: txt,
                     data: {
-                        versions: ProcessData.VersionList,
+                        versions: [],
                     }
                 });
-                if (callback != null) {
-                    callback(_this.VueSelect.$el);
-                }
+                _this.VueSelect.versions = _this.VersionList;
+                _this.VueSelect.$nextTick(function () {
+                    if (callback != null) {
+                        callback(_this.VueSelect.$el);
+                    }
+                });
             });
         }
         else {
+            this.VueSelect.versions = this.VersionList;
             if (callback != null) {
                 callback(this.VueSelect.$el);
             }
@@ -317,6 +321,9 @@ var VersionManagerClass = /** @class */ (function () {
             }
         }
         return versionVer;
+    };
+    VersionManagerClass.prototype.GetVersionFullname = function (version) {
+        return this.GetVersionVer(version.Vid) + (version.Name == '' ? '' : '-' + version.Name);
     };
     return VersionManagerClass;
 }());

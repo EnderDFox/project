@@ -127,7 +127,7 @@ class VersionManagerClass {
         }
     }
     //选择器
-    VueSelect: CombinedVueInstance1<{}>
+    VueSelect: CombinedVueInstance1<{ versions: VersionSingle[] }>
     BindSelect(domId: string, callback: Function) {
         if (this.VueSelect == null) {
             Loader.LoadVueTemplate(this.AuePath + "VersionSelect", (txt: string) => {
@@ -135,14 +135,18 @@ class VersionManagerClass {
                     el: domId,
                     template: txt,
                     data: {
-                        versions: ProcessData.VersionList,
+                        versions: [],
                     }
                 })
-                if (callback != null) {
-                    callback(this.VueSelect.$el)
-                }
+                this.VueSelect.versions = this.VersionList
+                this.VueSelect.$nextTick(() => {
+                    if (callback != null) {
+                        callback(this.VueSelect.$el)
+                    }
+                })
             })
         } else {
+            this.VueSelect.versions = this.VersionList
             if (callback != null) {
                 callback(this.VueSelect.$el)
             }
@@ -347,15 +351,18 @@ class VersionManagerClass {
     GetPublishName(genre: number): string {
         return this.PublishGenreNameList[genre - 1]
     }
-    GetVersionVer(vid:number):string{
+    GetVersionVer(vid: number): string {
         var versionVer = ''
-		if(vid){
-			var versionSingle = ProcessData.VersionMap[vid]
-			if(versionSingle){
-				versionVer = versionSingle.Ver
-			}
-        } 
+        if (vid) {
+            var versionSingle = ProcessData.VersionMap[vid]
+            if (versionSingle) {
+                versionVer = versionSingle.Ver
+            }
+        }
         return versionVer
+    }
+    GetVersionFullname(version: VersionSingle): string {
+        return this.GetVersionVer(version.Vid) + (version.Name == '' ? '' : '-' + version.Name);
     }
 }
 var VersionManager = new VersionManagerClass()

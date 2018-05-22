@@ -1,12 +1,4 @@
-//======interface
-declare interface IXY {
-    x: number
-    y: number
-}
 //======
-declare class ArrayUtil {
-    static IndexOfAttr(arr: any[], key: string, value: any): number
-}
 //======原生扩展 js代码位于Common.js
 //------Array扩展
 interface Array<T> {

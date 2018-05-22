@@ -307,7 +307,7 @@ class UploadManagerClass {
                         onDeleteFile: (index: number) => {
                             this.DoDeleteFile(index)
                         },
-                        onSubmit: (e: Event) => {
+                        onSubmit: (e: MouseEvent) => {
                             var _doSubmit = () => {
                                 //计算删除 (先删除再增加, 如果先增加, 后端会超过最大数量的)
                                 var deleteCount = this.deleteFids.length
@@ -593,7 +593,7 @@ class UploadManagerClass {
     currImageEle: JQuery<HTMLElement>
     ShowImageShowcase(images: ImageShowcaseImage[], currPage: number) {
         if (this.vueImageShowcase == null) {
-            Loader.LoadVueTemplate('common/' + 'ImageShowcase', (txt) => {
+            Loader.LoadVueTemplate(Common.AuePath + 'ImageShowcase', (txt) => {
                 this.vueImageShowcase = new Vue({
                     template: txt,
                     data: {

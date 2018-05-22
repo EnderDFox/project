@@ -1,4 +1,4 @@
-//弹出层的管理器
+/**弹出层的管理器*/
 var PopManagerClass = /** @class */ (function () {
     function PopManagerClass() {
         this.mouseOutList = [];
@@ -15,7 +15,7 @@ var PopManagerClass = /** @class */ (function () {
             }
         });
     };
-    //注册外部点击事件
+    /**注册外部点击事件*/
     PopManagerClass.prototype.RegisterMouseOut = function (selector, callback) {
         var _this = this;
         var oldIndxe = ArrayUtil.IndexOfAttr(this.mouseOutList, "selector", selector);
@@ -26,7 +26,7 @@ var PopManagerClass = /** @class */ (function () {
             }, 1);
         }
     };
-    //注销外部点击事件
+    /**注销外部点击事件*/
     PopManagerClass.prototype.CancelMouseOut = function (selector) {
         var oldIndxe = ArrayUtil.IndexOfAttr(this.mouseOutList, "selector", selector);
         if (oldIndxe > -1) {
@@ -35,5 +35,6 @@ var PopManagerClass = /** @class */ (function () {
     };
     return PopManagerClass;
 }());
+/**弹出层的管理器 实例*/
 var PopManager = new PopManagerClass();
 //# sourceMappingURL=PopManager.js.map

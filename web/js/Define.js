@@ -1,4 +1,5 @@
-//db.manager.department.did
+//# 数据库中的字段
+/**db.manager.department.did*/
 var DidField;
 (function (DidField) {
     DidField[DidField["VERSION"] = 0] = "VERSION";
@@ -11,6 +12,7 @@ var DidField;
     DidField[DidField["SUPERVISOR"] = 14] = "SUPERVISOR";
     DidField[DidField["TOOL"] = 16] = "TOOL";
 })(DidField || (DidField = {}));
+/**db.pm.publish.genre*/
 var GenreField;
 (function (GenreField) {
     // '开始', '完结', '封存', '延期', '发布', '总结'
