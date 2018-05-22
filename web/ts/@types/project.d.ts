@@ -111,6 +111,7 @@ interface ProcessFilterPack {
 }
 
 //===class and instance
+/** */
 declare class UserClass {
     Did: DidField
     Uid: number
@@ -118,7 +119,7 @@ declare class UserClass {
     RegisterFunc(): void
 }
 declare var User: UserClass
-
+/** */
 declare class DataClass {
     DepartmentLoop: DepartmentInfo[]
     /**
@@ -130,12 +131,12 @@ declare class DataClass {
     GetUser(uid: number): UserSingle
 }
 declare var Data: DataClass;
-
+/** */
 declare class ProfileManagerClass {
     RegisterFunc(): void
 }
 declare var ProfileManager: ProfileManagerClass
-
+/** */
 declare class ProcessManagerClass {
     RegisterFunc(): void
     WorkEdit(data: WorkSingle): void
@@ -143,41 +144,43 @@ declare class ProcessManagerClass {
     PublishDelete(publish:PublishSingle):void
 }
 declare var ProcessManager: ProcessManagerClass
-
+/** */
 declare class CollateManagerClass {
     RegisterFunc(): void
 }
 declare var CollateManager: CollateManagerClass
+/** */
 declare class FileManagerClass {
     RegisterFunc(): void
 }
 declare var FileManager: FileManagerClass
+/** */
 declare class NoticeManagerClass {
     RegisterFunc(): void
 }
 declare var NoticeManager: NoticeManagerClass
-
+/** */
 declare class CommondClass {
     Execute(cid: number, data: any): void
     Register(cid: number, callback: Function): void
 }
 declare var Commond: CommondClass
-
+/** */
 declare class MainClass {
     Init(): void
 }
 declare var Main: MainClass
-
+/** */
 declare class ProcessPanelClass {
     HideMenu(): void
 }
 declare var ProcessPanel: ProcessPanelClass
-
+/** */
 declare class ProjectNavClass {
     FilterDid: DidField
 }
 declare var ProjectNav: ProjectNavClass
-
+/** */
 declare class ProcessFilterClass {
     Pack: ProcessFilterPack
 }
