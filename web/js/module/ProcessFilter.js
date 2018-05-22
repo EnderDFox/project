@@ -1,7 +1,7 @@
 //进度筛选
 var ProcessFilter = {
 	//数据包
-	Pack:{'BeginDate':'','EndDate':'','ModeName':'','Ver':'','ModeStatus':0,'LinkStatus':0,'LinkName':'','LinkUserName':''},
+	Pack:{'BeginDate':'','EndDate':'','ModeName':'','Vid':'','ModeStatus':0,'LinkStatus':0,'LinkName':'','LinkUserName':''},
 	//初始化
 	Init:function(){
 		//数据初始
@@ -16,7 +16,7 @@ var ProcessFilter = {
 		this.Pack.BeginDate = Common.GetDate(-7)
 		this.Pack.EndDate = Common.GetDate(31)
 		this.Pack.ModeName = ''
-		this.Pack.Ver = ''
+		this.Pack.Vid = ''
 		this.Pack.ModeStatus = 0
 		this.Pack.LinkStatus = 0
 		this.Pack.LinkName = ''

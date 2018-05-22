@@ -308,6 +308,16 @@ var VersionManagerClass = /** @class */ (function () {
     VersionManagerClass.prototype.GetPublishName = function (genre) {
         return this.PublishGenreNameList[genre - 1];
     };
+    VersionManagerClass.prototype.GetVersionVer = function (vid) {
+        var versionVer = '';
+        if (vid) {
+            var versionSingle = ProcessData.VersionMap[vid];
+            if (versionSingle) {
+                versionVer = versionSingle.Ver;
+            }
+        }
+        return versionVer;
+    };
     return VersionManagerClass;
 }());
 var VersionManager = new VersionManagerClass();

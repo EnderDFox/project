@@ -20,7 +20,7 @@ input:focus,textarea:focus,button:focus{outline:none;}
 .commonNav .user{width:5%;display:flex;display:-webkit-flex;margin-left:10px;}
 .commonNav .user div{margin-left:5px;}
 .commonNav .user .umsgs{color:#ff0000;font-weight:bold;cursor:pointer;}
-.commonNav .head{text-align:center;width:15%;justify-content:center;-webkit-justify-content:center;display:flex;display:-webkit-flex;}
+.commonNav .head{text-align:center;width:20%;justify-content:center;-webkit-justify-content:center;display:flex;display:-webkit-flex;}
 .commonNav .head .on,.commonNav .head li:hover{background:#3da8f5;color:#fff;font-size:16px;font-weight:bold;}
 .commonNav .body{text-align:center;width:60%;justify-content:center;-webkit-justify-content:center;display:flex;display:-webkit-flex;}
 .commonNav .foot{width:20%;justify-content:center;-webkit-justify-content:center;display:flex;display:-webkit-flex;}

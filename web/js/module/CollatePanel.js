@@ -124,7 +124,7 @@ var CollatePanel = {
 		var html = ''
 		var link = CollateData.LinkMap[w.Lid]
 		html+= '<li wid="'+w.Wid+'">'
-		html+= '<span class="check_'+w.Inspect+'">'+CollateData.ModeMap[link.Mid].Ver+CollateData.ModeMap[link.Mid].Name+'-'+link.Name+'</span>'
+		html+= '<span class="check_'+w.Inspect+'">'+VersionManager.GetVersionVer(CollateData.ModeMap[link.Mid].Vid)+CollateData.ModeMap[link.Mid].Name+'-'+link.Name+'</span>'
 		html+= '<span class="special">'
 		if(w.MinNum > 0 || w.MaxNum > 0){
 			html+= '（'+w.MinNum+'/'+w.MaxNum+'）'

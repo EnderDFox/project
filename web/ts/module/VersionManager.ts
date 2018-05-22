@@ -347,5 +347,15 @@ class VersionManagerClass {
     GetPublishName(genre: number): string {
         return this.PublishGenreNameList[genre - 1]
     }
+    GetVersionVer(vid:number):string{
+        var versionVer = ''
+		if(vid){
+			var versionSingle = ProcessData.VersionMap[vid]
+			if(versionSingle){
+				versionVer = versionSingle.Ver
+			}
+        } 
+        return versionVer
+    }
 }
 var VersionManager = new VersionManagerClass()

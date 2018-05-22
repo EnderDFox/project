@@ -214,7 +214,7 @@ var ProcessPanel = {
 			return html
 		}
 		html += '<tr> \
-					<td class="mode bg_'+ mode.Color + '" mid="' + mode.Mid + '">' + mode.Ver + (mode.Name == '' ? '空' : mode.Name) + '</td> \
+					<td class="mode bg_'+ mode.Color + '" mid="' + mode.Mid + '">' + VersionManager.GetVersionVer(mode.Vid) + (mode.Name == '' ? '空' : mode.Name) + '</td> \
 					<td colspan="'+ (ProcessPanel.DateList.list.length + 2) + '">'
 		//流程
 		html += ProcessPanel.GetLinkListHtml(mode)
@@ -366,7 +366,7 @@ var ProcessPanel = {
 		//版本
 		VersionManager.BindSelect("#place_versionSelect", (dom) => {
 			if (cid == C2L.C2L_PROCESS_MODE_EDIT) {
-				$(dom).val(mode.Ver)
+				$(dom).val(mode.Vid)
 			} else {
 				$(dom).val(0)
 			}
@@ -376,7 +376,7 @@ var ProcessPanel = {
 		})
 		//确定 取消
 		plan.find('.confirm').unbind().click(function () {
-			var data = { 'Mid': mode.Mid, 'Did': Math.abs(ProjectNav.FilterDid), 'Name': $.trim(name.val()), 'Ver': plan.find("#versionSelect").val() };
+			var data = { 'Mid': mode.Mid, 'Did': Math.abs(ProjectNav.FilterDid), 'Name': $.trim(name.val()), 'Vid': parseInt(plan.find("#versionSelect").val()) };
 			if (cid == C2L.C2L_PROCESS_MODE_ADD) {
 				data["Tmid"] = parseInt(plan.find("#tplModeSelect").val())
 			}

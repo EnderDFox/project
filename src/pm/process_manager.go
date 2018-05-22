@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"encoding/json"
 
 	"github.com/gorilla/websocket"
@@ -201,7 +202,7 @@ func (this *C2L_M_PROCESS_MODE_ADD) execute(client *websocket.Conn, msg *Message
 	if user == nil {
 		return false
 	}
-	user.Process().ModeAdd(param.Mid, param.Name, param.Ver, param.Did, param.Tmid)
+	user.Process().ModeAdd(param.Mid, param.Name, param.Vid, param.Did, param.Tmid)
 	return true
 }
 
@@ -212,13 +213,15 @@ func (this *C2L_M_PROCESS_MODE_EDIT) execute(client *websocket.Conn, msg *Messag
 	param := &C2L_ProcessModeEdit{}
 	err := json.Unmarshal([]byte(msg.Param), param)
 	if err != nil {
+		log.Println(`err unmarshal:`,err)
 		return false
 	}
 	user := session.GetUser(msg.Uid)
 	if user == nil {
+		log.Println(`err user:`,err)
 		return false
 	}
-	user.Process().ModeEdit(param.Mid, param.Name, param.Ver)
+	user.Process().ModeEdit(param.Mid, param.Name, param.Vid)
 	return true
 }
 

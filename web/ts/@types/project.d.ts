@@ -27,10 +27,11 @@ interface ProjectSingle {
 }
 
 interface ModeSingle {
-    Mid?: number
+    Mid?: uint64
+    Vid?: uint64
     Ver?: string[]
     Name?: string[]
-    Color?: number
+    Color?: uint32
     LinkSort?: string[]
     Did?: DidField
     Status?: number
@@ -90,6 +91,19 @@ interface PublishSingle {
     Vid?: uint64
     Genre?: uint32
     DateLine?: string
+}
+
+interface ProcessFilterPack{
+    BeginDate:string
+    EndDate:string
+    ModeName:string
+    Vid:number
+    // Ver:string
+    ModeStatus:number
+    LinkStatus:number
+    LinkName:string
+    LinkUserName:string
+
 }
 
 //===class and instance
@@ -167,6 +181,6 @@ declare class ProjectNavClass {
 declare var ProjectNav: ProjectNavClass
 
 declare class ProcessFilterClass {
-    Pack: any
+    Pack: ProcessFilterPack
 }
 declare var ProcessFilter: ProcessFilterClass

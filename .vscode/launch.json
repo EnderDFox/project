@@ -2,7 +2,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Go launch",
+            "name": "Go main.go",
             "type": "go",
             "request": "launch",
             "mode": "debug",
@@ -11,6 +11,23 @@
             "host": "127.0.0.1",
             // "program": "${fileDirname}",
             "program": "${workspaceFolder}/src/pm/main.go",
+            "env": {
+                // "GOPATH":"D:/AmazingGame/tool_svn"
+            },
+            // "cwd": "${workspaceFolder}",
+            "args": [],
+            "showLog": true
+        },
+        {
+            "name": "Go hello.go",
+            "type": "go",
+            "request": "launch",
+            "mode": "debug",
+            "remotePath": "../../",
+            "port": 2345,
+            "host": "127.0.0.1",
+            // "program": "${fileDirname}",
+            "program": "${workspaceFolder}/src/hello/hello.go",
             "env": {
                 // "GOPATH":"D:/AmazingGame/tool_svn"
             },

@@ -44,6 +44,7 @@ type ScoreNoticeSingle struct {
 
 type ModeSingle struct {
 	Mid      uint64
+	Vid      uint64
 	Ver      string
 	Name     string
 	Color    uint64

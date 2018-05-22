@@ -68,7 +68,7 @@ func (this *Collate) GetModeList(midMap map[uint64]uint64) []*ModeSingle {
 	for _, mid := range midMap {
 		midList = append(midList, strconv.Itoa(int(mid)))
 	}
-	stmt, err := db.GetDb().Prepare(`SELECT mid,ver,name FROM ` + config.Pm + `.pm_mode WHERE mid IN (` + strings.Join(midList, ",") + `)`)
+	stmt, err := db.GetDb().Prepare(`SELECT mid,vid,name FROM ` + config.Pm + `.pm_mode WHERE mid IN (` + strings.Join(midList, ",") + `)`)
 	defer stmt.Close()
 	db.CheckErr(err)
 	rows, err := stmt.Query()
@@ -77,7 +77,7 @@ func (this *Collate) GetModeList(midMap map[uint64]uint64) []*ModeSingle {
 	var modeList []*ModeSingle
 	for rows.Next() {
 		single := &ModeSingle{}
-		rows.Scan(&single.Mid, &single.Ver, &single.Name)
+		rows.Scan(&single.Mid, &single.Vid, &single.Name)
 		modeList = append(modeList, single)
 	}
 	return modeList

@@ -150,7 +150,7 @@ var ProcessManager = {
 	ModeEdit:function(data){
 		//数据变化
 		ProcessData.ModeMap[data.Mid] = data
-		$('#content .mode[mid="'+data.Mid+'"]').html(data.Ver+(data.Name==''?'空':data.Name))
+		$('#content .mode[mid="'+data.Mid+'"]').html(VersionManager.GetVersionVer(data.Vid)+(data.Name==''?'空':data.Name))
 	},
 	//添加功能
 	ModeAdd:function(data){

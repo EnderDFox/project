@@ -1,4 +1,4 @@
 <select id="tplModeSelect">
-    <option value="0">不使用模板</option>
+    <option value="0">不使用</option>
     <option v-for="mode in modes" :value="mode.Tmid" v-if="mode.Links.length>0">{{mode.Name}}({{mode.Links.length}})</option>
 </select>

@@ -111,14 +111,14 @@ type C2L_ProcessWorkEdit struct {
 type C2L_ProcessModeEdit struct {
 	Mid  uint64
 	Name string
-	Ver  string
+	Vid  uint64
 	Did  uint64
 }
 
 type C2L_ProcessModeAdd struct {
 	Mid  uint64
 	Name string
-	Ver  string
+	Vid  uint64
 	Did  uint64
 	Tmid uint64
 }

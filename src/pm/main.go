@@ -37,6 +37,7 @@ func main() {
 	}
 	//定时器
 	go timer.Run()
+
 	//wb服务器
 	http.Handle("/", http.FileServer(http.Dir(config.Web)))
 	//http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./web/upload/"))))

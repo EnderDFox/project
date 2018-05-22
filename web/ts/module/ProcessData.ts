@@ -88,8 +88,11 @@ class ProcessDataClass {
 			if (ProjectNav.FilterDid == DidField.QA && DidField.QA != v.Did) {
 				return true
 			}
-			//版本号查询
+			/* //版本号查询
 			if (v.Ver.indexOf(ProcessFilter.Pack.Ver) == -1) {
+				return true
+			} */
+			if(ProcessFilter.Pack.Vid && ProcessFilter.Pack.Vid==v.Vid){
 				return true
 			}
 			//功能名查询
