@@ -109,8 +109,12 @@ var VersionManagerClass = /** @class */ (function () {
             }
         }
     };
-    VersionManagerClass.prototype.ShowEditList = function (e) {
+    /**
+     * @showVid 默认打开的Vid
+     */
+    VersionManagerClass.prototype.ShowVersionList = function (showVid) {
         var _this = this;
+        if (showVid === void 0) { showVid = 0; }
         this.HideVersionList(false);
         ProcessPanel.HideMenu();
         //真正执行显示面板的函数
@@ -121,14 +125,17 @@ var VersionManagerClass = /** @class */ (function () {
                 pageX = uiEditMode.x() + uiEditMode.width() + 5;
                 pageY = uiEditMode.y();
             }
-            if (!pageX)
-                pageX = e.pageX;
-            if (!pageY)
-                pageY = e.pageY;
-            var plan = $(_this.VueEditList.$el).xy(pageX, pageY).show().adjust(-5);
+            else {
+                pageX = 160;
+                pageY = 150;
+            }
+            var plan = $(_this.VueVersionList.$el).xy(pageX, pageY).show().adjust(-5);
+            if (showVid) {
+                _this.ShowVersionDetail(showVid);
+            }
         };
         Loader.LoadVueTemplate(this.AuePath + "EditVersionList", function (txt) {
-            _this.VueEditList = new Vue({
+            _this.VueVersionList = new Vue({
                 template: txt,
                 data: {
                     newVer: '',
@@ -138,17 +145,17 @@ var VersionManagerClass = /** @class */ (function () {
                 methods: {
                     onAddVer: function (isEnter) {
                         if (isEnter === void 0) { isEnter = false; }
-                        _this.VueEditList.newVer = _this.FormatVer(_this.VueEditList.newVer);
+                        _this.VueVersionList.newVer = _this.FormatVer(_this.VueVersionList.newVer);
                         if (isEnter) {
                             $('#editVersionList_newName').get(0).focus();
                         }
                     },
                     onAdd: function () {
-                        console.log("[debug]", "new Ver", _this.VueEditList.newVer.trim().toString());
-                        var data = { Ver: _this.VueEditList.newVer.trim().toString(), Name: _this.VueEditList.newName.trim().toString() };
+                        console.log("[debug]", "new Ver", _this.VueVersionList.newVer.trim().toString());
+                        var data = { Ver: _this.VueVersionList.newVer.trim().toString(), Name: _this.VueVersionList.newName.trim().toString() };
                         WSConn.sendMsg(C2L.C2L_VERSION_ADD, data);
-                        _this.VueEditList.newVer = "";
-                        _this.VueEditList.newName = "";
+                        _this.VueVersionList.newVer = "";
+                        _this.VueVersionList.newName = "";
                     },
                     onEditVer: function (e, item) {
                         //格式化为 正确的版本格式
@@ -190,49 +197,49 @@ var VersionManagerClass = /** @class */ (function () {
                     },
                 }
             }).$mount();
-            Common.InsertBeforeDynamicDom(_this.VueEditList.$el);
+            Common.InsertBeforeDynamicDom(_this.VueVersionList.$el);
             _show();
         });
     };
     VersionManagerClass.prototype.HideVersionList = function (fade) {
         if (fade === void 0) { fade = true; }
-        if (this.VueEditList) {
+        if (this.VueVersionList) {
             if (fade) {
-                $(this.VueEditList.$el).fadeOut(Config.FadeTime, function () {
+                $(this.VueVersionList.$el).fadeOut(Config.FadeTime, function () {
                     $(this).remove();
                 });
             }
             else {
-                $(this.VueEditList.$el).remove();
+                $(this.VueVersionList.$el).remove();
             }
-            this.VueEditList = null;
+            this.VueVersionList = null;
         }
     };
-    VersionManagerClass.prototype.ShowVersionDetail = function (arg) {
+    VersionManagerClass.prototype.ShowVersionDetail = function (showVid) {
         var _this = this;
         this.HideVersionDetail(false);
         var version;
-        if (typeof (arg) == 'number') {
-            version = this.VueEditList.versions.filter(function (item) {
-                if (item.Vid == arg) {
+        if (typeof (showVid) == 'number') {
+            version = this.VueVersionList.versions.filter(function (item) {
+                if (item.Vid == showVid) {
                     return true;
                 }
                 return false;
             })[0];
         }
         else {
-            version = arg;
+            version = showVid;
         }
         //
         var _show = function () {
             //为了和功能列表面板高度相同
             var pageX, pageY;
-            var uiList = $(_this.VueEditList.$el);
+            var uiList = $(_this.VueVersionList.$el);
             if (uiList.isShow()) {
                 pageX = uiList.x() + uiList.width() + 5;
                 pageY = uiList.y();
             }
-            var plan = $(_this.VueEditDetail.$el).xy(pageX, pageY).show().adjust(-5);
+            var plan = $(_this.VueVersionDetail.$el).xy(pageX, pageY).show().adjust(-5);
             //关闭日期
             plan.unbind().mousedown(function (e) {
                 if ($(e.target).attr('class') != 'date') {
@@ -254,7 +261,7 @@ var VersionManagerClass = /** @class */ (function () {
             });
         };
         Loader.LoadVueTemplate(this.AuePath + "EditVersionDetail", function (txt) {
-            _this.VueEditDetail = new Vue({
+            _this.VueVersionDetail = new Vue({
                 template: txt,
                 data: {
                     version: version
@@ -281,27 +288,37 @@ var VersionManagerClass = /** @class */ (function () {
                     }
                 }
             }).$mount();
-            Common.InsertBeforeDynamicDom(_this.VueEditDetail.$el);
+            Common.InsertBeforeDynamicDom(_this.VueVersionDetail.$el);
             _show();
         });
     };
     VersionManagerClass.prototype.HideVersionDetail = function (fade) {
         if (fade === void 0) { fade = true; }
-        if (this.VueEditDetail) {
+        if (this.VueVersionDetail) {
             if (fade) {
-                $(this.VueEditDetail.$el).fadeOut(Config.FadeTime, function () {
+                $(this.VueVersionDetail.$el).fadeOut(Config.FadeTime, function () {
                     $(this).remove();
                 });
             }
             else {
-                $(this.VueEditDetail.$el).remove();
+                $(this.VueVersionDetail.$el).remove();
             }
-            this.VueEditDetail = null;
+            this.VueVersionDetail = null;
         }
     };
     VersionManagerClass.prototype.Hide = function () {
         this.HideVersionList();
         this.HideVersionDetail();
+    };
+    /**根据日期决定打开的面板 */
+    VersionManagerClass.prototype.ShowVersionByDateLine = function (dateLine) {
+        var p = ProcessData.VersionDateLineMap[dateLine];
+        if (p) {
+            this.ShowVersionList(p.Vid);
+        }
+        else {
+            this.ShowVersionList();
+        }
     };
     /**
      * 格式化版本号   只能是 数字和`.` 例如 1.3   4.5.6

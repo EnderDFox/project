@@ -374,7 +374,7 @@ var ProcessPanel = {
 			}
 		})
 		plan.find('.version_edit').show().unbind().click(function (e) {
-			VersionManager.ShowEditList(e)
+			VersionManager.ShowVersionList()
 		})
 		//确定 取消
 		plan.find('.confirm').unbind().click(function () {
@@ -608,10 +608,11 @@ var ProcessPanel = {
 				case 'delay':
 				case 'pub':
 				case 'summary':
-					WSConn.sendMsg(C2L.C2L_PROCESS_PUBLISH_EDIT, { 'DateLine': info.s, 'Genre': $(this).index() + 1 })
+					VersionManager.ShowVersionByDateLine(info.s)
+					// WSConn.sendMsg(C2L.C2L_PROCESS_PUBLISH_EDIT, { 'DateLine': info.s, 'Genre': $(this).index() + 1 })
 					break
 				case 'del':
-					WSConn.sendMsg(C2L.C2L_PROCESS_PUBLISH_DELETE, { 'DateLine': info.s })
+					// WSConn.sendMsg(C2L.C2L_PROCESS_PUBLISH_DELETE, { 'DateLine': info.s })
 					break
 			}
 			//console.log($(this).index())
