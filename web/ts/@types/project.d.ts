@@ -139,13 +139,13 @@ declare var ProfileManager: ProfileManagerClass
 declare class ProcessManagerClass {
     RegisterFunc(): void
     WorkEdit(data: WorkSingle): void
+    PublishEdit(publish:PublishSingle):void
+    PublishDelete(publish:PublishSingle):void
 }
 declare var ProcessManager: ProcessManagerClass
 
 declare class CollateManagerClass {
     RegisterFunc(): void
-    PublishEdit(publish:PublishSingle):void
-    PublishDelete(publish:PublishSingle):void
 }
 declare var CollateManager: CollateManagerClass
 declare class FileManagerClass {
