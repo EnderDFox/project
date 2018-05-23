@@ -11,3 +11,4 @@ web/tests_fox/image/img2.jpg
 /pkg/
 run
 /bin/
+*.exe
