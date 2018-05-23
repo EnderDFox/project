@@ -95,6 +95,7 @@ interface PublishSingle {
     Vid?: uint64
     Genre?: uint32
     DateLine?: string
+    IsError?:boolean
 }
 
 interface ProcessFilterPack {

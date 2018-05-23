@@ -164,8 +164,8 @@ var ProcessPanel = {
 				html += '<td>'
 			}
 			html += '<div class="info">' + info.d + '</div>'
-			if (ProcessData.VersionDateLineMap[info.s]) {
-				var _genre = ProcessData.VersionDateLineMap[info.s].Genre
+			if (ProcessData.HasVersionDateLineMap(info.s) ){
+				var _genre = ProcessData.VersionDateLineMap[info.s][0].Genre
 				html += '<div class="stroke sk_' + _genre + '" genre="' + _genre + '"></div>'
 			}
 			html += '</td>'

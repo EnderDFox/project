@@ -13,7 +13,7 @@ class ProcessDataClass {
 	//版本和版本时间
 	VersionList: VersionSingle[]
 	VersionMap: { [key: number]: VersionSingle }	//key: Vid
-	VersionDateLineMap: { [key: number]: PublishSingle[] }	//key: DateLine
+	VersionDateLineMap: { [key: number]:PublishSingle[] }	//key: DateLine
 	//流程工作
 	LinkWorkMap: { [key: number]: { [key: string]: WorkSingle } }
 	//数据初始化
@@ -160,8 +160,12 @@ class ProcessDataClass {
 						}
 					}
 					p.Vid = v.Vid//后端传来的都没有vid, 需要自己加上
+					p.IsError = false
 					if (p.DateLine) {
-						this.VersionDateLineMap[p.DateLine] = p
+						if(!this.VersionDateLineMap[p.DateLine]){
+							this.VersionDateLineMap[p.DateLine] = []
+						}
+						this.VersionDateLineMap[p.DateLine].push(p)
 					}
 				}
 				v.PublishList.sort((a, b): number => {
@@ -172,6 +176,22 @@ class ProcessDataClass {
 			}
 		})
 	}
+	HasVersionDateLineMap(dateLine:string):boolean{
+		return this.VersionDateLineMap[dateLine] && this.VersionDateLineMap[dateLine].length>0
+	}
+	DeleteVersionDateLineMap(pub:PublishSingle):void{
+		if(this.HasVersionDateLineMap(pub.DateLine)){
+			var len = this.VersionDateLineMap[pub.DateLine].length
+			for (var i = 0; i < len; i++) {
+				var p:PublishSingle = this.VersionDateLineMap[pub.DateLine][i]
+				if(p.Vid==pub.Vid && p.Genre==pub.Genre){
+					this.VersionDateLineMap[pub.DateLine].splice(i,1)
+					break
+				}
+			}
+		}
+	}
+
 }
 
 var ProcessData = new ProcessDataClass()

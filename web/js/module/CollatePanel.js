@@ -66,9 +66,10 @@ var CollatePanel = {
 			}
 			html+= '<td class="'+tdClass.join(' ')+'">'
 			html+= '<dl>'
-			if(ProcessData.VersionDateLineMap[d.s]){
-				var publishName = '版本'+VersionManager.GetPublishName(ProcessData.VersionDateLineMap[d.s].Genre)
-				html+= '<dd class="notice sk_'+ProcessData.VersionDateLineMap[d.s].Genre+'">['+publishName+']</dd>'
+			if(ProcessData.HasVersionDateLineMap(d.s)){
+				var _genre = ProcessData.VersionDateLineMap[d.s][0].Genre
+				var publishName = '版本'+VersionManager.GetPublishName(_genre)
+				html+= '<dd class="notice sk_'+_genre+'">['+publishName+']</dd>'
 			}
 			html+= '<dt>'+d.s+'</dt>'
 			html+= '<dd>星期'+DateTime.WeekMap[d.w-1]+'</dd>'

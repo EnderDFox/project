@@ -9,7 +9,7 @@
             <div :class="['arrow']" v-if="index>0">➤</div>
             <button class="no-mbp  miniDelete cursor_pointer" @click.stop="onDelete(item)" title="清除" v-if="item.DateLine">x</button>
             <div class="info">
-                <input type="text" class="date" :placeholder="'选择日期'" :value="item.DateLine" readonly @click="onDateClick($event,item)" />
+                <input type="text" class="date" :class="{'error':item.IsError}" :placeholder="'选择日期'" :value="item.DateLine" readonly @click="onDateClick($event,item)" />
             </div>
             <div :class="['name sk_'+(index+1)]" v-text="publishName(index+1)+'日期'"></div>
         </li>

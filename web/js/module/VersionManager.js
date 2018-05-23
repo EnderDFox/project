@@ -48,7 +48,7 @@ var VersionManagerClass = /** @class */ (function () {
             for (var i = 0; i < len; i++) {
                 var p = v.PublishList[i];
                 if (p.DateLine) {
-                    delete ProcessData.VersionDateLineMap[p.DateLine];
+                    ProcessData.DeleteVersionDateLineMap(p);
                 }
             }
         }
@@ -74,20 +74,31 @@ var VersionManagerClass = /** @class */ (function () {
                 var p = v.PublishList[i];
                 if (p.Genre == data.Genre) {
                     var DateLineOld = p.DateLine.toString();
+                    //先把旧的时间删了
+                    if (p && p.DateLine) {
+                        ProcessData.DeleteVersionDateLineMap(p);
+                        if (ProcessData.HasVersionDateLineMap(p.DateLine)) {
+                            ProcessManager.PublishEdit(ProcessData.VersionDateLineMap[p.DateLine][0]);
+                        }
+                        else {
+                            ProcessManager.PublishDelete(p.DateLine);
+                        }
+                    }
                     p.DateLine = data.DateLine;
                     if (p.DateLine) {
-                        ProcessData.VersionDateLineMap[p.DateLine] = p;
-                        ProcessManager.PublishEdit(p);
-                    }
-                    else {
-                        if (DateLineOld) {
-                            delete ProcessData.VersionDateLineMap[DateLineOld];
-                            ProcessManager.PublishDelete(DateLineOld);
+                        if (!ProcessData.VersionDateLineMap[p.DateLine]) {
+                            ProcessData.VersionDateLineMap[p.DateLine] = [];
                         }
+                        ProcessData.VersionDateLineMap[p.DateLine].push(p);
+                        ProcessManager.PublishEdit(p);
                     }
                     break;
                 }
             }
+        }
+        //校验当前的
+        if (this.VueVersionDetail && this.VueVersionDetail.version.Vid == data.Vid) {
+            this.ValidatePublishDateLine();
         }
     };
     VersionManagerClass.prototype.BindSelect = function (domId, callback) {
@@ -266,6 +277,12 @@ var VersionManagerClass = /** @class */ (function () {
                     $(_this).click(); //change无法触发,只好用click
                 });
             });
+            _this.ValidatePublishDateLine();
+            // setTimeout(() => {
+            // }, 1000);
+            /*   Vue.nextTick(()=>{
+                  this.ValidatePublishDateLine()
+              })) */
         };
         Loader.LoadVueTemplate(this.AuePath + "EditVersionDetail", function (txt) {
             _this.VueVersionDetail = new Vue({
@@ -303,6 +320,40 @@ var VersionManagerClass = /** @class */ (function () {
             _show();
         });
     };
+    /**验证当前的 DateLine 有时间问题的 设置IsError=true */
+    VersionManagerClass.prototype.ValidatePublishDateLine = function () {
+        var hasDateStart = Boolean(this.VueVersionDetail.version.PublishList[0].DateLine);
+        var lastDateLineTimestamp = 0;
+        var len = this.VueVersionDetail.version.PublishList.length;
+        for (var i = 0; i < len; i++) {
+            var p = this.VueVersionDetail.version.PublishList[i];
+            if (p.DateLine) {
+                console.log("[debug]", Common.DateStr2TimeStamp(p.DateLine));
+                var _timestamp = Common.DateStr2TimeStamp(p.DateLine);
+                if (i == 0) {
+                    p.IsError = false;
+                    lastDateLineTimestamp = _timestamp;
+                }
+                else {
+                    if (hasDateStart == false) {
+                        //没设置start 却先设置其它时间了, 则start需要标红
+                        this.VueVersionDetail.version.PublishList[0].IsError = true;
+                    }
+                    if (_timestamp < lastDateLineTimestamp) {
+                        //后面的时间必须大于等于前面的时间,否则标红
+                        p.IsError = true;
+                    }
+                    else {
+                        p.IsError = false;
+                        lastDateLineTimestamp = _timestamp;
+                    }
+                }
+            }
+            else {
+                p.IsError = false;
+            }
+        }
+    };
     VersionManagerClass.prototype.HideVersionDetail = function (fade) {
         if (fade === void 0) { fade = true; }
         if (this.VueVersionDetail) {
@@ -323,8 +374,8 @@ var VersionManagerClass = /** @class */ (function () {
     };
     /**根据日期决定打开的面板 */
     VersionManagerClass.prototype.ShowVersionByDateLine = function (dateLine) {
-        var p = ProcessData.VersionDateLineMap[dateLine];
-        if (p) {
+        if (ProcessData.HasVersionDateLineMap(dateLine)) {
+            var p = ProcessData.VersionDateLineMap[dateLine][0];
             this.ShowVersionList(p.Vid);
         }
         else {

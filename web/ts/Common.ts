@@ -29,6 +29,11 @@ class CommonClass {
 		var day = date.getDay()
 		return day = day == 0 ? 7 : day
 	}
+	/**标准时间字符串 例如yyyy-MM-dd 转 timestamp(单位毫秒)*/
+	DateStr2TimeStamp(dateLine: string): number {
+		var date = new Date(dateLine)
+		return date.getTime()
+	}
 	/**终端判定*/
 	IsPC(): boolean {
 		var userAgentInfo = navigator.userAgent

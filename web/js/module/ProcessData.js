@@ -149,8 +149,12 @@ var ProcessDataClass = /** @class */ (function () {
                         }
                     }
                     p.Vid = v.Vid; //后端传来的都没有vid, 需要自己加上
+                    p.IsError = false;
                     if (p.DateLine) {
-                        _this.VersionDateLineMap[p.DateLine] = p;
+                        if (!_this.VersionDateLineMap[p.DateLine]) {
+                            _this.VersionDateLineMap[p.DateLine] = [];
+                        }
+                        _this.VersionDateLineMap[p.DateLine].push(p);
                     }
                 }
                 v.PublishList.sort(function (a, b) {
@@ -162,6 +166,21 @@ var ProcessDataClass = /** @class */ (function () {
                 });
             }
         });
+    };
+    ProcessDataClass.prototype.HasVersionDateLineMap = function (dateLine) {
+        return this.VersionDateLineMap[dateLine] && this.VersionDateLineMap[dateLine].length > 0;
+    };
+    ProcessDataClass.prototype.DeleteVersionDateLineMap = function (pub) {
+        if (this.HasVersionDateLineMap(pub.DateLine)) {
+            var len = this.VersionDateLineMap[pub.DateLine].length;
+            for (var i = 0; i < len; i++) {
+                var p = this.VersionDateLineMap[pub.DateLine][i];
+                if (p.Vid == pub.Vid && p.Genre == pub.Genre) {
+                    this.VersionDateLineMap[pub.DateLine].splice(i, 1);
+                    break;
+                }
+            }
+        }
     };
     return ProcessDataClass;
 }());
