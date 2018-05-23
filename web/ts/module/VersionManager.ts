@@ -129,7 +129,7 @@ class VersionManagerClass {
                     }
                     p.DateLine = data.DateLine
                     if (p.DateLine) {
-                        if(!ProcessData.VersionDateLineMap[p.DateLine]){
+                        if (!ProcessData.VersionDateLineMap[p.DateLine]) {
                             ProcessData.VersionDateLineMap[p.DateLine] = []
                         }
                         ProcessData.VersionDateLineMap[p.DateLine].push(p)
@@ -175,7 +175,7 @@ class VersionManagerClass {
     /** 
      * @showVid 默认打开的Vid
      */
-    ShowVersionList(showVid = 0) {
+    ShowVersionList(showVid = 0, showGenre = 0) {
         this.HideVersionList(false)
         ProcessPanel.HideMenu()
         //真正执行显示面板的函数
@@ -191,7 +191,7 @@ class VersionManagerClass {
             }
             var plan = $(this.VueVersionList.$el).xy(pageX, pageY).show().adjust(-5)
             if (showVid) {
-                this.ShowVersionDetail(showVid)
+                this.ShowVersionDetail(showVid, showGenre)
             }
         }
         Loader.LoadVueTemplate(this.AuePath + "EditVersionList", (txt: string) => {
@@ -274,7 +274,7 @@ class VersionManagerClass {
     }
     //版本编辑内容
     VueVersionDetail: CombinedVueInstance1<{ version: VersionSingle }>
-    ShowVersionDetail(showVid: number | VersionSingle) {
+    ShowVersionDetail(showVid: number | VersionSingle, openGenre: number = 0) {
         this.HideVersionDetail(false)
         var version: VersionSingle
         if (typeof (showVid) == 'number') {
@@ -286,6 +286,7 @@ class VersionManagerClass {
             })[0]
         } else {
             version = showVid as VersionSingle
+            showVid = version.Vid
         }
         //
         var _show = () => {
@@ -294,7 +295,22 @@ class VersionManagerClass {
             var uiList = $(this.VueVersionList.$el)
             if (uiList.isShow()) {
                 pageX = uiList.x() + uiList.width() + 5
-                pageY = uiList.y()
+                var index = ArrayUtil.IndexOfAttr(this.VueVersionList.versions, 'Vid', version.Vid)
+                // console.log("[info]",index,":[index]",version.Vid,":[version.Vid]",version.Ver,":[version.Ver]")
+                if(index>-1){
+                    var btnEdit = uiList.find('.btnEdit').get(index)//放到编辑按钮下面
+                    if(btnEdit){
+                        pageY = uiList.y() + $(btnEdit).y() + $(btnEdit).outerHeight()+2
+                    }else{
+                        pageY = uiList.y()
+                    }
+                }else{
+                    pageY = uiList.y()
+                }
+            }else{
+                //不应该进入这里
+                pageX = 160
+                pageY = 150
             }
             var plan = $(this.VueVersionDetail.$el).xy(pageX, pageY).show().adjust(-5)
             //关闭日期
@@ -326,7 +342,8 @@ class VersionManagerClass {
             this.VueVersionDetail = new Vue({
                 template: txt,
                 data: {
-                    version: version
+                    version: version,
+                    openIndex: openGenre - 1,   //打开的索引,需要闪烁一下
                 },
                 /*  filters: {
                      publishName:function(){
@@ -344,9 +361,11 @@ class VersionManagerClass {
                             WSConn.sendMsg(C2L.C2L_VERSION_CHANGE_PUBLISH, data)
                         }
                     },
-                    onDelete: (item: PublishSingle) => {
-                        var data: C2L_VersionChangePublish = { Vid: item.Vid, Genre: item.Genre, DateLine: '' }
-                        WSConn.sendMsg(C2L.C2L_VERSION_CHANGE_PUBLISH, data)
+                    onDelete: (e,item: PublishSingle) => {
+                        Common.Warning(null, e, function () {
+                            var data: C2L_VersionChangePublish = { Vid: item.Vid, Genre: item.Genre, DateLine: '' }
+                            WSConn.sendMsg(C2L.C2L_VERSION_CHANGE_PUBLISH, data)
+                        }, '删除后不可恢复，确认删除吗？');
                     },
                     onClose: () => {
                         this.HideVersionDetail()
@@ -362,30 +381,33 @@ class VersionManagerClass {
     ValidatePublishDateLine() {
         var hasDateStart = Boolean(this.VueVersionDetail.version.PublishList[0].DateLine)
         var lastDateLineTimestamp = 0
+        var lastPublish:PublishSingle
         var len = this.VueVersionDetail.version.PublishList.length
         for (var i = 0; i < len; i++) {
             var p = this.VueVersionDetail.version.PublishList[i]
             if (p.DateLine) {
-                console.log("[debug]", Common.DateStr2TimeStamp(p.DateLine))
+                // console.log("[debug]", Common.DateStr2TimeStamp(p.DateLine))
                 var _timestamp = Common.DateStr2TimeStamp(p.DateLine)
                 if (i == 0) {
-                    p.IsError = false
+                    p.ErrorMsg = ''
                     lastDateLineTimestamp = _timestamp
+                    lastPublish = p
                 } else {
                     if (hasDateStart == false) {
                         //没设置start 却先设置其它时间了, 则start需要标红
-                        this.VueVersionDetail.version.PublishList[0].IsError = true
+                        this.VueVersionDetail.version.PublishList[0].ErrorMsg = '必须设置开始日期'
                     }
                     if (_timestamp < lastDateLineTimestamp) {
                         //后面的时间必须大于等于前面的时间,否则标红
-                        p.IsError = true
+                        p.ErrorMsg = `${this.GetPublishName(p.Genre)}日期必须晚于${this.GetPublishName(lastPublish.Genre)}日期`
                     } else {
-                        p.IsError = false
-                        lastDateLineTimestamp = _timestamp
+                        p.ErrorMsg = ''
                     }
+                    lastDateLineTimestamp = _timestamp
+                    lastPublish = p
                 }
             } else {
-                p.IsError = false
+                p.ErrorMsg = ''
             }
         }
     }
@@ -409,10 +431,33 @@ class VersionManagerClass {
     ShowVersionByDateLine(dateLine: string) {
         if (ProcessData.HasVersionDateLineMap(dateLine)) {
             var p: PublishSingle = ProcessData.VersionDateLineMap[dateLine][0]
-            this.ShowVersionList(p.Vid)
+            this.ShowVersionList(p.Vid,p.Genre)
         } else {
             this.ShowVersionList()
         }
+    }
+    /**显示进度页面 表格头 日期格子中的tooltip */
+    ShowTableHeaderTooltip(dateLine:string,x:number,y:number){
+        var str = ``
+        if(ProcessData.HasVersionDateLineMap(dateLine)){
+            var pList:PublishSingle[] = ProcessData.VersionDateLineMap[dateLine]
+            if(pList.length>1){
+                str += `<span style="color:#FF0000">警告:有多个版本日期</span><br/>`
+            }
+            var len = pList.length
+            for (var i = 0; i < len; i++) {
+                var p:PublishSingle = pList[i]
+                var v:VersionSingle = ProcessData.VersionMap[p.Vid]
+                str += `<span style="max-width:144px;display:inline-block;" class="text-overflow-hide">版本:${this.GetVersionFullname(v)}</span><br/>`
+                str += `<span class="sk_${p.Genre}">${this.GetPublishName(p.Genre)}日期</span><br/>`
+                if(i<len-1){
+                    str += `<hr/>`
+                }
+            }
+        }else{
+            str = `无版本`
+        }
+        $('#workTips').xy(x,y).show().adjust(-5).html(str)
     }
     /**
      * 格式化版本号   只能是 数字和`.` 例如 1.3   4.5.6

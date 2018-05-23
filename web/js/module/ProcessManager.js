@@ -283,7 +283,7 @@ var ProcessManager = {
 			}
 			var pub = $('#content .title td:eq('+(k+3)+')')
 			pub.find('.stroke').remove()
-			pub.append('<div class="stroke sk_'+data.Genre+'" genre="'+data.Genre+'"></div>')
+			pub.append('<div class="stroke sk_'+data.Genre+'" date_line="'+data.DateLine+'"></div>')
 			return false
 		})
 		//数据变化

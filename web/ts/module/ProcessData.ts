@@ -160,7 +160,7 @@ class ProcessDataClass {
 						}
 					}
 					p.Vid = v.Vid//后端传来的都没有vid, 需要自己加上
-					p.IsError = false
+					p.ErrorMsg = ''
 					if (p.DateLine) {
 						if(!this.VersionDateLineMap[p.DateLine]){
 							this.VersionDateLineMap[p.DateLine] = []

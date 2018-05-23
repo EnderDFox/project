@@ -130,9 +130,10 @@ var VersionManagerClass = /** @class */ (function () {
     /**
      * @showVid 默认打开的Vid
      */
-    VersionManagerClass.prototype.ShowVersionList = function (showVid) {
+    VersionManagerClass.prototype.ShowVersionList = function (showVid, showGenre) {
         var _this = this;
         if (showVid === void 0) { showVid = 0; }
+        if (showGenre === void 0) { showGenre = 0; }
         this.HideVersionList(false);
         ProcessPanel.HideMenu();
         //真正执行显示面板的函数
@@ -149,7 +150,7 @@ var VersionManagerClass = /** @class */ (function () {
             }
             var plan = $(_this.VueVersionList.$el).xy(pageX, pageY).show().adjust(-5);
             if (showVid) {
-                _this.ShowVersionDetail(showVid);
+                _this.ShowVersionDetail(showVid, showGenre);
             }
         };
         Loader.LoadVueTemplate(this.AuePath + "EditVersionList", function (txt) {
@@ -233,8 +234,9 @@ var VersionManagerClass = /** @class */ (function () {
             this.VueVersionList = null;
         }
     };
-    VersionManagerClass.prototype.ShowVersionDetail = function (showVid) {
+    VersionManagerClass.prototype.ShowVersionDetail = function (showVid, openGenre) {
         var _this = this;
+        if (openGenre === void 0) { openGenre = 0; }
         this.HideVersionDetail(false);
         var version;
         if (typeof (showVid) == 'number') {
@@ -247,6 +249,7 @@ var VersionManagerClass = /** @class */ (function () {
         }
         else {
             version = showVid;
+            showVid = version.Vid;
         }
         //
         var _show = function () {
@@ -255,7 +258,25 @@ var VersionManagerClass = /** @class */ (function () {
             var uiList = $(_this.VueVersionList.$el);
             if (uiList.isShow()) {
                 pageX = uiList.x() + uiList.width() + 5;
-                pageY = uiList.y();
+                var index = ArrayUtil.IndexOfAttr(_this.VueVersionList.versions, 'Vid', version.Vid);
+                // console.log("[info]",index,":[index]",version.Vid,":[version.Vid]",version.Ver,":[version.Ver]")
+                if (index > -1) {
+                    var btnEdit = uiList.find('.btnEdit').get(index); //放到编辑按钮下面
+                    if (btnEdit) {
+                        pageY = uiList.y() + $(btnEdit).y() + $(btnEdit).outerHeight() + 2;
+                    }
+                    else {
+                        pageY = uiList.y();
+                    }
+                }
+                else {
+                    pageY = uiList.y();
+                }
+            }
+            else {
+                //不应该进入这里
+                pageX = 160;
+                pageY = 150;
             }
             var plan = $(_this.VueVersionDetail.$el).xy(pageX, pageY).show().adjust(-5);
             //关闭日期
@@ -288,7 +309,8 @@ var VersionManagerClass = /** @class */ (function () {
             _this.VueVersionDetail = new Vue({
                 template: txt,
                 data: {
-                    version: version
+                    version: version,
+                    openIndex: openGenre - 1,
                 },
                 /*  filters: {
                      publishName:function(){
@@ -306,9 +328,11 @@ var VersionManagerClass = /** @class */ (function () {
                             WSConn.sendMsg(C2L.C2L_VERSION_CHANGE_PUBLISH, data);
                         }
                     },
-                    onDelete: function (item) {
-                        var data = { Vid: item.Vid, Genre: item.Genre, DateLine: '' };
-                        WSConn.sendMsg(C2L.C2L_VERSION_CHANGE_PUBLISH, data);
+                    onDelete: function (e, item) {
+                        Common.Warning(null, e, function () {
+                            var data = { Vid: item.Vid, Genre: item.Genre, DateLine: '' };
+                            WSConn.sendMsg(C2L.C2L_VERSION_CHANGE_PUBLISH, data);
+                        }, '删除后不可恢复，确认删除吗？');
                     },
                     onClose: function () {
                         _this.HideVersionDetail();
@@ -324,33 +348,36 @@ var VersionManagerClass = /** @class */ (function () {
     VersionManagerClass.prototype.ValidatePublishDateLine = function () {
         var hasDateStart = Boolean(this.VueVersionDetail.version.PublishList[0].DateLine);
         var lastDateLineTimestamp = 0;
+        var lastPublish;
         var len = this.VueVersionDetail.version.PublishList.length;
         for (var i = 0; i < len; i++) {
             var p = this.VueVersionDetail.version.PublishList[i];
             if (p.DateLine) {
-                console.log("[debug]", Common.DateStr2TimeStamp(p.DateLine));
+                // console.log("[debug]", Common.DateStr2TimeStamp(p.DateLine))
                 var _timestamp = Common.DateStr2TimeStamp(p.DateLine);
                 if (i == 0) {
-                    p.IsError = false;
+                    p.ErrorMsg = '';
                     lastDateLineTimestamp = _timestamp;
+                    lastPublish = p;
                 }
                 else {
                     if (hasDateStart == false) {
                         //没设置start 却先设置其它时间了, 则start需要标红
-                        this.VueVersionDetail.version.PublishList[0].IsError = true;
+                        this.VueVersionDetail.version.PublishList[0].ErrorMsg = '必须设置开始日期';
                     }
                     if (_timestamp < lastDateLineTimestamp) {
                         //后面的时间必须大于等于前面的时间,否则标红
-                        p.IsError = true;
+                        p.ErrorMsg = this.GetPublishName(p.Genre) + "\u65E5\u671F\u5FC5\u987B\u665A\u4E8E" + this.GetPublishName(lastPublish.Genre) + "\u65E5\u671F";
                     }
                     else {
-                        p.IsError = false;
-                        lastDateLineTimestamp = _timestamp;
+                        p.ErrorMsg = '';
                     }
+                    lastDateLineTimestamp = _timestamp;
+                    lastPublish = p;
                 }
             }
             else {
-                p.IsError = false;
+                p.ErrorMsg = '';
             }
         }
     };
@@ -376,11 +403,36 @@ var VersionManagerClass = /** @class */ (function () {
     VersionManagerClass.prototype.ShowVersionByDateLine = function (dateLine) {
         if (ProcessData.HasVersionDateLineMap(dateLine)) {
             var p = ProcessData.VersionDateLineMap[dateLine][0];
-            this.ShowVersionList(p.Vid);
+            this.ShowVersionList(p.Vid, p.Genre);
         }
         else {
             this.ShowVersionList();
         }
+    };
+    /**显示进度页面 表格头 日期格子中的tooltip */
+    VersionManagerClass.prototype.ShowTableHeaderTooltip = function (dateLine, x, y) {
+        var str = "";
+        if (ProcessData.HasVersionDateLineMap(dateLine)) {
+            var pList = ProcessData.VersionDateLineMap[dateLine];
+            if (pList.length > 1) {
+                str += "<span style=\"color:#FF0000\">\u8B66\u544A:\u6709\u591A\u4E2A\u7248\u672C\u65E5\u671F</span><br/>";
+                str += "<hr/>";
+            }
+            var len = pList.length;
+            for (var i = 0; i < len; i++) {
+                var p = pList[i];
+                var v = ProcessData.VersionMap[p.Vid];
+                str += "<span style=\"max-width:144px;display:inline-block;\" class=\"text-overflow-hide\">\u7248\u672C:" + this.GetVersionFullname(v) + "</span><br/>";
+                str += "<span class=\"sk_color_" + p.Genre + "\">" + this.GetPublishName(p.Genre) + "\u65E5\u671F</span><br/>";
+                if (i < len - 1) {
+                    str += "<hr/>";
+                }
+            }
+        }
+        else {
+            str = "\u65E0\u7248\u672C";
+        }
+        $('#workTips').xy(x, y).show().adjust(-5).html(str);
     };
     /**
      * 格式化版本号   只能是 数字和`.` 例如 1.3   4.5.6

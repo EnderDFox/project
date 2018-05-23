@@ -169,12 +169,24 @@
   border-color: #ff0000;
 }
 
-.editVersionDetail .sk_1{color:#7030a0;}		/*版本开始*/
-.editVersionDetail .sk_2{color:#2e75b5;}		/*版本完结*/
-.editVersionDetail .sk_3{color:#c55a11;}		/*版本封存*/
-.editVersionDetail .sk_4{color:#ff0000;}		/*版本延期*/
-.editVersionDetail .sk_5{color:#538135;}		/*版本发布*/
-.editVersionDetail .sk_6{color:#ff3399;}		/*版本总结*/
+.editVersionDetail .publishOpen{
+  /* background-color:rgb(214, 252, 0); */
+  animation-name: anim_publishOpen;
+  animation-duration: 0.5s;
+  animation-iteration-count:4;
+}
+@keyframes anim_publishOpen{
+  0%{background-color:rgb(0, 255, 13);}
+  75%{background-color: rgb(255, 255, 255);}
+  100%{background-color: rgb(59, 252, 0);}
+}
+
+.sk_color_1{color:#7030a0;}		/*版本开始*/
+.sk_color_2{color:#2e75b5;}		/*版本完结*/
+.sk_color_3{color:#c55a11;}		/*版本封存*/
+.sk_color_4{color:#ff0000;}		/*版本延期*/
+.sk_color_5{color:#538135;}		/*版本发布*/
+.sk_color_6{color:#ff3399;}		/*版本总结*/
 
 /*编辑日程*/
 .editInfo .text{text-align:center;}
@@ -380,7 +392,7 @@
 .collate .type_12{background:#2ecc71;min-width:250px;width:250px;}			/*美术*/
 .collate .type_13{background:#2ecc71;min-width:250px;width:250px;}			/*美术*/
 .collate .type_14{background:#7f8c8d;min-width:250px;width:250px;}			/*迪士尼*/
-.collate .type_15{background:#bf9000;min-width:250px;width:250px;}			/*美术*/
+.collate .type_15{background:#ff697b;min-width:250px;width:250px;}			/*美术*/
 .collate .type_16{background:#2e75b5;min-width:250px;width:250px;}			/*美术*/
 
 /*工作状态*/

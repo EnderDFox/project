@@ -123,7 +123,6 @@ input:focus,textarea:focus,button:focus{outline:none;}
 */
 /*警告提示*/
 .commonWarning .tips{height:60px;line-height:25px;background:#fff;padding:20px;color:#ff0000;margin:20px 20px 15px 20px;border:1px solid #abadb3;border-radius:3px;}
-
 /*==========================================================空间==========================================================*/
 
 /*日历空间*/
@@ -149,3 +148,4 @@ input:focus,textarea:focus,button:focus{outline:none;}
 /*通用效果*/
 .button-disabled{background: #BBBBBB}
 .button-disabled:hover{background: #BBBBBB;border-color: #BBBBBB}
+.text-overflow-hide{white-space: nowrap;text-overflow: ellipsis;overflow: hidden;}

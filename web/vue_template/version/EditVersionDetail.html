@@ -7,11 +7,11 @@
     <ul>
         <li v-for="item,index in version.PublishList">
             <div :class="['arrow']" v-if="index>0">➤</div>
-            <button class="no-mbp  miniDelete cursor_pointer" @click.stop="onDelete(item)" title="清除" v-if="item.DateLine">x</button>
+            <button class="no-mbp  miniDelete cursor_pointer" @click.stop="onDelete($event,item)" title="清除" v-if="item.DateLine">x</button>
             <div class="info">
-                <input type="text" class="date" :class="{'error':item.IsError}" :placeholder="'选择日期'" :value="item.DateLine" readonly @click="onDateClick($event,item)" />
+                <input type="text" class="date" :title="item.ErrorMsg" :class="{'error':Boolean(item.ErrorMsg),'publishOpen':index==openIndex}" :placeholder="'选择日期'" :value="item.DateLine" readonly @click="onDateClick($event,item)" />
             </div>
-            <div :class="['name sk_'+(index+1)]" v-text="publishName(index+1)+'日期'"></div>
+            <div :class="['name sk_color_'+(index+1)]" v-text="publishName(index+1)+'日期'"></div>
         </li>
         <!-- <li class="body list-complete-item" v-for="(link,index) in mode.Links" :key="link.Tlid">
             <input type=" text " class="ver " placeholder="空 " :value="link.Name " :id=" 'editTplModeDetail_'+link.Tlid+

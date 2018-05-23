@@ -8,7 +8,7 @@
         <li class="body list-complete-item" v-for="item,index in versions" :key="item.Vid" v-if="index<10">
             <input type="text" class="name ver" placeholder="空" :value="item.Ver" @blur="onEditVer($event,item,index)" @keyup.enter="onEditVer($event,item,index)">
             <input type="text" class="name" placeholder="空" :value="item.Name" @blur="onEditName($event,item,index)" @keyup.enter="onEditName($event,item,index)">
-            <button class="confirm btnSmall3" title="编辑版本内容" @click="onEdit($event,item,index)">编辑</button>
+            <button class="confirm btnSmall3 btnEdit" title="编辑版本内容" @click="onEdit($event,item,index)">编辑</button>
             <button class="cancel btnSmall1" title="删除" @click="onDel($event,item,index)">X</button>
         </li>
     </transition-group>

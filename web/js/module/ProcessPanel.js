@@ -129,8 +129,9 @@ var ProcessPanel = {
 			if($(this).find('.stroke').length == 1){
 				var top = $(this).offset().top - 7
 				var left = $(this).offset().left + $(this).width() + 8
-				var genre = $(this).find('.stroke').attr('genre')
-				$('#workTips').css({top:top,left:left}).show().adjust(-5).html('<div>版本'+VersionManager.GetPublishName(genre)+'</div>')
+				var dateLine = $(this).find('.stroke').attr('date_line')
+				VersionManager.ShowTableHeaderTooltip(dateLine,left,top)
+				// $('#workTips').css({top:top,left:left}).show().adjust(-5).html('<div>版本'+VersionManager.GetPublishName(genre)+'</div>')
 			}
 		}).delegate('td', 'mouseleave', function (e) {
 			e.stopPropagation()
@@ -166,7 +167,7 @@ var ProcessPanel = {
 			html += '<div class="info">' + info.d + '</div>'
 			if (ProcessData.HasVersionDateLineMap(info.s) ){
 				var _genre = ProcessData.VersionDateLineMap[info.s][0].Genre
-				html += '<div class="stroke sk_' + _genre + '" genre="' + _genre + '"></div>'
+				html += '<div class="stroke sk_' + _genre + '" date_line="'+info.s+'"></div>'
 			}
 			html += '</td>'
 		})
