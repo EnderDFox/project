@@ -20,6 +20,7 @@ func (this *VersionManager) RegisterFunction() {
 	command.Register(C2L_VERSION_CHANGE_VER, &C2L_M_VERSION_CHANGE_VER{})
 	command.Register(C2L_VERSION_CHANGE_NAME, &C2L_M_VERSION_CHANGE_NAME{})
 	command.Register(C2L_VERSION_CHANGE_PUBLISH, &C2L_M_VERSION_CHANGE_PUBLISH{})
+	command.Register(C2L_VERSION_CHANGE_SORT, &C2L_M_VERSION_CHANGE_SORT{})
 }
 
 type C2L_M_VERSION_ADD struct{}
@@ -99,5 +100,21 @@ func (this *C2L_M_VERSION_CHANGE_PUBLISH) execute(client *websocket.Conn, msg *M
 		return false
 	}
 	user.Version().VersionChangePublish(param.Vid, param.Genre, param.DateLine)
+	return true
+}
+
+type C2L_M_VERSION_CHANGE_SORT struct{}
+
+func (this *C2L_M_VERSION_CHANGE_SORT) execute(client *websocket.Conn, msg *Message) bool {
+	param := &C2L_VersionChangeSort{}
+	err := json.Unmarshal([]byte(msg.Param), param)
+	if err != nil {
+		return false
+	}
+	user := session.GetUser(msg.Uid)
+	if user == nil {
+		return false
+	}
+	user.Version().VersionChangeSort(param.Vid1, param.Vid2)
 	return true
 }

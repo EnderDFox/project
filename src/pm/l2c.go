@@ -49,6 +49,7 @@ const (
 	L2C_VERSION_CHANGE_VER     = 80103
 	L2C_VERSION_CHANGE_NAME    = 80104
 	L2C_VERSION_CHANGE_PUBLISH = 80105
+	L2C_VERSION_CHANGE_SORT    = 80106
 )
 
 type L2C_SessionLogin struct {
@@ -171,9 +172,7 @@ type L2C_ProcessPublishDelete struct {
 }
 
 type L2C_VersionAdd struct {
-	Vid  uint64
-	Ver  string
-	Name string
+	VersionSingle *VersionSingle
 }
 
 type L2C_VersionDelete struct {

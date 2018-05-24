@@ -12,8 +12,7 @@
             <button class="confirm btnSmall2 " title="修改负责人所属的部门 " @click="onChangeDid($event,link.Tlid) ">{{link.Did|didName}}</button>
             <button :class="{ 'confirm':true, 'btnSmall1':true, 'button-disabled':index==0} " title="排序上移 " @click="onSortUp($event,link.Tlid) "
                 :disabled="index==0 ">↑</button>
-            <button :class="{ 'confirm':true, 'btnSmall1':true, 'button-disabled':index>=(mode.Links.length-1)}" title="排序下移" @click="onSortDown($event,link.Tlid)" :disabled="index>=(mode.Links.length-1)">↓
-            </button>
+            <button :class="{ 'confirm':true, 'btnSmall1':true, 'button-disabled':index>=(mode.Links.length-1)}" title="排序下移" @click="onSortDown($event,link.Tlid)" :disabled="index>=(mode.Links.length-1)">↓</button>
             <button :class="{'confirm':true,'btnSmall1':true}" title="删除" @click="onDel($event,link.Tlid)">X</button>
         </li>
     </transition-group>

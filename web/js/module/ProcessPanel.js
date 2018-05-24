@@ -368,12 +368,12 @@ var ProcessPanel = {
 			})
 		}
 		//版本
-		VersionManager.BindSelect("#place_versionSelect", (dom) => {
+		VersionManager.BindSelect("#place_versionSelect",mode.Vid, (dom) => {
 			if (cid == C2L.C2L_PROCESS_MODE_EDIT) {
 				if(ProcessData.VersionMap[mode.Vid]){
 					$(dom).val(mode.Vid)
 				}else{
-					$(dom).val(0)
+					$(dom).val(0)//已经被删除了
 				}
 			} else {
 				$(dom).val(0)

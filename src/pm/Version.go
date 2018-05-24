@@ -18,7 +18,7 @@ func NewVersion(user *User) *Version {
 }
 
 func (this *Version) VersionList() []*VersionSingle {
-	stmt, err := db.GetDb().Prepare(`SELECT vid,ver,name FROM ` + config.Pm + `.pm_version WHERE pid = ? AND is_del=0 ORDER BY vid`)
+	stmt, err := db.GetDb().Prepare(`SELECT vid,ver,name FROM ` + config.Pm + `.pm_version WHERE pid = ? AND is_del=0 ORDER BY sort DESC`)
 	defer stmt.Close()
 	db.CheckErr(err)
 	rows, err := stmt.Query(COMMON_PID)
@@ -58,10 +58,13 @@ func (this *Version) VersionAdd(ver string, name string) bool {
 	db.CheckErr(err)
 	vid, err := res.LastInsertId()
 	db.CheckErr(err)
-	data := &L2C_VersionAdd{
+	versionSingle := &VersionSingle{
 		Vid:  uint64(vid),
 		Ver:  ver,
 		Name: name,
+	}
+	data := &L2C_VersionAdd{
+		VersionSingle: versionSingle,
 	}
 	this.owner.SendToAll(L2C_VERSION_ADD, data)
 	return true
@@ -129,5 +132,47 @@ func (this *Version) VersionChangePublish(vid uint64, genre uint32, dateLine str
 		DateLine: dateLine,
 	}
 	this.owner.SendToAll(L2C_VERSION_CHANGE_PUBLISH, data)
+	return true
+}
+
+func (this *Version) VersionChangeSort(vid1 uint64, vid2 uint64) bool {
+	//拿旧值
+	stmt, err := db.GetDb().Prepare(`SELECT vid,sort FROM ` + config.Pm + `.pm_version WHERE vid in(?,?) and is_del=0`)
+	defer stmt.Close()
+	db.CheckErr(err)
+	rows, err := stmt.Query(vid1, vid2)
+	defer rows.Close()
+	db.CheckErr(err)
+	var sort1 uint32
+	var sort2 uint32
+	for rows.Next() {
+		var t_vid uint64
+		var t_sort uint32
+		rows.Scan(&t_vid, &t_sort)
+		if vid1 == t_vid {
+			sort1 = t_sort
+		} else {
+			sort2 = t_sort
+		}
+	}
+	log.Println("s1v2s2v1", sort1, vid2, sort2, vid1)
+	//更新v1
+	stmt, err = db.GetDb().Prepare(`UPDATE ` + config.Pm + `.pm_version SET sort=? WHERE vid=?`)
+	defer stmt.Close()
+	db.CheckErr(err)
+	_, err = stmt.Exec(sort1, vid2)
+	db.CheckErr(err)
+	//更新v2
+	stmt, err = db.GetDb().Prepare(`UPDATE ` + config.Pm + `.pm_version SET sort=? WHERE vid=?`)
+	defer stmt.Close()
+	db.CheckErr(err)
+	_, err = stmt.Exec(sort2, vid1)
+	db.CheckErr(err)
+	//发送给所有人
+	data := &C2L_VersionChangeSort{
+		Vid1: vid1,
+		Vid2: vid2,
+	}
+	this.owner.SendToAll(L2C_VERSION_CHANGE_SORT, data)
 	return true
 }

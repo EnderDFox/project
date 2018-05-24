@@ -1,4 +1,4 @@
 <select id="versionSelect">
     <option value="0">空</option>
-    <option v-for="version,index in versions" :value="version.Vid" v-if="index<10 && version.Ver">{{version.Ver+(version.Name?'-'+version.Name:'')}}</option>
+    <option v-for="version,index in versions" :value="version.Vid" :key="version.Vid" v-if=" version.Vid==CurrVid || (index<ListShowMax && version.Ver)">{{version.Ver+(version.Name?'-'+version.Name:'')}}</option>
 </select>

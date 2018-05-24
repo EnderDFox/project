@@ -117,7 +117,7 @@
 }
 /*版本列表*/
 .editVersionList{
-  min-width:480px;width:480px;
+  min-width:545px;width:545px;
 }
 .editVersionList li{
   height: 30px;
@@ -127,6 +127,8 @@
   min-width: 65px;
   max-width: 65px;
 }
+
+.editVersionList .btnSmall1{width: 30px; height: 30px; line-height: 30px;}
 /*版本编辑*/
 .editVersionDetail{
   min-width:720px;

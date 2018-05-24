@@ -124,6 +124,7 @@ type VersionSingle struct {
 	Vid         uint64
 	Ver         string
 	Name        string
+	Sort        uint32
 	PublishList []*PublishSingle
 }
 

@@ -1,16 +1,20 @@
 var VersionManagerClass = /** @class */ (function () {
     function VersionManagerClass() {
-        this.AuePath = "version/"; //模板所在目录
+        /**模板所在目录*/
+        this.AuePath = "version/";
+        /**显示的最大数量*/
+        this.ListShowMax = 5;
         //
         this.PublishGenreNameList = ['开始', '完结', '封存', '延期', '发布', '总结'];
     }
-    //初始化
+    /**初始化*/
     VersionManagerClass.prototype.Init = function () {
-        Commond.Register(L2C.L2C_VERSION_ADD, this.L2C_VersionAdd.bind(this));
-        Commond.Register(L2C.L2C_VERSION_DELETE, this.L2C_VersionDelete.bind(this));
-        Commond.Register(L2C.L2C_VERSION_CHANGE_VER, this.L2C_VersionChangeVer.bind(this));
-        Commond.Register(L2C.L2C_VERSION_CHANGE_NAME, this.L2C_VersionChangeName.bind(this));
-        Commond.Register(L2C.L2C_VERSION_CHANGE_PUBLISH, this.L2C_VersionChangePublish.bind(this));
+        Commond.Register(L2C.L2C_VERSION_ADD, this.onL2C_VersionAdd.bind(this));
+        Commond.Register(L2C.L2C_VERSION_DELETE, this.onL2C_VersionDelete.bind(this));
+        Commond.Register(L2C.L2C_VERSION_CHANGE_VER, this.onL2C_VersionChangeVer.bind(this));
+        Commond.Register(L2C.L2C_VERSION_CHANGE_NAME, this.onL2C_VersionChangeName.bind(this));
+        Commond.Register(L2C.L2C_VERSION_CHANGE_PUBLISH, this.onL2C_VersionChangePublish.bind(this));
+        Commond.Register(L2C.L2C_VERSION_CHANGE_SORT, this.onL2C_VersionChangeSort.bind(this));
     };
     //注册函数
     VersionManagerClass.prototype.RegisterFunc = function () {
@@ -22,11 +26,12 @@ var VersionManagerClass = /** @class */ (function () {
         enumerable: true,
         configurable: true
     });
-    VersionManagerClass.prototype.L2C_VersionAdd = function (data) {
+    VersionManagerClass.prototype.onL2C_VersionAdd = function (data) {
         var v = {
-            Vid: data.Vid,
-            Ver: data.Ver,
-            Name: data.Name,
+            Vid: data.VersionSingle.Vid,
+            Ver: data.VersionSingle.Ver,
+            Name: data.VersionSingle.Name,
+            Sort: data.VersionSingle.Sort,
             PublishList: []
         };
         for (var genre = GenreField.BEGIN; genre <= GenreField.SUMMARY; genre++) {
@@ -36,9 +41,15 @@ var VersionManagerClass = /** @class */ (function () {
         this.VersionList.unshift(v);
         ProcessData.VersionMap[v.Vid] = v;
     };
-    VersionManagerClass.prototype.L2C_VersionDelete = function (data) {
+    VersionManagerClass.prototype.onL2C_VersionDelete = function (data) {
         var index = ArrayUtil.IndexOfAttr(this.VersionList, "Vid", data.Vid);
         if (index >= -1) {
+            //其他的修改sort, 新增的sort最大, 所以如果删掉一个, 
+            for (var i = index + 1; i < this.VersionList.length; i++) {
+                var otherVersion = this.VersionList[i];
+                otherVersion.Sort--;
+            }
+            //删除吧
             this.VersionList.splice(index, 1);
         }
         var v = ProcessData.VersionMap[data.Vid];
@@ -57,7 +68,7 @@ var VersionManagerClass = /** @class */ (function () {
             }
         }
     };
-    VersionManagerClass.prototype.L2C_VersionChangeVer = function (data) {
+    VersionManagerClass.prototype.onL2C_VersionChangeVer = function (data) {
         var v = ProcessData.VersionMap[data.Vid];
         if (v) {
             //FormatVer可能会导致 newVer!=input.value,但 newVer==item.Ver, 需要把item.Ver设置为item.Ver, 此时如果vue值相同, 赋值是不会触发html变化,需要先赋另一个值
@@ -65,14 +76,14 @@ var VersionManagerClass = /** @class */ (function () {
             this.RefreshMode(data.Vid);
         }
     };
-    VersionManagerClass.prototype.L2C_VersionChangeName = function (data) {
+    VersionManagerClass.prototype.onL2C_VersionChangeName = function (data) {
         var v = ProcessData.VersionMap[data.Vid];
         if (v) {
             v.Name = data.Name;
             this.RefreshMode(data.Vid);
         }
     };
-    VersionManagerClass.prototype.L2C_VersionChangePublish = function (data) {
+    VersionManagerClass.prototype.onL2C_VersionChangePublish = function (data) {
         var v = ProcessData.VersionMap[data.Vid];
         if (v && v.PublishList) {
             var len = v.PublishList.length;
@@ -100,8 +111,44 @@ var VersionManagerClass = /** @class */ (function () {
             this.ValidatePublishDateLine();
         }
     };
-    VersionManagerClass.prototype.BindSelect = function (domId, callback) {
+    VersionManagerClass.prototype.onL2C_VersionChangeSort = function (data) {
+        var x, y;
+        var v1, v2;
+        var len = this.VersionList.length;
+        for (var i = 0; i < len; i++) {
+            var version = this.VersionList[i];
+            if (version.Vid == data.Vid1) {
+                v1 = version;
+                x = i;
+            }
+            else if (version.Vid == data.Vid2) {
+                v2 = version;
+                y = i;
+            }
+        }
+        //
+        var sort = v1.Sort;
+        v1.Sort = v2.Sort;
+        v2.Sort = sort;
+        //
+        (_a = this.VueVersionList.versions).splice.apply(_a, [x, 1].concat(this.VueVersionList.versions.splice(y, 1, this.VueVersionList.versions[x])));
+        var _a;
+    };
+    /**
+     *
+     * @param currVid 必须有的的currVid因为是当前的值
+     */
+    VersionManagerClass.prototype.BindSelect = function (domId, currVid, callback) {
         var _this = this;
+        var _show = function () {
+            _this.VueSelect.versions = _this.VersionList;
+            _this.VueSelect.CurrVid = currVid;
+            _this.VueSelect.$nextTick(function () {
+                if (callback != null) {
+                    callback(_this.VueSelect.$el);
+                }
+            });
+        };
         if (this.VueSelect == null) {
             Loader.LoadVueTemplate(this.AuePath + "VersionSelect", function (txt) {
                 _this.VueSelect = new Vue({
@@ -109,21 +156,15 @@ var VersionManagerClass = /** @class */ (function () {
                     template: txt,
                     data: {
                         versions: [],
-                    }
+                        ListShowMax: _this.ListShowMax,
+                        CurrVid: 0,
+                    },
                 });
-                _this.VueSelect.versions = _this.VersionList;
-                _this.VueSelect.$nextTick(function () {
-                    if (callback != null) {
-                        callback(_this.VueSelect.$el);
-                    }
-                });
+                _show();
             });
         }
         else {
-            this.VueSelect.versions = this.VersionList;
-            if (callback != null) {
-                callback(this.VueSelect.$el);
-            }
+            _show();
         }
     };
     /**
@@ -161,6 +202,7 @@ var VersionManagerClass = /** @class */ (function () {
                     newName: '',
                     versions: ProcessData.VersionList,
                     showVid: showVid,
+                    ListShowMax: _this.ListShowMax,
                 },
                 methods: {
                     onAddVer: function (isEnter) {
@@ -200,6 +242,14 @@ var VersionManagerClass = /** @class */ (function () {
                             var data = { Vid: item.Vid, Name: newName };
                             WSConn.sendMsg(C2L.C2L_VERSION_CHANGE_NAME, data);
                         }
+                    },
+                    onSortUp: function (e, item, index) {
+                        var data = { Vid1: item.Vid, Vid2: _this.VersionList[index - 1].Vid };
+                        WSConn.sendMsg(C2L.C2L_VERSION_CHANGE_SORT, data);
+                    },
+                    onSortDown: function (e, item, index) {
+                        var data = { Vid1: item.Vid, Vid2: _this.VersionList[index + 1].Vid };
+                        WSConn.sendMsg(C2L.C2L_VERSION_CHANGE_SORT, data);
                     },
                     onDel: function (e, item, index) {
                         Common.Warning(null, e, function () {
@@ -313,6 +363,7 @@ var VersionManagerClass = /** @class */ (function () {
                 data: {
                     version: version,
                     showGenre: showGenre,
+                    ListShowMax: _this.ListShowMax,
                 },
                 /*  filters: {
                      publishName:function(){

@@ -45,6 +45,7 @@ const (
 	C2L_VERSION_CHANGE_VER     = 80103
 	C2L_VERSION_CHANGE_NAME    = 80104
 	C2L_VERSION_CHANGE_PUBLISH = 80105
+	C2L_VERSION_CHANGE_SORT    = 80106
 )
 
 type C2L_SessionLogin struct {
@@ -225,4 +226,9 @@ type C2L_VersionChangePublish struct {
 	Vid      uint64
 	Genre    uint32
 	DateLine string
+}
+
+type C2L_VersionChangeSort struct {
+	Vid1 uint64
+	Vid2 uint64
 }

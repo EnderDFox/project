@@ -1,4 +1,3 @@
-
 interface C2L_VersionAdd {
     Ver: string
     Name: string
@@ -24,10 +23,13 @@ interface C2L_VersionChangePublish {
     DateLine: string
 }
 
+interface C2L_VersionChangeSort {
+    Vid1: uint64
+    Vid2: uint64
+}
+
 interface L2C_VersionAdd {
-    Vid: uint64
-    Ver: string
-    Name: string
+    VersionSingle: VersionSingle
 }
 
 interface L2C_VersionDelete {
@@ -49,16 +51,19 @@ interface L2C_VersionChangePublish {
     Genre: uint32
     DateLine: string
 }
-
 class VersionManagerClass {
-    AuePath: string = "version/" //模板所在目录
-    //初始化
+    /**模板所在目录*/
+    AuePath: string = "version/"
+    /**显示的最大数量*/
+    ListShowMax: number = 5
+    /**初始化*/
     Init() {
-        Commond.Register(L2C.L2C_VERSION_ADD, this.L2C_VersionAdd.bind(this))
-        Commond.Register(L2C.L2C_VERSION_DELETE, this.L2C_VersionDelete.bind(this))
-        Commond.Register(L2C.L2C_VERSION_CHANGE_VER, this.L2C_VersionChangeVer.bind(this))
-        Commond.Register(L2C.L2C_VERSION_CHANGE_NAME, this.L2C_VersionChangeName.bind(this))
-        Commond.Register(L2C.L2C_VERSION_CHANGE_PUBLISH, this.L2C_VersionChangePublish.bind(this))
+        Commond.Register(L2C.L2C_VERSION_ADD, this.onL2C_VersionAdd.bind(this))
+        Commond.Register(L2C.L2C_VERSION_DELETE, this.onL2C_VersionDelete.bind(this))
+        Commond.Register(L2C.L2C_VERSION_CHANGE_VER, this.onL2C_VersionChangeVer.bind(this))
+        Commond.Register(L2C.L2C_VERSION_CHANGE_NAME, this.onL2C_VersionChangeName.bind(this))
+        Commond.Register(L2C.L2C_VERSION_CHANGE_PUBLISH, this.onL2C_VersionChangePublish.bind(this))
+        Commond.Register(L2C.L2C_VERSION_CHANGE_SORT, this.onL2C_VersionChangeSort.bind(this))
     }
     //注册函数
     RegisterFunc() {
@@ -66,11 +71,12 @@ class VersionManagerClass {
     get VersionList(): VersionSingle[] {
         return ProcessData.VersionList;
     }
-    L2C_VersionAdd(data: L2C_VersionAdd) {
+    onL2C_VersionAdd(data: L2C_VersionAdd) {
         var v: VersionSingle = {
-            Vid: data.Vid,
-            Ver: data.Ver,
-            Name: data.Name,
+            Vid: data.VersionSingle.Vid,
+            Ver: data.VersionSingle.Ver,
+            Name: data.VersionSingle.Name,
+            Sort: data.VersionSingle.Sort,
             PublishList: []
         }
         for (var genre = GenreField.BEGIN; genre <= GenreField.SUMMARY; genre++) {
@@ -80,9 +86,15 @@ class VersionManagerClass {
         this.VersionList.unshift(v)
         ProcessData.VersionMap[v.Vid] = v
     }
-    L2C_VersionDelete(data: L2C_VersionDelete) {
+    onL2C_VersionDelete(data: L2C_VersionDelete) {
         var index = ArrayUtil.IndexOfAttr(this.VersionList, "Vid", data.Vid)
         if (index >= -1) {
+            //其他的修改sort, 新增的sort最大, 所以如果删掉一个, 
+            for (var i = index + 1; i < this.VersionList.length; i++) {
+                var otherVersion = this.VersionList[i]
+                otherVersion.Sort--
+            }
+            //删除吧
             this.VersionList.splice(index, 1)
         }
         var v = ProcessData.VersionMap[data.Vid]
@@ -101,7 +113,7 @@ class VersionManagerClass {
             }
         }
     }
-    L2C_VersionChangeVer(data: L2C_VersionChangeVer) {
+    onL2C_VersionChangeVer(data: L2C_VersionChangeVer) {
         var v = ProcessData.VersionMap[data.Vid]
         if (v) {
             //FormatVer可能会导致 newVer!=input.value,但 newVer==item.Ver, 需要把item.Ver设置为item.Ver, 此时如果vue值相同, 赋值是不会触发html变化,需要先赋另一个值
@@ -109,14 +121,14 @@ class VersionManagerClass {
             this.RefreshMode(data.Vid)
         }
     }
-    L2C_VersionChangeName(data: L2C_VersionChangeName) {
+    onL2C_VersionChangeName(data: L2C_VersionChangeName) {
         var v = ProcessData.VersionMap[data.Vid]
         if (v) {
             v.Name = data.Name
             this.RefreshMode(data.Vid)
         }
     }
-    L2C_VersionChangePublish(data: L2C_VersionChangePublish) {
+    onL2C_VersionChangePublish(data: L2C_VersionChangePublish) {
         var v = ProcessData.VersionMap[data.Vid]
         if (v && v.PublishList) {
             var len = v.PublishList.length
@@ -144,9 +156,43 @@ class VersionManagerClass {
             this.ValidatePublishDateLine()
         }
     }
+    onL2C_VersionChangeSort(data: C2L_VersionChangeSort) {
+        var x: number, y: number
+        var v1: VersionSingle, v2: VersionSingle
+        var len = this.VersionList.length
+        for (var i = 0; i < len; i++) {
+            var version = this.VersionList[i]
+            if (version.Vid == data.Vid1) {
+                v1 = version
+                x = i
+            } else if (version.Vid == data.Vid2) {
+                v2 = version
+                y = i
+            }
+        }
+        //
+        var sort = v1.Sort
+        v1.Sort = v2.Sort
+        v2.Sort = sort
+        //
+        this.VueVersionList.versions.splice(x, 1, ...this.VueVersionList.versions.splice(y, 1, this.VueVersionList.versions[x]))
+    }
     //## EditMode 选择器
-    VueSelect: CombinedVueInstance1<{ versions: VersionSingle[] }>
-    BindSelect(domId: string, callback: Function) {
+    VueSelect: CombinedVueInstance1<{ versions: VersionSingle[], ListShowMax: number, CurrVid: number }>
+    /**
+     * 
+     * @param currVid 必须有的的currVid因为是当前的值
+     */
+    BindSelect(domId: string, currVid: number, callback: Function) {
+        var _show = () => {
+            this.VueSelect.versions = this.VersionList
+            this.VueSelect.CurrVid = currVid
+            this.VueSelect.$nextTick(() => {
+                if (callback != null) {
+                    callback(this.VueSelect.$el)
+                }
+            })
+        }
         if (this.VueSelect == null) {
             Loader.LoadVueTemplate(this.AuePath + "VersionSelect", (txt: string) => {
                 this.VueSelect = new Vue({
@@ -154,24 +200,18 @@ class VersionManagerClass {
                     template: txt,
                     data: {
                         versions: [],
-                    }
+                        ListShowMax: this.ListShowMax,
+                        CurrVid: 0,
+                    },
                 })
-                this.VueSelect.versions = this.VersionList
-                this.VueSelect.$nextTick(() => {
-                    if (callback != null) {
-                        callback(this.VueSelect.$el)
-                    }
-                })
+                _show()
             })
         } else {
-            this.VueSelect.versions = this.VersionList
-            if (callback != null) {
-                callback(this.VueSelect.$el)
-            }
+            _show()
         }
     }
     //## 编辑`模板-功能列表`
-    VueVersionList: CombinedVueInstance1<{ newVer: string, newName: string, versions: VersionSingle[], showVid: number }>
+    VueVersionList: CombinedVueInstance1<{ newVer: string, newName: string, versions: VersionSingle[], showVid: number, ListShowMax: number }>
     /** 
      * @showVid 默认打开的Vid
      * @showGenre 默认打开的publish需要, 闪一下
@@ -203,6 +243,7 @@ class VersionManagerClass {
                     newName: '',
                     versions: ProcessData.VersionList,
                     showVid: showVid,   //打开时闪一下 -> 现在改成常亮
+                    ListShowMax: this.ListShowMax,
                 },
                 methods: {
                     onAddVer: (isEnter: boolean = false) => {
@@ -241,6 +282,14 @@ class VersionManagerClass {
                             WSConn.sendMsg(C2L.C2L_VERSION_CHANGE_NAME, data)
                         }
                     },
+                    onSortUp: (e, item: VersionSingle, index: number) => {
+                        var data: C2L_VersionChangeSort = { Vid1: item.Vid, Vid2: this.VersionList[index - 1].Vid }
+                        WSConn.sendMsg(C2L.C2L_VERSION_CHANGE_SORT, data)
+                    },
+                    onSortDown: (e, item: VersionSingle, index: number) => {
+                        var data: C2L_VersionChangeSort = { Vid1: item.Vid, Vid2: this.VersionList[index + 1].Vid }
+                        WSConn.sendMsg(C2L.C2L_VERSION_CHANGE_SORT, data)
+                    },
                     onDel: (e, item: VersionSingle, index: number) => {
                         Common.Warning(null, e, function () {
                             var data: C2L_VersionDelete = { Vid: item.Vid }
@@ -275,7 +324,7 @@ class VersionManagerClass {
         }
     }
     //版本编辑内容
-    VueVersionDetail: CombinedVueInstance1<{ version: VersionSingle }>
+    VueVersionDetail: CombinedVueInstance1<{ version: VersionSingle, ListShowMax: number }>
     ShowVersionDetail(showVid: number | VersionSingle, showGenre: number = 0) {
         this.HideVersionDetail(false)
         var version: VersionSingle
@@ -347,6 +396,7 @@ class VersionManagerClass {
                 data: {
                     version: version,
                     showGenre: showGenre,   //打开的索引,需要闪烁一下
+                    ListShowMax: this.ListShowMax,
                 },
                 /*  filters: {
                      publishName:function(){
