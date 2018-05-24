@@ -42,28 +42,34 @@ var VersionManagerClass = /** @class */ (function () {
             this.VersionList.splice(index, 1);
         }
         var v = ProcessData.VersionMap[data.Vid];
-        delete ProcessData.VersionMap[data.Vid];
-        if (v && v.PublishList) {
-            var len = v.PublishList.length;
-            for (var i = 0; i < len; i++) {
-                var p = v.PublishList[i];
-                if (p.DateLine) {
-                    ProcessData.DeleteVersionDateLineMap(p);
+        if (v) {
+            delete ProcessData.VersionMap[data.Vid];
+            if (v && v.PublishList) {
+                var len = v.PublishList.length;
+                for (var i = 0; i < len; i++) {
+                    var p = v.PublishList[i];
+                    this.DoPublishDelete(p);
                 }
+            }
+            this.RefreshMode(data.Vid);
+            if (this.VueVersionDetail && this.VueVersionDetail.version.Vid == v.Vid) {
+                this.HideVersionDetail();
             }
         }
     };
     VersionManagerClass.prototype.L2C_VersionChangeVer = function (data) {
         var v = ProcessData.VersionMap[data.Vid];
         if (v) {
-            v.Ver = 'temp'; //FormatVer会导致newVer和input.value不一致,但可能newVer和item.Ver一样,需要把item.Ver设置为item.Ver, 此时如果vue值相同, 赋值是不会触发html变化,需要先赋另一个值
-            v.Ver = data.Ver;
+            //FormatVer可能会导致 newVer!=input.value,但 newVer==item.Ver, 需要把item.Ver设置为item.Ver, 此时如果vue值相同, 赋值是不会触发html变化,需要先赋另一个值
+            Vue.set(v, "Ver", data.Ver);
+            this.RefreshMode(data.Vid);
         }
     };
     VersionManagerClass.prototype.L2C_VersionChangeName = function (data) {
         var v = ProcessData.VersionMap[data.Vid];
         if (v) {
             v.Name = data.Name;
+            this.RefreshMode(data.Vid);
         }
     };
     VersionManagerClass.prototype.L2C_VersionChangePublish = function (data) {
@@ -74,16 +80,9 @@ var VersionManagerClass = /** @class */ (function () {
                 var p = v.PublishList[i];
                 if (p.Genre == data.Genre) {
                     var DateLineOld = p.DateLine.toString();
-                    //先把旧的时间删了
-                    if (p && p.DateLine) {
-                        ProcessData.DeleteVersionDateLineMap(p);
-                        if (ProcessData.HasVersionDateLineMap(p.DateLine)) {
-                            ProcessManager.PublishEdit(ProcessData.VersionDateLineMap[p.DateLine][0]);
-                        }
-                        else {
-                            ProcessManager.PublishDelete(p.DateLine);
-                        }
-                    }
+                    //先把旧的`DateLine`删了
+                    this.DoPublishDelete(p);
+                    //设置新`DateLine`
                     p.DateLine = data.DateLine;
                     if (p.DateLine) {
                         if (!ProcessData.VersionDateLineMap[p.DateLine]) {
@@ -129,6 +128,7 @@ var VersionManagerClass = /** @class */ (function () {
     };
     /**
      * @showVid 默认打开的Vid
+     * @showGenre 默认打开的publish需要, 闪一下
      */
     VersionManagerClass.prototype.ShowVersionList = function (showVid, showGenre) {
         var _this = this;
@@ -145,8 +145,8 @@ var VersionManagerClass = /** @class */ (function () {
                 pageY = uiEditMode.y();
             }
             else {
-                pageX = 160;
-                pageY = 150;
+                pageX = 160 + $(window).scrollLeft();
+                pageY = 150 + $(window).scrollTop();
             }
             var plan = $(_this.VueVersionList.$el).xy(pageX, pageY).show().adjust(-5);
             if (showVid) {
@@ -160,6 +160,7 @@ var VersionManagerClass = /** @class */ (function () {
                     newVer: '',
                     newName: '',
                     versions: ProcessData.VersionList,
+                    showVid: showVid,
                 },
                 methods: {
                     onAddVer: function (isEnter) {
@@ -188,8 +189,8 @@ var VersionManagerClass = /** @class */ (function () {
                             WSConn.sendMsg(C2L.C2L_VERSION_CHANGE_VER, data);
                         }
                         else if (newVer != e.target.value) {
-                            item.Ver = 'temp'; //FormatVer会导致newVer和input.value不一致,但可能newVer和item.Ver一样,需要把item.Ver设置为item.Ver, 此时如果vue值相同, 赋值是不会触发html变化,需要先赋另一个值
-                            item.Ver = newVer;
+                            //FormatVer可能会导致 newVer!=input.value,但 newVer==item.Ver, 需要把item.Ver设置为item.Ver, 此时如果vue值相同, 赋值是不会触发html变化,需要先赋另一个值
+                            Vue.set(item, 'Ver', newVer);
                         }
                     },
                     onEditName: function (e, item) {
@@ -234,9 +235,9 @@ var VersionManagerClass = /** @class */ (function () {
             this.VueVersionList = null;
         }
     };
-    VersionManagerClass.prototype.ShowVersionDetail = function (showVid, openGenre) {
+    VersionManagerClass.prototype.ShowVersionDetail = function (showVid, showGenre) {
         var _this = this;
-        if (openGenre === void 0) { openGenre = 0; }
+        if (showGenre === void 0) { showGenre = 0; }
         this.HideVersionDetail(false);
         var version;
         if (typeof (showVid) == 'number') {
@@ -251,6 +252,7 @@ var VersionManagerClass = /** @class */ (function () {
             version = showVid;
             showVid = version.Vid;
         }
+        this.VueVersionList.showVid = showVid; // 当前正打开的记录有变化
         //
         var _show = function () {
             //为了和功能列表面板高度相同
@@ -274,9 +276,9 @@ var VersionManagerClass = /** @class */ (function () {
                 }
             }
             else {
-                //不应该进入这里
-                pageX = 160;
-                pageY = 150;
+                //其实不应该进入这里
+                pageX = 160 + $(window).scrollLeft();
+                pageY = 150 + $(window).scrollTop();
             }
             var plan = $(_this.VueVersionDetail.$el).xy(pageX, pageY).show().adjust(-5);
             //关闭日期
@@ -310,7 +312,7 @@ var VersionManagerClass = /** @class */ (function () {
                 template: txt,
                 data: {
                     version: version,
-                    openIndex: openGenre - 1,
+                    showGenre: showGenre,
                 },
                 /*  filters: {
                      publishName:function(){
@@ -383,6 +385,9 @@ var VersionManagerClass = /** @class */ (function () {
     };
     VersionManagerClass.prototype.HideVersionDetail = function (fade) {
         if (fade === void 0) { fade = true; }
+        if (this.VueVersionList) {
+            this.VueVersionList.showVid = 0;
+        }
         if (this.VueVersionDetail) {
             if (fade) {
                 $(this.VueVersionDetail.$el).fadeOut(Config.FadeTime, function () {
@@ -416,14 +421,14 @@ var VersionManagerClass = /** @class */ (function () {
             var pList = ProcessData.VersionDateLineMap[dateLine];
             if (pList.length > 1) {
                 str += "<span style=\"color:#FF0000\">\u8B66\u544A:\u6709\u591A\u4E2A\u7248\u672C\u65E5\u671F</span><br/>";
-                str += "<hr/>";
+                str += "<span style=\"color:#FF0000\">\u70B9\u51FB\u53F3\u952E\u7F16\u8F91</span><br/>";
             }
             var len = pList.length;
             for (var i = 0; i < len; i++) {
                 var p = pList[i];
                 var v = ProcessData.VersionMap[p.Vid];
                 str += "<span style=\"max-width:144px;display:inline-block;\" class=\"text-overflow-hide\">\u7248\u672C:" + this.GetVersionFullname(v) + "</span><br/>";
-                str += "<span class=\"sk_color_" + p.Genre + "\">" + this.GetPublishName(p.Genre) + "\u65E5\u671F</span><br/>";
+                str += "<span class=\"sk_" + p.Genre + "\">" + this.GetPublishName(p.Genre) + "\u65E5\u671F</span><br/>";
                 if (i < len - 1) {
                     str += "<hr/>";
                 }
@@ -433,6 +438,54 @@ var VersionManagerClass = /** @class */ (function () {
             str = "\u65E0\u7248\u672C";
         }
         $('#workTips').xy(x, y).show().adjust(-5).html(str);
+    };
+    /**显示进度页面 表格头 右键打开的菜单 */
+    VersionManagerClass.prototype.ShowTableHeaderMenu = function (dateLine, x, y) {
+        var _this = this;
+        var itemList = [];
+        var pList = ProcessData.VersionDateLineMap[dateLine];
+        if (pList && pList.length > 0) {
+            var len = pList.length;
+            for (var i = 0; i < len; i++) {
+                var p = pList[i];
+                var v = ProcessData.VersionMap[p.Vid];
+                var item = { Key: p.Vid, Label: "\u7248\u672C:" + v.Ver + " " + this.GetPublishName(p.Genre) + "\u65E5\u671F", Data: p.Genre };
+                itemList.push(item);
+            }
+            Common.ShowPullDownMenu(x, y, itemList, function (item) {
+                _this.ShowVersionList(item.Key, item.Data);
+            });
+        }
+        else {
+            //TODO:
+        }
+    };
+    VersionManagerClass.prototype.DoPublishDelete = function (p) {
+        if (p && p.DateLine) {
+            ProcessData.DeleteVersionDateLineMap(p);
+            if (ProcessData.HasVersionDateLineMap(p.DateLine)) {
+                ProcessManager.PublishEdit(ProcessData.VersionDateLineMap[p.DateLine][0]); //还有其它的日期,刷新一下
+            }
+            else {
+                ProcessManager.PublishDelete(p.DateLine); //没有其它的日期, 删除掉吧
+            }
+        }
+    };
+    /**
+     * 刷新对应的mode
+     * @param vid
+     */
+    VersionManagerClass.prototype.RefreshMode = function (vid) {
+        for (var k in ProcessData.ModeMap) {
+            var mode = ProcessData.ModeMap[k];
+            if (mode.Vid == vid) {
+                if (!ProcessData.VersionMap[vid]) {
+                    //已经是delete的vid
+                    mode.Vid = 0;
+                }
+                ProcessManager.ModeEdit(mode);
+            }
+        }
     };
     /**
      * 格式化版本号   只能是 数字和`.` 例如 1.3   4.5.6

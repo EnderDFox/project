@@ -364,17 +364,23 @@ var ProcessPanel = {
 			TemplateManager.BindTplSelect("#place_tplModeSelect")
 			plan.find('.tpl_edit').show().unbind().click(function (e) {
 				TemplateManager.ShowEditTplModeList(e)
+				VersionManager.Hide()
 			})
 		}
 		//版本
 		VersionManager.BindSelect("#place_versionSelect", (dom) => {
 			if (cid == C2L.C2L_PROCESS_MODE_EDIT) {
-				$(dom).val(mode.Vid)
+				if(ProcessData.VersionMap[mode.Vid]){
+					$(dom).val(mode.Vid)
+				}else{
+					$(dom).val(0)
+				}
 			} else {
 				$(dom).val(0)
 			}
 		})
 		plan.find('.version_edit').show().unbind().click(function (e) {
+			TemplateManager.Hide()
 			VersionManager.ShowVersionList()
 		})
 		//确定 取消
@@ -600,7 +606,9 @@ var ProcessPanel = {
 		var left = e.pageX + 1
 		var index = $(o).index() - 3
 		var info = ProcessPanel.DateList.list[index]
-		$('#pubMenu').css({ left: left, top: top }).unbind().delegate('.row', 'click', function () {
+		ProcessPanel.HideMenu()
+		VersionManager.ShowTableHeaderMenu(info.s,left,top)
+		/* $('#pubMenu').css({ left: left, top: top }).unbind().delegate('.row', 'click', function () {
 			var type = $(this).attr('type')
 			switch (type) {
 				case 'begin':
@@ -618,7 +626,7 @@ var ProcessPanel = {
 			}
 			//console.log($(this).index())
 			ProcessPanel.HideMenu()
-		}).show().adjust(-5)
+		}).show().adjust(-5) */
 	},
 	//选中迷你小匡
 	ShowMiniBox: function (e) {
@@ -650,5 +658,6 @@ var ProcessPanel = {
 	//关闭所有菜单
 	HideMenu: function () {
 		$('#menuUser,#menuLink,#menuDay,#menuMode,#pubMenu,#workTips,#dateTime,#menuStep,#menuExtra,#menuDepartment').hide()
+		Common.HidePullDownMenu()
 	}
 }

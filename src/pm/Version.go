@@ -18,7 +18,7 @@ func NewVersion(user *User) *Version {
 }
 
 func (this *Version) VersionList() []*VersionSingle {
-	stmt, err := db.GetDb().Prepare(`SELECT vid,ver,name FROM ` + config.Pm + `.pm_version WHERE pid = ? ORDER BY create_time DESC`)
+	stmt, err := db.GetDb().Prepare(`SELECT vid,ver,name FROM ` + config.Pm + `.pm_version WHERE pid = ? AND is_del=0 ORDER BY vid`)
 	defer stmt.Close()
 	db.CheckErr(err)
 	rows, err := stmt.Query(COMMON_PID)

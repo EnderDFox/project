@@ -7,12 +7,12 @@ interface ITplModeSimple {
 interface ITplLinkSimple {
     Tlid: number; Tmid: number; Did: number; Name: String
 }
-interface IDepartmentItem{
-    Did:number
-    Name:string
+interface IDepartmentItem {
+    Did: number
+    Name: string
 }
 class TemplateManagerClass {
-    AuePath:string =  "template/" //模板所在目录
+    AuePath: string = "template/" //模板所在目录
     DataModes: ITplModeSimple[]
     //初始化
     Init() {
@@ -80,11 +80,11 @@ class TemplateManagerClass {
             var mode = modes[index]
             mode.Links.push(data)
         }
-        if(mode.Links.length>10){
+        if (mode.Links.length > 10) {
             //滚动条滚动到底
-            Vue.nextTick(()=>{
+            Vue.nextTick(() => {
                 var scrollee = $(TemplateManager.vue_editTplModeDetail.$el).find('ul')
-                console.log("[debug]",scrollee,"<-`scrollee`");
+                console.log("[debug]", scrollee, "<-`scrollee`");
                 scrollee.scrollTop(scrollee[0].scrollHeight);
             })
         }
@@ -162,8 +162,8 @@ class TemplateManagerClass {
         return null;
     }
     //绑定到select选择器
-    vue_tplSelect: CombinedVueInstance1<{modes:ITplModeSimple[]}>
-    BindTplSelect(domId:string) {
+    vue_tplSelect: CombinedVueInstance1<{ modes: ITplModeSimple[] }>
+    BindTplSelect(domId: string) {
         if (TemplateManager.vue_tplSelect == null) {
             Loader.LoadVueTemplate(TemplateManager.AuePath + "TplModeSelect", function (txt) {
                 TemplateManager.vue_tplSelect = new Vue({
@@ -177,7 +177,7 @@ class TemplateManagerClass {
         }
     }
     //编辑 模板-功能列表
-    vue_editTplModeList: CombinedVueInstance1<{modes:ITplModeSimple[]}>
+    vue_editTplModeList: CombinedVueInstance1<{ modes: ITplModeSimple[], showTmid: number }>
     ShowEditTplModeList(e) {
         ProcessPanel.HideMenu()
         //真正执行显示面板的函数
@@ -212,7 +212,8 @@ class TemplateManagerClass {
                     template: txt,
                     data: {
                         newName: "",
-                        modes: TemplateManager.DataModes
+                        modes: TemplateManager.DataModes,
+                        showTmid: 0,
                     },
                     methods: {
                         onAdd(e) {
@@ -249,13 +250,13 @@ class TemplateManagerClass {
                                 return;
                             }
                         },
-                        onEdit: TemplateManager.ShowEditTplModeDetail,
+                        onEdit: TemplateManager.ShowEditTplModeDetail.bind(TemplateManager),
                         onDel(e, Tmid) {
-                            Common.Warning(this.$el,e,function(){
+                            Common.Warning(this.$el, e, function () {
                                 WSConn.sendMsg(C2L.C2L_TPL_MODE_DELETE, {
                                     Tmid: Tmid
                                 })
-                            },'删除后不可恢复，确认删除吗？')
+                            }, '删除后不可恢复，确认删除吗？')
                         }
                     }
                 }).$mount()
@@ -267,8 +268,11 @@ class TemplateManagerClass {
         }
     }
     //===编辑 模板-功能中的流程
-    vue_editTplModeDetail: CombinedVueInstance1<{mode:ITplModeSimple, newName:string, newDid:number}>
+    vue_editTplModeDetail: CombinedVueInstance1<{ mode: ITplModeSimple, newName: string, newDid: number }>
     RemoveEditTplModeDetail() {
+        if (this.vue_editTplModeList) {
+            this.vue_editTplModeList.showTmid = 0
+        }
         if (TemplateManager.vue_editTplModeDetail) {
             // plan.fadeOut(Config.FadeTime)
             $(TemplateManager.vue_editTplModeDetail.$el).remove()
@@ -276,25 +280,36 @@ class TemplateManagerClass {
         }
     }
     //显示编辑模版-功能-流程列表
-    ShowEditTplModeDetail(e, Tmid) {
+    ShowEditTplModeDetail(e, showTmid) {
         TemplateManager.RemoveEditTplModeDetail()
         ProcessPanel.HideMenu()
         var modes = TemplateManager.vue_editTplModeList.modes;
         var mode;
-        var index = ArrayUtil.IndexOfAttr(modes, "Tmid", Tmid);
+        var index = ArrayUtil.IndexOfAttr(modes, "Tmid", showTmid);
         if (index > -1) {
             mode = modes[index]
         } else {
             return;
         }
+        //
+        this.vue_editTplModeList.showTmid = showTmid
         //真正执行显示面板的函数
-        var show = function () {
+        var show = () => {
             //为了和功能列表面板高度相同
             var pageX, pageY
             var tplModeList = $(TemplateManager.vue_editTplModeList.$el)
             if (tplModeList.isShow()) {
                 pageX = tplModeList.x() + tplModeList.width() + 5
-                pageY = tplModeList.y()
+                if (index > -1) {
+                    var btnEdit = tplModeList.find('.btnEdit').get(index)//放到编辑按钮下面
+                    if (btnEdit) {
+                        pageY = tplModeList.y() + $(btnEdit).y() + $(btnEdit).outerHeight() + 2
+                    } else {
+                        pageY = tplModeList.y()
+                    }
+                } else {
+                    pageY = tplModeList.y()
+                }
             }
             if (!pageX) {
                 pageX = e.pageX
@@ -402,11 +417,11 @@ class TemplateManagerClass {
                         });
                     },
                     onDel(e, Tlid) {
-                        Common.Warning(this.$el,e,function(){
+                        Common.Warning(this.$el, e, function () {
                             WSConn.sendMsg(C2L.C2L_TPL_LINK_DELETE, {
                                 Tlid: Tlid
                             });
-                        },'删除后不可恢复，确认删除吗？')
+                        }, '删除后不可恢复，确认删除吗？')
                     }
                 },
                 filters: {
@@ -431,7 +446,7 @@ class TemplateManagerClass {
         })
     }
     //选择部门的菜单
-    vue_menuDepartment: CombinedVueInstance1<{departments:IDepartmentItem[]}>
+    vue_menuDepartment: CombinedVueInstance1<{ departments: IDepartmentItem[] }>
     ShowMenuDepartment_callback: Function
     ShowMenuDepartment(e, callback) {
         ProcessPanel.HideMenu()
@@ -453,7 +468,7 @@ class TemplateManagerClass {
         if (TemplateManager.vue_menuDepartment == null) {
             Loader.LoadVueTemplate(TemplateManager.AuePath + "MenuDepartment", function (txt) {
                 //读取部门保存为数组
-                var departments:IDepartmentItem[] = [];
+                var departments: IDepartmentItem[] = [];
                 var len = Data.DepartmentLoop.length
                 for (var i = 0; i < len; i++) {
                     var dinfo = Data.DepartmentLoop[i].info;

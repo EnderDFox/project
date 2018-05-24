@@ -84,7 +84,7 @@ class CommonClass {
 	}
 	//## Aue
 	AuePath = 'common/'
-	VuePullDownMenu: CombinedVueInstance1<{ itemList: IPullDownMenuItem[] }>
+	VuePullDownMenu: CombinedVueInstance1<{ itemList: IPullDownMenuItem[],clickCallback:(item: IPullDownMenuItem) => void }>
 	//### 下拉菜单
 	ShowPullDownMenu(x: number, y: number, itemList: IPullDownMenuItem[], clickCallback: (item: IPullDownMenuItem) => void) {
 		if (this.VuePullDownMenu == null) {
@@ -93,24 +93,26 @@ class CommonClass {
 					template: txt,
 					data: {
 						itemList: [],
+						clickCallback:null,
 					},
 					methods: {
 						onClick: (item: IPullDownMenuItem) => {
 							// console.log("[log]","clickCallback:",item.Id)
 							this.HidePullDownMenu()
-							clickCallback(item)
+							this.VuePullDownMenu.clickCallback(item)
 						}
 					}
 				}).$mount()
 				Common.InsertBeforeDynamicDom(this.VuePullDownMenu.$el)
-				this._ShowPullDownMenu(x, y, itemList)
+				this._ShowPullDownMenu(x, y, itemList,clickCallback)
 			})
 		} else {
-			this._ShowPullDownMenu(x, y, itemList)
+			this._ShowPullDownMenu(x, y, itemList,clickCallback)
 		}
 	}
-	_ShowPullDownMenu(x: number, y: number, itemList: IPullDownMenuItem[]): void {
+	_ShowPullDownMenu(x: number, y: number, itemList: IPullDownMenuItem[],clickCallback: (item: IPullDownMenuItem) => void): void {
 		this.VuePullDownMenu.itemList = itemList
+		this.VuePullDownMenu.clickCallback = clickCallback
 		$(this.VuePullDownMenu.$el).xy(x, y).show()
 	}
 	HidePullDownMenu(): void {
@@ -123,6 +125,7 @@ var Common = new CommonClass()
 interface IPullDownMenuItem {
 	Key: number | string
 	Label: string
+	Data: any
 }
 //
 class ArrayUtil {

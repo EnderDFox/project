@@ -95,25 +95,27 @@ var CommonClass = /** @class */ (function () {
                     template: txt,
                     data: {
                         itemList: [],
+                        clickCallback: null,
                     },
                     methods: {
                         onClick: function (item) {
                             // console.log("[log]","clickCallback:",item.Id)
                             _this.HidePullDownMenu();
-                            clickCallback(item);
+                            _this.VuePullDownMenu.clickCallback(item);
                         }
                     }
                 }).$mount();
                 Common.InsertBeforeDynamicDom(_this.VuePullDownMenu.$el);
-                _this._ShowPullDownMenu(x, y, itemList);
+                _this._ShowPullDownMenu(x, y, itemList, clickCallback);
             });
         }
         else {
-            this._ShowPullDownMenu(x, y, itemList);
+            this._ShowPullDownMenu(x, y, itemList, clickCallback);
         }
     };
-    CommonClass.prototype._ShowPullDownMenu = function (x, y, itemList) {
+    CommonClass.prototype._ShowPullDownMenu = function (x, y, itemList, clickCallback) {
         this.VuePullDownMenu.itemList = itemList;
+        this.VuePullDownMenu.clickCallback = clickCallback;
         $(this.VuePullDownMenu.$el).xy(x, y).show();
     };
     CommonClass.prototype.HidePullDownMenu = function () {

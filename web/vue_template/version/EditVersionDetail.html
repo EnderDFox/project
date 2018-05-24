@@ -1,5 +1,5 @@
 <!-- 编辑模板-功能中的流程列表 -->
-<div class="commonDialog editTplMode editVersionDetail">
+<div class="commonDialog editTplMode editVersion editVersionDetail">
     <div class="head">
         <div class="title">编辑版本-{{version.Ver}}{{version.Name?'-'+version.Name:''}}</div>
         <div class="close" @click="onClose()">x</div>
@@ -9,9 +9,9 @@
             <div :class="['arrow']" v-if="index>0">➤</div>
             <button class="no-mbp  miniDelete cursor_pointer" @click.stop="onDelete($event,item)" title="清除" v-if="item.DateLine">x</button>
             <div class="info">
-                <input type="text" class="date" :title="item.ErrorMsg" :class="{'error':Boolean(item.ErrorMsg),'publishOpen':index==openIndex}" :placeholder="'选择日期'" :value="item.DateLine" readonly @click="onDateClick($event,item)" />
+                <input type="text" class="date" :title="item.ErrorMsg" :class="{'error':Boolean(item.ErrorMsg),'publishOpen':item.Genre==showGenre}" :placeholder="'选择日期'" :value="item.DateLine" readonly @click="onDateClick($event,item)" />
             </div>
-            <div :class="['name sk_color_'+(index+1)]" v-text="publishName(index+1)+'日期'"></div>
+            <div :class="['name sk_color_'+(index+1)]" v-text="(index+1)+'.'+publishName(index+1)+'日期'"></div>
         </li>
         <!-- <li class="body list-complete-item" v-for="(link,index) in mode.Links" :key="link.Tlid">
             <input type=" text " class="ver " placeholder="空 " :value="link.Name " :id=" 'editTplModeDetail_'+link.Tlid+

@@ -140,6 +140,7 @@ declare var ProfileManager: ProfileManagerClass
 /** */
 declare class ProcessManagerClass {
     RegisterFunc(): void
+    ModeEdit(data: ModeSingle): void
     WorkEdit(data: WorkSingle): void
     PublishEdit(publish: PublishSingle): void
     PublishDelete(dateLine: string): void

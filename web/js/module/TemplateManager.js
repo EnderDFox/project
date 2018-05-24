@@ -197,7 +197,8 @@ var TemplateManagerClass = /** @class */ (function () {
                     template: txt,
                     data: {
                         newName: "",
-                        modes: TemplateManager.DataModes
+                        modes: TemplateManager.DataModes,
+                        showTmid: 0,
                     },
                     methods: {
                         onAdd: function (e) {
@@ -236,7 +237,7 @@ var TemplateManagerClass = /** @class */ (function () {
                                 return;
                             }
                         },
-                        onEdit: TemplateManager.ShowEditTplModeDetail,
+                        onEdit: TemplateManager.ShowEditTplModeDetail.bind(TemplateManager),
                         onDel: function (e, Tmid) {
                             Common.Warning(this.$el, e, function () {
                                 WSConn.sendMsg(C2L.C2L_TPL_MODE_DELETE, {
@@ -255,6 +256,9 @@ var TemplateManagerClass = /** @class */ (function () {
         }
     };
     TemplateManagerClass.prototype.RemoveEditTplModeDetail = function () {
+        if (this.vue_editTplModeList) {
+            this.vue_editTplModeList.showTmid = 0;
+        }
         if (TemplateManager.vue_editTplModeDetail) {
             // plan.fadeOut(Config.FadeTime)
             $(TemplateManager.vue_editTplModeDetail.$el).remove();
@@ -262,18 +266,20 @@ var TemplateManagerClass = /** @class */ (function () {
         }
     };
     //显示编辑模版-功能-流程列表
-    TemplateManagerClass.prototype.ShowEditTplModeDetail = function (e, Tmid) {
+    TemplateManagerClass.prototype.ShowEditTplModeDetail = function (e, showTmid) {
         TemplateManager.RemoveEditTplModeDetail();
         ProcessPanel.HideMenu();
         var modes = TemplateManager.vue_editTplModeList.modes;
         var mode;
-        var index = ArrayUtil.IndexOfAttr(modes, "Tmid", Tmid);
+        var index = ArrayUtil.IndexOfAttr(modes, "Tmid", showTmid);
         if (index > -1) {
             mode = modes[index];
         }
         else {
             return;
         }
+        //
+        this.vue_editTplModeList.showTmid = showTmid;
         //真正执行显示面板的函数
         var show = function () {
             //为了和功能列表面板高度相同
@@ -281,7 +287,18 @@ var TemplateManagerClass = /** @class */ (function () {
             var tplModeList = $(TemplateManager.vue_editTplModeList.$el);
             if (tplModeList.isShow()) {
                 pageX = tplModeList.x() + tplModeList.width() + 5;
-                pageY = tplModeList.y();
+                if (index > -1) {
+                    var btnEdit = tplModeList.find('.btnEdit').get(index); //放到编辑按钮下面
+                    if (btnEdit) {
+                        pageY = tplModeList.y() + $(btnEdit).y() + $(btnEdit).outerHeight() + 2;
+                    }
+                    else {
+                        pageY = tplModeList.y();
+                    }
+                }
+                else {
+                    pageY = tplModeList.y();
+                }
             }
             if (!pageX) {
                 pageX = e.pageX;

@@ -6,9 +6,9 @@
     </div>
     <transition-group name="list-complete" tag="ul">
         <li class="body list-complete-item" v-for="mode in modes" :key="mode.Tmid">
-            <input type="text" class="ver" placeholder="空" :value="mode.Name" :id="'editTplModeList_'+mode.Tmid+'_name'" @blur="onEditName($event,mode.Tmid)"
+            <input type="text" class="ver" :class="{'listOpenBorder':mode.Tmid==showTmid}" placeholder="空" :value="mode.Name" :id="'editTplModeList_'+mode.Tmid+'_name'" @blur="onEditName($event,mode.Tmid)"
                 @keyup.enter="onEditName($event,mode.Tmid)" />
-            <button class="confirm btnSmall3" title="编辑功能内流程列表" v-on:click="onEdit($event,mode.Tmid)">编辑({{mode.Links.length}})</button>
+            <button class="confirm btnSmall3 btnEdit" :class="{'listOpenBorder':mode.Tmid==showTmid,'listOpenBg':mode.Tmid==showTmid}" title="编辑功能内流程列表" v-on:click="onEdit($event,mode.Tmid)">编辑({{mode.Links.length}})</button>
             <button class="cancel btnSmall1" title="删除" @click="onDel($event,mode.Tmid)">X</button>
         </li>
     </transition-group>

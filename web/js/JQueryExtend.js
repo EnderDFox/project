@@ -35,20 +35,30 @@ $.fn.extend({
         return this.is(":visible");
     },
     //修正位置
-    adjust: function (number) {
+    adjust: function (offsetY) {
         var eleW = this.outerWidth();
         var eleH = this.outerHeight();
-        var maxL = this.offset().left + eleW;
-        var maxT = this.offset().top + eleH;
-        var winL = $(window).innerWidth() + $(window).scrollLeft();
-        var winH = $(window).innerHeight() + $(window).scrollTop();
-        if (maxL > winL) {
-            var left = Math.min(maxL, winL) - eleW + number;
-            this.css({ 'left': left });
+        var eleLeft = this.offset().left;
+        var eleTop = this.offset().top;
+        var eleRight = eleLeft + eleW;
+        var eleBottom = eleTop + eleH;
+        var winLeft = $(window).scrollLeft();
+        var winTop = $(window).scrollTop();
+        var winRight = winLeft + $(window).innerWidth();
+        var winBottom = winTop + $(window).innerHeight();
+        if (eleLeft < winLeft) {
+            this.x(winLeft + 5);
         }
-        if (maxT > winH) {
-            var top = Math.min(maxT, winH) - eleH + number;
-            this.css({ 'top': top });
+        else if (eleRight > winRight) {
+            var x = Math.min(eleRight, winRight) - eleW + offsetY;
+            this.x(x);
+        }
+        if (eleTop < winTop) {
+            this.y(winTop + 5);
+        }
+        else if (eleBottom > winBottom) {
+            var y = Math.min(eleBottom, winBottom) - eleH + offsetY;
+            this.y(y);
         }
         return this;
     },

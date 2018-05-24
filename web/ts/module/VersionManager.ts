@@ -86,28 +86,34 @@ class VersionManagerClass {
             this.VersionList.splice(index, 1)
         }
         var v = ProcessData.VersionMap[data.Vid]
-        delete ProcessData.VersionMap[data.Vid]
-        if (v && v.PublishList) {
-            var len = v.PublishList.length
-            for (var i = 0; i < len; i++) {
-                var p = v.PublishList[i]
-                if (p.DateLine) {
-                    ProcessData.DeleteVersionDateLineMap(p)
+        if (v) {
+            delete ProcessData.VersionMap[data.Vid]
+            if (v && v.PublishList) {
+                var len = v.PublishList.length
+                for (var i = 0; i < len; i++) {
+                    var p = v.PublishList[i]
+                    this.DoPublishDelete(p)
                 }
+            }
+            this.RefreshMode(data.Vid)
+            if (this.VueVersionDetail && this.VueVersionDetail.version.Vid == v.Vid) {
+                this.HideVersionDetail()
             }
         }
     }
     L2C_VersionChangeVer(data: L2C_VersionChangeVer) {
         var v = ProcessData.VersionMap[data.Vid]
         if (v) {
-            v.Ver = 'temp'//FormatVer会导致newVer和input.value不一致,但可能newVer和item.Ver一样,需要把item.Ver设置为item.Ver, 此时如果vue值相同, 赋值是不会触发html变化,需要先赋另一个值
-            v.Ver = data.Ver
+            //FormatVer可能会导致 newVer!=input.value,但 newVer==item.Ver, 需要把item.Ver设置为item.Ver, 此时如果vue值相同, 赋值是不会触发html变化,需要先赋另一个值
+            Vue.set(v, "Ver", data.Ver)
+            this.RefreshMode(data.Vid)
         }
     }
     L2C_VersionChangeName(data: L2C_VersionChangeName) {
         var v = ProcessData.VersionMap[data.Vid]
         if (v) {
             v.Name = data.Name
+            this.RefreshMode(data.Vid)
         }
     }
     L2C_VersionChangePublish(data: L2C_VersionChangePublish) {
@@ -118,15 +124,9 @@ class VersionManagerClass {
                 var p = v.PublishList[i]
                 if (p.Genre == data.Genre) {
                     var DateLineOld = p.DateLine.toString()
-                    //先把旧的时间删了
-                    if (p && p.DateLine) {
-                        ProcessData.DeleteVersionDateLineMap(p)
-                        if (ProcessData.HasVersionDateLineMap(p.DateLine)) {
-                            ProcessManager.PublishEdit(ProcessData.VersionDateLineMap[p.DateLine][0])
-                        } else {
-                            ProcessManager.PublishDelete(p.DateLine)
-                        }
-                    }
+                    //先把旧的`DateLine`删了
+                    this.DoPublishDelete(p)
+                    //设置新`DateLine`
                     p.DateLine = data.DateLine
                     if (p.DateLine) {
                         if (!ProcessData.VersionDateLineMap[p.DateLine]) {
@@ -170,10 +170,11 @@ class VersionManagerClass {
             }
         }
     }
-    //## 编辑 模板-功能列表
-    VueVersionList: CombinedVueInstance1<{ newVer: string, newName: string, versions: VersionSingle[] }>
+    //## 编辑`模板-功能列表`
+    VueVersionList: CombinedVueInstance1<{ newVer: string, newName: string, versions: VersionSingle[], showVid: number }>
     /** 
      * @showVid 默认打开的Vid
+     * @showGenre 默认打开的publish需要, 闪一下
      */
     ShowVersionList(showVid = 0, showGenre = 0) {
         this.HideVersionList(false)
@@ -186,8 +187,8 @@ class VersionManagerClass {
                 pageX = uiEditMode.x() + uiEditMode.width() + 5
                 pageY = uiEditMode.y()
             } else {
-                pageX = 160
-                pageY = 150
+                pageX = 160 + $(window).scrollLeft()
+                pageY = 150 + $(window).scrollTop()
             }
             var plan = $(this.VueVersionList.$el).xy(pageX, pageY).show().adjust(-5)
             if (showVid) {
@@ -201,6 +202,7 @@ class VersionManagerClass {
                     newVer: '',
                     newName: '',
                     versions: ProcessData.VersionList,
+                    showVid: showVid,   //打开时闪一下 -> 现在改成常亮
                 },
                 methods: {
                     onAddVer: (isEnter: boolean = false) => {
@@ -227,8 +229,8 @@ class VersionManagerClass {
                             var data: C2L_VersionChangeVer = { Vid: item.Vid, Ver: newVer }
                             WSConn.sendMsg(C2L.C2L_VERSION_CHANGE_VER, data)
                         } else if (newVer != e.target.value) {
-                            item.Ver = 'temp'//FormatVer会导致newVer和input.value不一致,但可能newVer和item.Ver一样,需要把item.Ver设置为item.Ver, 此时如果vue值相同, 赋值是不会触发html变化,需要先赋另一个值
-                            item.Ver = newVer
+                            //FormatVer可能会导致 newVer!=input.value,但 newVer==item.Ver, 需要把item.Ver设置为item.Ver, 此时如果vue值相同, 赋值是不会触发html变化,需要先赋另一个值
+                            Vue.set(item, 'Ver', newVer)
                         }
                     },
                     onEditName: (e, item: VersionSingle) => {
@@ -274,7 +276,7 @@ class VersionManagerClass {
     }
     //版本编辑内容
     VueVersionDetail: CombinedVueInstance1<{ version: VersionSingle }>
-    ShowVersionDetail(showVid: number | VersionSingle, openGenre: number = 0) {
+    ShowVersionDetail(showVid: number | VersionSingle, showGenre: number = 0) {
         this.HideVersionDetail(false)
         var version: VersionSingle
         if (typeof (showVid) == 'number') {
@@ -288,6 +290,7 @@ class VersionManagerClass {
             version = showVid as VersionSingle
             showVid = version.Vid
         }
+        this.VueVersionList.showVid = showVid // 当前正打开的记录有变化
         //
         var _show = () => {
             //为了和功能列表面板高度相同
@@ -297,20 +300,20 @@ class VersionManagerClass {
                 pageX = uiList.x() + uiList.width() + 5
                 var index = ArrayUtil.IndexOfAttr(this.VueVersionList.versions, 'Vid', version.Vid)
                 // console.log("[info]",index,":[index]",version.Vid,":[version.Vid]",version.Ver,":[version.Ver]")
-                if(index>-1){
+                if (index > -1) {
                     var btnEdit = uiList.find('.btnEdit').get(index)//放到编辑按钮下面
-                    if(btnEdit){
-                        pageY = uiList.y() + $(btnEdit).y() + $(btnEdit).outerHeight()+2
-                    }else{
+                    if (btnEdit) {
+                        pageY = uiList.y() + $(btnEdit).y() + $(btnEdit).outerHeight() + 2
+                    } else {
                         pageY = uiList.y()
                     }
-                }else{
+                } else {
                     pageY = uiList.y()
                 }
-            }else{
-                //不应该进入这里
-                pageX = 160
-                pageY = 150
+            } else {
+                //其实不应该进入这里
+                pageX = 160 + $(window).scrollLeft()
+                pageY = 150 + $(window).scrollTop()
             }
             var plan = $(this.VueVersionDetail.$el).xy(pageX, pageY).show().adjust(-5)
             //关闭日期
@@ -343,7 +346,7 @@ class VersionManagerClass {
                 template: txt,
                 data: {
                     version: version,
-                    openIndex: openGenre - 1,   //打开的索引,需要闪烁一下
+                    showGenre: showGenre,   //打开的索引,需要闪烁一下
                 },
                 /*  filters: {
                      publishName:function(){
@@ -361,7 +364,7 @@ class VersionManagerClass {
                             WSConn.sendMsg(C2L.C2L_VERSION_CHANGE_PUBLISH, data)
                         }
                     },
-                    onDelete: (e,item: PublishSingle) => {
+                    onDelete: (e, item: PublishSingle) => {
                         Common.Warning(null, e, function () {
                             var data: C2L_VersionChangePublish = { Vid: item.Vid, Genre: item.Genre, DateLine: '' }
                             WSConn.sendMsg(C2L.C2L_VERSION_CHANGE_PUBLISH, data)
@@ -381,7 +384,7 @@ class VersionManagerClass {
     ValidatePublishDateLine() {
         var hasDateStart = Boolean(this.VueVersionDetail.version.PublishList[0].DateLine)
         var lastDateLineTimestamp = 0
-        var lastPublish:PublishSingle
+        var lastPublish: PublishSingle
         var len = this.VueVersionDetail.version.PublishList.length
         for (var i = 0; i < len; i++) {
             var p = this.VueVersionDetail.version.PublishList[i]
@@ -412,6 +415,9 @@ class VersionManagerClass {
         }
     }
     HideVersionDetail(fade: boolean = true) {
+        if (this.VueVersionList) {
+            this.VueVersionList.showVid = 0
+        }
         if (this.VueVersionDetail) {
             if (fade) {
                 $(this.VueVersionDetail.$el).fadeOut(Config.FadeTime, function () {
@@ -431,33 +437,79 @@ class VersionManagerClass {
     ShowVersionByDateLine(dateLine: string) {
         if (ProcessData.HasVersionDateLineMap(dateLine)) {
             var p: PublishSingle = ProcessData.VersionDateLineMap[dateLine][0]
-            this.ShowVersionList(p.Vid,p.Genre)
+            this.ShowVersionList(p.Vid, p.Genre)
         } else {
             this.ShowVersionList()
         }
     }
     /**显示进度页面 表格头 日期格子中的tooltip */
-    ShowTableHeaderTooltip(dateLine:string,x:number,y:number){
+    ShowTableHeaderTooltip(dateLine: string, x: number, y: number) {
         var str = ``
-        if(ProcessData.HasVersionDateLineMap(dateLine)){
-            var pList:PublishSingle[] = ProcessData.VersionDateLineMap[dateLine]
-            if(pList.length>1){
+        if (ProcessData.HasVersionDateLineMap(dateLine)) {
+            var pList: PublishSingle[] = ProcessData.VersionDateLineMap[dateLine]
+            if (pList.length > 1) {
                 str += `<span style="color:#FF0000">警告:有多个版本日期</span><br/>`
+                str += `<span style="color:#FF0000">点击右键编辑</span><br/>`
             }
             var len = pList.length
             for (var i = 0; i < len; i++) {
-                var p:PublishSingle = pList[i]
-                var v:VersionSingle = ProcessData.VersionMap[p.Vid]
+                var p: PublishSingle = pList[i]
+                var v: VersionSingle = ProcessData.VersionMap[p.Vid]
                 str += `<span style="max-width:144px;display:inline-block;" class="text-overflow-hide">版本:${this.GetVersionFullname(v)}</span><br/>`
                 str += `<span class="sk_${p.Genre}">${this.GetPublishName(p.Genre)}日期</span><br/>`
-                if(i<len-1){
+                if (i < len - 1) {
                     str += `<hr/>`
                 }
             }
-        }else{
+        } else {
             str = `无版本`
         }
-        $('#workTips').xy(x,y).show().adjust(-5).html(str)
+        $('#workTips').xy(x, y).show().adjust(-5).html(str)
+    }
+    /**显示进度页面 表格头 右键打开的菜单 */
+    ShowTableHeaderMenu(dateLine: string, x: number, y: number) {
+        var itemList: IPullDownMenuItem[] = []
+        var pList: PublishSingle[] = ProcessData.VersionDateLineMap[dateLine]
+        if (pList && pList.length > 0) {
+            var len = pList.length
+            for (var i = 0; i < len; i++) {
+                var p: PublishSingle = pList[i]
+                var v: VersionSingle = ProcessData.VersionMap[p.Vid]
+                var item: IPullDownMenuItem = { Key: p.Vid, Label: `版本:${v.Ver} ${this.GetPublishName(p.Genre)}日期`, Data: p.Genre }
+                itemList.push(item)
+            }
+            Common.ShowPullDownMenu(x, y, itemList, (item: IPullDownMenuItem) => {
+                this.ShowVersionList(item.Key as number, item.Data as number)
+            })
+        } else {
+            //TODO:
+        }
+    }
+    DoPublishDelete(p: PublishSingle): void {
+        if (p && p.DateLine) {
+            ProcessData.DeleteVersionDateLineMap(p)
+            if (ProcessData.HasVersionDateLineMap(p.DateLine)) {
+                ProcessManager.PublishEdit(ProcessData.VersionDateLineMap[p.DateLine][0])//还有其它的日期,刷新一下
+            } else {
+                ProcessManager.PublishDelete(p.DateLine)//没有其它的日期, 删除掉吧
+            }
+        }
+    }
+    /**
+     * 刷新对应的mode
+     * @param vid 
+     */
+    RefreshMode(vid: number): void {
+        for (var k in ProcessData.ModeMap) {
+            var mode: ModeSingle = ProcessData.ModeMap[k]
+            if (mode.Vid == vid) {
+                if (!ProcessData.VersionMap[vid]) {
+                    //已经是delete的vid
+                    mode.Vid = 0
+                }
+                ProcessManager.ModeEdit(mode)
+            }
+        }
     }
     /**
      * 格式化版本号   只能是 数字和`.` 例如 1.3   4.5.6

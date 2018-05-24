@@ -31,7 +31,7 @@ var DateTimeClass = /** @class */ (function () {
         var plan = $('#dateTime');
         var left = $(this.InputEle).offset().left - plan.outerWidth() - 2;
         var top = $(this.InputEle).offset().top;
-        plan.css({ top: top, left: left }).show();
+        plan.css({ top: top, left: left }).show().adjust(-5);
     };
     //设置时间
     DateTimeClass.prototype.SetDate = function (str) {

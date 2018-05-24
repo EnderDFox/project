@@ -107,9 +107,20 @@
 .editTplMode .btnSmall3{width: 72px;}
 .editTplMode .leftBlock{margin-left: 30px;}
 
+/*  */
+.listOpenBorder{
+  border-color: rgb(10, 150, 17);
+}
+.listOpenBg{
+  background-color: #92d050;
+  /* background-color: rgb(0, 255, 13); */
+}
 /*版本列表*/
 .editVersionList{
   min-width:480px;width:480px;
+}
+.editVersionList li{
+  height: 30px;
 }
 .editVersionList .ver{
   width: 65px;
@@ -118,7 +129,7 @@
 }
 /*版本编辑*/
 .editVersionDetail{
-  min-width:750px;width:750px;
+  min-width:720px;
   height: 116px;
 }
 .editVersionDetail ul{
@@ -132,8 +143,8 @@
 }
 .editVersionDetail .arrow{
   position: absolute;
-  margin-top: 40px;
-  margin-left: 0px;
+  margin-top: 5px;
+  margin-left: -1px;
 }
 .editVersionDetail .miniDelete{
   position: absolute;
@@ -169,7 +180,7 @@
   border-color: #ff0000;
 }
 
-.editVersionDetail .publishOpen{
+.editVersion .publishOpen{
   /* background-color:rgb(214, 252, 0); */
   animation-name: anim_publishOpen;
   animation-duration: 0.5s;
