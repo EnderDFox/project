@@ -309,20 +309,18 @@ var VersionManagerClass = /** @class */ (function () {
             var pageX, pageY;
             var uiList = $(_this.VueVersionList.$el);
             if (uiList.isShow()) {
-                pageX = uiList.x() + uiList.width() + 5;
+                //找不到 btnEdit时的默认值
+                pageX = uiList.x() + uiList.width() - 175;
+                pageY = uiList.y();
+                //
                 var index = ArrayUtil.IndexOfAttr(_this.VueVersionList.versions, 'Vid', version.Vid);
                 // console.log("[info]",index,":[index]",version.Vid,":[version.Vid]",version.Ver,":[version.Ver]")
                 if (index > -1) {
                     var btnEdit = uiList.find('.btnEdit').get(index); //放到编辑按钮下面
                     if (btnEdit) {
+                        pageX = uiList.x() + $(btnEdit).x() + $(btnEdit).outerWidth() / 2;
                         pageY = uiList.y() + $(btnEdit).y() + $(btnEdit).outerHeight() + 2;
                     }
-                    else {
-                        pageY = uiList.y();
-                    }
-                }
-                else {
-                    pageY = uiList.y();
                 }
             }
             else {
@@ -341,15 +339,9 @@ var VersionManagerClass = /** @class */ (function () {
                  } */
             });
             //日期绑定
-            plan.find('.date').unbind().click(function () {
-                var _this = this;
-                DateTime.Open(this, $(this).val(), function (date) {
-                    // console.log("[debug]","DateTime:",date)
-                    $(_this).val(date);
-                    // $(this).trigger('change')
-                    $(_this).click(); //change无法触发,只好用click
-                });
-            });
+            // plan.find('.date').unbind().click(function (this: HTMLInputElement) {
+            // console.log("[info]","lan.find('.date').unbind().click")
+            // })
             _this.ValidatePublishDateLine();
             // setTimeout(() => {
             // }, 1000);
@@ -373,12 +365,24 @@ var VersionManagerClass = /** @class */ (function () {
                  }, */
                 methods: {
                     publishName: _this.GetPublishName.bind(_this),
-                    onDateClick: function (e, item) {
-                        // console.log("[info]","onClick Date",e.target.value)
-                        if (e.target.value && item.DateLine != e.target.value) {
-                            // console.log("[info]","onClick Date send",e.target.value)
-                            var data = { Vid: item.Vid, Genre: item.Genre, DateLine: e.target.value };
-                            WSConn.sendMsg(C2L.C2L_VERSION_CHANGE_PUBLISH, data);
+                    onDateClick: function (e, item, index) {
+                        if (!e.target.value || item.DateLine == e.target.value) {
+                            var _dateLine = $(e.target).val();
+                            if (!_dateLine) {
+                                //找到前一个时间
+                                while (index > 0) {
+                                    index--;
+                                    if (_this.VueVersionDetail.version.PublishList[index].DateLine) {
+                                        _dateLine = _this.VueVersionDetail.version.PublishList[index].DateLine;
+                                        break;
+                                    }
+                                }
+                            }
+                            DateTime.Open(e.target, _dateLine, function (date) {
+                                $(e.target).val(date);
+                                var data = { Vid: item.Vid, Genre: item.Genre, DateLine: date };
+                                WSConn.sendMsg(C2L.C2L_VERSION_CHANGE_PUBLISH, data);
+                            });
                         }
                     },
                     onDelete: function (e, item) {
@@ -418,7 +422,7 @@ var VersionManagerClass = /** @class */ (function () {
                         //没设置start 却先设置其它时间了, 则start需要标红
                         this.VueVersionDetail.version.PublishList[0].ErrorMsg = '必须设置开始日期';
                     }
-                    if (_timestamp < lastDateLineTimestamp) {
+                    if (_timestamp <= lastDateLineTimestamp) {
                         //后面的时间必须大于等于前面的时间,否则标红
                         p.ErrorMsg = this.GetPublishName(p.Genre) + "\u65E5\u671F\u5FC5\u987B\u665A\u4E8E" + this.GetPublishName(lastPublish.Genre) + "\u65E5\u671F";
                     }
@@ -467,8 +471,7 @@ var VersionManagerClass = /** @class */ (function () {
     };
     VersionManagerClass.prototype.ShowTableHeaderTooltip = function (dateLine, x, y) {
         var _this = this;
-        Loader.LoadVueTemplate(this.VuePath + 'TableHeaderTooltip', function (txt) {
-            //
+        var _show = function () {
             var items = [];
             if (ProcessData.HasVersionDateLineMap(dateLine)) {
                 var pList = ProcessData.VersionDateLineMap[dateLine];
@@ -482,47 +485,46 @@ var VersionManagerClass = /** @class */ (function () {
             else {
                 var nearestVersion = _this.GetNearestVersion(dateLine);
                 if (nearestVersion) {
-                    items.push({ version: nearestVersion, publish: { Vid: nearestVersion.Vid, Genre: 0, DateLine: '' } });
+                    var p = _this.GetPrevNearestPublish(dateLine);
+                    items.push({ version: nearestVersion, publish: p });
                 }
             }
             //
-            _this.VueTableHeaderTooltip = new Vue({
-                template: txt,
-                data: {
-                    currDateLine: dateLine,
-                    items: items,
-                },
-                methods: {
-                    GetVersionFullname: _this.GetVersionFullname.bind(_this),
-                    GetPublishName: _this.GetPublishName.bind(_this),
-                }
-            }).$mount();
+            _this.VueTableHeaderTooltip.currDateLine = dateLine;
+            _this.VueTableHeaderTooltip.items = items;
+            _this.VueTableHeaderTooltip.IsWrite = User.IsWrite;
             //
-            $('#workTips').xy(x, y).show().adjust(-5).html(_this.VueTableHeaderTooltip.$el.outerHTML);
-        });
-        /*  var str = `<div>`
-         if (ProcessData.HasVersionDateLineMap(dateLine)) {
-             var pList: PublishSingle[] = ProcessData.VersionDateLineMap[dateLine]
-             if (pList.length > 1) {
-                 str += `<span style="color:#FF0000">警告:有多个版本日期</span><br/>`
-                 str += `<span style="color:#FF0000">点击右键编辑</span><br/>`
-             }
-             var len = pList.length
-             for (var i = 0; i < len; i++) {
-                 var p: PublishSingle = pList[i]
-                 var v: VersionSingle = ProcessData.VersionMap[p.Vid]
-                 str += `<span style="max-width:144px;display:inline-block;" class="text-overflow-hide">版本:${this.GetVersionFullname(v)}</span><br/>`
-                 str += `<span class="sk_${p.Genre}">${this.GetPublishName(p.Genre)}日期</span><br/>`
-                 if (i < len - 1) {
-                     str += `<hr/>`
-                 }
-             }
-         } else {
-             str += `无版本`
-         }
-         str += `</div>`
-         $('#workTips').xy(x, y).show().adjust(-5).html(str)
-         */
+            $(_this.VueTableHeaderTooltip.$el).css({ 'width': items.length > 1 ? items.length * 160 : 200 });
+            $(_this.VueTableHeaderTooltip.$el).find('.versionFullname').css({ 'max-width': items.length > 1 ? 150 : 190 });
+            _this.VueTableHeaderTooltip.$nextTick(function () {
+                //nextTick后 outerHTML才能拿到渲染好的
+                $('#workTips').xy(x, y).html(_this.VueTableHeaderTooltip.$el.outerHTML);
+                _this.VueTableHeaderTooltip.$nextTick(function () {
+                    //不nextTick, $el的width则无法传递给#workTips
+                    $('#workTips').show().adjust(-5);
+                });
+            });
+        };
+        if (this.VueTableHeaderTooltip == null) {
+            Loader.LoadVueTemplate(this.VuePath + 'TableHeaderTooltip', function (txt) {
+                _this.VueTableHeaderTooltip = new Vue({
+                    template: txt,
+                    data: {
+                        currDateLine: '',
+                        items: [],
+                        IsWrite: false
+                    },
+                    methods: {
+                        GetVersionFullname: _this.GetVersionFullname.bind(_this),
+                        GetPublishName: _this.GetPublishName.bind(_this),
+                    }
+                }).$mount();
+                _show();
+            });
+        }
+        else {
+            _show();
+        }
     };
     /**显示进度页面 表格头 右键打开的菜单 */
     VersionManagerClass.prototype.ShowTableHeaderMenu = function (dateLine, x, y) {
@@ -618,7 +620,7 @@ var VersionManagerClass = /** @class */ (function () {
             var version = this.VersionList[i];
             if (version.PublishList[0].DateLine) {
                 var _timestamp = Common.DateStr2TimeStamp(version.PublishList[GenreField.BEGIN - 1].DateLine);
-                if (!nearestVersion || (_timestamp < currTimestamp && _timestamp > nearestTimestamp)) {
+                if (!nearestVersion || (currTimestamp > _timestamp && _timestamp > nearestTimestamp)) {
                     nearestVersion = version;
                     nearestTimestamp = _timestamp;
                 }
@@ -637,6 +639,30 @@ var VersionManagerClass = /** @class */ (function () {
             // console.log("[debug]", "没日期")
         }
         return null;
+    };
+    /**获取前面最近的publish */
+    VersionManagerClass.prototype.GetPrevNearestPublish = function (dateLine) {
+        var nearestVersion = this.GetNearestVersion(dateLine);
+        if (nearestVersion) {
+            var currTimestamp = Common.DateStr2TimeStamp(dateLine);
+            var nextNearestPublish;
+            var nextNearestTimestamp;
+            var len = nearestVersion.PublishList.length;
+            for (var i = 0; i < len; i++) {
+                var p = nearestVersion.PublishList[i];
+                if (p.DateLine) {
+                    var _timestamp = Common.DateStr2TimeStamp(p.DateLine);
+                    if (!nextNearestPublish || (currTimestamp >= _timestamp && _timestamp > nextNearestTimestamp)) {
+                        nextNearestPublish = p;
+                        nextNearestTimestamp = _timestamp;
+                    }
+                }
+            }
+            return nextNearestPublish;
+        }
+        else {
+            return null;
+        }
     };
     /**获取后面最近的publish */
     VersionManagerClass.prototype.GetNextNearestPublish = function (dateLine) {

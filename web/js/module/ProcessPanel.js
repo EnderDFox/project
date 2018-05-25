@@ -99,8 +99,8 @@ var ProcessPanel = {
 				info.push('<div>数量:' + work.MinNum + '/' + work.MaxNum + '</div>')
 			}
 			if (info.length > 0) {
-				var top = $(this).offset().top - 7
-				var left = $(this).offset().left + $(this).width() + 8
+				var top = $(this).offset().top + $(this).height() + 2
+				var left = $(this).offset().left + $(this).width() + 2
 				$('#workTips').css({ top: top, left: left }).show().adjust(-5).html(info.join(''))
 			}
 		}).delegate('td', 'mouseleave', function (e) {
@@ -128,8 +128,8 @@ var ProcessPanel = {
 		}).delegate('td', 'mouseenter', function (e) {
 			e.stopPropagation()
 			// if($(this).find('.stroke').length == 1){//判断仅有date_line的
-				var top = $(this).offset().top - 7
-				var left = $(this).offset().left + $(this).width() + 8
+				var top = $(this).offset().top + $(this).height() + 2
+				var left = $(this).offset().left + $(this).width() + 2
 				var dateLine = $(this).attr('date_line')
 				VersionManager.ShowTableHeaderTooltip(dateLine,left,top)
 				// $('#workTips').css({top:top,left:left}).show().adjust(-5).html('<div>版本'+VersionManager.GetPublishName(genre)+'</div>')
@@ -370,7 +370,7 @@ var ProcessPanel = {
 			})
 		}
 		//版本
-		VersionManager.BindSelect("#place_versionSelect",mode.Vid, (dom) => {
+		VersionManager.BindSelect("#place_versionSelect",mode.Vid, function(dom) {
 			if (cid == C2L.C2L_PROCESS_MODE_EDIT) {
 				if(ProcessData.VersionMap[mode.Vid]){
 					$(dom).val(mode.Vid)
@@ -604,8 +604,8 @@ var ProcessPanel = {
 	//发布菜单
 	ShowMenuPub: function (o, e) {
 		var cur = $(o).parent()
-		var top = e.pageY + 1
-		var left = e.pageX + 1
+		var top = e.pageY + 4
+		var left = e.pageX + 2
 		var index = $(o).index() - 3
 		var info = ProcessPanel.DateList.list[index]
 		ProcessPanel.HideMenu()

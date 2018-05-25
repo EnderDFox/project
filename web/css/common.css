@@ -18,7 +18,7 @@ input:focus,textarea:focus,button:focus{outline:none;}
 /*功能导航*/
 .commonNav{position:fixed;z-index:1;border-bottom:1px solid #e8e8e8;display:flex;display:-webkit-flex;border-top:1px solid #e8e8e8;width:100%;height:33px;line-height:33px;top:0px;left:0px;background:#ffffff;-webkit-transform:translateZ(0);-moz-transform:translateZ(0);-ms-transform:translateZ(0);-o-transform:translateZ(0);transform:translateZ(0);}
 .commonNav .user{width:5%;display:flex;display:-webkit-flex;margin-left:10px;}
-.commonNav .user div{margin-left:5px;}
+.commonNav .user div{margin-left:5px;white-space: nowrap;}
 .commonNav .user .umsgs{color:#ff0000;font-weight:bold;cursor:pointer;}
 .commonNav .head{text-align:center;width:20%;justify-content:center;-webkit-justify-content:center;display:flex;display:-webkit-flex;}
 .commonNav .head .on,.commonNav .head li:hover{background:#3da8f5;color:#fff;font-size:16px;font-weight:bold;}

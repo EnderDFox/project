@@ -1,10 +1,10 @@
 //内容加载
 var Loader = {
-    isDebug:false,
+    isDebug: false,
     //版本号 由外部传入
-    Ver : '0.0.0',
+    Ver: '0.0.0',
     //模块Id
-    Needs:{},
+    Needs: {},
     //语言环境
     Lang: ['zh'],
     //需要加载的css文件列表
@@ -15,18 +15,18 @@ var Loader = {
     //需要加载的js文件列表  jquery必须提前加载
     //< script src = "js/Loader1.js?v=v1.3.59" > </script>
     JsList: [
-        { path: "", files: [ 'Define','PrototypeExtend','JQueryExtend', 'Protocol', 'Config', 'WSConn', 'Commond', 'Common', 'DateTime', 'Search', 'Templet', 'Data', 'Main'] },
-        { path: "lib", files: ['vue', 'Echarts.min', 'Cookie','jquery.md5'] },
+        { path: "", files: ['Define', 'PrototypeExtend', 'JQueryExtend', 'Protocol', 'Config', 'WSConn', 'Commond', 'Common', 'DateTime', 'Search', 'Templet', 'Data', 'Main'] },
+        { path: "lib", files: ['vue', 'Echarts.min', 'Cookie', 'jquery.md5'] },
         {
             path: "module", files: ['User', 'ProjectNav', 'FileManager',
                 'ProcessData', 'ProcessManager', 'ProcessPanel', 'ProcessFilter',
                 'CollateData', 'CollateManager', 'CollatePanel', 'CollateFilter',
                 'NoticeData', 'NoticeManager', 'NoticePanel',
-                'ProfileData', 'ProfileManager', 'ProfilePanel', 
-                'TemplateManager','PopManager','UploadManager','VersionManager']
+                'ProfileData', 'ProfileManager', 'ProfilePanel',
+                'TemplateManager', 'PopManager', 'UploadManager', 'VersionManager']
         },
         {
-            path:"tests",files:[]
+            path: "tests", files: []
         }
     ],
     //脚本数量
@@ -64,33 +64,45 @@ var Loader = {
         UploadManager.RegisterFunc()
     },
     //设置协议
-    SetNeedCode: function (){
+    SetNeedCode: function () {
         this.Needs[L2C.L2C_SESSION_LOGIN] = true
         this.Needs[L2C.L2C_USER_LIST] = true
         this.Needs[L2C.L2C_DEPARTMENT_LIST] = true
     },
     //检查环境
-    CheckEnviroment: function(){
-        if(window.location.href.toLowerCase().indexOf('isdebug=true')>-1){
+    CheckEnviroment: function () {
+        if (window.location.href.toLowerCase().indexOf('isdebug=true') > -1) {
             this.isDebug = true;
-        }else if(window.location.href.toLowerCase().indexOf('isdebug=false')>-1){
+        } else if (window.location.href.toLowerCase().indexOf('isdebug=false') > -1) {
             this.isDebug = false;
-        }else{
-            var hostMap:any = { '192.168.50.191:8080': 1, 'localhost:8080': 1, '192.168.118.224:8080': 1, '192.168.120.236:8080': 1 }
-            if (hostMap[location.host]) { 
+        } else {
+            var hostMap: any = { '192.168.50.191:8080': 1, 'localhost:8080': 1, '192.168.118.224:8080': 1, '192.168.120.236:8080': 1 }
+            if (hostMap[location.host]) {
                 this.isDebug = true;
-            }else{
+            } else {
                 this.isDebug = false;
             }
         }
     },
     //调试 初始化
     InitForDebug: function () {
-        console.log("[debug]",window.location.href.toLowerCase())
-        if(window.location.href.toLowerCase().indexOf('debugacc=wangy')>-1){
-            $.cookie("set",{duration:0,name:'Account',value:'wangy'})
-            $.cookie("set",{duration:0,name:'Verify',value:'cfd4ce79ef36c539b63d0e54143abf2d'})
-        }else{
+        var str = window.location.href.toLowerCase()
+        console.log("[debug]", str)
+        if (str.indexOf('debugacc=') > -1) {
+            str = str.split('debugacc=').pop().toString()
+            str = str.split('&').shift().toString()
+            var verify: string = ''
+            switch (str) {
+                case 'wangy':
+                    verify = 'cfd4ce79ef36c539b63d0e54143abf2d'
+                    break;
+                case 'xiangjch':
+                    verify = 'b078eac31f1a05a49647e8683f8fd5a8'
+                    break;
+            }
+            $.cookie("set", { duration: 0, name: 'Account', value: str })
+            $.cookie("set", { duration: 0, name: 'Verify', value: verify })
+        } else {
             $.cookie("set", { duration: 0, name: 'Account', value: 'fengjw' })
             $.cookie("set", { duration: 0, name: 'Verify', value: 'f96f8007f6566300c90cbc09555cf17b' })
         }
@@ -98,7 +110,7 @@ var Loader = {
     //脚本加载完毕
     ScriptComplete: function () {
         //调试
-        if(this.isDebug){
+        if (this.isDebug) {
             this.InitForDebug()
         }
         //注册函数
@@ -172,7 +184,7 @@ var Loader = {
     //加载脚本
     LoadAll: function () {
         //先加载jquery否则需要他的资源无法使用
-        this.loadSingleScript("lib/jquery-3.2.1.min",():void=>{
+        this.loadSingleScript("lib/jquery-3.2.1.min", (): void => {
             //计算总数
             this.LoadFileSum = 0
             for (var i in this.CssList) {
@@ -184,11 +196,11 @@ var Loader = {
             //开始加载
             for (var i in this.CssList) {
                 var item = this.CssList[i]
-                this.AsyncCss(item.files, item.path+'/')
+                this.AsyncCss(item.files, item.path + '/')
             }
             for (var i in this.JsList) {
                 var item = this.JsList[i]
-                this.AsyncScript(item.files, item.path+'/')
+                this.AsyncScript(item.files, item.path + '/')
             }
         })
     },
@@ -205,7 +217,7 @@ var Loader = {
             location.reload()
         })
         //收到
-        WSConn.onMessage(function (msg:{Cid:number,Data:any}) {
+        WSConn.onMessage(function (msg: { Cid: number, Data: any }) {
             //函数执行
             Commond.Execute(msg.Cid, msg.Data)
             //执行完毕
@@ -218,7 +230,7 @@ var Loader = {
         Main.Init()
     },
     //消息同步完成
-    MsgAsync: function (cid:number):any {
+    MsgAsync: function (cid: number): any {
         if (this.IsComplete) {
             return false
         }
@@ -234,14 +246,14 @@ var Loader = {
             this.MsgCall()
         }
     },
-    VueTemplateLoaded:{},
-    LoadVueTemplate: function (tplName:string, callback:Function) {
-        if(Loader.VueTemplateLoaded[tplName]){
+    VueTemplateLoaded: {},
+    LoadVueTemplate: function (tplName: string, callback: Function) {
+        if (Loader.VueTemplateLoaded[tplName]) {
             callback(Loader.VueTemplateLoaded[tplName])
-        }else{
+        } else {
             $.ajax({
-                url: "vue_template/" + tplName + ".html?v"+Loader.Ver, dataType: 'text', async: true,
-                success: function (res:string, textStatus:any) {
+                url: "vue_template/" + tplName + ".html?v" + Loader.Ver, dataType: 'text', async: true,
+                success: function (res: string, textStatus: any) {
                     Loader.VueTemplateLoaded[tplName] = res;
                     if (callback) {
                         callback(res)
@@ -253,22 +265,22 @@ var Loader = {
 }
 
 //准备完毕
-window.onload = function(){
+window.onload = function () {
     Loader.CheckEnviroment()
-    if(Loader.isDebug){
+    if (Loader.isDebug) {
         //开发阶段用随机数做版本号
         Loader.Init(Math.random().toString())
-    }else{
+    } else {
         //正式版本读取 <script src="js/Loader.js?v=xxx"></script> 中的版本号
         var scripts = this.document.head.getElementsByTagName('script')
         var len = scripts.length
         for (var i = 0; i < len; i++) {
             var item = scripts[i];
-            if(item.src && item.src.indexOf('Loader.js')>-1){
+            if (item.src && item.src.indexOf('Loader.js') > -1) {
                 Loader.Init(item.src.split('v=')[1])
                 return;
             }
         }
-        console.log("[fatal]",`没有找到<script src="js/Loader.js?v=xxx"></script>`);
+        console.log("[fatal]", `没有找到<script src="js/Loader.js?v=xxx"></script>`);
     }
 }

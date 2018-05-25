@@ -353,18 +353,18 @@ class VersionManagerClass {
             var pageX, pageY
             var uiList = $(this.VueVersionList.$el)
             if (uiList.isShow()) {
-                pageX = uiList.x() + uiList.width() + 5
+                //找不到 btnEdit时的默认值
+                pageX = uiList.x() + uiList.width() - 175
+                pageY = uiList.y()
+                //
                 var index = ArrayUtil.IndexOfAttr(this.VueVersionList.versions, 'Vid', version.Vid)
                 // console.log("[info]",index,":[index]",version.Vid,":[version.Vid]",version.Ver,":[version.Ver]")
                 if (index > -1) {
                     var btnEdit = uiList.find('.btnEdit').get(index)//放到编辑按钮下面
                     if (btnEdit) {
+                        pageX = uiList.x() + $(btnEdit).x() + $(btnEdit).outerWidth() / 2
                         pageY = uiList.y() + $(btnEdit).y() + $(btnEdit).outerHeight() + 2
-                    } else {
-                        pageY = uiList.y()
                     }
-                } else {
-                    pageY = uiList.y()
                 }
             } else {
                 //其实不应该进入这里
@@ -382,14 +382,9 @@ class VersionManagerClass {
                  } */
             })
             //日期绑定
-            plan.find('.date').unbind().click(function (this: HTMLInputElement) {
-                DateTime.Open(this, $(this).val(), (date) => {
-                    // console.log("[debug]","DateTime:",date)
-                    $(this).val(date)
-                    // $(this).trigger('change')
-                    $(this).click()//change无法触发,只好用click
-                })
-            })
+            // plan.find('.date').unbind().click(function (this: HTMLInputElement) {
+            // console.log("[info]","lan.find('.date').unbind().click")
+            // })
             this.ValidatePublishDateLine()
             // setTimeout(() => {
             // }, 1000);
@@ -413,12 +408,24 @@ class VersionManagerClass {
                  }, */
                 methods: {
                     publishName: this.GetPublishName.bind(this),
-                    onDateClick: (e, item: PublishSingle) => {
-                        // console.log("[info]","onClick Date",e.target.value)
-                        if (e.target.value && item.DateLine != e.target.value) {
-                            // console.log("[info]","onClick Date send",e.target.value)
-                            var data: C2L_VersionChangePublish = { Vid: item.Vid, Genre: item.Genre, DateLine: e.target.value }
-                            WSConn.sendMsg(C2L.C2L_VERSION_CHANGE_PUBLISH, data)
+                    onDateClick: (e, item: PublishSingle, index: number) => {
+                        if (!e.target.value || item.DateLine == e.target.value) {
+                            var _dateLine = $(e.target).val()
+                            if (!_dateLine) {
+                                //找到前一个时间
+                                while (index > 0) {
+                                    index--
+                                    if (this.VueVersionDetail.version.PublishList[index].DateLine) {
+                                        _dateLine = this.VueVersionDetail.version.PublishList[index].DateLine
+                                        break;
+                                    }
+                                }
+                            }
+                            DateTime.Open(e.target, _dateLine, (date) => {
+                                $(e.target).val(date)
+                                var data: C2L_VersionChangePublish = { Vid: item.Vid, Genre: item.Genre, DateLine: date }
+                                WSConn.sendMsg(C2L.C2L_VERSION_CHANGE_PUBLISH, data)
+                            })
                         }
                     },
                     onDelete: (e, item: PublishSingle) => {
@@ -457,7 +464,7 @@ class VersionManagerClass {
                         //没设置start 却先设置其它时间了, 则start需要标红
                         this.VueVersionDetail.version.PublishList[0].ErrorMsg = '必须设置开始日期'
                     }
-                    if (_timestamp < lastDateLineTimestamp) {
+                    if (_timestamp <= lastDateLineTimestamp) {
                         //后面的时间必须大于等于前面的时间,否则标红
                         p.ErrorMsg = `${this.GetPublishName(p.Genre)}日期必须晚于${this.GetPublishName(lastPublish.Genre)}日期`
                     } else {
@@ -500,10 +507,9 @@ class VersionManagerClass {
         }
     }
     /**显示进度页面 表格头 日期格子中的tooltip */
-    VueTableHeaderTooltip: CombinedVueInstance1<{ currDateLine:string, items: TooltipItem[] }>
+    VueTableHeaderTooltip: CombinedVueInstance1<{ currDateLine: string, items: TooltipItem[], IsWrite: boolean }>
     ShowTableHeaderTooltip(dateLine: string, x: number, y: number) {
-        Loader.LoadVueTemplate(this.VuePath + 'TableHeaderTooltip', (txt: string) => {
-            //
+        var _show = () => {
             var items: TooltipItem[] = []
             if (ProcessData.HasVersionDateLineMap(dateLine)) {
                 var pList: PublishSingle[] = ProcessData.VersionDateLineMap[dateLine]
@@ -516,47 +522,45 @@ class VersionManagerClass {
             } else {
                 var nearestVersion = this.GetNearestVersion(dateLine)
                 if (nearestVersion) {
-                    items.push({ version: nearestVersion, publish: { Vid: nearestVersion.Vid, Genre: 0, DateLine: '' } })
+                    var p = this.GetPrevNearestPublish(dateLine)
+                    items.push({ version: nearestVersion, publish: p })
                 }
             }
             //
-            this.VueTableHeaderTooltip = new Vue({
-                template: txt,
-                data: {
-                    currDateLine:dateLine,
-                    items: items,
-                },
-                methods: {
-                    GetVersionFullname: this.GetVersionFullname.bind(this),
-                    GetPublishName: this.GetPublishName.bind(this),
-                }
-            }).$mount()
+            this.VueTableHeaderTooltip.currDateLine = dateLine
+            this.VueTableHeaderTooltip.items = items
+            this.VueTableHeaderTooltip.IsWrite = User.IsWrite
             //
-            $('#workTips').xy(x, y).show().adjust(-5).html(this.VueTableHeaderTooltip.$el.outerHTML)
-        })
-        /*  var str = `<div>`
-         if (ProcessData.HasVersionDateLineMap(dateLine)) {
-             var pList: PublishSingle[] = ProcessData.VersionDateLineMap[dateLine]
-             if (pList.length > 1) {
-                 str += `<span style="color:#FF0000">警告:有多个版本日期</span><br/>`
-                 str += `<span style="color:#FF0000">点击右键编辑</span><br/>`
-             }
-             var len = pList.length
-             for (var i = 0; i < len; i++) {
-                 var p: PublishSingle = pList[i]
-                 var v: VersionSingle = ProcessData.VersionMap[p.Vid]
-                 str += `<span style="max-width:144px;display:inline-block;" class="text-overflow-hide">版本:${this.GetVersionFullname(v)}</span><br/>`
-                 str += `<span class="sk_${p.Genre}">${this.GetPublishName(p.Genre)}日期</span><br/>`
-                 if (i < len - 1) {
-                     str += `<hr/>`
-                 }
-             }
-         } else {
-             str += `无版本`
-         }
-         str += `</div>` 
-         $('#workTips').xy(x, y).show().adjust(-5).html(str)
-         */
+            $(this.VueTableHeaderTooltip.$el).css({ 'width': items.length > 1 ? items.length * 160 : 200 })
+            $(this.VueTableHeaderTooltip.$el).find('.versionFullname').css({ 'max-width': items.length > 1 ? 150 : 190 })
+            this.VueTableHeaderTooltip.$nextTick(() => {
+                //nextTick后 outerHTML才能拿到渲染好的
+                $('#workTips').xy(x, y).html(this.VueTableHeaderTooltip.$el.outerHTML)
+                this.VueTableHeaderTooltip.$nextTick(() => {
+                    //不nextTick, $el的width则无法传递给#workTips
+                    $('#workTips').show().adjust(-5)
+                })
+            })
+        }
+        if (this.VueTableHeaderTooltip == null) {
+            Loader.LoadVueTemplate(this.VuePath + 'TableHeaderTooltip', (txt: string) => {
+                this.VueTableHeaderTooltip = new Vue({
+                    template: txt,
+                    data: {
+                        currDateLine: '',
+                        items: [],
+                        IsWrite: false
+                    },
+                    methods: {
+                        GetVersionFullname: this.GetVersionFullname.bind(this),
+                        GetPublishName: this.GetPublishName.bind(this),
+                    }
+                }).$mount()
+                _show()
+            })
+        } else {
+            _show()
+        }
     }
     /**显示进度页面 表格头 右键打开的菜单 */
     ShowTableHeaderMenu(dateLine: string, x: number, y: number) {
@@ -649,7 +653,7 @@ class VersionManagerClass {
             var version = this.VersionList[i]
             if (version.PublishList[0].DateLine) {
                 var _timestamp = Common.DateStr2TimeStamp(version.PublishList[GenreField.BEGIN - 1].DateLine)
-                if (!nearestVersion || (_timestamp < currTimestamp && _timestamp > nearestTimestamp)) {
+                if (!nearestVersion || (currTimestamp > _timestamp && _timestamp > nearestTimestamp)) {
                     nearestVersion = version
                     nearestTimestamp = _timestamp
                 }
@@ -666,6 +670,29 @@ class VersionManagerClass {
             // console.log("[debug]", "没日期")
         }
         return null
+    }
+    /**获取前面最近的publish */
+    GetPrevNearestPublish(dateLine: string): PublishSingle {
+        var nearestVersion: VersionSingle = this.GetNearestVersion(dateLine)
+        if (nearestVersion) {
+            var currTimestamp = Common.DateStr2TimeStamp(dateLine)
+            var nextNearestPublish: PublishSingle
+            var nextNearestTimestamp: number
+            var len = nearestVersion.PublishList.length
+            for (var i = 0; i < len; i++) {
+                var p = nearestVersion.PublishList[i]
+                if (p.DateLine) {
+                    var _timestamp = Common.DateStr2TimeStamp(p.DateLine)
+                    if (!nextNearestPublish || (currTimestamp >= _timestamp && _timestamp > nextNearestTimestamp)) {
+                        nextNearestPublish = p
+                        nextNearestTimestamp = _timestamp
+                    }
+                }
+            }
+            return nextNearestPublish
+        } else {
+            return null
+        }
     }
     /**获取后面最近的publish */
     GetNextNearestPublish(dateLine: string): PublishSingle {

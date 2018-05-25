@@ -1,4 +1,4 @@
-#在cd /root/trunk_beta/src/pm后 执行命令sh ./run_beta.sh
+#在 cd /root/trunk_beta/src/pm 后 执行命令sh ./run.beta.sh
 #svn更新
 svn up ../../
 #copy 文件

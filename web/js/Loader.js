@@ -89,10 +89,22 @@ var Loader = {
     },
     //调试 初始化
     InitForDebug: function () {
-        console.log("[debug]", window.location.href.toLowerCase());
-        if (window.location.href.toLowerCase().indexOf('debugacc=wangy') > -1) {
-            $.cookie("set", { duration: 0, name: 'Account', value: 'wangy' });
-            $.cookie("set", { duration: 0, name: 'Verify', value: 'cfd4ce79ef36c539b63d0e54143abf2d' });
+        var str = window.location.href.toLowerCase();
+        console.log("[debug]", str);
+        if (str.indexOf('debugacc=') > -1) {
+            str = str.split('debugacc=').pop().toString();
+            str = str.split('&').shift().toString();
+            var verify = '';
+            switch (str) {
+                case 'wangy':
+                    verify = 'cfd4ce79ef36c539b63d0e54143abf2d';
+                    break;
+                case 'xiangjch':
+                    verify = 'b078eac31f1a05a49647e8683f8fd5a8';
+                    break;
+            }
+            $.cookie("set", { duration: 0, name: 'Account', value: str });
+            $.cookie("set", { duration: 0, name: 'Verify', value: verify });
         }
         else {
             $.cookie("set", { duration: 0, name: 'Account', value: 'fengjw' });

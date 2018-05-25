@@ -119,6 +119,7 @@ declare class UserClass {
     Uid: number
     Login(): void
     RegisterFunc(): void
+    IsWrite: boolean
 }
 declare var User: UserClass
 /** */

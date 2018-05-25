@@ -123,7 +123,7 @@ var CommonClass = /** @class */ (function () {
     CommonClass.prototype._ShowPullDownMenu = function (x, y, itemList, clickCallback) {
         this.VuePullDownMenu.itemList = itemList;
         this.VuePullDownMenu.clickCallback = clickCallback;
-        $(this.VuePullDownMenu.$el).xy(x, y).show();
+        $(this.VuePullDownMenu.$el).xy(x, y).show().adjust(-5);
     };
     CommonClass.prototype.HidePullDownMenu = function () {
         if (this.VuePullDownMenu) {

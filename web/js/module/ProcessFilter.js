@@ -136,10 +136,11 @@ var ProcessFilter = {
 			$(this).select()
 		})
 	},
-	HideFilter:function(fade = true){
-		if(fade){
+	HideFilter: function (fade) {
+		if (fade === void 0) { fade = true; }
+		if (fade) {
 			$('#stepFilter').fadeOut(Config.FadeTime)
-		}else{
+		} else {
 			$('#stepFilter').hide()
 		}
 		$('#storeMenu').hide()
@@ -153,20 +154,20 @@ var ProcessFilter = {
 		plan.css({ top: top, left: left }).show()
 		//版本刷新
 		var oldVid = ProcessFilter.Pack.Vid
-		if(oldVid>0){
+		if (oldVid > 0) {
 			var oldVidLabel = null
 			var len = Math.min(ProcessData.VersionList.length, 10)
 			for (var i = 0; i < len; i++) {
 				var version = ProcessData.VersionList[i];
-				if(oldVid==version.Vid){
+				if (oldVid == version.Vid) {
 					oldVidLabel = VersionManager.GetVersionFullname(version).toString()
 				}
 			}
-			if(oldVidLabel==null){
+			if (oldVidLabel == null) {
 				//old vid发生变化, 需要重设
 				ProcessFilter.SetPack('Vid', 0)
 				plan.find('.select[stype="Vid"]').val("版本号")
-			}else{
+			} else {
 				//全名有可能在版本编辑中变化了,这里需要重新设置
 				plan.find('.select[stype="Vid"]').val(oldVidLabel)
 			}
@@ -185,7 +186,7 @@ var ProcessFilter = {
 				itemList.push(item)
 			}
 			//
-			Common.ShowPullDownMenu(left, top, itemList, (item) => {
+			Common.ShowPullDownMenu(left, top, itemList, function (item) {
 				if (item.Key == 0) {
 					$(dom).val("版本号")
 				} else {

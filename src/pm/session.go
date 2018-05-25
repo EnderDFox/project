@@ -44,6 +44,7 @@ func (this *Session) GetUsers() map[uint64]*User {
 func (this *Session) Login(client *websocket.Conn, account, verify string) bool {
 	has := md5.Sum([]byte(this.Key + account))
 	md5str := fmt.Sprintf("%x", has)
+	log.Println(md5str, ":[md5str]", verify, ":[verify]")
 	if md5str != verify {
 		msg := &L2C_Message{
 			Cid:  L2C_SESSION_LOGIN_ERROR,

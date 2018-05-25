@@ -120,7 +120,7 @@ class CommonClass {
 	_ShowPullDownMenu(x: number, y: number, itemList: IPullDownMenuItem[], clickCallback: (item: IPullDownMenuItem) => void): void {
 		this.VuePullDownMenu.itemList = itemList
 		this.VuePullDownMenu.clickCallback = clickCallback
-		$(this.VuePullDownMenu.$el).xy(x, y).show()
+		$(this.VuePullDownMenu.$el).xy(x, y).show().adjust(-5)
 	}
 	HidePullDownMenu(): void {
 		if (this.VuePullDownMenu) {
