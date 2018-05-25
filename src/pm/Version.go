@@ -18,7 +18,7 @@ func NewVersion(user *User) *Version {
 }
 
 func (this *Version) VersionList() []*VersionSingle {
-	stmt, err := db.GetDb().Prepare(`SELECT vid,ver,name FROM ` + config.Pm + `.pm_version WHERE pid = ? AND is_del=0 ORDER BY sort DESC`)
+	stmt, err := db.GetDb().Prepare(`SELECT vid,ver,name FROM ` + config.Pm + `.pm_version WHERE pid = ? AND is_del=0 ORDER BY sort DESC, vid DESC`)
 	defer stmt.Close()
 	db.CheckErr(err)
 	rows, err := stmt.Query(COMMON_PID)
@@ -51,7 +51,11 @@ func (this *Version) PublishList(vid uint64) []*PublishSingle {
 }
 
 func (this *Version) VersionAdd(ver string, name string) bool {
-	stmt, err := db.GetDb().Prepare(`INSERT INTO ` + config.Pm + `.pm_version (pid,ver,name,add_uid,create_time) VALUES (?,?,?,?,?)`)
+	stmt, err := db.GetDb().Prepare(`INSERT INTO ` + config.Pm + `.pm_version (pid,ver,name,add_uid,create_time,sort) VALUES (?,?,?,?,?,(
+		(SELECT IFNULL(
+			(SELECT ms FROM(SELECT max(sort)+1 AS ms FROM ` + config.Pm + `.pm_version) b)
+		,1))
+		))`)
 	defer stmt.Close()
 	db.CheckErr(err)
 	res, err := stmt.Exec(COMMON_PID, ver, name, this.owner.GetUid(), time.Now().Unix())
@@ -71,11 +75,13 @@ func (this *Version) VersionAdd(ver string, name string) bool {
 }
 
 func (this *Version) VersionDelete(vid uint64) bool {
-	stmt, err := db.GetDb().Prepare(`UPDATE ` + config.Pm + `.pm_version SET is_del = 1 WHERE vid=?`)
+	//设置 is_del=1
+	stmt, err := db.GetDb().Prepare(`UPDATE ` + config.Pm + `.pm_version SET is_del = 1 WHERE vid=?;`)
 	defer stmt.Close()
 	db.CheckErr(err)
 	_, err = stmt.Exec(vid)
 	db.CheckErr(err)
+	//比当前大的sort-1 没必要改,不影响排序的
 	//
 	data := &L2C_VersionDelete{
 		Vid: vid,
@@ -137,6 +143,7 @@ func (this *Version) VersionChangePublish(vid uint64, genre uint32, dateLine str
 
 func (this *Version) VersionChangeSort(vid1 uint64, vid2 uint64) bool {
 	//拿旧值
+	/* # 传统方式
 	stmt, err := db.GetDb().Prepare(`SELECT vid,sort FROM ` + config.Pm + `.pm_version WHERE vid in(?,?) and is_del=0`)
 	defer stmt.Close()
 	db.CheckErr(err)
@@ -167,6 +174,15 @@ func (this *Version) VersionChangeSort(vid1 uint64, vid2 uint64) bool {
 	defer stmt.Close()
 	db.CheckErr(err)
 	_, err = stmt.Exec(sort2, vid1)
+	db.CheckErr(err) */
+	//# 使用一条sql处理
+	stmt, err := db.GetDb().Prepare(`UPDATE ` + config.Pm + `.pm_version a,` + config.Pm + `.pm_version b,
+		(SELECT @a:=` + config.Pm + `.pm_version.sort va FROM ` + config.Pm + `.pm_version WHERE ` + config.Pm + `.pm_version.vid=?) tas,
+		(SELECT @b:=` + config.Pm + `.pm_version.sort vb FROM ` + config.Pm + `.pm_version WHERE ` + config.Pm + `.pm_version.vid=?) tbs 
+	SET a.sort = @b,b.sort=@a where a.vid=? and b.vid=?`)
+	defer stmt.Close()
+	db.CheckErr(err)
+	_, err = stmt.Exec(vid1, vid2, vid1, vid2)
 	db.CheckErr(err)
 	//发送给所有人
 	data := &C2L_VersionChangeSort{
