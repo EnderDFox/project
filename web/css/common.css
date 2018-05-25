@@ -44,6 +44,13 @@ input:focus,textarea:focus,button:focus{outline:none;}
     padding: 0px 0px 0px 0px;
     margin: 0px 0px 0px 0px;
 }
+.list-style-type-none{
+    list-style-type:none !important;
+}
+
+.font_bold{
+    font-weight:bold !important;
+}
 /* 鼠标样式 */
 .cursor_none{
     cursor:none !important;
@@ -146,6 +153,7 @@ input:focus,textarea:focus,button:focus{outline:none;}
 
 
 /*通用效果*/
-.button-disabled{background: #BBBBBB}
-.button-disabled:hover{background: #BBBBBB;border-color: #BBBBBB}
+.button-disabled{background: #BBBBBB;}
+.button-disabled:hover{background: #BBBBBB;border-color: #BBBBBB;}
 .text-overflow-hide{white-space: nowrap;text-overflow: ellipsis;overflow: hidden;}
+.font_color_black3{color: #333333;}

@@ -66,7 +66,7 @@
 .process .weekend{background:#d9d9d9;}		/*节假日*/
 
 /*工作Tips*/
-.workTips{z-index:1;border-radius:3px;padding:7px;min-height:70px;color:#000000;font-size:14px;background:#ffffe1;min-width:135px;width:135px;position:absolute;box-shadow:0px 0px 5px #333333;display:none;}
+.workTips{z-index:1;border-radius:3px;padding:7px;min-height:70px;color:#000000;font-size:14px;background:#ffffe1;min-width:135px;position:absolute;box-shadow:0px 0px 5px #333333;display:none;}
 
 /*编辑环节*/
 .editLink .text{text-align:center;}
@@ -108,6 +108,11 @@
 .editTplMode .leftBlock{margin-left: 30px;}
 
 /*  */
+
+.border_right_vline{
+  border-right:2px solid #BBBBBB;
+}
+
 .listOpenBorder{
   border-color: rgb(10, 150, 17);
 }

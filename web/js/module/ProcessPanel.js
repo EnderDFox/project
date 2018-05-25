@@ -113,9 +113,10 @@ var ProcessPanel = {
 			ProcessPanel.HideMenu()
 			TemplateManager.Hide()
 			VersionManager.Hide()
+			/* 改成左键单击 但也保留右键 为了兼容旧版本
 			if (e.button !== Main.MouseDir) {
 				return false
-			}
+			} */
 			if (!User.IsWrite) {
 				return false
 			}
@@ -126,13 +127,13 @@ var ProcessPanel = {
 			ProcessPanel.ShowMenuPub(this, e)
 		}).delegate('td', 'mouseenter', function (e) {
 			e.stopPropagation()
-			if($(this).find('.stroke').length == 1){
+			// if($(this).find('.stroke').length == 1){//判断仅有date_line的
 				var top = $(this).offset().top - 7
 				var left = $(this).offset().left + $(this).width() + 8
-				var dateLine = $(this).find('.stroke').attr('date_line')
+				var dateLine = $(this).attr('date_line')
 				VersionManager.ShowTableHeaderTooltip(dateLine,left,top)
 				// $('#workTips').css({top:top,left:left}).show().adjust(-5).html('<div>版本'+VersionManager.GetPublishName(genre)+'</div>')
-			}
+			// }
 		}).delegate('td', 'mouseleave', function (e) {
 			e.stopPropagation()
 			$('#workTips').hide()
@@ -160,10 +161,11 @@ var ProcessPanel = {
 					<td class="duty">负责人</td>'
 		$.each(ProcessPanel.DateList.list, function (k, info) {
 			if (info.s == today) {
-				html += '<td class="today">'
+				html += '<td class="today"'
 			} else {
-				html += '<td>'
+				html += '<td'
 			}
+			html += ' date_line="'+info.s+'">'
 			html += '<div class="info">' + info.d + '</div>'
 			if (ProcessData.HasVersionDateLineMap(info.s) ){
 				var _genre = ProcessData.VersionDateLineMap[info.s][0].Genre

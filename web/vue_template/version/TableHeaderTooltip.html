@@ -1,0 +1,19 @@
+<div>
+    <div style="padding-bottom: 4px;font-weight: normal;">
+        {{currDateLine}}
+    </div>
+    <div style="padding-bottom: 10px;" v-if="items.length!=1">
+        <span style="color:#FF0000;" v-if="items.length>1">警告:有{{items.length}}个版本日期</span>
+        <span v-if="items.length==0">未设置版本</span>
+    </div>
+    <div v-if="items.length>=1">
+        <div v-for="item,index in items" style="display: inline-block;width: 120px;padding-left: 6px;" :class="{'border_right_vline':index<items.length-1}">
+            <!-- <hr v-if="items.length>1"/> -->
+            <span style="max-width:144px;display:inline-block; font-size: 16px;" class="text-overflow-hide">版本:{{GetVersionFullname(item.version)}}</span><br/>
+            <li v-for="pItem,pIndex in item.version.PublishList" class="list-style-type-none" :class="{'font_bold':pItem.Genre==item.publish.Genre}"><span :class="['sk_color_'+pItem.Genre]">{{GetPublishName(pItem.Genre)}}: </span><span :class="{'font_bold':pItem.Genre==item.publish.Genre,'font_color_black3':pItem.Genre!=item.publish.Genre}">{{pItem.DateLine||'空'}}</span></li>
+        </div>
+    </div>
+    <div style="color:rgb(151, 151, 151);padding-top: 10px;" >
+        点击左键编辑
+    </div>
+</div>

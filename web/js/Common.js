@@ -38,6 +38,13 @@ var CommonClass = /** @class */ (function () {
         var date = new Date(dateLine);
         return date.getTime();
     };
+    //两个DateLine的间隔日
+    CommonClass.prototype.DateLineSpaceDay = function (dateLine1, dateLine2) {
+        var ts1 = this.DateStr2TimeStamp(dateLine1);
+        var ts2 = this.DateStr2TimeStamp(dateLine2);
+        var ts = Math.abs(ts1 - ts2);
+        return Math.floor(ts / 1000 / 3600 / 24);
+    };
     /**终端判定*/
     CommonClass.prototype.IsPC = function () {
         var userAgentInfo = navigator.userAgent;

@@ -34,6 +34,13 @@ class CommonClass {
 		var date = new Date(dateLine)
 		return date.getTime()
 	}
+	//两个DateLine的间隔日
+	DateLineSpaceDay(dateLine1: string, dateLine2: string): number {
+		var ts1 = this.DateStr2TimeStamp(dateLine1)
+		var ts2 = this.DateStr2TimeStamp(dateLine2)
+		var ts = Math.abs(ts1-ts2)
+		return Math.floor(ts/1000/3600/24)
+	}
 	/**终端判定*/
 	IsPC(): boolean {
 		var userAgentInfo = navigator.userAgent
@@ -84,7 +91,7 @@ class CommonClass {
 	}
 	//## Aue
 	AuePath = 'common/'
-	VuePullDownMenu: CombinedVueInstance1<{ itemList: IPullDownMenuItem[],clickCallback:(item: IPullDownMenuItem) => void }>
+	VuePullDownMenu: CombinedVueInstance1<{ itemList: IPullDownMenuItem[], clickCallback: (item: IPullDownMenuItem) => void }>
 	//### 下拉菜单
 	ShowPullDownMenu(x: number, y: number, itemList: IPullDownMenuItem[], clickCallback: (item: IPullDownMenuItem) => void) {
 		if (this.VuePullDownMenu == null) {
@@ -93,7 +100,7 @@ class CommonClass {
 					template: txt,
 					data: {
 						itemList: [],
-						clickCallback:null,
+						clickCallback: null,
 					},
 					methods: {
 						onClick: (item: IPullDownMenuItem) => {
@@ -104,13 +111,13 @@ class CommonClass {
 					}
 				}).$mount()
 				Common.InsertBeforeDynamicDom(this.VuePullDownMenu.$el)
-				this._ShowPullDownMenu(x, y, itemList,clickCallback)
+				this._ShowPullDownMenu(x, y, itemList, clickCallback)
 			})
 		} else {
-			this._ShowPullDownMenu(x, y, itemList,clickCallback)
+			this._ShowPullDownMenu(x, y, itemList, clickCallback)
 		}
 	}
-	_ShowPullDownMenu(x: number, y: number, itemList: IPullDownMenuItem[],clickCallback: (item: IPullDownMenuItem) => void): void {
+	_ShowPullDownMenu(x: number, y: number, itemList: IPullDownMenuItem[], clickCallback: (item: IPullDownMenuItem) => void): void {
 		this.VuePullDownMenu.itemList = itemList
 		this.VuePullDownMenu.clickCallback = clickCallback
 		$(this.VuePullDownMenu.$el).xy(x, y).show()
