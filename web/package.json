@@ -2,5 +2,6 @@
   "name": "fox.tools.web",
   "version": "1.0.3",
   "dependencies": {
+    "@types/pdf": "^0.0.31"
   }
 }

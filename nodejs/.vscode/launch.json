@@ -34,16 +34,18 @@
             "type": "node",
             "request": "launch",
             "name": "Launch StaticServer",
-            "program": "${workspaceFolder}/ts/StaticServer.ts",
+            "program": "${workspaceFolder}/ts/FileManager.ts",
             "args": [
-                "-p","4399",
-                "-d","C:/fox/projects/MKGProject1/tb_client"
+                "-p","823",
+                "-d","D:/",
+                "-f","D:/download"
                 // "--dir","C:/fox/projects/performance/egret"
                 // "-p","831"
             ],
             "outFiles": [
                 "${workspaceFolder}/bin/js/*.js"
-            ]
+            ],
+            "cwd": "${workspaceFolder}"
         },
         {
             "type": "node",

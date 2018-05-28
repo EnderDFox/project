@@ -2,7 +2,7 @@ var FileManager = /** @class */ (function () {
     function FileManager() {
     }
     FileManager.prototype.onload = function () {
-        $.get("list", null, this.onList.bind(this));
+        $.get("/list", { currPath: "code" }, this.onList.bind(this));
     };
     FileManager.prototype.onList = function (data) {
         var _this = this;

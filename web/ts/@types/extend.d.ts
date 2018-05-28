@@ -38,5 +38,14 @@ interface JQuery<TElement extends Node = HTMLElement> extends Iterable<TElement>
 declare type CombinedVueInstance1<Data> = Vue & Data;
 
 
+//======pdfjs
+interface PDFJSStatic{
+    GlobalWorkerOptions:any
+}
+
+interface PDFRenderTask{
+    promise:any
+}
+
 
 

@@ -63,8 +63,8 @@ var FileManager = /** @class */ (function () {
         //start server
         var port = args.port || 80;
         app.listen(port, function () {
-            console.log('Express started on http://localhost:' +
-                port + ' ; press Ctrl-C to terminate.');
+            console.log("Express started on http://" + _this.getIPAdress() + ":" +
+                port + "  press Ctrl-C to terminate.");
         });
     };
     /** 没有定位到的,如果是目录,则显示目录列表 */
@@ -75,14 +75,19 @@ var FileManager = /** @class */ (function () {
         }
         var folder = path.resolve(this.staticPath, reqUrl);
         // console.log("[debug]", "will showFolderContent:", folder)
-        var stat = fs.lstatSync(folder);
-        if (stat.isDirectory()) {
-            var t = fs.readFileSync(path.resolve(process.cwd(), 'bin/template/index.template.html')).toString();
-            var children = [];
-            t = ejs.render(t, { title: 'Folder List', children: this.getChildFiles(folder, null) });
-            // console.log("[info]", "t:", t)
-            res.end(t);
-            return true;
+        if (fs.existsSync(folder)) {
+            var stat = fs.lstatSync(folder);
+            if (stat.isDirectory()) {
+                var t = fs.readFileSync(path.resolve(process.cwd(), 'bin/template/index.template.html')).toString();
+                var children = [];
+                t = ejs.render(t, { title: 'Folder List', children: this.getChildFiles(folder, null) });
+                // console.log("[info]", "t:", t)
+                res.end(t);
+                return true;
+            }
+            else {
+                return false;
+            }
         }
         else {
             return false;
@@ -256,6 +261,19 @@ var FileManager = /** @class */ (function () {
         fs.renameSync(req.query.fullname, newFullnameTemp);
         fs.renameSync(newFullnameTemp, req.query.newFullname);
         res.send({ success: true });
+    };
+    FileManager.prototype.getIPAdress = function () {
+        var interfaces = require('os').networkInterfaces();
+        for (var devName in interfaces) {
+            var iface = interfaces[devName];
+            for (var i = 0; i < iface.length; i++) {
+                var alias = iface[i];
+                if (alias.family === 'IPv4' && alias.address !== '127.0.0.1' && !alias.internal) {
+                    return alias.address;
+                }
+            }
+        }
+        return "localhost";
     };
     FileManager.Ext_map = ".map";
     return FileManager;
