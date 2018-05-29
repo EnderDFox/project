@@ -1,32 +1,29 @@
-var PdfViewer_page = /** @class */ (function () {
-    function PdfViewer_page() {
+var PdfViewer = /** @class */ (function () {
+    function PdfViewer() {
         this.pageNum = 1;
         this.pageScale = 1.0;
         this.pageRendering = false;
         this.pageNumPending = null;
     }
-    PdfViewer_page.prototype.init = function () {
+    PdfViewer.prototype.init = function () {
         var _this = this;
         var pdfPath = 'assets/Go in Action CN.pdf';
         // Loaded via <script> tag, create shortcut to access PDF.js exports.
         this.pdfjsLib = window['pdfjs-dist/build/pdf'];
         // The workerSrc property shall be specified.
         this.pdfjsLib.GlobalWorkerOptions.workerSrc = 'js/pdfjs/pdf.worker.js';
+        //
         this.canvas = document.getElementById('the-canvas');
         this.ctx = this.canvas.getContext('2d');
-        /**
-         * Get page info from document, resize canvas accordingly, and render page.
-         * @param num Page number.
-         */
-        /**
-         * If another page rendering in progress, waits until the rendering is
-         * finised. Otherwise, executes rendering immediately.
-         */
+        //
+        this.initVue();
+        //
         document.getElementById('prev').addEventListener('click', this.onPrevPage.bind(this));
         document.getElementById('next').addEventListener('click', this.onNextPage.bind(this));
         document.getElementById('zoomOut').addEventListener('click', this.onZoomOut.bind(this));
         document.getElementById('zoomIn').addEventListener('click', this.onZoomIn.bind(this));
         document.getElementById('pageTo').addEventListener('click', this.onPageTo.bind(this));
+        //
         /**
          * Asynchronously downloads PDF.
          */
@@ -35,12 +32,12 @@ var PdfViewer_page = /** @class */ (function () {
             document.getElementById('page_count').textContent = _this.pdfDoc.numPages.toString();
             // Initial/first page rendering
             _this._renderPage(_this.pageNum);
+            _this.initOutline();
         });
-        this.initVue();
     };
-    PdfViewer_page.prototype.initVue = function () {
+    PdfViewer.prototype.initVue = function () {
         // demo数据
-        var data = {
+        var treeData = {
             name: 'My Tree',
             children: [
                 { name: 'hello' },
@@ -79,14 +76,41 @@ var PdfViewer_page = /** @class */ (function () {
             },
             methods: {}
         });
-        var demo = new Vue({
-            el: '#demo',
+        console.log("[info]", treeData, ":[treeData]");
+        this.vueOutline = new Vue({
+            el: '#outline',
             data: {
-                treeData: data
+                treeData: treeData
             }
         });
     };
-    PdfViewer_page.prototype.doRenderPage = function (num) {
+    PdfViewer.prototype.initOutline = function () {
+        var _this = this;
+        // this.vueOutline 
+        this.pdfDoc.getOutline().then(function (outline) {
+            // console.log("[info] outline:",outline.length)
+            var logItems = function (items, depth) {
+                if (depth === void 0) { depth = 0; }
+                var treeData = [];
+                var len = items.length;
+                for (var i = 0; i < len; i++) {
+                    var item = items[i];
+                    // console.log("[log]", i, ':', depth, "-", item.title, item)
+                    var data = { name: item.title };
+                    // data.dest = item.dest
+                    // data.isOpen = true
+                    if (item.items && item.items.length > 0) {
+                        data.children = logItems(item.items, depth + 1);
+                    }
+                    treeData.push(data);
+                }
+                return treeData;
+            };
+            console.log("[info]", logItems(outline, 0), ":[logItems(outline, 0)]");
+            _this.vueOutline.treeData = { 'name': 'outline', 'children': logItems(outline, 0) };
+        });
+    };
+    PdfViewer.prototype.doRenderPage = function (num) {
         this.pageNum = num;
         if (this.pageRendering) {
             this.pageNumPending = num;
@@ -98,7 +122,7 @@ var PdfViewer_page = /** @class */ (function () {
     /**
      * Displays previous page.
      */
-    PdfViewer_page.prototype.onPrevPage = function () {
+    PdfViewer.prototype.onPrevPage = function () {
         if (this.pageNum <= 1) {
             return;
         }
@@ -107,19 +131,19 @@ var PdfViewer_page = /** @class */ (function () {
     /**
      * Displays next page.
      */
-    PdfViewer_page.prototype.onNextPage = function () {
+    PdfViewer.prototype.onNextPage = function () {
         if (this.pageNum >= this.pdfDoc.numPages) {
             return;
         }
         this.doRenderPage(this.pageNum + 1);
     };
-    PdfViewer_page.prototype.onZoomOut = function () {
+    PdfViewer.prototype.onZoomOut = function () {
         this.renderScale(this.pageScale - 0.1);
     };
-    PdfViewer_page.prototype.onZoomIn = function () {
+    PdfViewer.prototype.onZoomIn = function () {
         this.renderScale(this.pageScale + 0.1);
     };
-    PdfViewer_page.prototype.onPageTo = function () {
+    PdfViewer.prototype.onPageTo = function () {
         var _this = this;
         this.pdfDoc.getOutline().then(function (outline) {
             // console.log("[info] outline:",outline.length)
@@ -142,13 +166,13 @@ var PdfViewer_page = /** @class */ (function () {
             logItems(outline, 0);
         });
     };
-    PdfViewer_page.prototype.renderScale = function (val) {
+    PdfViewer.prototype.renderScale = function (val) {
         this.pageScale = val;
         this.viewport.fontScale = val;
         this.doRenderPage(this.pageNum);
         document.getElementById('page_scale').textContent = val.toString();
     };
-    PdfViewer_page.prototype._renderPage = function (num) {
+    PdfViewer.prototype._renderPage = function (num) {
         var _this = this;
         this.pageRendering = true;
         // Using promise to fetch the page
@@ -176,6 +200,6 @@ var PdfViewer_page = /** @class */ (function () {
         // Update page counters
         document.getElementById('page_num').textContent = num.toString();
     };
-    return PdfViewer_page;
+    return PdfViewer;
 }());
 //# sourceMappingURL=PdfViewer.js.map

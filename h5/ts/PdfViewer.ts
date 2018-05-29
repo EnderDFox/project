@@ -1,4 +1,10 @@
-class PdfViewer_page {
+interface ITreeItem {
+    name?: string
+    children?: ITreeItem[]
+    isOpen?: boolean
+    dest?: any
+}
+class PdfViewer {
     canvas: HTMLCanvasElement
     ctx: CanvasRenderingContext2D
     pdfjsLib: PDFJSStatic
@@ -16,47 +22,35 @@ class PdfViewer_page {
 
         // The workerSrc property shall be specified.
         this.pdfjsLib.GlobalWorkerOptions.workerSrc = 'js/pdfjs/pdf.worker.js';
-
-
+        //
         this.canvas = document.getElementById('the-canvas') as HTMLCanvasElement
         this.ctx = this.canvas.getContext('2d')
-
-        /**
-         * Get page info from document, resize canvas accordingly, and render page.
-         * @param num Page number.
-         */
-
-        /**
-         * If another page rendering in progress, waits until the rendering is
-         * finised. Otherwise, executes rendering immediately.
-         */
-
+        //
+        this.initVue()
+        //
         document.getElementById('prev').addEventListener('click', this.onPrevPage.bind(this));
-
         document.getElementById('next').addEventListener('click', this.onNextPage.bind(this));
         document.getElementById('zoomOut').addEventListener('click', this.onZoomOut.bind(this));
         document.getElementById('zoomIn').addEventListener('click', this.onZoomIn.bind(this));
         document.getElementById('pageTo').addEventListener('click', this.onPageTo.bind(this));
-
+        //
         /**
          * Asynchronously downloads PDF.
          */
         this.pdfjsLib.getDocument(pdfPath).then((pdfDoc_: PDFDocumentProxy) => {
             this.pdfDoc = pdfDoc_;
             document.getElementById('page_count').textContent = this.pdfDoc.numPages.toString();
-
             // Initial/first page rendering
             this._renderPage(this.pageNum);
-
+            this.initOutline()
         });
 
-        this.initVue()
 
     }
 
     initVue() {
         // demo数据
-        var data = {
+        var treeData = {
             name: 'My Tree',
             children: [
                 { name: 'hello' },
@@ -99,12 +93,39 @@ class PdfViewer_page {
             }
         })
 
+        console.log("[info]",treeData,":[treeData]")
 
-        var demo = new Vue({
-            el: '#demo',
+        this.vueOutline = new Vue({
+            el: '#outline',
             data: {
-                treeData: data
+                treeData: treeData
             }
+        })
+
+    }
+    vueOutline: CombinedVueInstance1<{ treeData: ITreeItem }>
+    initOutline() {
+        // this.vueOutline 
+        this.pdfDoc.getOutline().then((outline: PDFTreeNode[]) => {
+            // console.log("[info] outline:",outline.length)
+            var logItems = (items: PDFTreeNode[], depth: number = 0): ITreeItem[] => {
+                var treeData: ITreeItem[] = []
+                var len = items.length
+                for (var i = 0; i < len; i++) {
+                    var item = items[i]
+                    // console.log("[log]", i, ':', depth, "-", item.title, item)
+                    var data: ITreeItem = { name: item.title }
+                    // data.dest = item.dest
+                    // data.isOpen = true
+                    if (item.items && item.items.length > 0) {
+                        data.children = logItems(item.items, depth + 1)
+                    }
+                    treeData.push(data)
+                }
+                return treeData
+            }
+            console.log("[info]", logItems(outline, 0), ":[logItems(outline, 0)]")
+            this.vueOutline.treeData = {'name':'outline','children':logItems(outline, 0)}
         })
     }
     doRenderPage(num) {
