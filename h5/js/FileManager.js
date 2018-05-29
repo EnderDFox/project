@@ -1,5 +1,6 @@
 var FileManager = /** @class */ (function () {
     function FileManager() {
+        path.sep = '/';
     }
     FileManager.prototype.onload = function () {
         $.get("/list", { currPath: "" }, this.onList.bind(this));
@@ -70,6 +71,8 @@ var FileManager = /** @class */ (function () {
                         $.get('openFolder', { folder: item.isDir ? _this.getFullname(item.parent, item.name) : item.parent });
                     },
                     onChildFolderEnter: function (e, item) {
+                        var p1 = _this.getFullname(item.parent, item.name);
+                        console.log("[info] onChildFolderEnter:", p1, item.parent, item.name);
                         $.get("list", { currPath: _this.getFullname(item.parent, item.name) }, _this.onList.bind(_this), 'json');
                     },
                     onReset: this.onReset.bind(this),
@@ -202,7 +205,11 @@ var FileManager = /** @class */ (function () {
         for (var _i = 0; _i < arguments.length; _i++) {
             args[_i] = arguments[_i];
         }
-        return path.resolve.apply(this, args);
+        var p = path.resolve.apply(this, args);
+        if (p.indexOf('/') == 0) {
+            p = p.replace('/', '');
+        }
+        return p;
     };
     return FileManager;
 }());

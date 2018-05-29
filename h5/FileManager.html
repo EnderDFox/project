@@ -101,7 +101,8 @@
     </section>
     <!-- children -->
     <hr>
-    <section class="row" style="height: 3em;">
+    <section class="row" style="margin-bottom: 0.5em;">
+      <!-- toggle btn `Children` -->
       <div class="col-lg-1" style="padding: 0;">
         <button type="button" class="btn btn-warning" aria-label="Left Align" @click="showChildren=!showChildren">
           <span :class="['glyphicon',{'glyphicon-minus':showChildren,'glyphicon-plus':!showChildren}]" aria-hidden="true"></span> Children
@@ -197,13 +198,12 @@
     </section>
   </div>
   <!--javascript-->
-  <!-- jQuery (Bootstrap 的所有 JavaScript 插件都依赖 jQuery，所以必须放在前边) -->
-  <!-- <script src="https://cdn.bootcss.com/jquery/1.12.4/jquery.min.js"></script> -->
-  <script type="text/javascript" src="bower_components/path/path.js"></script>
+  <!-- lib3 -->
+  <script type="text/javascript" src="lib3/path.js"></script>
   <script src="lib3/jquery-3.2.1.min.js"></script>
   <script src="lib3/vue.js"></script>
-  <!-- 加载 Bootstrap 的所有 JavaScript 插件。你也可以根据需要只加载单个插件。 -->
   <script src="lib3/bootstrap-3.3.7-dist/js/bootstrap.js"></script>
+  <!-- my js -->
   <script src="js/FileManager.js"></script>
 </body>
 

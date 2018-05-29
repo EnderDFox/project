@@ -47,9 +47,65 @@ class PdfViewer_page {
 
             // Initial/first page rendering
             this._renderPage(this.pageNum);
-           
+
         });
 
+        this.initVue()
+
+    }
+
+    initVue() {
+        // demo数据
+        var data = {
+            name: 'My Tree',
+            children: [
+                { name: 'hello' },
+                { name: 'wat' },
+                {
+                    name: 'child folder',
+                    children: [
+                        {
+                            name: 'child folder',
+                            children: [
+                                { name: 'hello' },
+                                { name: 'wat' }
+                            ]
+                        },
+                        { name: 'hello' },
+                        { name: 'wat' },
+                        {
+                            name: 'child folder',
+                            children: [
+                                { name: 'hello' },
+                                { name: 'wat' }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+
+        // 定义子级组件
+        Vue.component('item', {
+            template: '#item-template',
+            props: {
+                model: Object
+            },
+            data: function () {
+                return {
+                }
+            },
+            methods: {
+            }
+        })
+
+
+        var demo = new Vue({
+            el: '#demo',
+            data: {
+                treeData: data
+            }
+        })
     }
     doRenderPage(num) {
         this.pageNum = num
@@ -67,7 +123,7 @@ class PdfViewer_page {
         if (this.pageNum <= 1) {
             return;
         }
-        this.doRenderPage(this.pageNum-1);
+        this.doRenderPage(this.pageNum - 1);
     }
     /**
      * Displays next page.
@@ -76,7 +132,7 @@ class PdfViewer_page {
         if (this.pageNum >= this.pdfDoc.numPages) {
             return;
         }
-        this.doRenderPage(this.pageNum+1);
+        this.doRenderPage(this.pageNum + 1);
     }
     onZoomOut() {
         this.renderScale(this.pageScale - 0.1)
@@ -84,26 +140,26 @@ class PdfViewer_page {
     onZoomIn() {
         this.renderScale(this.pageScale + 0.1)
     }
-    onPageTo(){
-        this.pdfDoc.getOutline().then((outline:PDFTreeNode[])=>{
+    onPageTo() {
+        this.pdfDoc.getOutline().then((outline: PDFTreeNode[]) => {
             // console.log("[info] outline:",outline.length)
-            var logItems = (items:PDFTreeNode[],depth:number)=>{
+            var logItems = (items: PDFTreeNode[], depth: number) => {
                 var len = items.length
                 for (var i = 0; i < len; i++) {
                     var item = items[i]
-                    if(i==5){
+                    if (i == 5) {
                         // console.log("[log]",i,':',depth,"-",item.title,item)
                         this.pdfDoc.getPageIndex(item.dest[0]).then((pageIndex) => {
-                            console.log("[info]",pageIndex,":[pageIndex]")
-                            this.doRenderPage(pageIndex+1)
+                            console.log("[info]", pageIndex, ":[pageIndex]")
+                            this.doRenderPage(pageIndex + 1)
                         })
                     }
-                    if(item.items){
+                    if (item.items) {
                         // logItems(item.items,depth+1)
                     }
                 }
             }
-            logItems(outline,0)
+            logItems(outline, 0)
         })
     }
     renderScale(val: number) {

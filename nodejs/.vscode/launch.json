@@ -61,12 +61,11 @@
             "program": "${workspaceFolder}/ts/FileManager.ts",
             // "cwd": "${workspaceFolder}",
             "args": [
-                "-p",
-                "833",
-                "-d",
-                "../h5",
-                "-f",
-                "D:/download"
+                "-f","D:/download",
+                // "--random_ext_need","mp4 rm rmvb mkv wmv avi",
+                "--random_ext_ignore","txt",
+                "-d","../h5",
+                "-p","833"
             ],
             "outFiles": [
                 "${workspaceFolder}/bin/js/*.js"
@@ -78,8 +77,7 @@
             "name": "Launch FileManager no args",
             "program": "${workspaceFolder}/ts/FileManager.ts",
             // "cwd": "${workspaceFolder}",
-            "args": [
-            ],
+            "args": [],
             "outFiles": [
                 "${workspaceFolder}/bin/js/*.js"
             ]

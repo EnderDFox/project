@@ -1,11 +1,8 @@
 /* 文件管理 */
 import * as fs from "fs";
 import * as path from "path";
-import * as parseArgs from "minimist";
 import * as child_process from "child_process";
 import * as express from "express";
-import * as ejs from "ejs";
-import * as bodyParser from "body-parser";
 import { MathUtil } from "./lib1/MathUtil";
 import { ExpressServer } from "./lib1/ExpressServer";
 
@@ -18,7 +15,12 @@ class FileManager {
     }
     initServer() {
         this.server = new ExpressServer()
-        this.server.init({ "folder": 'f' }, this.initGetPostAll.bind(this))
+        //random_ext_xxx: e.g. ['mp4', 'rm', 'rmvb', 'mkv', 'wmv', 'avi']
+        this.server.init({ "folder": 'f', 'random_ext_need': 'r', 'random_ext_ignore': 'i' }, this.initGetPostAll.bind(this))
+        this.extNeed = this.server.args.random_ext_need?this.server.args.random_ext_need.split(" "):[]
+        this.extIgnore = this.server.args.random_ext_ignore?this.server.args.random_ext_ignore.split(" "):[]
+        console.log("[log]",this.server.args.random_ext_need,this.extNeed,":[this.extNeed]")
+        console.log("[log]",this.server.args.random_ext_ignore,this.extIgnore,":[this.extIgnore]")
     }
     initGetPostAll() {
         var app = this.server.app
@@ -75,10 +77,6 @@ class FileManager {
         res.send(data)
     }
     //---递归得到文件夹里的所有文件 为了随机用的
-    /*     ignoreExtnames = ["torrent", "jpg", "png", "txt", "mp3", "lnk", "url", "pdf",
-            "js", "html", "css",
-            "zip", "rar", "7z"]; */
-    needExtNames = ["mp4", "rm", "rmvb", "mkv", "wmv", "avi"]
     /**得到目录下所有文件 (递归) 中随机的几个 */
     getRandomFiles(dir: string): IChildFile[] {
         var filesAll = this.getFileAll(dir);
@@ -96,6 +94,12 @@ class FileManager {
             return []
         }
     }
+    /**忽略的后缀名 */
+    extIgnore: string[]
+    /**需要的后缀名,如果为null或length=0则不限制后缀名 
+     * e.g. ['mp4', 'rm', 'rmvb', 'mkv', 'wmv', 'avi']
+    */
+    extNeed: string[]
     /**得到目录下所有文件 (递归) */
     getFileAll(dir: string): IRandomFile[] {
         var fileAll: IRandomFile[] = []
@@ -117,8 +121,9 @@ class FileManager {
                     continue;
                 }
                 var ext = path.extname(fullname).toLowerCase();
-                // if (this.ignoreExtnames.indexOf('.'+ext) > -1) continue;
-                if (this.needExtNames.indexOf('.' + ext) == -1) continue;
+                ext = ext.replace(/\./g,'') //去掉 `.`
+                if (this.extIgnore.indexOf(ext) > -1) continue;
+                if (this.extNeed.length > 0 && this.extNeed.indexOf(ext) == -1) continue;
                 if (stat.isDirectory()) {
                     fileAll = fileAll.concat(this.getFileAll(fullname));//recursive children folders
                 } else {

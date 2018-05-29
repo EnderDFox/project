@@ -178,4 +178,4 @@ var PdfViewer_page = /** @class */ (function () {
     };
     return PdfViewer_page;
 }());
-//# sourceMappingURL=PdfViewerPage.js.map
+//# sourceMappingURL=PdfViewer.js.map

@@ -8,16 +8,16 @@ var MathUtil_1 = require("./lib1/MathUtil");
 var ExpressServer_1 = require("./lib1/ExpressServer");
 var FileManager = /** @class */ (function () {
     function FileManager() {
-        //---递归得到文件夹里的所有文件 为了随机用的
-        /*     ignoreExtnames = ["torrent", "jpg", "png", "txt", "mp3", "lnk", "url", "pdf",
-                "js", "html", "css",
-                "zip", "rar", "7z"]; */
-        this.needExtNames = ["mp4", "rm", "rmvb", "mkv", "wmv", "avi"];
         this.initServer();
     }
     FileManager.prototype.initServer = function () {
         this.server = new ExpressServer_1.ExpressServer();
-        this.server.init({ "folder": 'f' }, this.initGetPostAll.bind(this));
+        //random_ext_xxx: e.g. ['mp4', 'rm', 'rmvb', 'mkv', 'wmv', 'avi']
+        this.server.init({ "folder": 'f', 'random_ext_need': 'r', 'random_ext_ignore': 'i' }, this.initGetPostAll.bind(this));
+        this.extNeed = this.server.args.random_ext_need ? this.server.args.random_ext_need.split(" ") : [];
+        this.extIgnore = this.server.args.random_ext_ignore ? this.server.args.random_ext_ignore.split(" ") : [];
+        console.log("[log]", this.server.args.random_ext_need, this.extNeed, ":[this.extNeed]");
+        console.log("[log]", this.server.args.random_ext_ignore, this.extIgnore, ":[this.extIgnore]");
     };
     FileManager.prototype.initGetPostAll = function () {
         var app = this.server.app;
@@ -75,6 +75,7 @@ var FileManager = /** @class */ (function () {
         };
         res.send(data);
     };
+    //---递归得到文件夹里的所有文件 为了随机用的
     /**得到目录下所有文件 (递归) 中随机的几个 */
     FileManager.prototype.getRandomFiles = function (dir) {
         var filesAll = this.getFileAll(dir);
@@ -114,8 +115,10 @@ var FileManager = /** @class */ (function () {
                     continue;
                 }
                 var ext = path.extname(fullname).toLowerCase();
-                // if (this.ignoreExtnames.indexOf('.'+ext) > -1) continue;
-                if (this.needExtNames.indexOf('.' + ext) == -1)
+                ext = ext.replace(/\./g, ''); //去掉 `.`
+                if (this.extIgnore.indexOf(ext) > -1)
+                    continue;
+                if (this.extNeed.length > 0 && this.extNeed.indexOf(ext) == -1)
                     continue;
                 if (stat.isDirectory()) {
                     fileAll = fileAll.concat(this.getFileAll(fullname)); //recursive children folders

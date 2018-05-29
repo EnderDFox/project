@@ -1,17 +1,18 @@
 class FileManager {
     constructor() {
+        path.sep = '/'
     }
     vueAll: CombinedVueInstance1<IVueData>
     onload(): void {
-        $.get("/list",  { currPath:""}, this.onList.bind(this))
+        $.get("/list", { currPath: "" }, this.onList.bind(this))
     }
     onList(data: IVueData): void {
         console.log("[debug] onList => data:", data)
         if (this.vueAll == null) {
             this.vueAll = new Vue({
                 data: {
-                    msg:'',
-                    error:'',
+                    msg: '',
+                    error: '',
                     showRandom: true,
                     showChildren: true,
                     currPath: '',
@@ -70,6 +71,8 @@ class FileManager {
                         $.get('openFolder', { folder: item.isDir ? this.getFullname(item.parent, item.name) : item.parent });
                     },
                     onChildFolderEnter: (e: Event, item: IChildFile) => {
+                        var p1 = this.getFullname(item.parent, item.name);
+                        console.log("[info] onChildFolderEnter:", p1, item.parent, item.name)
                         $.get("list", { currPath: this.getFullname(item.parent, item.name) }, this.onList.bind(this), 'json')
                     },
                     onReset: this.onReset.bind(this),
@@ -192,8 +195,12 @@ class FileManager {
             item.newName = currNameSp.join("-");
         }
     }
-    getFullname(...args:string[]):string {
-        return path.resolve.apply(this, args)
+    getFullname(...args: string[]): string {
+        var p = path.resolve.apply(this, args)
+        if (p.indexOf('/') == 0) {
+            p = p.replace('/', '')
+        }
+        return p
     }
 }
 

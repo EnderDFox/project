@@ -26,7 +26,6 @@ var ExpressServer = /** @class */ (function () {
         //
         console.log("[info]", "`args.dir(-d)`:", args.dir);
         console.log("[info]", "`args.port(-p)`:", args.port);
-        console.log("[info]", "`args.folder(-f)`:", args.folder);
         console.log("[info]", "`__dirname`:", __dirname);
         console.log("[info]", "`process.cwd()`:", process.cwd());
         this.staticPath = path.resolve(__dirname, '../../../', args.dir || "");
