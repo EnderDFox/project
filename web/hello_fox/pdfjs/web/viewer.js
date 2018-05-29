@@ -2710,7 +2710,7 @@ var PDFLinkService = function () {
     key: 'navigateTo',
     value: function navigateTo(dest) {
       var _this = this;
-
+      console.log("[info]",dest,":[dest]");
       var goToDestination = function goToDestination(_ref2) {
         var namedDest = _ref2.namedDest,
             explicitDest = _ref2.explicitDest;
@@ -2720,8 +2720,10 @@ var PDFLinkService = function () {
         if (destRef instanceof Object) {
           pageNumber = _this._cachedPageNumber(destRef);
           if (pageNumber === null) {
+            console.log("[log]",destRef,":[destRef]");
             _this.pdfDocument.getPageIndex(destRef).then(function (pageIndex) {
               _this.cachePageRef(pageIndex + 1, destRef);
+              console.log("[log]",pageIndex,":[pageIndex]",destRef,":[destRef]");
               goToDestination({
                 namedDest: namedDest,
                 explicitDest: explicitDest
@@ -3227,7 +3229,8 @@ var defaultOptions = {
     kind: OptionKind.VIEWER
   },
   defaultUrl: {
-    value: 'compressed.tracemonkey-pldi-09.pdf',
+    // value: 'compressed.tracemonkey-pldi-09.pdf',
+    value: 'Go in Action CN.pdf',
     kind: OptionKind.VIEWER
   },
   defaultZoomValue: {

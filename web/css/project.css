@@ -187,6 +187,10 @@
   border-color: #ff0000;
 }
 
+.table_header_tooltip li span{
+  display: inline-block;
+}
+
 .editVersion .publishOpen{
   /* background-color:rgb(214, 252, 0); */
   animation-name: anim_publishOpen;

@@ -479,14 +479,31 @@ var VersionManagerClass = /** @class */ (function () {
                 for (var i = 0; i < len; i++) {
                     var p = pList[i];
                     var v = ProcessData.VersionMap[p.Vid];
+                    _this.ClearSpaceDayCount(v.PublishList);
                     items.push({ version: v, publish: p });
+                }
+                //
+                if (items.length == 1) {
+                    var np = _this.GetNextNearestPublish(dateLine, false, items[0].version);
+                    if (np) {
+                        np.SubDayCount = Common.DateLineSpaceDay(dateLine, np.DateLine);
+                    }
                 }
             }
             else {
                 var nearestVersion = _this.GetNearestVersion(dateLine);
                 if (nearestVersion) {
-                    var p = _this.GetPrevNearestPublish(dateLine);
-                    items.push({ version: nearestVersion, publish: p });
+                    _this.ClearSpaceDayCount(nearestVersion.PublishList);
+                    //
+                    var p = _this.GetPrevNearestPublish(dateLine, false);
+                    if (p) {
+                        p.SubDayCount = -Common.DateLineSpaceDay(dateLine, p.DateLine);
+                        items.push({ version: nearestVersion, publish: p });
+                        var np = _this.GetNextNearestPublish(dateLine, false);
+                        if (np) {
+                            np.SubDayCount = Common.DateLineSpaceDay(dateLine, np.DateLine);
+                        }
+                    }
                 }
             }
             //
@@ -495,8 +512,8 @@ var VersionManagerClass = /** @class */ (function () {
             _this.VueTableHeaderTooltip.IsWrite = User.IsWrite;
             //
             $(_this.VueTableHeaderTooltip.$el).css({ 'width': items.length > 1 ? items.length * 160 : 200 });
-            $(_this.VueTableHeaderTooltip.$el).find('.versionFullname').css({ 'max-width': items.length > 1 ? 150 : 190 });
             _this.VueTableHeaderTooltip.$nextTick(function () {
+                $(_this.VueTableHeaderTooltip.$el).find('.versionFullname').css({ 'max-width': items.length > 1 ? 140 : 200 });
                 //nextTick后 outerHTML才能拿到渲染好的
                 $('#workTips').xy(x, y).html(_this.VueTableHeaderTooltip.$el.outerHTML);
                 _this.VueTableHeaderTooltip.$nextTick(function () {
@@ -609,7 +626,7 @@ var VersionManagerClass = /** @class */ (function () {
     VersionManagerClass.prototype.GetVersionFullname = function (version) {
         return this.GetVersionVer(version.Vid) + (version.Name == '' ? '' : '-' + version.Name);
     };
-    /**获取前面最近的version */
+    /**获取前面最近的version, 根据有begin来判断 */
     VersionManagerClass.prototype.GetNearestVersion = function (dateLine) {
         var currTimestamp = Common.DateStr2TimeStamp(dateLine);
         //找到最近的BEGIN并且没有总结的日期的
@@ -620,14 +637,16 @@ var VersionManagerClass = /** @class */ (function () {
             var version = this.VersionList[i];
             if (version.PublishList[0].DateLine) {
                 var _timestamp = Common.DateStr2TimeStamp(version.PublishList[GenreField.BEGIN - 1].DateLine);
-                if (!nearestVersion || (currTimestamp > _timestamp && _timestamp > nearestTimestamp)) {
-                    nearestVersion = version;
-                    nearestTimestamp = _timestamp;
+                if (currTimestamp > _timestamp) {
+                    if (!nearestVersion || _timestamp > nearestTimestamp) {
+                        nearestVersion = version;
+                        nearestTimestamp = _timestamp;
+                    }
                 }
             }
         }
-        if (nearestVersion) {
-            var _timestamp = Common.DateStr2TimeStamp(version.PublishList[GenreField.SUMMARY - 1].DateLine);
+        if (nearestVersion) { //如果已经过了总结日期,说明已经结束了
+            var _timestamp = Common.DateStr2TimeStamp(nearestVersion.PublishList[GenreField.SUMMARY - 1].DateLine);
             if (_timestamp < currTimestamp) {
                 // console.log("[debug]", "已经结束了")
             }
@@ -641,8 +660,15 @@ var VersionManagerClass = /** @class */ (function () {
         return null;
     };
     /**获取前面最近的publish */
-    VersionManagerClass.prototype.GetPrevNearestPublish = function (dateLine) {
-        var nearestVersion = this.GetNearestVersion(dateLine);
+    VersionManagerClass.prototype.GetPrevNearestPublish = function (dateLine, equal, v) {
+        if (v === void 0) { v = null; }
+        var nearestVersion;
+        if (v) {
+            nearestVersion = v;
+        }
+        else {
+            nearestVersion = this.GetNearestVersion(dateLine);
+        }
         if (nearestVersion) {
             var currTimestamp = Common.DateStr2TimeStamp(dateLine);
             var nextNearestPublish;
@@ -652,9 +678,11 @@ var VersionManagerClass = /** @class */ (function () {
                 var p = nearestVersion.PublishList[i];
                 if (p.DateLine) {
                     var _timestamp = Common.DateStr2TimeStamp(p.DateLine);
-                    if (!nextNearestPublish || (currTimestamp >= _timestamp && _timestamp > nextNearestTimestamp)) {
-                        nextNearestPublish = p;
-                        nextNearestTimestamp = _timestamp;
+                    if (currTimestamp > _timestamp || (equal && currTimestamp == _timestamp)) {
+                        if (!nextNearestPublish || (_timestamp > nextNearestTimestamp)) {
+                            nextNearestPublish = p;
+                            nextNearestTimestamp = _timestamp;
+                        }
                     }
                 }
             }
@@ -665,8 +693,15 @@ var VersionManagerClass = /** @class */ (function () {
         }
     };
     /**获取后面最近的publish */
-    VersionManagerClass.prototype.GetNextNearestPublish = function (dateLine) {
-        var nearestVersion = this.GetNearestVersion(dateLine);
+    VersionManagerClass.prototype.GetNextNearestPublish = function (dateLine, equal, v) {
+        if (v === void 0) { v = null; }
+        var nearestVersion;
+        if (v) {
+            nearestVersion = v;
+        }
+        else {
+            nearestVersion = this.GetNearestVersion(dateLine);
+        }
         if (nearestVersion) {
             var currTimestamp = Common.DateStr2TimeStamp(dateLine);
             var nextNearestPublish;
@@ -676,7 +711,7 @@ var VersionManagerClass = /** @class */ (function () {
                 var p = nearestVersion.PublishList[i];
                 if (p.DateLine) {
                     var _timestamp = Common.DateStr2TimeStamp(p.DateLine);
-                    if (currTimestamp < _timestamp) {
+                    if (currTimestamp < _timestamp || (equal && currTimestamp == _timestamp)) {
                         if (!nextNearestPublish || _timestamp < nextNearestTimestamp) {
                             nextNearestPublish = p;
                             nextNearestTimestamp = _timestamp;
@@ -688,6 +723,13 @@ var VersionManagerClass = /** @class */ (function () {
         }
         else {
             return null;
+        }
+    };
+    VersionManagerClass.prototype.ClearSpaceDayCount = function (pList) {
+        var len = pList.length;
+        for (var i = 0; i < len; i++) {
+            var item = pList[i];
+            item.SubDayCount = 0;
         }
     };
     return VersionManagerClass;

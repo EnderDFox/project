@@ -517,13 +517,30 @@ class VersionManagerClass {
                 for (var i = 0; i < len; i++) {
                     var p: PublishSingle = pList[i]
                     var v: VersionSingle = ProcessData.VersionMap[p.Vid]
+                    this.ClearSpaceDayCount(v.PublishList)
                     items.push({ version: v, publish: p })
+                }
+                //
+                if (items.length == 1) {
+                    var np = this.GetNextNearestPublish(dateLine, false,items[0].version)
+                    if (np) {
+                        np.SubDayCount = Common.DateLineSpaceDay(dateLine, np.DateLine)
+                    }
                 }
             } else {
                 var nearestVersion = this.GetNearestVersion(dateLine)
                 if (nearestVersion) {
-                    var p = this.GetPrevNearestPublish(dateLine)
-                    items.push({ version: nearestVersion, publish: p })
+                    this.ClearSpaceDayCount(nearestVersion.PublishList)
+                    //
+                    var p = this.GetPrevNearestPublish(dateLine, false)
+                    if (p) {
+                        p.SubDayCount = -Common.DateLineSpaceDay(dateLine, p.DateLine)
+                        items.push({ version: nearestVersion, publish: p })
+                        var np = this.GetNextNearestPublish(dateLine, false)
+                        if (np) {
+                            np.SubDayCount = Common.DateLineSpaceDay(dateLine, np.DateLine)
+                        }
+                    }
                 }
             }
             //
@@ -532,8 +549,8 @@ class VersionManagerClass {
             this.VueTableHeaderTooltip.IsWrite = User.IsWrite
             //
             $(this.VueTableHeaderTooltip.$el).css({ 'width': items.length > 1 ? items.length * 160 : 200 })
-            $(this.VueTableHeaderTooltip.$el).find('.versionFullname').css({ 'max-width': items.length > 1 ? 150 : 190 })
             this.VueTableHeaderTooltip.$nextTick(() => {
+                $(this.VueTableHeaderTooltip.$el).find('.versionFullname').css({ 'max-width': items.length > 1 ? 140 : 200 })
                 //nextTick后 outerHTML才能拿到渲染好的
                 $('#workTips').xy(x, y).html(this.VueTableHeaderTooltip.$el.outerHTML)
                 this.VueTableHeaderTooltip.$nextTick(() => {
@@ -642,7 +659,7 @@ class VersionManagerClass {
     GetVersionFullname(version: VersionSingle): string {
         return this.GetVersionVer(version.Vid) + (version.Name == '' ? '' : '-' + version.Name);
     }
-    /**获取前面最近的version */
+    /**获取前面最近的version, 根据有begin来判断 */
     GetNearestVersion(dateLine: string): VersionSingle {
         var currTimestamp = Common.DateStr2TimeStamp(dateLine)
         //找到最近的BEGIN并且没有总结的日期的
@@ -653,14 +670,16 @@ class VersionManagerClass {
             var version = this.VersionList[i]
             if (version.PublishList[0].DateLine) {
                 var _timestamp = Common.DateStr2TimeStamp(version.PublishList[GenreField.BEGIN - 1].DateLine)
-                if (!nearestVersion || (currTimestamp > _timestamp && _timestamp > nearestTimestamp)) {
-                    nearestVersion = version
-                    nearestTimestamp = _timestamp
+                if (currTimestamp > _timestamp) {
+                    if (!nearestVersion || _timestamp > nearestTimestamp) {
+                        nearestVersion = version
+                        nearestTimestamp = _timestamp
+                    }
                 }
             }
         }
-        if (nearestVersion) {
-            var _timestamp = Common.DateStr2TimeStamp(version.PublishList[GenreField.SUMMARY - 1].DateLine)
+        if (nearestVersion) {//如果已经过了总结日期,说明已经结束了
+            var _timestamp = Common.DateStr2TimeStamp(nearestVersion.PublishList[GenreField.SUMMARY - 1].DateLine)
             if (_timestamp < currTimestamp) {
                 // console.log("[debug]", "已经结束了")
             } else {
@@ -672,8 +691,13 @@ class VersionManagerClass {
         return null
     }
     /**获取前面最近的publish */
-    GetPrevNearestPublish(dateLine: string): PublishSingle {
-        var nearestVersion: VersionSingle = this.GetNearestVersion(dateLine)
+    GetPrevNearestPublish(dateLine: string, equal: boolean, v: VersionSingle = null): PublishSingle {
+        var nearestVersion: VersionSingle;
+        if (v) {
+            nearestVersion = v
+        } else {
+            nearestVersion = this.GetNearestVersion(dateLine)
+        }
         if (nearestVersion) {
             var currTimestamp = Common.DateStr2TimeStamp(dateLine)
             var nextNearestPublish: PublishSingle
@@ -683,9 +707,11 @@ class VersionManagerClass {
                 var p = nearestVersion.PublishList[i]
                 if (p.DateLine) {
                     var _timestamp = Common.DateStr2TimeStamp(p.DateLine)
-                    if (!nextNearestPublish || (currTimestamp >= _timestamp && _timestamp > nextNearestTimestamp)) {
-                        nextNearestPublish = p
-                        nextNearestTimestamp = _timestamp
+                    if (currTimestamp > _timestamp || (equal && currTimestamp == _timestamp)) {
+                        if (!nextNearestPublish || (_timestamp > nextNearestTimestamp)) {
+                            nextNearestPublish = p
+                            nextNearestTimestamp = _timestamp
+                        }
                     }
                 }
             }
@@ -695,8 +721,13 @@ class VersionManagerClass {
         }
     }
     /**获取后面最近的publish */
-    GetNextNearestPublish(dateLine: string): PublishSingle {
-        var nearestVersion: VersionSingle = this.GetNearestVersion(dateLine)
+    GetNextNearestPublish(dateLine: string, equal: boolean, v: VersionSingle = null): PublishSingle {
+        var nearestVersion: VersionSingle;
+        if (v) {
+            nearestVersion = v
+        } else {
+            nearestVersion = this.GetNearestVersion(dateLine)
+        }
         if (nearestVersion) {
             var currTimestamp = Common.DateStr2TimeStamp(dateLine)
             var nextNearestPublish: PublishSingle
@@ -706,7 +737,7 @@ class VersionManagerClass {
                 var p = nearestVersion.PublishList[i]
                 if (p.DateLine) {
                     var _timestamp = Common.DateStr2TimeStamp(p.DateLine)
-                    if (currTimestamp < _timestamp) {
+                    if (currTimestamp < _timestamp || (equal && currTimestamp == _timestamp)) {
                         if (!nextNearestPublish || _timestamp < nextNearestTimestamp) {
                             nextNearestPublish = p
                             nextNearestTimestamp = _timestamp
@@ -717,6 +748,13 @@ class VersionManagerClass {
             return nextNearestPublish
         } else {
             return null
+        }
+    }
+    ClearSpaceDayCount(pList: PublishSingle[]) {
+        var len = pList.length
+        for (var i = 0; i < len; i++) {
+            var item = pList[i]
+            item.SubDayCount = 0
         }
     }
 }

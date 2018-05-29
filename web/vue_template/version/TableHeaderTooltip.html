@@ -1,21 +1,27 @@
-<div>
-    <div style="margin-bottom: 4px;font-weight: bold;">
-        {{currDateLine}}
+<div class="table_header_tooltip">
+    <div style="margin-bottom: 4px;margin-left: 4px;font-size: 16px;">
+        日期:
+        <span style="font-weight: bold;">{{currDateLine}}</span>
     </div>
-    <div style="margin-bottom: 10px;" v-if="items.length!=1">
+    <div style="margin-bottom: 10px;margin-left: 6px;" v-if="items.length!=1">
         <span style="color:#FF0000;" v-if="items.length>1">警告:有{{items.length}}个版本日期</span>
         <span v-if="items.length==0">未设置版本</span>
     </div>
     <div v-if="items.length>=1">
-        <div v-for="item,index in items" style="display: inline-block;width: 150px;padding-left: 6px;" :class="{'border_right_vline':index<items.length-1}">
-            <span style="max-width:150px;display:inline-block; font-size: 16px;margin-bottom: 6px;" class="text-overflow-hide">版本:{{GetVersionFullname(item.version)}}</span><br/>
-            <li v-for="pItem,pIndex in item.version.PublishList" v-if="Boolean(pItem.DateLine)" class="list-style-type-none" :class="{'font_bold':pItem.Genre==item.publish.Genre}">
-                <span :class="['sk_color_'+pItem.Genre]">{{GetPublishName(pItem.Genre)}}: </span>
-                <span :class="{'font_bold':pItem.Genre==item.publish.Genre,'font_color_black3':pItem.Genre!=item.publish.Genre}">{{pItem.DateLine||'空'}}</span>
-            </li>
+        <div v-for="item,index in items" style="display: inline-block;width: auto;padding-left: 6px;" :class="{'border_right_vline':index<items.length-1}">
+            <span style="display:inline-block;width:inherit; font-size: 16px;margin-bottom: 6px;" class="text-overflow-hide versionFullname">版本: {{GetVersionFullname(item.version)}}</span>
+            <br/>
+            <ul class="no-mbp">
+                <li v-for="pItem,pIndex in item.version.PublishList" v-if="Boolean(pItem.DateLine)" class="list-style-type-none" :class="{'font_bold':pItem.Genre==item.publish.Genre}">
+                    <span :class="['sk_color_'+pItem.Genre]" style="width: 38px;">{{GetPublishName(pItem.Genre)}}: </span>
+                    <span :class="{'font_bold':pItem.Genre==item.publish.Genre,'font_color_black3':pItem.Genre!=item.publish.Genre}" style="width: 82px;">{{pItem.DateLine||'空'}}</span>
+                    <span v-if="items.length==1 && pItem.SubDayCount!=0" style="font-weight: normal;">({{pItem.SubDayCount
+                        <0? -pItem.SubDayCount+'天前': pItem.SubDayCount+'天后'}})</span>
+                </li>
+            </ul>
         </div>
     </div>
-    <div style="color:rgb(151, 151, 151);padding-top: 10px; text-align: right;" v-if="IsWrite" >
+    <div style="color:rgb(151, 151, 151);padding-top: 10px; text-align: right;" v-if="IsWrite">
         点击左键编辑
     </div>
 </div>

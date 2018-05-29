@@ -150,6 +150,7 @@ var ProcessDataClass = /** @class */ (function () {
                     }
                     p.Vid = v.Vid; //后端传来的都没有vid, 需要自己加上
                     p.ErrorMsg = '';
+                    p.SubDayCount = 0;
                     if (p.DateLine) {
                         if (!_this.VersionDateLineMap[p.DateLine]) {
                             _this.VersionDateLineMap[p.DateLine] = [];

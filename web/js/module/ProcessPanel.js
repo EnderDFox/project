@@ -132,7 +132,6 @@ var ProcessPanel = {
 				var left = $(this).offset().left + $(this).width() + 2
 				var dateLine = $(this).attr('date_line')
 				VersionManager.ShowTableHeaderTooltip(dateLine,left,top)
-				// $('#workTips').css({top:top,left:left}).show().adjust(-5).html('<div>版本'+VersionManager.GetPublishName(genre)+'</div>')
 			// }
 		}).delegate('td', 'mouseleave', function (e) {
 			e.stopPropagation()

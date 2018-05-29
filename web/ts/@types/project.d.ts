@@ -97,6 +97,7 @@ interface PublishSingle {
     Genre?: uint32
     DateLine?: string
     ErrorMsg?: string
+    SubDayCount?: uint32
 }
 
 interface ProcessFilterPack {
