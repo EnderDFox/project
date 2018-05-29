@@ -70,7 +70,7 @@ var PdfViewer = /** @class */ (function () {
         Vue.component('item', {
             template: '#item-template',
             props: {
-                model: Object
+                models: Array
             },
             data: function () {
                 return {};
@@ -92,7 +92,7 @@ var PdfViewer = /** @class */ (function () {
         this.vueOutline = new Vue({
             el: '#outline',
             data: {
-                treeData: { children: [] }
+                treeData: []
             }
         });
     };
@@ -120,7 +120,7 @@ var PdfViewer = /** @class */ (function () {
                 return treeData;
             };
             // console.log("[info]", logItems(outline, 0), ":[logItems(outline, 0)]")
-            _this.vueOutline.treeData = { uuid: uuid++, 'name': 'outline', 'children': logItems(outline, 0), isOpen: true };
+            _this.vueOutline.treeData = logItems(outline, 0);
         });
     };
     PdfViewer.prototype.doRenderPage = function (num) {

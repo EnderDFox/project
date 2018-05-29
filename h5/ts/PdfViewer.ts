@@ -83,7 +83,7 @@ class PdfViewer {
         Vue.component('item', {
             template: '#item-template',
             props: {
-                model: Object
+                models: Array
             },
             data: function () {
                 return {
@@ -106,12 +106,12 @@ class PdfViewer {
         this.vueOutline = new Vue({
             el: '#outline',
             data: {
-                treeData: {children:[]}
+                treeData: []
             }
         })
 
     }
-    vueOutline: CombinedVueInstance1<{ treeData: ITreeItem }>
+    vueOutline: CombinedVueInstance1<{ treeData: ITreeItem[] }>
     initOutline() {
         var uuid = 1
         // this.vueOutline 
@@ -134,7 +134,7 @@ class PdfViewer {
                 return treeData
             }
             // console.log("[info]", logItems(outline, 0), ":[logItems(outline, 0)]")
-            this.vueOutline.treeData = { uuid: uuid++, 'name': 'outline', 'children': logItems(outline, 0), isOpen: true }
+            this.vueOutline.treeData = logItems(outline, 0)
         })
     }
     doRenderPage(num) {

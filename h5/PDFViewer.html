@@ -50,27 +50,27 @@
 
   <!-- 子级组件 -->
   <template id="item-template">
-    <li class="list-unstyled">
-      <div>
-        <span @click="toggleItem(model)" role="button" v-if="model.children.length>0">
-          {{model.isOpen?'-':'+'}}
-        </span>
-        &nbsp;&nbsp;
-        <span @click="linkItem(model)" role="button">
-          {{model.name}}
-        </span>
-      </div>
-      <!-- 组件中引用当前组件，传入下级数据 -->
-      <ul v-show="model.isOpen">
-        <item class="item" v-for="model in model.children" :model="model" :key="model.uuid">
+    <ul>
+      <li class="list-unstyled" v-for="model in models" :key="model.uuid">
+        <div>
+          <span @click="toggleItem(model)" role="button" v-if="model.children.length>0">
+            {{model.isOpen?'-':'+'}}
+          </span>
+          &nbsp;&nbsp;
+          <span @click="linkItem(model)" role="button">
+            {{model.name}}
+          </span>
+        </div>
+        <!-- 组件中引用当前组件，传入下级数据 -->
+        <item class="item" :models="model.children" v-show="model.isOpen">
         </item>
-      </ul>
-    </li>
+      </li>
+    </ul>
   </template>
 
   <!-- 父级 -->
   <ul id="outline">
-    <item class="item" :model="treeData">
+    <item class="item" :models="treeData">
     </item>
   </ul>
 
