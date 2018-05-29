@@ -10,8 +10,7 @@ class PdfViewer_page {
     viewport: PDFPageViewport
 
     init() {
-        var pdfPath = 'assets/tracemonkey.pdf';
-
+        var pdfPath = 'assets/Go in Action CN.pdf';
         // Loaded via <script> tag, create shortcut to access PDF.js exports.
         this.pdfjsLib = window['pdfjs-dist/build/pdf'];
 
@@ -35,8 +34,9 @@ class PdfViewer_page {
         document.getElementById('prev').addEventListener('click', this.onPrevPage.bind(this));
 
         document.getElementById('next').addEventListener('click', this.onNextPage.bind(this));
-        document.getElementById('zoomout').addEventListener('click', this.onZoomout.bind(this));
-        document.getElementById('zoomin').addEventListener('click', this.onZoomin.bind(this));
+        document.getElementById('zoomOut').addEventListener('click', this.onZoomOut.bind(this));
+        document.getElementById('zoomIn').addEventListener('click', this.onZoomIn.bind(this));
+        document.getElementById('pageTo').addEventListener('click', this.onPageTo.bind(this));
 
         /**
          * Asynchronously downloads PDF.
@@ -46,15 +46,17 @@ class PdfViewer_page {
             document.getElementById('page_count').textContent = this.pdfDoc.numPages.toString();
 
             // Initial/first page rendering
-            this.renderPage(this.pageNum);
+            this._renderPage(this.pageNum);
+           
         });
 
     }
-    queueRenderPage(num) {
+    doRenderPage(num) {
+        this.pageNum = num
         if (this.pageRendering) {
             this.pageNumPending = num;
         } else {
-            this.renderPage(num);
+            this._renderPage(num);
         }
     }
 
@@ -65,8 +67,7 @@ class PdfViewer_page {
         if (this.pageNum <= 1) {
             return;
         }
-        this.pageNum--;
-        this.queueRenderPage(this.pageNum);
+        this.doRenderPage(this.pageNum-1);
     }
     /**
      * Displays next page.
@@ -75,22 +76,43 @@ class PdfViewer_page {
         if (this.pageNum >= this.pdfDoc.numPages) {
             return;
         }
-        this.pageNum++;
-        this.queueRenderPage(this.pageNum);
+        this.doRenderPage(this.pageNum+1);
     }
-    onZoomout() {
+    onZoomOut() {
         this.renderScale(this.pageScale - 0.1)
     }
-    onZoomin() {
+    onZoomIn() {
         this.renderScale(this.pageScale + 0.1)
+    }
+    onPageTo(){
+        this.pdfDoc.getOutline().then((outline:PDFTreeNode[])=>{
+            // console.log("[info] outline:",outline.length)
+            var logItems = (items:PDFTreeNode[],depth:number)=>{
+                var len = items.length
+                for (var i = 0; i < len; i++) {
+                    var item = items[i]
+                    if(i==5){
+                        console.log("[log]",i,':',depth,"-",item.title,item)
+                        this.pdfDoc.getPageIndex(item.dest[0]).then((pageIndex) => {
+                            console.log("[info]",pageIndex,":[pageIndex]")
+                            this.doRenderPage(pageIndex+1)
+                        })
+                    }
+                    if(item.items){
+                        // logItems(item.items,depth+1)
+                    }
+                }
+            }
+            logItems(outline,0)
+        })
     }
     renderScale(val: number) {
         this.pageScale = val
         this.viewport.fontScale = val
-        this.queueRenderPage(this.pageNum);
+        this.doRenderPage(this.pageNum);
         document.getElementById('page_scale').textContent = val.toString();
     }
-    renderPage(num: number) {
+    _renderPage(num: number) {
         this.pageRendering = true;
         // Using promise to fetch the page
         this.pdfDoc.getPage(num).then((page: PDFPageProxy) => {
@@ -112,7 +134,7 @@ class PdfViewer_page {
                 this.pageRendering = false;
                 if (this.pageNumPending !== null) {
                     // New page rendering is pending
-                    this.renderPage(this.pageNumPending);
+                    this._renderPage(this.pageNumPending);
                     this.pageNumPending = null;
                 }
             });

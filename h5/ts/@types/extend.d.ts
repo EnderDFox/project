@@ -48,4 +48,8 @@ interface PDFRenderTask{
 }
 
 
+interface PDFDocumentProxy{
+    getPageIndex(dest:any): PDFPromise<number>
+}
+
 

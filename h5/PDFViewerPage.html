@@ -34,16 +34,17 @@ window.onload=function(){
     <script src="js/pdfjs/pdf.js"></script>
     <script src="js/PdfViewerPage.js"></script>
 
-    <h1>PDF.js Previous/Next example</h1>
-
     <div>
       <button id="prev">Previous</button>
       <button id="next">Next</button>
       <span>Page: <span id="page_num"></span> / <span id="page_count"></span></span>
 
-      <button id="zoomout">-</button>
-      <button id="zoomin">+</button>
+      <button id="zoomOut">-</button>
+      <button id="zoomIn">+</button>
       <span>Scale: <span id="page_scale"></span>
+
+      <button id="pageTo">to</button>
+
     </div>
     
     <canvas id="the-canvas"></canvas>

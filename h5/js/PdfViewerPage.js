@@ -7,7 +7,7 @@ var PdfViewer_page = /** @class */ (function () {
     }
     PdfViewer_page.prototype.init = function () {
         var _this = this;
-        var pdfPath = 'assets/tracemonkey.pdf';
+        var pdfPath = 'assets/Go in Action CN.pdf';
         // Loaded via <script> tag, create shortcut to access PDF.js exports.
         this.pdfjsLib = window['pdfjs-dist/build/pdf'];
         // The workerSrc property shall be specified.
@@ -24,8 +24,9 @@ var PdfViewer_page = /** @class */ (function () {
          */
         document.getElementById('prev').addEventListener('click', this.onPrevPage.bind(this));
         document.getElementById('next').addEventListener('click', this.onNextPage.bind(this));
-        document.getElementById('zoomout').addEventListener('click', this.onZoomout.bind(this));
-        document.getElementById('zoomin').addEventListener('click', this.onZoomin.bind(this));
+        document.getElementById('zoomOut').addEventListener('click', this.onZoomOut.bind(this));
+        document.getElementById('zoomIn').addEventListener('click', this.onZoomIn.bind(this));
+        document.getElementById('pageTo').addEventListener('click', this.onPageTo.bind(this));
         /**
          * Asynchronously downloads PDF.
          */
@@ -33,15 +34,16 @@ var PdfViewer_page = /** @class */ (function () {
             _this.pdfDoc = pdfDoc_;
             document.getElementById('page_count').textContent = _this.pdfDoc.numPages.toString();
             // Initial/first page rendering
-            _this.renderPage(_this.pageNum);
+            _this._renderPage(_this.pageNum);
         });
     };
-    PdfViewer_page.prototype.queueRenderPage = function (num) {
+    PdfViewer_page.prototype.doRenderPage = function (num) {
+        this.pageNum = num;
         if (this.pageRendering) {
             this.pageNumPending = num;
         }
         else {
-            this.renderPage(num);
+            this._renderPage(num);
         }
     };
     /**
@@ -51,8 +53,7 @@ var PdfViewer_page = /** @class */ (function () {
         if (this.pageNum <= 1) {
             return;
         }
-        this.pageNum--;
-        this.queueRenderPage(this.pageNum);
+        this.doRenderPage(this.pageNum - 1);
     };
     /**
      * Displays next page.
@@ -61,22 +62,44 @@ var PdfViewer_page = /** @class */ (function () {
         if (this.pageNum >= this.pdfDoc.numPages) {
             return;
         }
-        this.pageNum++;
-        this.queueRenderPage(this.pageNum);
+        this.doRenderPage(this.pageNum + 1);
     };
-    PdfViewer_page.prototype.onZoomout = function () {
+    PdfViewer_page.prototype.onZoomOut = function () {
         this.renderScale(this.pageScale - 0.1);
     };
-    PdfViewer_page.prototype.onZoomin = function () {
+    PdfViewer_page.prototype.onZoomIn = function () {
         this.renderScale(this.pageScale + 0.1);
+    };
+    PdfViewer_page.prototype.onPageTo = function () {
+        var _this = this;
+        this.pdfDoc.getOutline().then(function (outline) {
+            // console.log("[info] outline:",outline.length)
+            var logItems = function (items, depth) {
+                var len = items.length;
+                for (var i = 0; i < len; i++) {
+                    var item = items[i];
+                    if (i == 5) {
+                        console.log("[log]", i, ':', depth, "-", item.title, item);
+                        _this.pdfDoc.getPageIndex(item.dest[0]).then(function (pageIndex) {
+                            console.log("[info]", pageIndex, ":[pageIndex]");
+                            _this.doRenderPage(pageIndex + 1);
+                        });
+                    }
+                    if (item.items) {
+                        // logItems(item.items,depth+1)
+                    }
+                }
+            };
+            logItems(outline, 0);
+        });
     };
     PdfViewer_page.prototype.renderScale = function (val) {
         this.pageScale = val;
         this.viewport.fontScale = val;
-        this.queueRenderPage(this.pageNum);
+        this.doRenderPage(this.pageNum);
         document.getElementById('page_scale').textContent = val.toString();
     };
-    PdfViewer_page.prototype.renderPage = function (num) {
+    PdfViewer_page.prototype._renderPage = function (num) {
         var _this = this;
         this.pageRendering = true;
         // Using promise to fetch the page
@@ -96,7 +119,7 @@ var PdfViewer_page = /** @class */ (function () {
                 _this.pageRendering = false;
                 if (_this.pageNumPending !== null) {
                     // New page rendering is pending
-                    _this.renderPage(_this.pageNumPending);
+                    _this._renderPage(_this.pageNumPending);
                     _this.pageNumPending = null;
                 }
             });
