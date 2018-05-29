@@ -13,15 +13,15 @@
                 "focus": false,
                 "panel": "shared"
             }
-        }
-       /*  ,
+        },
         {
             "type": "typescript",
-            "label": "tsconfig.Test.json",
-            "tsconfig": "tsconfig.Test.json",
+            "label": "watch tsconfig.json",
+            "tsconfig": "tsconfig.json",
+            "option": "watch",
             "problemMatcher": [
                 "$tsc"
             ]
-        } */
+        }
     ]
 }

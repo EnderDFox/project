@@ -4,7 +4,7 @@ var fs = require("fs");
 var path = require("path");
 // import * as getPixels from "get-pixels";
 var pngjs_1 = require("pngjs");
-var ColorUtil_1 = require("./utils/ColorUtil");
+var ColorUtil_1 = require("./lib1/ColorUtil");
 function getPixels(url, callback) {
     //TODO:
     // old use `import * as getPixels from "get-pixels";`

@@ -5,7 +5,7 @@ import * as path from "path";
 import * as parseArgs from "minimist";
 // import * as getPixels from "get-pixels";
 import { PNG } from "pngjs";
-import { ColorUtil, IRGB, IHSB } from "./utils/ColorUtil"
+import { ColorUtil, IRGB, IHSB } from "./lib1/ColorUtil"
 import { StreamState } from "http2";
 
 

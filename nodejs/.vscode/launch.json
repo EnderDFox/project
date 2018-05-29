@@ -9,9 +9,12 @@
             "request": "launch",
             "name": "Launch SrtParser",
             "program": "${workspaceFolder}/ts/SrtParser.ts",
+            "cwd": "${workspaceFolder}",
             "args": [
-                "-i","test/srt/Zootopia.srt",
-                "-o","test/srt/Zootopia.srt.json"
+                "-i",
+                "test/srt/Zootopia.srt",
+                "-o",
+                "test/srt/Zootopia.srt.json"
             ],
             "outFiles": [
                 "${workspaceFolder}/bin/js/*.js"
@@ -22,6 +25,7 @@
             "request": "launch",
             "name": "Launch Yaml2Json",
             "program": "${workspaceFolder}/bin/js/Yaml2Json.js",
+            "cwd": "${workspaceFolder}",
             "args": [
                 "--dir",
                 "bin/test"
@@ -35,42 +39,63 @@
             "request": "launch",
             "name": "Launch StaticServer",
             "program": "${workspaceFolder}/ts/FileManager.ts",
+            "cwd": "${workspaceFolder}",
             "args": [
-                "-p","823",
-                "-d","D:/",
-                "-f","D:/download"
+                "-p",
+                "823",
+                "-d",
+                "D:/",
+                "-f",
+                "D:/download"
                 // "--dir","C:/fox/projects/performance/egret"
                 // "-p","831"
             ],
             "outFiles": [
                 "${workspaceFolder}/bin/js/*.js"
-            ],
-            "cwd": "${workspaceFolder}"
+            ]
         },
         {
             "type": "node",
             "request": "launch",
             "name": "Launch FileManager",
             "program": "${workspaceFolder}/ts/FileManager.ts",
+            // "cwd": "${workspaceFolder}",
             "args": [
-                "-d","../web",
-                "-p","833",
-                "-f","D:/download"
+                "-p",
+                "833",
+                "-d",
+                "../web",
+                "-f",
+                "D:/download"
             ],
             "outFiles": [
                 "${workspaceFolder}/bin/js/*.js"
+            ]
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Launch FileManager no args",
+            "program": "${workspaceFolder}/ts/FileManager.ts",
+            // "cwd": "${workspaceFolder}",
+            "args": [
             ],
-            "cwd": "${workspaceFolder}"
+            "outFiles": [
+                "${workspaceFolder}/bin/js/*.js"
+            ]
         },
         {
             "type": "node",
             "request": "launch",
             "name": "Launch ImgToMap",
             "program": "${workspaceFolder}/ts/ImgToMap.ts",
+            "cwd": "${workspaceFolder}",
             // "program": "${workspaceFolder}/bin/js/ImgToMap.js",
             "args": [
-                "-p","4501",
-                "-d","C:/fox/projects/MKGProject1/tb_client"
+                "-p",
+                "4501",
+                "-d",
+                "C:/fox/projects/MKGProject1/tb_client"
                 // "--dir","C:/fox/projects/performance/egret"
                 // "-p","831"
             ],
@@ -83,6 +108,7 @@
             "request": "launch",
             "name": "Launch ImageToBase64",
             "program": "${workspaceFolder}/bin/js/ImageToBase64.js",
+            "cwd": "${workspaceFolder}",
             "args": [
                 "-d",
                 "test",
@@ -100,6 +126,7 @@
             "request": "launch",
             "name": "Launch ProtobufJsHelper",
             "program": "${workspaceFolder}/bin/js/ProtobufJsHelper.js",
+            "cwd": "${workspaceFolder}",
             "args": [
                 // "-h",
                 "-d",
@@ -120,6 +147,7 @@
             "request": "launch",
             "name": "Launch AutoReferencePath",
             "program": "${workspaceFolder}/ts/AutoReferencePath.ts",
+            "cwd": "${workspaceFolder}",
             "args": [
                 // "-h",
                 "-d",
@@ -140,8 +168,8 @@
             "request": "launch",
             "name": "Launch TestA",
             "program": "${workspaceFolder}/ts/TestA.ts",
-            "args": [
-            ],
+            "cwd": "${workspaceFolder}",
+            "args": [],
             "outFiles": [
                 "${workspaceFolder}/bin/js/*.js"
             ]

@@ -3,7 +3,7 @@ class FileManager {
     }
     vueAll: CombinedVueInstance1<IVueData>
     onload(): void {
-        $.get("/list",  { currPath:"code"}, this.onList.bind(this))
+        $.get("/list",  { currPath:""}, this.onList.bind(this))
     }
     onList(data: IVueData): void {
         console.log("[debug] onList => data:", data)
