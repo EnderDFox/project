@@ -97,7 +97,7 @@ class PdfViewer {
                     })
                 },
                 toggleItem: (item: ITreeItem) => {
-                    // console.log("[info]", item.isOpen, ":[toggleItem]", item)
+                    console.log("[info]", item.isOpen, ":[toggleItem]", item)
                     item.isOpen = !item.isOpen
                 }
             }

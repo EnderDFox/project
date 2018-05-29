@@ -13,6 +13,32 @@
     #the-canvas {
       border: 1px solid black;
     }
+
+    .outline {
+      position: fixed;
+      top: 30px;
+      left: 2px;
+      border: 1px solid #313131;
+      background-color: rgba(255, 255, 255, 0.82);
+    }
+
+    .outline ul {
+      padding-left: 12px;
+    }
+
+    .outline ul .item_toggle {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      line-height: 16px;
+      text-align: center;
+      vertical-align: middle;
+      /* background-color: rgba(255, 255, 255, 0.452) */
+    }
+
+    .outline ul .item_name {
+      margin-left: 0px;
+    }
   </style>
   <!-- lib3 -->
   <script type="text/javascript" src="lib3/path.js"></script>
@@ -53,11 +79,9 @@
     <ul>
       <li class="list-unstyled" v-for="model in models" :key="model.uuid">
         <div>
-          <span @click="toggleItem(model)" role="button" v-if="model.children.length>0">
-            {{model.isOpen?'-':'+'}}
-          </span>
-          &nbsp;&nbsp;
-          <span @click="linkItem(model)" role="button">
+          <span @click="toggleItem(model)" role="button" class="item_toggle">
+            {{model.children.length>0?(model.isOpen?'-':'+'):' '}}
+          </span><span @click="linkItem(model)" role="button" class="item_name">
             {{model.name}}
           </span>
         </div>
@@ -69,10 +93,10 @@
   </template>
 
   <!-- 父级 -->
-  <ul id="outline">
+  <section id="outline" class="outline">
     <item class="item" :models="treeData">
     </item>
-  </ul>
+  </section>
 
   <!-- <script>
     // tell the embed parent frame the height of the content
