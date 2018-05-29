@@ -22,7 +22,6 @@ var PdfViewer = /** @class */ (function () {
         document.getElementById('next').addEventListener('click', this.onNextPage.bind(this));
         document.getElementById('zoomOut').addEventListener('click', this.onZoomOut.bind(this));
         document.getElementById('zoomIn').addEventListener('click', this.onZoomIn.bind(this));
-        document.getElementById('pageTo').addEventListener('click', this.onPageTo.bind(this));
         //
         /**
          * Asynchronously downloads PDF.
@@ -36,7 +35,8 @@ var PdfViewer = /** @class */ (function () {
         });
     };
     PdfViewer.prototype.initVue = function () {
-        // demo数据
+        var _this = this;
+        /* demo数据
         var treeData = {
             name: 'My Tree',
             children: [
@@ -64,7 +64,8 @@ var PdfViewer = /** @class */ (function () {
                     ]
                 }
             ]
-        };
+        }
+        */
         // 定义子级组件
         Vue.component('item', {
             template: '#item-template',
@@ -74,40 +75,52 @@ var PdfViewer = /** @class */ (function () {
             data: function () {
                 return {};
             },
-            methods: {}
+            methods: {
+                linkItem: function (item) {
+                    _this.pdfDoc.getPageIndex(item.dest[0]).then(function (pageIndex) {
+                        // console.log("[info]", pageIndex, ":[pageIndex]")
+                        _this.doRenderPage(pageIndex + 1);
+                    });
+                },
+                toggleItem: function (item) {
+                    // console.log("[info]", item.isOpen, ":[toggleItem]", item)
+                    item.isOpen = !item.isOpen;
+                }
+            }
         });
-        console.log("[info]", treeData, ":[treeData]");
+        //
         this.vueOutline = new Vue({
             el: '#outline',
             data: {
-                treeData: treeData
+                treeData: { children: [] }
             }
         });
     };
     PdfViewer.prototype.initOutline = function () {
         var _this = this;
+        var uuid = 1;
         // this.vueOutline 
         this.pdfDoc.getOutline().then(function (outline) {
             // console.log("[info] outline:",outline.length)
             var logItems = function (items, depth) {
-                if (depth === void 0) { depth = 0; }
                 var treeData = [];
                 var len = items.length;
                 for (var i = 0; i < len; i++) {
                     var item = items[i];
                     // console.log("[log]", i, ':', depth, "-", item.title, item)
-                    var data = { name: item.title };
-                    // data.dest = item.dest
-                    // data.isOpen = true
+                    var dataSingle = { uuid: uuid++, name: item.title, dest: item.dest, isOpen: false };
                     if (item.items && item.items.length > 0) {
-                        data.children = logItems(item.items, depth + 1);
+                        dataSingle.children = logItems(item.items, depth + 1);
                     }
-                    treeData.push(data);
+                    else {
+                        dataSingle.children = [];
+                    }
+                    treeData.push(dataSingle);
                 }
                 return treeData;
             };
-            console.log("[info]", logItems(outline, 0), ":[logItems(outline, 0)]");
-            _this.vueOutline.treeData = { 'name': 'outline', 'children': logItems(outline, 0) };
+            // console.log("[info]", logItems(outline, 0), ":[logItems(outline, 0)]")
+            _this.vueOutline.treeData = { uuid: uuid++, 'name': 'outline', 'children': logItems(outline, 0), isOpen: true };
         });
     };
     PdfViewer.prototype.doRenderPage = function (num) {
@@ -142,29 +155,6 @@ var PdfViewer = /** @class */ (function () {
     };
     PdfViewer.prototype.onZoomIn = function () {
         this.renderScale(this.pageScale + 0.1);
-    };
-    PdfViewer.prototype.onPageTo = function () {
-        var _this = this;
-        this.pdfDoc.getOutline().then(function (outline) {
-            // console.log("[info] outline:",outline.length)
-            var logItems = function (items, depth) {
-                var len = items.length;
-                for (var i = 0; i < len; i++) {
-                    var item = items[i];
-                    if (i == 5) {
-                        // console.log("[log]",i,':',depth,"-",item.title,item)
-                        _this.pdfDoc.getPageIndex(item.dest[0]).then(function (pageIndex) {
-                            console.log("[info]", pageIndex, ":[pageIndex]");
-                            _this.doRenderPage(pageIndex + 1);
-                        });
-                    }
-                    if (item.items) {
-                        // logItems(item.items,depth+1)
-                    }
-                }
-            };
-            logItems(outline, 0);
-        });
     };
     PdfViewer.prototype.renderScale = function (val) {
         this.pageScale = val;

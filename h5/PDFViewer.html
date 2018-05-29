@@ -44,20 +44,25 @@
     <button id="zoomIn">+</button>
     <span>Scale:
       <span id="page_scale"></span>
-      <button id="pageTo">to</button>
   </div>
 
   <canvas id="the-canvas"></canvas>
 
   <!-- 子级组件 -->
   <template id="item-template">
-    <li>
+    <li class="list-unstyled">
       <div>
-        {{model.name}}
+        <span @click="toggleItem(model)" role="button" v-if="model.children.length>0">
+          {{model.isOpen?'-':'+'}}
+        </span>
+        &nbsp;&nbsp;
+        <span @click="linkItem(model)" role="button">
+          {{model.name}}
+        </span>
       </div>
       <!-- 组件中引用当前组件，传入下级数据 -->
-      <ul>
-        <item class="item" v-for="model in model.children" :model="model">
+      <ul v-show="model.isOpen">
+        <item class="item" v-for="model in model.children" :model="model" :key="model.uuid">
         </item>
       </ul>
     </li>

@@ -1,8 +1,9 @@
 interface ITreeItem {
+    uuid?: number
     name?: string
     children?: ITreeItem[]
     isOpen?: boolean
-    dest?: any
+    dest?: any[]
 }
 class PdfViewer {
     canvas: HTMLCanvasElement
@@ -32,7 +33,6 @@ class PdfViewer {
         document.getElementById('next').addEventListener('click', this.onNextPage.bind(this));
         document.getElementById('zoomOut').addEventListener('click', this.onZoomOut.bind(this));
         document.getElementById('zoomIn').addEventListener('click', this.onZoomIn.bind(this));
-        document.getElementById('pageTo').addEventListener('click', this.onPageTo.bind(this));
         //
         /**
          * Asynchronously downloads PDF.
@@ -49,7 +49,7 @@ class PdfViewer {
     }
 
     initVue() {
-        // demo数据
+        /* demo数据
         var treeData = {
             name: 'My Tree',
             children: [
@@ -78,7 +78,7 @@ class PdfViewer {
                 }
             ]
         }
-
+        */
         // 定义子级组件
         Vue.component('item', {
             template: '#item-template',
@@ -90,42 +90,51 @@ class PdfViewer {
                 }
             },
             methods: {
+                linkItem: (item: ITreeItem) => {
+                    this.pdfDoc.getPageIndex(item.dest[0]).then((pageIndex) => {
+                        // console.log("[info]", pageIndex, ":[pageIndex]")
+                        this.doRenderPage(pageIndex + 1)
+                    })
+                },
+                toggleItem: (item: ITreeItem) => {
+                    // console.log("[info]", item.isOpen, ":[toggleItem]", item)
+                    item.isOpen = !item.isOpen
+                }
             }
         })
-
-        console.log("[info]",treeData,":[treeData]")
-
+        //
         this.vueOutline = new Vue({
             el: '#outline',
             data: {
-                treeData: treeData
+                treeData: {children:[]}
             }
         })
 
     }
     vueOutline: CombinedVueInstance1<{ treeData: ITreeItem }>
     initOutline() {
+        var uuid = 1
         // this.vueOutline 
         this.pdfDoc.getOutline().then((outline: PDFTreeNode[]) => {
             // console.log("[info] outline:",outline.length)
-            var logItems = (items: PDFTreeNode[], depth: number = 0): ITreeItem[] => {
+            var logItems = (items: PDFTreeNode[], depth: number): ITreeItem[] => {
                 var treeData: ITreeItem[] = []
                 var len = items.length
                 for (var i = 0; i < len; i++) {
                     var item = items[i]
                     // console.log("[log]", i, ':', depth, "-", item.title, item)
-                    var data: ITreeItem = { name: item.title }
-                    // data.dest = item.dest
-                    // data.isOpen = true
+                    var dataSingle: ITreeItem = { uuid: uuid++, name: item.title, dest: item.dest, isOpen: false }
                     if (item.items && item.items.length > 0) {
-                        data.children = logItems(item.items, depth + 1)
+                        dataSingle.children = logItems(item.items, depth + 1)
+                    } else {
+                        dataSingle.children = []
                     }
-                    treeData.push(data)
+                    treeData.push(dataSingle)
                 }
                 return treeData
             }
-            console.log("[info]", logItems(outline, 0), ":[logItems(outline, 0)]")
-            this.vueOutline.treeData = {'name':'outline','children':logItems(outline, 0)}
+            // console.log("[info]", logItems(outline, 0), ":[logItems(outline, 0)]")
+            this.vueOutline.treeData = { uuid: uuid++, 'name': 'outline', 'children': logItems(outline, 0), isOpen: true }
         })
     }
     doRenderPage(num) {
@@ -160,28 +169,6 @@ class PdfViewer {
     }
     onZoomIn() {
         this.renderScale(this.pageScale + 0.1)
-    }
-    onPageTo() {
-        this.pdfDoc.getOutline().then((outline: PDFTreeNode[]) => {
-            // console.log("[info] outline:",outline.length)
-            var logItems = (items: PDFTreeNode[], depth: number) => {
-                var len = items.length
-                for (var i = 0; i < len; i++) {
-                    var item = items[i]
-                    if (i == 5) {
-                        // console.log("[log]",i,':',depth,"-",item.title,item)
-                        this.pdfDoc.getPageIndex(item.dest[0]).then((pageIndex) => {
-                            console.log("[info]", pageIndex, ":[pageIndex]")
-                            this.doRenderPage(pageIndex + 1)
-                        })
-                    }
-                    if (item.items) {
-                        // logItems(item.items,depth+1)
-                    }
-                }
-            }
-            logItems(outline, 0)
-        })
     }
     renderScale(val: number) {
         this.pageScale = val
