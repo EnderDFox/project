@@ -92,7 +92,7 @@ class PdfViewer_page {
                 for (var i = 0; i < len; i++) {
                     var item = items[i]
                     if(i==5){
-                        console.log("[log]",i,':',depth,"-",item.title,item)
+                        // console.log("[log]",i,':',depth,"-",item.title,item)
                         this.pdfDoc.getPageIndex(item.dest[0]).then((pageIndex) => {
                             console.log("[info]",pageIndex,":[pageIndex]")
                             this.doRenderPage(pageIndex+1)
