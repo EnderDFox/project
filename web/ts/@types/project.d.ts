@@ -133,6 +133,7 @@ declare class DataClass {
     DepartmentUserMap: { [key: number]: { [key: number]: UserSingle } }
     RegisterFunc(): void
     GetUser(uid: number): UserSingle
+    UserList:any[]
 }
 declare var Data: DataClass;
 /** */
@@ -173,11 +174,13 @@ declare var Commond: CommondClass
 /** */
 declare class MainClass {
     Init(): void
+    Over(callback: () => void): void
 }
 declare var Main: MainClass
 /** */
 declare class ProcessPanelClass {
     HideMenu(): void
+    Index(): void
 }
 declare var ProcessPanel: ProcessPanelClass
 /** */
@@ -185,8 +188,3 @@ declare class ProjectNavClass {
     FilterDid: DidField
 }
 declare var ProjectNav: ProjectNavClass
-/** */
-declare class ProcessFilterClass {
-    Pack: ProcessFilterPack
-}
-declare var ProcessFilter: ProcessFilterClass

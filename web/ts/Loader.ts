@@ -86,26 +86,19 @@ var Loader = {
     },
     //调试 初始化
     InitForDebug: function () {
+        var key = '23528d0315eac50e44927b0051e6e75f'
+        var account:string = 'fengjw'
         var str = window.location.href.toLowerCase()
-        console.log("[debug]", str)
+        // console.log("[debug]", str)
         if (str.indexOf('debugacc=') > -1) {
             str = str.split('debugacc=').pop().toString()
             str = str.split('&').shift().toString()
-            var verify: string = ''
-            switch (str) {
-                case 'wangy':
-                    verify = 'cfd4ce79ef36c539b63d0e54143abf2d'
-                    break;
-                case 'xiangjch':
-                    verify = 'b078eac31f1a05a49647e8683f8fd5a8'
-                    break;
-            }
-            $.cookie("set", { duration: 0, name: 'Account', value: str })
-            $.cookie("set", { duration: 0, name: 'Verify', value: verify })
-        } else {
-            $.cookie("set", { duration: 0, name: 'Account', value: 'fengjw' })
-            $.cookie("set", { duration: 0, name: 'Verify', value: 'f96f8007f6566300c90cbc09555cf17b' })
+            account = str
         }
+        var verify = $.md5(key + account)
+        console.log("[info]",account,":[account]",verify,":[verify]")
+        $.cookie("set", { duration: 0, name: 'Account', value: account })
+        $.cookie("set", { duration: 0, name: 'Verify', value: verify })
     },
     //脚本加载完毕
     ScriptComplete: function () {

@@ -132,7 +132,7 @@ var Common = new CommonClass()
 interface IPullDownMenuItem {
 	Key: number | string
 	Label: string
-	Data: any
+	Data?: any
 }
 //
 class ArrayUtil {
