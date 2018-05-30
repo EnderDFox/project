@@ -17,13 +17,11 @@ class ProcessFilterClass {
     Init() {
         //数据初始
         this.PackInit()
-        //填充数据
-        this.FillInput()
-        //绑定事件
-        this.BindActions()
+        //
+        this.InitVue()
     }
     //搜索初始化
-    private PackInit() {
+    PackInit() {
         this.Pack.BeginDate = Common.GetDate(-7)
         this.Pack.EndDate = Common.GetDate(31)
         this.Pack.ModeName = ''
@@ -34,33 +32,33 @@ class ProcessFilterClass {
         this.Pack.LinkUserName = ''
     }
     //填充Input
-    private FillInput() {
-        var plan = $('#stepFilter')
+    FillInput() {
+        var plan = $(this.VueFilter.$el)
         $.each(this.Pack, function (k, v) {
             plan.find('input[name="' + k + '"]').val(v)
         })
     }
     //填充Pack
-    private FillPack() {
+    FillPack() {
         var self = this
-        var plan = $('#stepFilter')
+        var plan = $(this.VueFilter.$el)
         plan.find('input').each(function (this: HTMLInputElement) {
             self.Pack[this.name] = this.value
         })
     }
     //设置Pack
-    private SetPack(key, val) {
+    SetPack(key, val) {
         this.Pack[key] = val
     }
     //重置Pack
-    private ResetPack() {
-        var plan = $('#stepFilter')
+    ResetPack() {
+        var plan = $(this.VueFilter.$el)
         plan.find('input').val('')
         this.PackInit()
         this.FillInput()
     }
     //获取数据
-    private GetPack() {
+    GetPack() {
         var param = {
             'BeginDate': this.Pack.BeginDate,
             'EndDate': this.Pack.EndDate
@@ -68,10 +66,10 @@ class ProcessFilterClass {
         return param
     }
     //绑定事件
-    private BindActions() {
+    BindActions() {
         //面板事件
         var self = this
-        var plan = $('#stepFilter')
+        var plan = $(this.VueFilter.$el)
         plan.find('.confirm').unbind().click(function () {
             self.FillPack()
             Main.Over(() => {
@@ -83,7 +81,6 @@ class ProcessFilterClass {
         plan.find('.cancel,.close').unbind().click(function () {
             plan.fadeOut(Config.FadeTime)
             DateTime.HideDate()
-            $('#storeMenu').hide()
             Common.HidePullDownMenu()
         })
         //关闭日期
@@ -92,7 +89,6 @@ class ProcessFilterClass {
                 DateTime.HideDate()
             }
             if ($(e.target).attr('class') != 'select') {
-                $('#storeMenu').hide()
                 Common.HidePullDownMenu()
             }
         })
@@ -105,17 +101,19 @@ class ProcessFilterClass {
         })
         //归档绑定
         plan.find('.select[stype="ModeStatus"],.select[stype="LinkStatus"]').unbind().click(function (this: HTMLElement, e) {
-            Common.HidePullDownMenu()
-            var menu = $('#storeMenu')
-            var stype = $(this).attr('stype')
             var dom = this
-            var top = $(this).offset().top + $(this).outerHeight() + 2
             var left = $(this).offset().left /*- menu.outerWidth() - 2*/
-            menu.css({ left: left, top: top }).unbind().delegate('.row', 'click', function () {
-                $(dom).val($(this).find('.txt').html())
-                menu.hide()
-                self.SetPack(stype, $(this).index() - 1)
-            }).show()
+            var top = $(this).offset().top + $(this).outerHeight() + 2
+            var stype = $(this).attr('stype')
+            var itemList: IPullDownMenuItem[] = [
+                { Key: -1, Label: '选择全部' },
+                { Key: 0, Label: '进行中的' },
+                { Key: 1, Label: '已归档的' },
+            ]
+            Common.ShowPullDownMenu(left, top, itemList, (item) => {
+                $(dom).val(item.Label)
+                self.SetPack(stype, item.Key)
+            })
         })
         //用户搜索
         plan.find('.user').unbind().bind('input', function (this: HTMLInputElement) {
@@ -149,24 +147,32 @@ class ProcessFilterClass {
             $(this).select()
         })
     }
-    private HideFilter(fade) {
-        if (fade === void 0) { fade = true; }
-        if (fade) {
-            $('#stepFilter').fadeOut(Config.FadeTime)
-        } else {
-            $('#stepFilter').hide()
-        }
-        $('#storeMenu').hide()
-        Common.HidePullDownMenu()
+    //# Vue
+    VuePath = 'process/'
+    VueFilter: CombinedVueInstance1<{}>
+    InitVue() {
+        Loader.LoadVueTemplate(this.VuePath + 'ProcessFilter', (txt: string) => {
+            this.VueFilter = new Vue({
+                template: txt,
+                data: {},
+                methods: {
+                }
+            }).$mount()
+            Common.InsertBeforeDynamicDom(this.VueFilter.$el)
+            //填充数据
+            this.FillInput()
+            //绑定事件
+            this.BindActions()
+        })
     }
     //显示面板
-    private ShowFilter(o, e) {
+    ShowFilter(o, e) {
         var self = this
-        var plan = $('#stepFilter')
+        var plan = $(this.VueFilter.$el)
         var top = $(o).offset().top + 50
         var left = $(o).offset().left - plan.outerWidth()
         plan.css({ top: top, left: left }).show()
-        //版本刷新
+        //版本刷新 每次打开时刷新一下版本
         var oldVid = this.Pack.Vid
         if (oldVid > 0) {
             var oldVidLabel = null
@@ -186,12 +192,12 @@ class ProcessFilterClass {
                 plan.find('.select[stype="Vid"]').val(oldVidLabel)
             }
         }
-        //版本绑定
+        //版本 绑定input打开menu 每次打开时刷新一下版本
         plan.find('.select[stype="Vid"]').unbind().click(function (e) {
-            $('#storeMenu').hide()
             var dom = this
             var left = $(this).offset().left
             var top = $(this).offset().top + $(this).outerHeight() + 2
+            //
             var itemList: IPullDownMenuItem[] = [{ Key: 0, Label: '空' }]
             var len = Math.min(ProcessData.VersionList.length, 10)
             for (var i = 0; i < len; i++) {
@@ -211,6 +217,18 @@ class ProcessFilterClass {
         })
         //
     }
+    HideFilter(fade) {
+        if (this.VueFilter) {
+            if (fade === void 0) { fade = true; }
+            if (fade) {
+                $(this.VueFilter.$el).fadeOut(Config.FadeTime)
+            } else {
+                $(this.VueFilter.$el).hide()
+            }
+        }
+        Common.HidePullDownMenu()
+    }
+
 }
 //
 var ProcessFilter = new ProcessFilterClass()

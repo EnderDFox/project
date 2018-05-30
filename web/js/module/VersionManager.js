@@ -334,20 +334,8 @@ var VersionManagerClass = /** @class */ (function () {
                 if ($(e.target).attr('class') != 'date') {
                     DateTime.HideDate();
                 }
-                /*  if ($(e.target).attr('class') != 'select') {
-                 $('#storeMenu').hide()
-                 } */
             });
-            //日期绑定
-            // plan.find('.date').unbind().click(function (this: HTMLInputElement) {
-            // console.log("[info]","lan.find('.date').unbind().click")
-            // })
             _this.ValidatePublishDateLine();
-            // setTimeout(() => {
-            // }, 1000);
-            /*   Vue.nextTick(()=>{
-                  this.ValidatePublishDateLine()
-              })) */
         };
         Loader.LoadVueTemplate(this.VuePath + "EditVersionDetail", function (txt) {
             _this.VueVersionDetail = new Vue({

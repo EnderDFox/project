@@ -135,6 +135,8 @@ var ProjectNav = {
 	},
 	//关闭菜单
 	HideMenu:function(){
-		$('#stepFilter,#workFilter,#storeMenu,#extraNotice').hide()
+		$('#workFilter,#extraNotice').hide()
+		ProcessFilter.HideFilter(false)
+		Common.HidePullDownMenu()
 	}
 }

@@ -3,15 +3,15 @@ var ProcessFilterClass = /** @class */ (function () {
     function ProcessFilterClass() {
         //数据包
         this.Pack = {};
+        //# Vue
+        this.VuePath = 'process/';
     }
     //初始化
     ProcessFilterClass.prototype.Init = function () {
         //数据初始
         this.PackInit();
-        //填充数据
-        this.FillInput();
-        //绑定事件
-        this.BindActions();
+        //
+        this.InitVue();
     };
     //搜索初始化
     ProcessFilterClass.prototype.PackInit = function () {
@@ -26,7 +26,7 @@ var ProcessFilterClass = /** @class */ (function () {
     };
     //填充Input
     ProcessFilterClass.prototype.FillInput = function () {
-        var plan = $('#stepFilter');
+        var plan = $(this.VueFilter.$el);
         $.each(this.Pack, function (k, v) {
             plan.find('input[name="' + k + '"]').val(v);
         });
@@ -34,7 +34,7 @@ var ProcessFilterClass = /** @class */ (function () {
     //填充Pack
     ProcessFilterClass.prototype.FillPack = function () {
         var self = this;
-        var plan = $('#stepFilter');
+        var plan = $(this.VueFilter.$el);
         plan.find('input').each(function () {
             self.Pack[this.name] = this.value;
         });
@@ -45,7 +45,7 @@ var ProcessFilterClass = /** @class */ (function () {
     };
     //重置Pack
     ProcessFilterClass.prototype.ResetPack = function () {
-        var plan = $('#stepFilter');
+        var plan = $(this.VueFilter.$el);
         plan.find('input').val('');
         this.PackInit();
         this.FillInput();
@@ -62,7 +62,7 @@ var ProcessFilterClass = /** @class */ (function () {
     ProcessFilterClass.prototype.BindActions = function () {
         //面板事件
         var self = this;
-        var plan = $('#stepFilter');
+        var plan = $(this.VueFilter.$el);
         plan.find('.confirm').unbind().click(function () {
             self.FillPack();
             Main.Over(function () {
@@ -74,7 +74,6 @@ var ProcessFilterClass = /** @class */ (function () {
         plan.find('.cancel,.close').unbind().click(function () {
             plan.fadeOut(Config.FadeTime);
             DateTime.HideDate();
-            $('#storeMenu').hide();
             Common.HidePullDownMenu();
         });
         //关闭日期
@@ -83,7 +82,6 @@ var ProcessFilterClass = /** @class */ (function () {
                 DateTime.HideDate();
             }
             if ($(e.target).attr('class') != 'select') {
-                $('#storeMenu').hide();
                 Common.HidePullDownMenu();
             }
         });
@@ -96,17 +94,19 @@ var ProcessFilterClass = /** @class */ (function () {
         });
         //归档绑定
         plan.find('.select[stype="ModeStatus"],.select[stype="LinkStatus"]').unbind().click(function (e) {
-            Common.HidePullDownMenu();
-            var menu = $('#storeMenu');
-            var stype = $(this).attr('stype');
             var dom = this;
-            var top = $(this).offset().top + $(this).outerHeight() + 2;
             var left = $(this).offset().left; /*- menu.outerWidth() - 2*/
-            menu.css({ left: left, top: top }).unbind().delegate('.row', 'click', function () {
-                $(dom).val($(this).find('.txt').html());
-                menu.hide();
-                self.SetPack(stype, $(this).index() - 1);
-            }).show();
+            var top = $(this).offset().top + $(this).outerHeight() + 2;
+            var stype = $(this).attr('stype');
+            var itemList = [
+                { Key: -1, Label: '选择全部' },
+                { Key: 0, Label: '进行中的' },
+                { Key: 1, Label: '已归档的' },
+            ];
+            Common.ShowPullDownMenu(left, top, itemList, function (item) {
+                $(dom).val(item.Label);
+                self.SetPack(stype, item.Key);
+            });
         });
         //用户搜索
         plan.find('.user').unbind().bind('input', function () {
@@ -141,27 +141,29 @@ var ProcessFilterClass = /** @class */ (function () {
             $(this).select();
         });
     };
-    ProcessFilterClass.prototype.HideFilter = function (fade) {
-        if (fade === void 0) {
-            fade = true;
-        }
-        if (fade) {
-            $('#stepFilter').fadeOut(Config.FadeTime);
-        }
-        else {
-            $('#stepFilter').hide();
-        }
-        $('#storeMenu').hide();
-        Common.HidePullDownMenu();
+    ProcessFilterClass.prototype.InitVue = function () {
+        var _this = this;
+        Loader.LoadVueTemplate(this.VuePath + 'ProcessFilter', function (txt) {
+            _this.VueFilter = new Vue({
+                template: txt,
+                data: {},
+                methods: {}
+            }).$mount();
+            Common.InsertBeforeDynamicDom(_this.VueFilter.$el);
+            //填充数据
+            _this.FillInput();
+            //绑定事件
+            _this.BindActions();
+        });
     };
     //显示面板
     ProcessFilterClass.prototype.ShowFilter = function (o, e) {
         var self = this;
-        var plan = $('#stepFilter');
+        var plan = $(this.VueFilter.$el);
         var top = $(o).offset().top + 50;
         var left = $(o).offset().left - plan.outerWidth();
         plan.css({ top: top, left: left }).show();
-        //版本刷新
+        //版本刷新 每次打开时刷新一下版本
         var oldVid = this.Pack.Vid;
         if (oldVid > 0) {
             var oldVidLabel = null;
@@ -182,12 +184,12 @@ var ProcessFilterClass = /** @class */ (function () {
                 plan.find('.select[stype="Vid"]').val(oldVidLabel);
             }
         }
-        //版本绑定
+        //版本 绑定input打开menu 每次打开时刷新一下版本
         plan.find('.select[stype="Vid"]').unbind().click(function (e) {
-            $('#storeMenu').hide();
             var dom = this;
             var left = $(this).offset().left;
             var top = $(this).offset().top + $(this).outerHeight() + 2;
+            //
             var itemList = [{ Key: 0, Label: '空' }];
             var len = Math.min(ProcessData.VersionList.length, 10);
             for (var i = 0; i < len; i++) {
@@ -207,6 +209,20 @@ var ProcessFilterClass = /** @class */ (function () {
             });
         });
         //
+    };
+    ProcessFilterClass.prototype.HideFilter = function (fade) {
+        if (this.VueFilter) {
+            if (fade === void 0) {
+                fade = true;
+            }
+            if (fade) {
+                $(this.VueFilter.$el).fadeOut(Config.FadeTime);
+            }
+            else {
+                $(this.VueFilter.$el).hide();
+            }
+        }
+        Common.HidePullDownMenu();
     };
     return ProcessFilterClass;
 }());

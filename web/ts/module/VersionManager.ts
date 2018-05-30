@@ -377,20 +377,8 @@ class VersionManagerClass {
                 if ($(e.target).attr('class') != 'date') {
                     DateTime.HideDate()
                 }
-                /*  if ($(e.target).attr('class') != 'select') {
-                 $('#storeMenu').hide()
-                 } */
             })
-            //日期绑定
-            // plan.find('.date').unbind().click(function (this: HTMLInputElement) {
-            // console.log("[info]","lan.find('.date').unbind().click")
-            // })
             this.ValidatePublishDateLine()
-            // setTimeout(() => {
-            // }, 1000);
-            /*   Vue.nextTick(()=>{
-                  this.ValidatePublishDateLine()
-              })) */
         }
         Loader.LoadVueTemplate(this.VuePath + "EditVersionDetail", (txt: string) => {
             this.VueVersionDetail = new Vue({
@@ -522,7 +510,7 @@ class VersionManagerClass {
                 }
                 //
                 if (items.length == 1) {
-                    var np = this.GetNextNearestPublish(dateLine, false,items[0].version)
+                    var np = this.GetNextNearestPublish(dateLine, false, items[0].version)
                     if (np) {
                         np.SubDayCount = Common.DateLineSpaceDay(dateLine, np.DateLine)
                     }
