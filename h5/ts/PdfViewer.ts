@@ -10,78 +10,55 @@ class PdfViewer {
     ctx: CanvasRenderingContext2D
     pdfjsLib: PDFJSStatic
     pdfDoc: PDFDocumentProxy
-    pageNum = 1
-    pageScale = 1.0
     pageRendering = false
     pageNumPending = null
-    viewport: PDFPageViewport
-
     init() {
         var pdfPath = 'assets/Go in Action CN.pdf';
         // Loaded via <script> tag, create shortcut to access PDF.js exports.
         this.pdfjsLib = window['pdfjs-dist/build/pdf'];
-
         // The workerSrc property shall be specified.
         this.pdfjsLib.GlobalWorkerOptions.workerSrc = 'js/pdfjs/pdf.worker.js';
         //
-        this.canvas = document.getElementById('the-canvas') as HTMLCanvasElement
-        this.ctx = this.canvas.getContext('2d')
+        this.preventDragDefault()
         //
         this.initVue()
-        //
-        document.getElementById('prev').addEventListener('click', this.onPrevPage.bind(this));
-        document.getElementById('next').addEventListener('click', this.onNextPage.bind(this));
-        document.getElementById('zoomOut').addEventListener('click', this.onZoomOut.bind(this));
-        document.getElementById('zoomIn').addEventListener('click', this.onZoomIn.bind(this));
-        //
         /**
          * Asynchronously downloads PDF.
          */
-        this.pdfjsLib.getDocument(pdfPath).then((pdfDoc_: PDFDocumentProxy) => {
-            this.pdfDoc = pdfDoc_;
-            document.getElementById('page_count').textContent = this.pdfDoc.numPages.toString();
-            // Initial/first page rendering
-            this._renderPage(this.pageNum);
-            this.initOutline()
+        Vue.nextTick(() => {
+            this.canvas = this.vueDoc.$refs.canvas as HTMLCanvasElement
+            this.ctx = this.canvas.getContext('2d')
+            this.pdfjsLib.getDocument(pdfPath).then((pdfDoc_: PDFDocumentProxy) => {
+                this.pdfDoc = pdfDoc_;
+                this.initVueData()
+                // Initial/first page rendering
+                this._renderPage(this.vueDoc.pageNum);
+            });
         });
-
 
     }
 
+    preventDragDefault() {
+        var _preventDefault = function (e) {
+            e.preventDefault();
+        };
+        document.addEventListener("dragleave", _preventDefault); //拖离
+        document.addEventListener("drop", _preventDefault); //拖后放
+        document.addEventListener("dragenter", _preventDefault); //拖进
+        document.addEventListener("dragover", _preventDefault); //拖来拖去
+        // document.addEventListener("touchmove", preventDefault);
+        document.addEventListener("mousedown", _preventDefault);
+        document.addEventListener("mouseup", _preventDefault);
+        document.addEventListener("mousemove", _preventDefault);
+        document.addEventListener("touchstart", _preventDefault);
+        document.addEventListener("touchmove", _preventDefault);
+        document.addEventListener("touchend", _preventDefault);
+    }
+
     initVue() {
-        /* demo数据
-        var treeData = {
-            name: 'My Tree',
-            children: [
-                { name: 'hello' },
-                { name: 'wat' },
-                {
-                    name: 'child folder',
-                    children: [
-                        {
-                            name: 'child folder',
-                            children: [
-                                { name: 'hello' },
-                                { name: 'wat' }
-                            ]
-                        },
-                        { name: 'hello' },
-                        { name: 'wat' },
-                        {
-                            name: 'child folder',
-                            children: [
-                                { name: 'hello' },
-                                { name: 'wat' }
-                            ]
-                        }
-                    ]
-                }
-            ]
-        }
-        */
-        // 定义子级组件
+        //# 定义子级组件
         Vue.component('item', {
-            template: '#item-template',
+            template: '#template_outline_item',
             props: {
                 models: Array
             },
@@ -90,32 +67,101 @@ class PdfViewer {
                 }
             },
             methods: {
-                linkItem: (item: ITreeItem) => {
+                onLinkItem: (item: ITreeItem) => {
                     this.pdfDoc.getPageIndex(item.dest[0]).then((pageIndex) => {
                         // console.log("[info]", pageIndex, ":[pageIndex]")
-                        this.doRenderPage(pageIndex + 1)
+                        this.renderPage(pageIndex + 1)
                     })
                 },
-                toggleItem: (item: ITreeItem) => {
-                    console.log("[info]", item.isOpen, ":[toggleItem]", item)
+                onToggleItem: (item: ITreeItem) => {
+                    // console.log("[info]", item.isOpen, ":[toggleItem]", item)
                     item.isOpen = !item.isOpen
                 }
             }
         })
-        //
-        this.vueOutline = new Vue({
-            el: '#outline',
+        //# 自定义指令: drag
+        Vue.directive('drag', {
+            bind: function (trigger, binding) {
+                var onStart = (e) => {
+                    var dragTarget = binding.value() || trigger
+                    //鼠标按下，计算当前元素距离可视区的距离
+                    let disX = e.clientX - dragTarget.offsetLeft;
+                    let disY = e.clientY - dragTarget.offsetTop;
+                    var onMove = (e) => {
+                        //通过事件委托，计算移动的距离 
+                        let l = e.clientX - disX;
+                        let t = e.clientY - disY;
+                        //移动当前元素  
+                        dragTarget.style.left = l + 'px';
+                        dragTarget.style.top = t + 'px';
+                        //将此时的位置传出去
+                        // binding.value({ x: e.pageX, y: e.pageY })
+                    };
+                    var onEnd = (e) => {
+                        if (Common.IsPC()) {
+                            document.onmousemove = null;
+                            document.onmouseup = null;
+                        } else {
+                            document.ontouchmove = null;
+                            document.ontouchend = null;
+
+                        }
+                    };
+                    if (Common.IsPC()) {
+                        document.onmousemove = onMove
+                        document.onmouseup = onEnd
+                    } else {
+                        document.ontouchmove = onMove
+                        document.ontouchend = onEnd
+                    }
+                };
+                if (Common.IsPC()) {
+                    trigger.onmousedown = onStart
+                } else {
+                    trigger.ontouchstart = onStart
+                }
+            }
+        }
+        );
+        //#
+        this.vueDoc = new Vue({
+            el: '.doc',
             data: {
-                treeData: []
+                pageNum: 1,
+                pageTotal: 1,
+                pageScale: 1,
+            },
+            methods: {
+                getDragTarget: () => {
+                    return this.vueDoc.$refs.canvas;
+                },
+                onPagePrev: this.onPagePrev.bind(this),
+                onPageNext: this.onPageNext.bind(this),
+                onZoomOut: this.onZoomOut.bind(this),
+                onZoomIn: this.onZoomIn.bind(this),
+            }
+        })
+        this.vueOutline = new Vue({
+            el: '.outline',
+            data: {
+                showOutline: true,
+                treeData: [],
+            },
+            methods: {
+                getDragTarget: () => {
+                    return this.vueOutline.$el
+                }
             }
         })
 
     }
-    vueOutline: CombinedVueInstance1<{ treeData: ITreeItem[] }>
-    initOutline() {
-        var uuid = 1
+    vueDoc: CombinedVueInstance1<{ pageNum: number, pageTotal: number, pageScale: number, }>
+    vueOutline: CombinedVueInstance1<{ showOutline: boolean, treeData: ITreeItem[], }>
+    initVueData() {
+        this.vueDoc.pageTotal = this.pdfDoc.numPages;
         // this.vueOutline 
         this.pdfDoc.getOutline().then((outline: PDFTreeNode[]) => {
+            var uuid = 1
             // console.log("[info] outline:",outline.length)
             var logItems = (items: PDFTreeNode[], depth: number): ITreeItem[] => {
                 var treeData: ITreeItem[] = []
@@ -137,8 +183,7 @@ class PdfViewer {
             this.vueOutline.treeData = logItems(outline, 0)
         })
     }
-    doRenderPage(num) {
-        this.pageNum = num
+    renderPage(num) {
         if (this.pageRendering) {
             this.pageNumPending = num;
         } else {
@@ -149,52 +194,49 @@ class PdfViewer {
     /**
      * Displays previous page.
      */
-    onPrevPage() {
-        if (this.pageNum <= 1) {
+    onPagePrev() {
+        if (this.vueDoc.pageNum <= 1) {
             return;
         }
-        this.doRenderPage(this.pageNum - 1);
+        this.renderPage(this.vueDoc.pageNum - 1);
     }
     /**
      * Displays next page.
      */
-    onNextPage() {
-        if (this.pageNum >= this.pdfDoc.numPages) {
+    onPageNext() {
+        if (this.vueDoc.pageNum >= this.vueDoc.pageTotal) {
             return;
         }
-        this.doRenderPage(this.pageNum + 1);
+        this.renderPage(this.vueDoc.pageNum + 1);
     }
     onZoomOut() {
-        this.renderScale(this.pageScale - 0.1)
+        this.renderScale(this.vueDoc.pageScale - 0.1)
     }
     onZoomIn() {
-        this.renderScale(this.pageScale + 0.1)
+        this.renderScale(this.vueDoc.pageScale + 0.1)
     }
     renderScale(val: number) {
-        this.pageScale = val
-        this.viewport.fontScale = val
-        this.doRenderPage(this.pageNum);
-        document.getElementById('page_scale').textContent = val.toString();
+        val = Math.round(val * 10) / 10
+        this.vueDoc.pageScale = val
+        this.renderPage(this.vueDoc.pageNum);
     }
     _renderPage(num: number) {
+        this.vueDoc.pageNum = num
         this.pageRendering = true;
         // Using promise to fetch the page
         this.pdfDoc.getPage(num).then((page: PDFPageProxy) => {
-            var viewport = page.getViewport(this.pageScale);
-            this.viewport = viewport
-
+            var viewport: PDFPageViewport = page.getViewport(this.vueDoc.pageScale);
+            //
             this.canvas.height = viewport.height;
             this.canvas.width = viewport.width;
-
             // Render PDF page into canvas context
-            var renderContext = {
+            var renderTask = page.render({
                 canvasContext: this.ctx,
                 viewport: viewport
-            };
-            var renderTask = page.render(renderContext);
-
+            });
             // Wait for rendering to finish
             renderTask.promise.then(() => {
+                //render pending page
                 this.pageRendering = false;
                 if (this.pageNumPending !== null) {
                     // New page rendering is pending
@@ -203,8 +245,5 @@ class PdfViewer {
                 }
             });
         });
-
-        // Update page counters
-        document.getElementById('page_num').textContent = num.toString();
     }
 }

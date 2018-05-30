@@ -10,31 +10,69 @@
   <!--  -->
   <link href="lib3/bootstrap-3.3.7-dist/css/bootstrap.css" rel="stylesheet">
   <style type="text/css">
-    #the-canvas {
-      border: 1px solid black;
+    .doc {
+      /* position: absolute; */
+      /* border: 1px solid #313131; */
+      width: 100%;
+      height: 100%;
+    }
+
+    .doc .buttonBar {
+      /* position: fixed; */
+    }
+
+    .doc .btn_drag {
+      float: right;
+    }
+
+    .doc canvas {
+      border: 1px solid rgb(65, 65, 65);
+      position: absolute;
+      left: 4px;
+      top: 34px;
+      z-index: -1;
     }
 
     .outline {
-      position: fixed;
+      position: absolute;
       top: 30px;
-      left: 2px;
+      left: 4px;
       border: 1px solid #313131;
       background-color: rgba(255, 255, 255, 0.82);
+      max-height: 90%;
+      overflow-y: auto;
+      padding-right: 8px;
+    }
+
+    .outline .children0 {
+      border-top: 1px solid #313131;
     }
 
     .outline ul {
-      padding-left: 12px;
+      padding-left: 0px;
     }
 
-    .outline ul .item_toggle {
-      display: inline-block;
-      width: 16px;
-      height: 16px;
-      line-height: 16px;
-      text-align: center;
-      vertical-align: middle;
-      /* background-color: rgba(255, 255, 255, 0.452) */
+    .outline .children {
+      padding-left: 25px;
     }
+
+    /* .outline ul .item_toggle { */
+
+    /* display: inline-block; */
+
+    /* width: 16px; */
+
+    /* height: 16px; */
+
+    /* line-height: 16px; */
+
+    /* text-align: center; */
+
+    /* vertical-align: middle; */
+
+    /* background-color: rgba(255, 255, 255, 0.452) */
+
+    /* } */
 
     .outline ul .item_name {
       margin-left: 0px;
@@ -47,57 +85,65 @@
   <script src="lib3/vue.js"></script>
   <script src="js/pdfjs/pdf.js"></script>
   <!-- my js -->
+  <script src="js/lib1/Common.js"></script>
+  <script src="js/lib1/JQueryExtend.js"></script>
   <script src="js/PdfViewer.js"></script>
   <script type="text/javascript">
     window.onload = function () {
-
       new PdfViewer().init()
-
     }
   </script>
 </head>
 
 <body>
-
-  <div>
-    <button id="prev">Previous</button>
-    <button id="next">Next</button>
-    <span>Page:
-      <span id="page_num"></span> /
-      <span id="page_count"></span>
-    </span>
-    <button id="zoomOut">-</button>
-    <button id="zoomIn">+</button>
-    <span>Scale:
-      <span id="page_scale"></span>
+  <!-- doc -->
+  <div class="doc">
+    <!-- button bar -->
+    <div class="buttonBar">
+      <!-- page -->
+      <span>Page:</span>
+      <button @click='onPagePrev'>-</button>
+      <span>
+        <span>{{pageNum}}</span> /
+        <span>{{pageTotal}}</span>
+      </span>
+      <button @click='onPageNext'>+</button>
+      <!-- scale -->
+      <span>Scale:</span>
+      <button @click="onZoomOut">-</button>
+      <span>
+        <span>{{pageScale}}</span>
+      </span>
+      <button @click="onZoomIn">+</button>
+      <!-- <button class="btn_drag" v-drag="getDragTarget">Drag</button> -->
+    </div>
+    <!-- canvas -->
+    <canvas ref='canvas' v-drag="getDragTarget">Your canvas is not supported</canvas>
   </div>
-
-  <canvas id="the-canvas"></canvas>
-
-  <!-- 子级组件 -->
-  <template id="item-template">
+  <!-- outline -->
+  <section class="outline">
+    <div class="buttonBar" v-drag="getDragTarget">
+      <span class="section_name">Outline:</span>
+      <button @click="showOutline=!showOutline">Toggle</button>
+      <!-- <button class="btn_drag" v-drag="getDragTarget">Drag</button> -->
+    </div>
+    <item class="children0" :models="treeData" v-if="showOutline">
+    </item>
+  </section>
+  <!-- vue 组件 -->
+  <template id="template_outline_item">
     <ul>
       <li class="list-unstyled" v-for="model in models" :key="model.uuid">
         <div>
-          <span @click="toggleItem(model)" role="button" class="item_toggle">
-            {{model.children.length>0?(model.isOpen?'-':'+'):' '}}
-          </span><span @click="linkItem(model)" role="button" class="item_name">
-            {{model.name}}
-          </span>
+          <button @click="onToggleItem(model)" role="button" class="item_toggle" :style="{'visibility': model.children.length>0?'visible':'hidden'}">{{model.isOpen?'-':'+'}}</button>
+          <button @click="onLinkItem(model)" role="button" class="item_name">{{model.name}}</button>
         </div>
         <!-- 组件中引用当前组件，传入下级数据 -->
-        <item class="item" :models="model.children" v-show="model.isOpen">
+        <item class="children" :models="model.children" v-show="model.isOpen">
         </item>
       </li>
     </ul>
   </template>
-
-  <!-- 父级 -->
-  <section id="outline" class="outline">
-    <item class="item" :models="treeData">
-    </item>
-  </section>
-
   <!-- <script>
     // tell the embed parent frame the height of the content
     if (window.parent && window.parent.parent) {
