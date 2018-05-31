@@ -10,38 +10,35 @@ var ProcessFilterClass = /** @class */ (function () {
     //初始化
     ProcessFilterClass.prototype.Init = function () {
         //数据初始
-        this.PackInit();
+        this.InitPack();
         //
         this.InitVue();
     };
     //搜索初始化
-    ProcessFilterClass.prototype.PackInit = function () {
+    ProcessFilterClass.prototype.InitPack = function () {
         this.Pack.BeginDate = Common.GetDate(-7);
         this.Pack.EndDate = Common.GetDate(31);
-        this.Pack.ModeName = '';
-        this.Pack.Vid = 0;
-        this.Pack.ModeStatus = 0;
-        this.Pack.LinkStatus = 0;
-        this.Pack.LinkName = '';
-        this.Pack.LinkUserName = '';
+        this.Pack.ModeName = [];
+        this.Pack.Vid = [];
+        this.Pack.ModeStatus = [];
+        this.Pack.LinkStatus = [];
+        this.Pack.LinkName = [];
+        this.Pack.LinkUserName = [];
     };
-    //填充Pack
-    ProcessFilterClass.prototype.FillPack = function () {
-        var self = this;
-        var plan = $(this.VueFilter.$el);
-        plan.find('input').each(function () {
-            self.Pack[this.name] = this.value;
-        });
+    /**重置 VueFilter 但不变Pack, 以免点击了取消后还要恢复 */
+    ProcessFilterClass.prototype.ResetVueFilter = function () {
+        this.VueFilter.beginDate = Common.GetDate(-7);
+        this.VueFilter.endDate = Common.GetDate(31);
+        this.SetCheckBoxValues(this.VueFilter.vid.Inputs, []);
+        this.SetTextFieldValues(this.VueFilter.modeName, []);
+        this.SetCheckBoxValues(this.VueFilter.modeStatus.Inputs, []);
+        this.SetTextFieldValues(this.VueFilter.linkName, []);
+        this.SetTextFieldValues(this.VueFilter.linkUserName, []);
+        this.SetCheckBoxValues(this.VueFilter.linkStatus.Inputs, []);
     };
     //设置Pack
     ProcessFilterClass.prototype.SetPack = function (key, val) {
         this.Pack[key] = val;
-    };
-    //重置Pack
-    ProcessFilterClass.prototype.ResetPack = function () {
-        var plan = $(this.VueFilter.$el);
-        plan.find('input').val('');
-        this.PackInit();
     };
     //获取发送给服务器的数据
     ProcessFilterClass.prototype.GetSvrPack = function () {
@@ -65,60 +62,6 @@ var ProcessFilterClass = /** @class */ (function () {
                 Common.HidePullDownMenu();
             }
         });
-        //日期绑定
-        plan.find('.date').unbind().click(function () {
-            var dom = this;
-            DateTime.Open(dom, $(dom).val(), function (date) {
-                $(dom).val(date);
-            });
-        });
-        //归档绑定
-        plan.find('.select[stype="ModeStatus"],.select[stype="LinkStatus"]').unbind().click(function (e) {
-            var dom = this;
-            var left = $(this).offset().left; /*- menu.outerWidth() - 2*/
-            var top = $(this).offset().top + $(this).outerHeight() + 2;
-            var stype = $(this).attr('stype');
-            var itemList = [
-                { Key: -1, Label: '选择全部' },
-                { Key: 0, Label: '进行中的' },
-                { Key: 1, Label: '已归档的' },
-            ];
-            Common.ShowPullDownMenu(left, top, itemList, function (item) {
-                $(dom).val(item.Label);
-                self.SetPack(stype, item.Key);
-            });
-        });
-        //用户搜索
-        plan.find('input[name="linkUserName"]').unbind().bind('input', function () {
-            /* var html = ''
-            var dom = this
-            var sear = $('#searchUser')
-            $.each(Data.UserList, function (k, v) {
-                if (dom.value == '') {
-                    return
-                }
-                if (v.Name.indexOf(dom.value) == -1) {
-                    return
-                }
-                html += '<li uid="' + v.Uid + '">' + v.Name + '</li>'
-            })
-            if (html != '') {
-                var top = $(dom).offset().top + $(dom).outerHeight()
-                var left = $(dom).offset().left
-                sear.css({ top: top, left: left }).unbind().delegate('li', 'click', function () {
-                    sear.hide()
-                    $(dom).val($(this).html())
-                }).html(html).show()
-            } else {
-                sear.hide()
-            }
-        }).blur(function (this: HTMLInputElement, e) {
-            self.SetPack('LinkUid', $.trim(this.value))*/
-        });
-        //选中效果
-        /*  plan.find('input:not([readonly])').focus(function () {
-             $(this).select()
-         }) */
     };
     ProcessFilterClass.prototype.InitVue = function () {
         var _this = this;
@@ -146,9 +89,12 @@ var ProcessFilterClass = /** @class */ (function () {
             });
             //初始化数据
             var data = {};
-            data.beginDate = Common.GetDate(-7);
-            data.endDate = Common.GetDate(31);
-            data.vid = null;
+            data.beginDate = '';
+            data.endDate = '';
+            data.vid = {
+                Uuid: _this.VueUuid++, Name: '功能版本', InputName: 'Vid', ShowLen: VersionManager.ListShowMax, ShowLenMin: VersionManager.ListShowMax, ShowLenMax: 20,
+                Inputs: []
+            };
             data.modeName = { Uuid: _this.VueUuid++, Name: '功能名称', InputName: 'ModeName', Placeholder: '输入功能名称', Value: '', Prompt: '', };
             data.modeStatus = {
                 Uuid: _this.VueUuid++, Name: '功能归档', InputName: 'ModeStatus', ShowLen: -1, ShowLenMin: 0, ShowLenMax: 0,
@@ -172,6 +118,21 @@ var ProcessFilterClass = /** @class */ (function () {
                 template: tplList[2],
                 data: data,
                 methods: {
+                    //日期绑定
+                    onClickDate: function (e, kind) {
+                        var dom = e.target;
+                        DateTime.Open(dom, $(dom).val(), function (date) {
+                            switch (kind) {
+                                case 1:
+                                    _this.VueFilter.beginDate = date;
+                                    break;
+                                case 2:
+                                    _this.VueFilter.endDate = date;
+                                    break;
+                            }
+                        });
+                    },
+                    //数据框变化(暂时仅用于负责人)
                     onInputChange: function (e, item) {
                         console.log("[info]", e.type, ":[e.type]");
                         switch (item.InputName) {
@@ -241,14 +202,9 @@ var ProcessFilterClass = /** @class */ (function () {
                                 break;
                         }
                     },
+                    onReset: _this.ResetVueFilter.bind(_this),
                     onSubmit: function () {
-                        console.log("[log]", _this.VueFilter.beginDate.toString(), _this.VueFilter.endDate.toString());
-                        var vids = _this.GetCheckBoxValues(_this.VueFilter.vid.Inputs);
-                        console.log("[info]", vids, ":[vids]");
-                        var modeNames = _this.GetTextFieldValues(_this.VueFilter.modeName);
-                        console.log("[info]", modeNames, ":[modeNames]");
-                        //## backup
-                        // this.FillPack()
+                        _this.VueFilterToPack();
                         /*  Main.Over(() => {
                              ProcessPanel.Index()
                         }) */
@@ -268,72 +224,51 @@ var ProcessFilterClass = /** @class */ (function () {
     };
     //显示面板
     ProcessFilterClass.prototype.ShowFilter = function (o, e) {
-        var self = this;
+        this.PackToVueFilter();
+        this.VueFilter.vid.ShowLen = this.VueFilter.vid.ShowLenMin.valueOf();
         var plan = $(this.VueFilter.$el);
         var top = $(o).offset().top + 50;
         var left = $(o).offset().left - plan.outerWidth();
         plan.css({ top: top, left: left }).show();
-        //vue data
-        //初始化data
-        var item;
-        //version vid
-        item = {
-            Uuid: this.VueUuid++, Name: '功能版本', InputName: 'Vid', ShowLen: VersionManager.ListShowMax, ShowLenMin: VersionManager.ListShowMax, ShowLenMax: 20,
-            Inputs: []
-        };
-        // var len = Math.min(ProcessData.VersionList.length, VersionManager.ListShowMax)
+    };
+    /**将VueFilter填充到Pack*/
+    ProcessFilterClass.prototype.VueFilterToPack = function () {
+        // console.log("[log]", this.VueFilter.beginDate.toString(), this.VueFilter.endDate.toString())
+        //
+        var beginDateTs = Common.DateStr2TimeStamp(this.VueFilter.beginDate);
+        var endDateTs = Common.DateStr2TimeStamp(this.VueFilter.endDate);
+        if (endDateTs >= beginDateTs) {
+            this.Pack.BeginDate = this.VueFilter.beginDate.toString();
+            this.Pack.EndDate = this.VueFilter.endDate.toString();
+        }
+        else {
+            this.Pack.BeginDate = this.VueFilter.endDate.toString();
+            this.Pack.EndDate = this.VueFilter.beginDate.toString();
+        }
+        //
+        this.Pack.Vid = this.GetCheckBoxValues(this.VueFilter.vid.Inputs);
+        this.Pack.ModeName = this.GetTextFieldValues(this.VueFilter.modeName);
+        this.Pack.ModeStatus = this.GetCheckBoxValues(this.VueFilter.modeStatus.Inputs);
+        this.Pack.LinkName = this.GetTextFieldValues(this.VueFilter.linkName);
+        this.Pack.LinkUserName = this.GetTextFieldValues(this.VueFilter.linkUserName);
+        this.Pack.LinkStatus = this.GetCheckBoxValues(this.VueFilter.linkStatus.Inputs);
+    };
+    /**将Pack中的数据填充到VueFilter */
+    ProcessFilterClass.prototype.PackToVueFilter = function () {
+        this.VueFilter.beginDate = this.Pack.BeginDate;
+        this.VueFilter.endDate = this.Pack.EndDate;
+        //vid必须每次都重新设置,因为完结可以编辑
+        this.VueFilter.vid.Inputs.splice(0, this.VueFilter.vid.Inputs.length);
         var len = ProcessData.VersionList.length;
         for (var i = 0; i < len; i++) {
             var version = ProcessData.VersionList[i];
-            item.Inputs.push({ Value: version.Vid, Label: version.Ver, Checked: false, Title: VersionManager.GetVersionFullname(version), });
+            this.VueFilter.vid.Inputs.push({ Value: version.Vid, Label: version.Ver, Checked: this.Pack.Vid.indexOf(version.Vid) > -1, Title: VersionManager.GetVersionFullname(version), });
         }
-        this.VueFilter.vid = item;
-        //版本刷新 每次打开时刷新一下版本
-        var oldVid = this.Pack.Vid;
-        if (oldVid > 0) {
-            var oldVidLabel = null;
-            var len = Math.min(ProcessData.VersionList.length, VersionManager.ListShowMax);
-            for (var i = 0; i < len; i++) {
-                var version = ProcessData.VersionList[i];
-                if (oldVid == version.Vid) {
-                    oldVidLabel = VersionManager.GetVersionFullname(version).toString();
-                }
-            }
-            if (oldVidLabel == null) {
-                //old vid发生变化, 需要重设
-                this.SetPack('Vid', 0);
-                plan.find('.select[stype="Vid"]').val("版本号");
-            }
-            else {
-                //全名有可能在版本编辑中变化了,这里需要重新设置
-                plan.find('.select[stype="Vid"]').val(oldVidLabel);
-            }
-        }
-        //版本 绑定input打开menu 每次打开时刷新一下版本
-        plan.find('.select[stype="Vid"]').unbind().click(function (e) {
-            var dom = this;
-            var left = $(this).offset().left;
-            var top = $(this).offset().top + $(this).outerHeight() + 2;
-            //
-            var itemList = [{ Key: 0, Label: '空' }];
-            var len = Math.min(ProcessData.VersionList.length, 10);
-            for (var i = 0; i < len; i++) {
-                var version = ProcessData.VersionList[i];
-                var item = { Key: parseInt(version.Vid.toString()), Label: VersionManager.GetVersionFullname(version).toString() };
-                itemList.push(item);
-            }
-            //
-            Common.ShowPullDownMenu(left, top, itemList, function (item) {
-                if (item.Key == 0) {
-                    $(dom).val("版本号");
-                }
-                else {
-                    $(dom).val(item.Label);
-                }
-                self.SetPack('Vid', item.Key);
-            });
-        });
-        //
+        this.SetTextFieldValues(this.VueFilter.modeName, this.Pack.ModeName);
+        this.SetCheckBoxValues(this.VueFilter.modeStatus.Inputs, this.Pack.ModeStatus);
+        this.SetTextFieldValues(this.VueFilter.linkName, this.Pack.LinkName);
+        this.SetTextFieldValues(this.VueFilter.linkUserName, this.Pack.LinkUserName);
+        this.SetCheckBoxValues(this.VueFilter.linkStatus.Inputs, this.Pack.LinkStatus);
     };
     ProcessFilterClass.prototype.HideFilter = function (fade) {
         if (this.VueFilter) {
@@ -361,6 +296,13 @@ var ProcessFilterClass = /** @class */ (function () {
         }
         return vals;
     };
+    ProcessFilterClass.prototype.SetCheckBoxValues = function (inputs, vals) {
+        var len = inputs.length;
+        for (var i = 0; i < len; i++) {
+            var input = inputs[i];
+            input.Checked = (vals.indexOf(input.Value) > -1);
+        }
+    };
     //得到textField全部值
     ProcessFilterClass.prototype.GetTextFieldValues = function (item) {
         var val = item.Value.toString();
@@ -372,6 +314,9 @@ var ProcessFilterClass = /** @class */ (function () {
             }
         }
         return vals;
+    };
+    ProcessFilterClass.prototype.SetTextFieldValues = function (item, vals) {
+        item.Value = vals.join(' ');
     };
     return ProcessFilterClass;
 }());

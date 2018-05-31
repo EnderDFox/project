@@ -12,8 +12,8 @@
 					 -->
 					<span style="visibility: hidden;">占位</span>期</div>
 				<div class="info">
-					<input type="text" class="date" placeholder="选择开始日期" name="BeginDate" readonly v-model="beginDate" /> ~
-					<input type="text" class="date" placeholder="选择结束日期" name="EndDate" readonly v-model="endDate" />
+					<input type="text" class="date" placeholder="选择开始日期" name="BeginDate" readonly v-model="beginDate" @click="onClickDate($event,1)" /> ~
+					<input type="text" class="date" placeholder="选择结束日期" name="EndDate" readonly v-model="endDate" @click="onClickDate($event,2)"/>
 				</div>
 			</li>
 			<FilterItemCheckBox v-if="vid" :item="vid"></FilterItemCheckBox>
@@ -77,6 +77,7 @@
 		<div class="buttons">
 			<button class="confirm" @click="onSubmit()">确定</button>
 			<button class="cancel" @click="onClose()">取消</button>
+			<button class="confirm" @click="onReset()">重置</button>
 		</div>
 	</div>
 </div>
