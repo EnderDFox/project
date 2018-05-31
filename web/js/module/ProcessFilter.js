@@ -64,14 +64,6 @@ var ProcessFilterClass = /** @class */ (function () {
         //面板事件
         var self = this;
         var plan = $(this.VueFilter.$el);
-        plan.find('.confirm').unbind().click(function () {
-            self.FillPack();
-            Main.Over(function () {
-                ProcessPanel.Index();
-            });
-            ProcessPanel.HideMenu();
-            plan.fadeOut(Config.FadeTime);
-        });
         plan.find('.cancel,.close').unbind().click(function () {
             plan.fadeOut(Config.FadeTime);
             DateTime.HideDate();
@@ -144,10 +136,20 @@ var ProcessFilterClass = /** @class */ (function () {
     };
     ProcessFilterClass.prototype.InitVue = function () {
         var _this = this;
-        Loader.LoadVueTemplateList([this.VuePath + "FilterItemCheckBox", this.VuePath + "ProcessFilter"], function (tplList) {
+        Loader.LoadVueTemplateList([this.VuePath + "FilterItemTextField", this.VuePath + "FilterItemCheckBox", this.VuePath + "ProcessFilter"], function (tplList) {
             //注册组件
-            Vue.component('FilterItemCheckBox', {
+            Vue.component('FilterItemTextField', {
                 template: tplList[0],
+                props: {
+                    item: Object
+                },
+                data: function () {
+                    return {};
+                },
+                methods: {}
+            });
+            Vue.component('FilterItemCheckBox', {
+                template: tplList[1],
                 props: {
                     item: Object
                 },
@@ -158,27 +160,48 @@ var ProcessFilterClass = /** @class */ (function () {
             });
             //初始化 VueFilter 
             _this.VueFilter = new Vue({
-                template: tplList[1],
+                template: tplList[2],
                 data: {
                     itemVid: null,
+                    itemModeName: null,
                     itemModeStatus: null,
+                    itemLinkName: null,
+                    itemLinkUserName: null,
                     itemLinkStatus: null,
                 },
-                methods: {}
+                methods: {
+                    onSubmit: function () {
+                        var vids = _this.GetCheckBoxValues(_this.VueFilter.itemVid.Inputs);
+                        console.log("[info]", vids, ":[vids]");
+                        _this.GetTextFieldValues(_this.VueFilter.itemModeName);
+                        //# backup
+                        // this.FillPack()
+                        /*  Main.Over(() => {
+                             ProcessPanel.Index()
+                        }) */
+                        // ProcessPanel.HideMenu()
+                        _this.HideFilter(true);
+                    }
+                }
             }).$mount();
             //放入html
             Common.InsertBeforeDynamicDom(_this.VueFilter.$el);
             //初始化数据
+            _this.VueFilter.itemModeName = { Uuid: _this.VueUuid++, Name: '功能名称', InputName: 'ModeName', Placeholder: '输入功能名称', Value: '' };
+            //
             _this.VueFilter.itemModeStatus = {
-                Uuid: _this.VueUuid++, Name: '功能归档', InputName: 'ModeName', ShowLen: -1,
+                Uuid: _this.VueUuid++, Name: '功能归档', InputName: 'ModeStatus', ShowLen: -1, ShowLenMin: 0, ShowLenMax: 0,
                 Inputs: [
                     { Value: '0', Label: '进行中的', Checked: false, Title: '', },
                     { Value: '1', Label: '已归档的', Checked: false, Title: '', },
                 ]
             };
             //
+            _this.VueFilter.itemLinkName = { Uuid: _this.VueUuid++, Name: '流程名称', InputName: 'LinkName', Placeholder: '输入流程名称', Value: '' };
+            _this.VueFilter.itemLinkUserName = { Uuid: _this.VueUuid++, Name: '流程负责', InputName: 'LinkUserName', Placeholder: '输入负责人', Value: '' };
+            //
             _this.VueFilter.itemLinkStatus = {
-                Uuid: _this.VueUuid++, Name: '流程归档', InputName: 'LinkName', ShowLen: -1,
+                Uuid: _this.VueUuid++, Name: '流程归档', InputName: 'LinkStatus', ShowLen: -1, ShowLenMin: 0, ShowLenMax: 0,
                 Inputs: [
                     { Value: '0', Label: '进行中的', Checked: false, Title: '', },
                     { Value: '1', Label: '已归档的', Checked: false, Title: '', },
@@ -202,7 +225,7 @@ var ProcessFilterClass = /** @class */ (function () {
         var item;
         //version vid
         item = {
-            Uuid: this.VueUuid++, Name: '功能版本', InputName: 'Vid', ShowLen: VersionManager.ListShowMax,
+            Uuid: this.VueUuid++, Name: '功能版本', InputName: 'Vid', ShowLen: VersionManager.ListShowMax, ShowLenMin: VersionManager.ListShowMax, ShowLenMax: 20,
             Inputs: []
         };
         // var len = Math.min(ProcessData.VersionList.length, VersionManager.ListShowMax)
@@ -272,6 +295,24 @@ var ProcessFilterClass = /** @class */ (function () {
             }
         }
         Common.HidePullDownMenu();
+    };
+    //得到checkbox全部值
+    ProcessFilterClass.prototype.GetCheckBoxValues = function (inputs) {
+        var vals = [];
+        var len = inputs.length;
+        for (var i = 0; i < len; i++) {
+            var input = inputs[i];
+            if (input.Checked) {
+                vals.push(parseInt(input.Value.toString()));
+            }
+        }
+        return vals;
+    };
+    //得到textField全部值
+    ProcessFilterClass.prototype.GetTextFieldValues = function (item) {
+        var val = item.Value.toString();
+        val = val.trim();
+        return val.split(' ');
     };
     return ProcessFilterClass;
 }());

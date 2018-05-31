@@ -1,24 +1,33 @@
 interface IProcessFilterPack {
     BeginDate?: string
     EndDate?: string
-    ModeName?: string
     Vid?: number
+    ModeName?: string
     ModeStatus?: number
-    LinkStatus?: number
     LinkName?: string
     LinkUserName?: string
+    LinkStatus?: number
 }
 
+interface IFilterItemTextField {
+    Uuid: number
+    Name: string
+    InputName: string
+    Placeholder: string
+    Value: string
+}
 
 interface IFilterItemCheckBox {
     Uuid: number
     Name: string
     InputName: string
-    Inputs: IFilterItemInput[]
+    Inputs: IFilterItemCheckBoxInput[]
     ShowLen: number
+    ShowLenMin: number
+    ShowLenMax: number
 }
 
-interface IFilterItemInput {
+interface IFilterItemCheckBoxInput {
     Value: number | string
     Label: string
     Checked: boolean
@@ -86,14 +95,6 @@ class ProcessFilterClass {
         //面板事件
         var self = this
         var plan = $(this.VueFilter.$el)
-        plan.find('.confirm').unbind().click(function () {
-            self.FillPack()
-            Main.Over(() => {
-                ProcessPanel.Index()
-            })
-            ProcessPanel.HideMenu()
-            plan.fadeOut(Config.FadeTime)
-        })
         plan.find('.cancel,.close').unbind().click(function () {
             plan.fadeOut(Config.FadeTime)
             DateTime.HideDate()
@@ -166,12 +167,27 @@ class ProcessFilterClass {
     //# Vue
     VueUuid = 0
     VuePath = 'process/'
-    VueFilter: CombinedVueInstance1<{ itemVid: IFilterItemCheckBox, itemModeStatus: IFilterItemCheckBox, itemLinkStatus: IFilterItemCheckBox }>
+    VueFilter: CombinedVueInstance1<{
+        itemVid: IFilterItemCheckBox, itemModeName: IFilterItemTextField, itemModeStatus: IFilterItemCheckBox,
+        itemLinkName: IFilterItemTextField, itemLinkUserName: IFilterItemTextField, itemLinkStatus: IFilterItemCheckBox
+    }>
     InitVue() {
-        Loader.LoadVueTemplateList([`${this.VuePath}FilterItemCheckBox`, `${this.VuePath}ProcessFilter`], (tplList: string[]) => {
+        Loader.LoadVueTemplateList([`${this.VuePath}FilterItemTextField`, `${this.VuePath}FilterItemCheckBox`, `${this.VuePath}ProcessFilter`], (tplList: string[]) => {
             //注册组件
-            Vue.component('FilterItemCheckBox', {
+            Vue.component('FilterItemTextField', {
                 template: tplList[0],
+                props: {
+                    item: Object
+                },
+                data: function () {
+                    return {}
+                },
+                methods: {
+
+                }
+            })
+            Vue.component('FilterItemCheckBox', {
+                template: tplList[1],
                 props: {
                     item: Object
                 },
@@ -184,28 +200,48 @@ class ProcessFilterClass {
             })
             //初始化 VueFilter 
             this.VueFilter = new Vue({
-                template: tplList[1],
+                template: tplList[2],
                 data: {
                     itemVid: null,
+                    itemModeName: null,
                     itemModeStatus: null,
+                    itemLinkName: null,
+                    itemLinkUserName: null,
                     itemLinkStatus: null,
                 },
                 methods: {
+                    onSubmit: () => {
+                        var vids: number[] = this.GetCheckBoxValues(this.VueFilter.itemVid.Inputs)
+                        console.log("[info]", vids, ":[vids]")
+                        this.GetTextFieldValues(this.VueFilter.itemModeName)
+                        //# backup
+                        // this.FillPack()
+                        /*  Main.Over(() => {
+                             ProcessPanel.Index()
+                        }) */
+                        // ProcessPanel.HideMenu()
+                        this.HideFilter(true)
+                    }
                 }
             }).$mount()
             //放入html
             Common.InsertBeforeDynamicDom(this.VueFilter.$el)
             //初始化数据
+            this.VueFilter.itemModeName = { Uuid: this.VueUuid++, Name: '功能名称', InputName: 'ModeName', Placeholder: '输入功能名称', Value: '' }
+            //
             this.VueFilter.itemModeStatus = {
-                Uuid: this.VueUuid++, Name: '功能归档', InputName: 'ModeName', ShowLen: -1,
+                Uuid: this.VueUuid++, Name: '功能归档', InputName: 'ModeStatus', ShowLen: -1, ShowLenMin: 0, ShowLenMax: 0,
                 Inputs: [
                     { Value: '0', Label: '进行中的', Checked: false, Title: '', },
                     { Value: '1', Label: '已归档的', Checked: false, Title: '', },
                 ]
             }
             //
+            this.VueFilter.itemLinkName = { Uuid: this.VueUuid++, Name: '流程名称', InputName: 'LinkName', Placeholder: '输入流程名称', Value: '' }
+            this.VueFilter.itemLinkUserName = { Uuid: this.VueUuid++, Name: '流程负责', InputName: 'LinkUserName', Placeholder: '输入负责人', Value: '' }
+            //
             this.VueFilter.itemLinkStatus = {
-                Uuid: this.VueUuid++, Name: '流程归档', InputName: 'LinkName', ShowLen: -1,
+                Uuid: this.VueUuid++, Name: '流程归档', InputName: 'LinkStatus', ShowLen: -1, ShowLenMin: 0, ShowLenMax: 0,
                 Inputs: [
                     { Value: '0', Label: '进行中的', Checked: false, Title: '', },
                     { Value: '1', Label: '已归档的', Checked: false, Title: '', },
@@ -229,7 +265,7 @@ class ProcessFilterClass {
         var item: IFilterItemCheckBox
         //version vid
         item = {
-            Uuid: this.VueUuid++, Name: '功能版本', InputName: 'Vid', ShowLen: VersionManager.ListShowMax,
+            Uuid: this.VueUuid++, Name: '功能版本', InputName: 'Vid', ShowLen: VersionManager.ListShowMax, ShowLenMin: VersionManager.ListShowMax, ShowLenMax: 20,
             Inputs: []
         }
         // var len = Math.min(ProcessData.VersionList.length, VersionManager.ListShowMax)
@@ -295,7 +331,24 @@ class ProcessFilterClass {
         }
         Common.HidePullDownMenu()
     }
-
+    //得到checkbox全部值
+    GetCheckBoxValues(inputs: IFilterItemCheckBoxInput[]): number[] {
+        var vals: number[] = []
+        var len = inputs.length
+        for (var i = 0; i < len; i++) {
+            var input = inputs[i]
+            if (input.Checked) {
+                vals.push(parseInt(input.Value.toString()))
+            }
+        }
+        return vals
+    }
+    //得到textField全部值
+    GetTextFieldValues(item: IFilterItemTextField): string[] {
+        var val = item.Value.toString()
+        val = val.trim()
+        return val.split(' ')
+    }
 }
 //
 var ProcessFilter = new ProcessFilterClass()
