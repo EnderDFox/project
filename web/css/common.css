@@ -39,28 +39,51 @@ input:focus,textarea:focus,button:focus{outline:none;}
 .commonBody{/*margin-top:70px;*/position:absolute;top:0px;display:inline-table;/*box-shadow:0px 0px 5px #333333;*/}
 
 /*======单项css*/
+.float_left{
+    float: left;
+}
+
+.display_inline_block{
+    display: inline-block;
+}
+
+.no-mp{
+    padding: 0px 0px 0px 0px;
+    margin: 0px 0px 0px 0px;
+}
+
 .no-mbp{
     border: 0px;
     padding: 0px 0px 0px 0px;
     margin: 0px 0px 0px 0px;
 }
+/* li 不显示 列表样式 */
 .list-style-type-none{
-    list-style-type:none !important;
+    list-style-type:none;
 }
 
 .font_bold{
-    font-weight:bold !important;
+    font-weight:bold;
 }
 /* 鼠标样式 */
 .cursor_none{
-    cursor:none !important;
+    cursor:none;
 }
 .cursor_pointer{
-    cursor:pointer !important;
+    cursor:pointer;
 }
-/*可见性*/
-.hidden{display: none !important;}
-
+/* 文本不可以被选择 */
+.user_select_none{
+    user-select: none;
+}
+/* 不可见 彻底不占位 */
+.hidden{
+    display: none;
+}
+/* 不可见 还占位 */
+.visible_false{
+    visibility: hidden;
+}
 /*边框*/
 /* 实线 */
 .border_solid{

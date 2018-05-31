@@ -1,51 +1,102 @@
-<!--进度筛选--> 
-<ul class="commonDialog stepFilter"> 
-	<li class="head"> 
-		<div class="title">内容筛选</div> 
-		<div class="close">x</div> 
-	</li> 
-	<li class="body"> 
-		<ul class="search"> 
-			<li> 
-				<div class="name">功能版本</div> 
-				<!--<div class="info"><input type="text" placeholder="输入版本号" name="Vid" /></div>--> 
-				<div class="info"><input type="text" class="select" stype="Vid" readonly value="版本号" ></div> 
-			</li> 
-			<li> 
-				<div class="name">功能名称</div> 
-				<div class="info"><input type="text" placeholder="输入功能名" name="ModeName" /></div> 
-			</li> 
-			<li> 
-				<div class="name">功能归档</div> 
-				<div class="info"><input type="text" class="select" stype="ModeStatus" readonly value="进行中的" /> 
-				</div> 
-			</li> 
-			<li> 
-				<div class="name">开始日期</div> 
-				<div class="info"><input type="text" class="date" placeholder="选择开始日期" name="BeginDate" readonly /></div> 
-			</li> 
-			<li> 
-				<div class="name">结束日期</div> 
-				<div class="info"><input type="text" class="date" placeholder="选择结束日期" name="EndDate" readonly /></div> 
-			</li> 
-			<li> 
-				<div class="name">流程名称</div> 
-				<div class="info"><input type="text" class="" placeholder="输入流程名" name="LinkName" /></div> 
-			</li> 
-			<li> 
-				<div class="name">流程负责</div> 
-				<div class="info"><input type="text" class="user" placeholder="输入负责人" name="LinkUserName" maxlength="6" /></div> 
-			</li> 
-			<li> 
-				<div class="name">流程归档</div> 
-				<div class="info"><input type="text" class="select" stype="LinkStatus" readonly value="进行中的" /></div> 
-			</li> 
-		</ul> 
-	</li> 
-	<li class="foot"> 
-		<div class="buttons"> 
-			<button class="confirm">确定</button> 
-			<button class="cancel">取消</button> 
-		</div> 
-	</li> 
-</ul> 
+<!--进度筛选-->
+<div class="commonDialog stepFilter ProcessFilter">
+	<div class="head">
+		<div class="title">内容筛选</div>
+		<div class="close">x</div>
+	</div>
+	<div class="body">
+		<ul>
+			<li>
+				<div class="name">日<!-- 防止换行符占位 必须前后紧贴 不要换行
+					 --><span style="visibility: hidden;">占位</span>期</div>
+				<div class="info">
+					<input type="text" class="date" placeholder="选择开始日期" name="BeginDate" readonly /> ~
+					<input type="text" class="date" placeholder="选择结束日期" name="EndDate" readonly />
+				</div>
+			</li>
+			<FilterItemCheckBox v-if="itemVid" :item="itemVid"></FilterItemCheckBox>
+			<li>
+				<div class="name">功能名称</div>
+				<div class="info">
+					<input type="text" name="ModeName" placeholder="输入功能名称">
+				</div>
+			</li>
+			<FilterItemCheckBox v-if="itemModeStatus" :item="itemModeStatus"></FilterItemCheckBox>
+			<li>
+				<div class="name">流程名称</div>
+				<div class="info">
+					<input type="text" name="ModeName" placeholder="输入流程名称">
+				</div>
+			</li>
+			<li>
+				<div class="name">流程负责</div>
+				<div class="info">
+					<input type="text" name="ModeName" placeholder="输入负责人">
+				</div>
+			</li>
+			<FilterItemCheckBox v-if="itemLinkStatus" :item="itemLinkStatus"></FilterItemCheckBox>
+		</ul>
+		<!-- backup -->
+		<ul class="search" style="border: 1px solid #FF0000;display:none;">
+			<li>
+				<div class="name">功能版本</div>
+				<!--<div class="info"><input type="text" placeholder="输入版本号" name="Vid" /></div>-->
+				<div class="info">
+					<input type="text" class="select" stype="Vid" readonly value="版本号">
+				</div>
+			</li>
+			<li>
+				<div class="name">功能名称</div>
+				<div class="info">
+					<input type="text" placeholder="输入功能名" name="ModeName" />
+				</div>
+			</li>
+			<li>
+				<div class="name">功能归档</div>
+				<div class="info">
+					<input type="text" class="select" stype="ModeStatus" readonly value="进行中的" />
+				</div>
+			</li>
+			<li>
+				<div class="name">开始日期</div>
+				<div class="info">
+					<input type="text" class="date" placeholder="选择开始日期" name="BeginDate" readonly />
+				</div>
+			</li>
+			<li>
+				<div class="name">结束日期</div>
+				<div class="info">
+					<input type="text" class="date" placeholder="选择结束日期" name="EndDate" readonly />
+				</div>
+			</li>
+			<li>
+				<div class="name">流程名称</div>
+				<div class="info">
+					<input type="text" class="" placeholder="输入流程名" name="LinkName" />
+				</div>
+			</li>
+			<li>
+				<div class="name">流程负责</div>
+				<div class="info">
+					<input type="text" class="user" placeholder="输入负责人" name="LinkUserName" maxlength="6" />
+				</div>
+			</li>
+			<li>
+				<div class="name">流程归档</div>
+				<div class="info">
+					<input type="text" class="select" stype="LinkStatus" readonly value="进行中的" />
+				</div>
+			</li>
+		</ul>
+	</div>
+	<div class="foot">
+		<div class="prompt">
+			[功能名称],[流程名称],[流程负责]
+			<br/>可以输入多个值, 用`空格`分割
+		</div>
+		<div class="buttons">
+			<button class="confirm">确定</button>
+			<button class="cancel">取消</button>
+		</div>
+	</div>
+</div>

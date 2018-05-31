@@ -243,22 +243,45 @@ var Loader = {
             this.MsgCall();
         }
     },
+    /**vue模板缓存 */
     VueTemplateLoaded: {},
+    /**加载vue模板
+     * @tplName 模板路径名称, 对应``vue_template`目录下的html文件, e.g. `template\EditTplModeDetail`
+     */
     LoadVueTemplate: function (tplName, callback) {
         if (Loader.VueTemplateLoaded[tplName]) {
-            callback(Loader.VueTemplateLoaded[tplName]);
+            callback(Loader.VueTemplateLoaded[tplName], tplName);
         }
         else {
             $.ajax({
                 url: "vue_template/" + tplName + ".html?v" + Loader.Ver, dataType: 'text', async: true,
-                success: function (res, textStatus) {
-                    Loader.VueTemplateLoaded[tplName] = res;
+                success: function (tpl, textStatus) {
+                    Loader.VueTemplateLoaded[tplName] = tpl;
                     if (callback) {
-                        callback(res);
+                        callback(tpl, tplName);
                     }
                 }
             });
         }
+    },
+    /**批量加载vue模板 */
+    LoadVueTemplateList: function (tplNameList, callback) {
+        var _this = this;
+        var _tplNameList = tplNameList.concat();
+        var _tplTxtList = [];
+        var _doLoad = function () {
+            if (_tplNameList.length > 0) {
+                _this.LoadVueTemplate(_tplNameList.shift(), function (tpl, tplName) {
+                    _tplTxtList.push(tpl);
+                    _doLoad();
+                });
+            }
+            else {
+                //加载完成
+                callback(_tplTxtList, tplNameList);
+            }
+        };
+        _doLoad();
     }
 };
 //准备完毕

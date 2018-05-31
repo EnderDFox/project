@@ -9,6 +9,22 @@ interface IProcessFilterPack {
     LinkUserName?: string
 }
 
+
+interface IFilterItemCheckBox {
+    Uuid: number
+    Name: string
+    InputName: string
+    Inputs: IFilterItemInput[]
+    ShowLen: number
+}
+
+interface IFilterItemInput {
+    Value: number | string
+    Label: string
+    Checked: boolean
+    Title: string
+}
+
 //进度筛选
 class ProcessFilterClass {
     //数据包
@@ -148,17 +164,53 @@ class ProcessFilterClass {
         })
     }
     //# Vue
+    VueUuid = 0
     VuePath = 'process/'
-    VueFilter: CombinedVueInstance1<{}>
+    VueFilter: CombinedVueInstance1<{ itemVid: IFilterItemCheckBox, itemModeStatus: IFilterItemCheckBox, itemLinkStatus: IFilterItemCheckBox }>
     InitVue() {
-        Loader.LoadVueTemplate(this.VuePath + 'ProcessFilter', (txt: string) => {
+        Loader.LoadVueTemplateList([`${this.VuePath}FilterItemCheckBox`, `${this.VuePath}ProcessFilter`], (tplList: string[]) => {
+            //注册组件
+            Vue.component('FilterItemCheckBox', {
+                template: tplList[0],
+                props: {
+                    item: Object
+                },
+                data: function () {
+                    return {}
+                },
+                methods: {
+
+                }
+            })
+            //初始化 VueFilter 
             this.VueFilter = new Vue({
-                template: txt,
-                data: {},
+                template: tplList[1],
+                data: {
+                    itemVid: null,
+                    itemModeStatus: null,
+                    itemLinkStatus: null,
+                },
                 methods: {
                 }
             }).$mount()
+            //放入html
             Common.InsertBeforeDynamicDom(this.VueFilter.$el)
+            //初始化数据
+            this.VueFilter.itemModeStatus = {
+                Uuid: this.VueUuid++, Name: '功能归档', InputName: 'ModeName', ShowLen: -1,
+                Inputs: [
+                    { Value: '0', Label: '进行中的', Checked: false, Title: '', },
+                    { Value: '1', Label: '已归档的', Checked: false, Title: '', },
+                ]
+            }
+            //
+            this.VueFilter.itemLinkStatus = {
+                Uuid: this.VueUuid++, Name: '流程归档', InputName: 'LinkName', ShowLen: -1,
+                Inputs: [
+                    { Value: '0', Label: '进行中的', Checked: false, Title: '', },
+                    { Value: '1', Label: '已归档的', Checked: false, Title: '', },
+                ]
+            }
             //填充数据
             this.FillInput()
             //绑定事件
@@ -172,11 +224,26 @@ class ProcessFilterClass {
         var top = $(o).offset().top + 50
         var left = $(o).offset().left - plan.outerWidth()
         plan.css({ top: top, left: left }).show()
+        //vue data
+        //初始化data
+        var item: IFilterItemCheckBox
+        //version vid
+        item = {
+            Uuid: this.VueUuid++, Name: '功能版本', InputName: 'Vid', ShowLen: VersionManager.ListShowMax,
+            Inputs: []
+        }
+        // var len = Math.min(ProcessData.VersionList.length, VersionManager.ListShowMax)
+        var len = ProcessData.VersionList.length
+        for (var i = 0; i < len; i++) {
+            var version = ProcessData.VersionList[i];
+            item.Inputs.push({ Value: version.Vid, Label: version.Ver, Checked: false, Title: VersionManager.GetVersionFullname(version), })
+        }
+        this.VueFilter.itemVid = item
         //版本刷新 每次打开时刷新一下版本
         var oldVid = this.Pack.Vid
         if (oldVid > 0) {
             var oldVidLabel = null
-            var len = Math.min(ProcessData.VersionList.length, 10)
+            var len = Math.min(ProcessData.VersionList.length, VersionManager.ListShowMax)
             for (var i = 0; i < len; i++) {
                 var version = ProcessData.VersionList[i];
                 if (oldVid == version.Vid) {

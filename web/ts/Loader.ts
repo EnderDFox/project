@@ -87,7 +87,7 @@ var Loader = {
     //调试 初始化
     InitForDebug: function () {
         var key = '23528d0315eac50e44927b0051e6e75f'
-        var account:string = 'fengjw'
+        var account: string = 'fengjw'
         var str = window.location.href.toLowerCase()
         // console.log("[debug]", str)
         if (str.indexOf('debugacc=') > -1) {
@@ -96,7 +96,7 @@ var Loader = {
             account = str
         }
         var verify = $.md5(key + account)
-        console.log("[info]",account,":[account]",verify,":[verify]")
+        console.log("[info]", account, ":[account]", verify, ":[verify]")
         $.cookie("set", { duration: 0, name: 'Account', value: account })
         $.cookie("set", { duration: 0, name: 'Verify', value: verify })
     },
@@ -239,21 +239,42 @@ var Loader = {
             this.MsgCall()
         }
     },
+    /**vue模板缓存 */
     VueTemplateLoaded: {},
-    LoadVueTemplate: function (tplName: string, callback: Function) {
+    /**加载vue模板
+     * @tplName 模板路径名称, 对应``vue_template`目录下的html文件, e.g. `template\EditTplModeDetail`
+     */
+    LoadVueTemplate: function (tplName: string, callback: (tpl: string, tplName: string) => void) {
         if (Loader.VueTemplateLoaded[tplName]) {
-            callback(Loader.VueTemplateLoaded[tplName])
+            callback(Loader.VueTemplateLoaded[tplName], tplName)
         } else {
             $.ajax({
                 url: "vue_template/" + tplName + ".html?v" + Loader.Ver, dataType: 'text', async: true,
-                success: function (res: string, textStatus: any) {
-                    Loader.VueTemplateLoaded[tplName] = res;
+                success: function (tpl: string, textStatus: any) {
+                    Loader.VueTemplateLoaded[tplName] = tpl;
                     if (callback) {
-                        callback(res)
+                        callback(tpl, tplName)
                     }
                 }
             })
         }
+    },
+    /**批量加载vue模板 */
+    LoadVueTemplateList: function (tplNameList: string[], callback: (tplList: string[], tplNameList: string[]) => void) {
+        var _tplNameList = tplNameList.concat()
+        var _tplTxtList: string[] = []
+        var _doLoad = () => {
+            if (_tplNameList.length > 0) {
+                this.LoadVueTemplate(_tplNameList.shift(), (tpl: string, tplName: string) => {
+                    _tplTxtList.push(tpl)
+                    _doLoad()
+                })
+            } else {
+                //加载完成
+                callback(_tplTxtList, tplNameList)
+            }
+        }
+        _doLoad()
     }
 }
 

@@ -350,6 +350,55 @@
 /*
 .stepFilter .search .status{height:30px;line-height:30px;width:160px;font-family:微软雅黑;border-radius:3px;}
 */
+/* 进度 筛选 */
+.ProcessFilter{
+  width: 535px;
+}
+.ProcessFilter .prompt{
+  color: rgb(151, 151, 151);
+  text-align: left;
+  width: 300px;
+  float: left;
+  margin-left: 40px;
+}
+.ProcessFilter .body li{
+  margin-top: 8px;
+  margin-bottom: 8px;
+}
+.ProcessFilter .body li .name{
+  /* float: left; */
+  font-weight: bold;
+  display: inline-block;
+  width: 74px;
+  text-align: center;
+  white-space: nowrap;
+}
+.ProcessFilter .body li .name::after{
+  content:"：";
+}
+.ProcessFilter .body li .info{
+  /* float: left; */
+  display: inline-block;
+  width: 400px;
+}
+.ProcessFilter .body li input{
+  text-align: center;
+}
+.ProcessFilter .body li input[type="text"]{
+  display: inline-block;
+  width: 400px;
+}
+.ProcessFilter .body li .info .date{
+  width: 188px;
+}
+.ProcessFilter .body li .btnSelectAll{
+  margin: 0px;
+  padding: 0px;
+  width: 36px;
+  height: 20px;
+  line-height: 20px;
+  font-size: 90%;
+}
 
 /*用户查询*/
 .searchUser{position:absolute;z-index:1;border:0px solid red;padding:0px;margin:0px;width:140px;box-shadow:3px 3px 10px #333333;background:#fff;display:none;border-radius:3px;}
