@@ -133,7 +133,7 @@ declare class DataClass {
     DepartmentUserMap: { [key: number]: { [key: number]: UserSingle } }
     RegisterFunc(): void
     GetUser(uid: number): UserSingle
-    UserList:any[]
+    UserList:UserSingle[]
 }
 declare var Data: DataClass;
 /** */

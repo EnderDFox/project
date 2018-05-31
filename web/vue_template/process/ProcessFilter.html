@@ -2,24 +2,26 @@
 <div class="commonDialog stepFilter ProcessFilter">
 	<div class="head">
 		<div class="title">内容筛选</div>
-		<div class="close">x</div>
+		<div class="close" @click="onClose()">x</div>
 	</div>
 	<div class="body">
 		<ul>
 			<li>
-				<div class="name">日<!-- 防止换行符占位 必须前后紧贴 不要换行
-					 --><span style="visibility: hidden;">占位</span>期</div>
+				<div class="name">日
+					<!-- 防止换行符占位 必须前后紧贴 不要换行
+					 -->
+					<span style="visibility: hidden;">占位</span>期</div>
 				<div class="info">
-					<input type="text" class="date" placeholder="选择开始日期" name="BeginDate" readonly /> ~
-					<input type="text" class="date" placeholder="选择结束日期" name="EndDate" readonly />
+					<input type="text" class="date" placeholder="选择开始日期" name="BeginDate" readonly v-model="beginDate" /> ~
+					<input type="text" class="date" placeholder="选择结束日期" name="EndDate" readonly v-model="endDate" />
 				</div>
 			</li>
-			<FilterItemCheckBox v-if="itemVid" :item="itemVid"></FilterItemCheckBox>
-			<FilterItemTextField v-if="itemModeName" :item="itemModeName"></FilterItemTextField>
-			<FilterItemCheckBox v-if="itemModeStatus" :item="itemModeStatus"></FilterItemCheckBox>
-			<FilterItemTextField v-if="itemLinkName" :item="itemLinkName"></FilterItemTextField>
-			<FilterItemTextField v-if="itemLinkUserName" :item="itemLinkUserName"></FilterItemTextField>
-			<FilterItemCheckBox v-if="itemLinkStatus" :item="itemLinkStatus"></FilterItemCheckBox>
+			<FilterItemCheckBox v-if="vid" :item="vid"></FilterItemCheckBox>
+			<FilterItemTextField v-if="modeName" :item="modeName"></FilterItemTextField>
+			<FilterItemCheckBox v-if="modeStatus" :item="modeStatus"></FilterItemCheckBox>
+			<FilterItemTextField v-if="linkName" :item="linkName"></FilterItemTextField>
+			<FilterItemTextField v-if="linkUserName" :item="linkUserName" @inputChange="onInputChange"></FilterItemTextField>
+			<FilterItemCheckBox v-if="linkStatus" :item="linkStatus"></FilterItemCheckBox>
 		</ul>
 		<!-- backup -->
 		<ul class="search" style="border: 1px solid #FF0000;display:none;">
@@ -61,12 +63,6 @@
 				</div>
 			</li>
 			<li>
-				<div class="name">流程负责</div>
-				<div class="info">
-					<input type="text" class="user" placeholder="输入负责人" name="LinkUserName" maxlength="6" />
-				</div>
-			</li>
-			<li>
 				<div class="name">流程归档</div>
 				<div class="info">
 					<input type="text" class="select" stype="LinkStatus" readonly value="进行中的" />
@@ -76,12 +72,11 @@
 	</div>
 	<div class="foot">
 		<div class="prompt">
-			[功能名称],[流程名称],[流程负责]
-			<br/>可以输入多个值, 用`空格`分割
+				[功能名称][流程名称][流程负责]<br/>可以输入多个值, 用`空格`分割
 		</div>
 		<div class="buttons">
 			<button class="confirm" @click="onSubmit()">确定</button>
-			<button class="cancel">取消</button>
+			<button class="cancel" @click="onClose()">取消</button>
 		</div>
 	</div>
 </div>

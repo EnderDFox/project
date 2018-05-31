@@ -357,6 +357,7 @@
 .ProcessFilter .prompt{
   color: rgb(151, 151, 151);
   text-align: left;
+  font-size: 80%;
   width: 300px;
   float: left;
   margin-left: 40px;
@@ -372,6 +373,7 @@
   width: 74px;
   text-align: center;
   white-space: nowrap;
+  vertical-align: top;
 }
 .ProcessFilter .body li .name::after{
   content:"：";
@@ -389,6 +391,7 @@
   width: 400px;
 }
 .ProcessFilter .body li .info .date{
+  cursor: pointer;
   width: 188px;
 }
 .ProcessFilter .body li .btnSelectAll{

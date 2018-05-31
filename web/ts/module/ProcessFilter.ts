@@ -1,3 +1,8 @@
+interface IVueFilter {
+    beginDate?: string, endDate?: string,
+    vid?: IFilterItemCheckBox, modeName?: IFilterItemTextField, modeStatus?: IFilterItemCheckBox,
+    linkName?: IFilterItemTextField, linkUserName?: IFilterItemTextField, linkStatus?: IFilterItemCheckBox
+}
 interface IProcessFilterPack {
     BeginDate?: string
     EndDate?: string
@@ -15,6 +20,7 @@ interface IFilterItemTextField {
     InputName: string
     Placeholder: string
     Value: string
+    Prompt: string
 }
 
 interface IFilterItemCheckBox {
@@ -25,6 +31,7 @@ interface IFilterItemCheckBox {
     ShowLen: number
     ShowLenMin: number
     ShowLenMax: number
+    Prompt?: string
 }
 
 interface IFilterItemCheckBoxInput {
@@ -56,13 +63,6 @@ class ProcessFilterClass {
         this.Pack.LinkName = ''
         this.Pack.LinkUserName = ''
     }
-    //填充Input
-    FillInput() {
-        var plan = $(this.VueFilter.$el)
-        $.each(this.Pack, function (k, v) {
-            plan.find('input[name="' + k + '"]').val(v)
-        })
-    }
     //填充Pack
     FillPack() {
         var self = this
@@ -80,10 +80,9 @@ class ProcessFilterClass {
         var plan = $(this.VueFilter.$el)
         plan.find('input').val('')
         this.PackInit()
-        this.FillInput()
     }
-    //获取数据
-    GetPack() {
+    //获取发送给服务器的数据
+    GetSvrPack() {
         var param = {
             'BeginDate': this.Pack.BeginDate,
             'EndDate': this.Pack.EndDate
@@ -95,11 +94,6 @@ class ProcessFilterClass {
         //面板事件
         var self = this
         var plan = $(this.VueFilter.$el)
-        plan.find('.cancel,.close').unbind().click(function () {
-            plan.fadeOut(Config.FadeTime)
-            DateTime.HideDate()
-            Common.HidePullDownMenu()
-        })
         //关闭日期
         plan.unbind().mousedown(function (e) {
             if ($(e.target).attr('class') != 'date') {
@@ -133,8 +127,8 @@ class ProcessFilterClass {
             })
         })
         //用户搜索
-        plan.find('.user').unbind().bind('input', function (this: HTMLInputElement) {
-            var html = ''
+        plan.find('input[name="linkUserName"]').unbind().bind('input', function (this: HTMLInputElement) {
+            /* var html = ''
             var dom = this
             var sear = $('#searchUser')
             $.each(Data.UserList, function (k, v) {
@@ -155,22 +149,20 @@ class ProcessFilterClass {
                 }).html(html).show()
             } else {
                 sear.hide()
-            }
+            } 
         }).blur(function (this: HTMLInputElement, e) {
-            self.SetPack('LinkUid', $.trim(this.value))
+            self.SetPack('LinkUid', $.trim(this.value))*/
+
         })
         //选中效果
-        plan.find('input:not([readonly])').focus(function () {
-            $(this).select()
-        })
+        /*  plan.find('input:not([readonly])').focus(function () {
+             $(this).select()
+         }) */
     }
     //# Vue
     VueUuid = 0
     VuePath = 'process/'
-    VueFilter: CombinedVueInstance1<{
-        itemVid: IFilterItemCheckBox, itemModeName: IFilterItemTextField, itemModeStatus: IFilterItemCheckBox,
-        itemLinkName: IFilterItemTextField, itemLinkUserName: IFilterItemTextField, itemLinkStatus: IFilterItemCheckBox
-    }>
+    VueFilter: CombinedVueInstance1<IVueFilter>
     InitVue() {
         Loader.LoadVueTemplateList([`${this.VuePath}FilterItemTextField`, `${this.VuePath}FilterItemCheckBox`, `${this.VuePath}ProcessFilter`], (tplList: string[]) => {
             //注册组件
@@ -198,55 +190,121 @@ class ProcessFilterClass {
 
                 }
             })
-            //初始化 VueFilter 
-            this.VueFilter = new Vue({
-                template: tplList[2],
-                data: {
-                    itemVid: null,
-                    itemModeName: null,
-                    itemModeStatus: null,
-                    itemLinkName: null,
-                    itemLinkUserName: null,
-                    itemLinkStatus: null,
-                },
-                methods: {
-                    onSubmit: () => {
-                        var vids: number[] = this.GetCheckBoxValues(this.VueFilter.itemVid.Inputs)
-                        console.log("[info]", vids, ":[vids]")
-                        var modeNames: string[] = this.GetTextFieldValues(this.VueFilter.itemModeName)
-                        console.log("[info]", modeNames, ":[modeNames]")
-                        //# backup
-                        // this.FillPack()
-                        /*  Main.Over(() => {
-                             ProcessPanel.Index()
-                        }) */
-                        // ProcessPanel.HideMenu()
-                        this.HideFilter(true)
-                    }
-                }
-            }).$mount()
-            //放入html
-            Common.InsertBeforeDynamicDom(this.VueFilter.$el)
             //初始化数据
-            this.VueFilter.itemModeName = { Uuid: this.VueUuid++, Name: '功能名称', InputName: 'ModeName', Placeholder: '输入功能名称', Value: '' }
-            this.VueFilter.itemModeStatus = {
+            var data: IVueFilter = {}
+            data.beginDate = Common.GetDate(-7)
+            data.endDate = Common.GetDate(31)
+            data.vid = null
+            data.modeName = { Uuid: this.VueUuid++, Name: '功能名称', InputName: 'ModeName', Placeholder: '输入功能名称', Value: '', Prompt: '', }
+            data.modeStatus = {
                 Uuid: this.VueUuid++, Name: '功能归档', InputName: 'ModeStatus', ShowLen: -1, ShowLenMin: 0, ShowLenMax: 0,
                 Inputs: [
                     { Value: '0', Label: '进行中的', Checked: false, Title: '', },
                     { Value: '1', Label: '已归档的', Checked: false, Title: '', },
                 ]
             }
-            this.VueFilter.itemLinkName = { Uuid: this.VueUuid++, Name: '流程名称', InputName: 'LinkName', Placeholder: '输入流程名称', Value: '' }
-            this.VueFilter.itemLinkUserName = { Uuid: this.VueUuid++, Name: '流程负责', InputName: 'LinkUserName', Placeholder: '输入负责人', Value: '' }
-            this.VueFilter.itemLinkStatus = {
+            data.linkName = { Uuid: this.VueUuid++, Name: '流程名称', InputName: 'LinkName', Placeholder: '输入流程名称', Value: '', Prompt: '', }
+            data.linkUserName = { Uuid: this.VueUuid++, Name: '流程负责', InputName: 'LinkUserName', Placeholder: '输入负责人', Value: '小 狐', Prompt: '可以输入多个值, 用`空格`分割',  }
+            data.linkStatus = {
                 Uuid: this.VueUuid++, Name: '流程归档', InputName: 'LinkStatus', ShowLen: -1, ShowLenMin: 0, ShowLenMax: 0,
                 Inputs: [
                     { Value: '0', Label: '进行中的', Checked: false, Title: '', },
                     { Value: '1', Label: '已归档的', Checked: false, Title: '', },
                 ]
             }
-            //填充数据
-            this.FillInput()
+            var oldLeft: number
+            //初始化 VueFilter 
+            this.VueFilter = new Vue({
+                template: tplList[2],
+                data: data,
+                methods: {
+                    onInputChange: (e: Event, item: IFilterItemTextField) => {
+                        console.log("[info]", e.type, ":[e.type]")
+                        switch (item.InputName) {
+                            case this.VueFilter.linkUserName.InputName:
+                                var dom = e.target as HTMLInputElement
+                                //### 获取当前所选的关键字
+                                // console.log("[info]", dom.selectionStart, ":[dom.selectionStart]")
+                                var selectStart = dom.selectionStart
+                                var selectEnd = dom.selectionStart
+                                var wordArr: string[] = []
+                                //  = dom.value.charAt(selectStart)
+                                while (selectStart > 0) {
+                                    var char = dom.value.charAt(selectStart - 1)
+                                    if (char && char != ' ') {
+                                        wordArr.unshift(char)
+                                        selectStart--
+                                    } else {
+                                        break
+                                    }
+                                }
+                                while (selectEnd < dom.value.length) {
+                                    var char = dom.value.charAt(selectEnd)
+                                    if (char && char != ' ') {
+                                        wordArr.push(char)
+                                        selectEnd++
+                                    } else {
+                                        break
+                                    }
+                                }
+                                var word = wordArr.join('')
+                                //### menu data
+                                if (!word) {
+                                    Common.HidePullDownMenu()
+                                    return
+                                }
+                                var itemList: IPullDownMenuItem[] = []
+                                var len = Data.UserList.length
+                                for (var i = 0; i < len; i++) {
+                                    var user: UserSingle = Data.UserList[i]
+                                    if (user.Name.indexOf(word) == -1) {
+                                        continue
+                                    }
+                                    itemList.push({ Key: user.Uid, Label: user.Name })
+                                }
+                                //### show menu
+                                var left: number
+                                if (e['pageX']) {
+                                    left = e['pageX']
+                                    oldLeft = left
+                                } else {
+                                    left = oldLeft || $(dom).offset().left
+                                }
+                                var top = $(dom).offset().top + $(dom).outerHeight()
+                                Common.ShowPullDownMenu(left, top, itemList, (menuItem) => {
+                                    console.log("[info]", menuItem.Label, ":[item.Label]", "in user menu", word, ":[word]")
+                                    var before = item.Value.toString().substring(0, selectStart)
+                                    var after = item.Value.toString().substring(selectEnd, item.Value.length)
+                                    console.log("[info]", before, ":[before]", after, ":[after]")
+                                    item.Value = before + menuItem.Label + after
+                                    $(dom).select()
+                                    // $(dom).val(item.Label)
+                                    // self.SetPack(stype, item.Key)
+                                })
+                                break;
+                        }
+                    },
+                    onSubmit: () => {
+                        console.log("[log]", this.VueFilter.beginDate.toString(), this.VueFilter.endDate.toString())
+                        var vids: number[] = this.GetCheckBoxValues(this.VueFilter.vid.Inputs)
+                        console.log("[info]", vids, ":[vids]")
+                        var modeNames: string[] = this.GetTextFieldValues(this.VueFilter.modeName)
+                        console.log("[info]", modeNames, ":[modeNames]")
+                        //## backup
+                        // this.FillPack()
+                        /*  Main.Over(() => {
+                             ProcessPanel.Index()
+                        }) */
+                        // ProcessPanel.HideMenu()
+                        // this.HideFilter(true)
+                    },
+                    onClose: () => {
+                        this.HideFilter(true)
+                    },
+                }
+            }).$mount()
+            //放入html
+            Common.InsertBeforeDynamicDom(this.VueFilter.$el)
             //绑定事件
             this.BindActions()
         })
@@ -272,7 +330,7 @@ class ProcessFilterClass {
             var version = ProcessData.VersionList[i];
             item.Inputs.push({ Value: version.Vid, Label: version.Ver, Checked: false, Title: VersionManager.GetVersionFullname(version), })
         }
-        this.VueFilter.itemVid = item
+        this.VueFilter.vid = item
         //版本刷新 每次打开时刷新一下版本
         var oldVid = this.Pack.Vid
         if (oldVid > 0) {

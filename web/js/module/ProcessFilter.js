@@ -25,13 +25,6 @@ var ProcessFilterClass = /** @class */ (function () {
         this.Pack.LinkName = '';
         this.Pack.LinkUserName = '';
     };
-    //填充Input
-    ProcessFilterClass.prototype.FillInput = function () {
-        var plan = $(this.VueFilter.$el);
-        $.each(this.Pack, function (k, v) {
-            plan.find('input[name="' + k + '"]').val(v);
-        });
-    };
     //填充Pack
     ProcessFilterClass.prototype.FillPack = function () {
         var self = this;
@@ -49,10 +42,9 @@ var ProcessFilterClass = /** @class */ (function () {
         var plan = $(this.VueFilter.$el);
         plan.find('input').val('');
         this.PackInit();
-        this.FillInput();
     };
-    //获取数据
-    ProcessFilterClass.prototype.GetPack = function () {
+    //获取发送给服务器的数据
+    ProcessFilterClass.prototype.GetSvrPack = function () {
         var param = {
             'BeginDate': this.Pack.BeginDate,
             'EndDate': this.Pack.EndDate
@@ -64,11 +56,6 @@ var ProcessFilterClass = /** @class */ (function () {
         //面板事件
         var self = this;
         var plan = $(this.VueFilter.$el);
-        plan.find('.cancel,.close').unbind().click(function () {
-            plan.fadeOut(Config.FadeTime);
-            DateTime.HideDate();
-            Common.HidePullDownMenu();
-        });
         //关闭日期
         plan.unbind().mousedown(function (e) {
             if ($(e.target).attr('class') != 'date') {
@@ -102,37 +89,36 @@ var ProcessFilterClass = /** @class */ (function () {
             });
         });
         //用户搜索
-        plan.find('.user').unbind().bind('input', function () {
-            var html = '';
-            var dom = this;
-            var sear = $('#searchUser');
+        plan.find('input[name="linkUserName"]').unbind().bind('input', function () {
+            /* var html = ''
+            var dom = this
+            var sear = $('#searchUser')
             $.each(Data.UserList, function (k, v) {
                 if (dom.value == '') {
-                    return;
+                    return
                 }
                 if (v.Name.indexOf(dom.value) == -1) {
-                    return;
+                    return
                 }
-                html += '<li uid="' + v.Uid + '">' + v.Name + '</li>';
-            });
+                html += '<li uid="' + v.Uid + '">' + v.Name + '</li>'
+            })
             if (html != '') {
-                var top = $(dom).offset().top + $(dom).outerHeight();
-                var left = $(dom).offset().left;
+                var top = $(dom).offset().top + $(dom).outerHeight()
+                var left = $(dom).offset().left
                 sear.css({ top: top, left: left }).unbind().delegate('li', 'click', function () {
-                    sear.hide();
-                    $(dom).val($(this).html());
-                }).html(html).show();
+                    sear.hide()
+                    $(dom).val($(this).html())
+                }).html(html).show()
+            } else {
+                sear.hide()
             }
-            else {
-                sear.hide();
-            }
-        }).blur(function (e) {
-            self.SetPack('LinkUid', $.trim(this.value));
+        }).blur(function (this: HTMLInputElement, e) {
+            self.SetPack('LinkUid', $.trim(this.value))*/
         });
         //选中效果
-        plan.find('input:not([readonly])').focus(function () {
-            $(this).select();
-        });
+        /*  plan.find('input:not([readonly])').focus(function () {
+             $(this).select()
+         }) */
     };
     ProcessFilterClass.prototype.InitVue = function () {
         var _this = this;
@@ -158,55 +144,124 @@ var ProcessFilterClass = /** @class */ (function () {
                 },
                 methods: {}
             });
-            //初始化 VueFilter 
-            _this.VueFilter = new Vue({
-                template: tplList[2],
-                data: {
-                    itemVid: null,
-                    itemModeName: null,
-                    itemModeStatus: null,
-                    itemLinkName: null,
-                    itemLinkUserName: null,
-                    itemLinkStatus: null,
-                },
-                methods: {
-                    onSubmit: function () {
-                        var vids = _this.GetCheckBoxValues(_this.VueFilter.itemVid.Inputs);
-                        console.log("[info]", vids, ":[vids]");
-                        var modeNames = _this.GetTextFieldValues(_this.VueFilter.itemModeName);
-                        console.log("[info]", modeNames, ":[modeNames]");
-                        //# backup
-                        // this.FillPack()
-                        /*  Main.Over(() => {
-                             ProcessPanel.Index()
-                        }) */
-                        // ProcessPanel.HideMenu()
-                        _this.HideFilter(true);
-                    }
-                }
-            }).$mount();
-            //放入html
-            Common.InsertBeforeDynamicDom(_this.VueFilter.$el);
             //初始化数据
-            _this.VueFilter.itemModeName = { Uuid: _this.VueUuid++, Name: '功能名称', InputName: 'ModeName', Placeholder: '输入功能名称', Value: '' };
-            _this.VueFilter.itemModeStatus = {
+            var data = {};
+            data.beginDate = Common.GetDate(-7);
+            data.endDate = Common.GetDate(31);
+            data.vid = null;
+            data.modeName = { Uuid: _this.VueUuid++, Name: '功能名称', InputName: 'ModeName', Placeholder: '输入功能名称', Value: '', Prompt: '', };
+            data.modeStatus = {
                 Uuid: _this.VueUuid++, Name: '功能归档', InputName: 'ModeStatus', ShowLen: -1, ShowLenMin: 0, ShowLenMax: 0,
                 Inputs: [
                     { Value: '0', Label: '进行中的', Checked: false, Title: '', },
                     { Value: '1', Label: '已归档的', Checked: false, Title: '', },
                 ]
             };
-            _this.VueFilter.itemLinkName = { Uuid: _this.VueUuid++, Name: '流程名称', InputName: 'LinkName', Placeholder: '输入流程名称', Value: '' };
-            _this.VueFilter.itemLinkUserName = { Uuid: _this.VueUuid++, Name: '流程负责', InputName: 'LinkUserName', Placeholder: '输入负责人', Value: '' };
-            _this.VueFilter.itemLinkStatus = {
+            data.linkName = { Uuid: _this.VueUuid++, Name: '流程名称', InputName: 'LinkName', Placeholder: '输入流程名称', Value: '', Prompt: '', };
+            data.linkUserName = { Uuid: _this.VueUuid++, Name: '流程负责', InputName: 'LinkUserName', Placeholder: '输入负责人', Value: '小 狐', Prompt: '可以输入多个值, 用`空格`分割', };
+            data.linkStatus = {
                 Uuid: _this.VueUuid++, Name: '流程归档', InputName: 'LinkStatus', ShowLen: -1, ShowLenMin: 0, ShowLenMax: 0,
                 Inputs: [
                     { Value: '0', Label: '进行中的', Checked: false, Title: '', },
                     { Value: '1', Label: '已归档的', Checked: false, Title: '', },
                 ]
             };
-            //填充数据
-            _this.FillInput();
+            var oldLeft;
+            //初始化 VueFilter 
+            _this.VueFilter = new Vue({
+                template: tplList[2],
+                data: data,
+                methods: {
+                    onInputChange: function (e, item) {
+                        console.log("[info]", e.type, ":[e.type]");
+                        switch (item.InputName) {
+                            case _this.VueFilter.linkUserName.InputName:
+                                var dom = e.target;
+                                //### 获取当前所选的关键字
+                                // console.log("[info]", dom.selectionStart, ":[dom.selectionStart]")
+                                var selectStart = dom.selectionStart;
+                                var selectEnd = dom.selectionStart;
+                                var wordArr = [];
+                                //  = dom.value.charAt(selectStart)
+                                while (selectStart > 0) {
+                                    var char = dom.value.charAt(selectStart - 1);
+                                    if (char && char != ' ') {
+                                        wordArr.unshift(char);
+                                        selectStart--;
+                                    }
+                                    else {
+                                        break;
+                                    }
+                                }
+                                while (selectEnd < dom.value.length) {
+                                    var char = dom.value.charAt(selectEnd);
+                                    if (char && char != ' ') {
+                                        wordArr.push(char);
+                                        selectEnd++;
+                                    }
+                                    else {
+                                        break;
+                                    }
+                                }
+                                var word = wordArr.join('');
+                                //### menu data
+                                if (!word) {
+                                    Common.HidePullDownMenu();
+                                    return;
+                                }
+                                var itemList = [];
+                                var len = Data.UserList.length;
+                                for (var i = 0; i < len; i++) {
+                                    var user = Data.UserList[i];
+                                    if (user.Name.indexOf(word) == -1) {
+                                        continue;
+                                    }
+                                    itemList.push({ Key: user.Uid, Label: user.Name });
+                                }
+                                //### show menu
+                                var left;
+                                if (e['pageX']) {
+                                    left = e['pageX'];
+                                    oldLeft = left;
+                                }
+                                else {
+                                    left = oldLeft || $(dom).offset().left;
+                                }
+                                var top = $(dom).offset().top + $(dom).outerHeight();
+                                Common.ShowPullDownMenu(left, top, itemList, function (menuItem) {
+                                    console.log("[info]", menuItem.Label, ":[item.Label]", "in user menu", word, ":[word]");
+                                    var before = item.Value.toString().substring(0, selectStart);
+                                    var after = item.Value.toString().substring(selectEnd, item.Value.length);
+                                    console.log("[info]", before, ":[before]", after, ":[after]");
+                                    item.Value = before + menuItem.Label + after;
+                                    $(dom).select();
+                                    // $(dom).val(item.Label)
+                                    // self.SetPack(stype, item.Key)
+                                });
+                                break;
+                        }
+                    },
+                    onSubmit: function () {
+                        console.log("[log]", _this.VueFilter.beginDate.toString(), _this.VueFilter.endDate.toString());
+                        var vids = _this.GetCheckBoxValues(_this.VueFilter.vid.Inputs);
+                        console.log("[info]", vids, ":[vids]");
+                        var modeNames = _this.GetTextFieldValues(_this.VueFilter.modeName);
+                        console.log("[info]", modeNames, ":[modeNames]");
+                        //## backup
+                        // this.FillPack()
+                        /*  Main.Over(() => {
+                             ProcessPanel.Index()
+                        }) */
+                        // ProcessPanel.HideMenu()
+                        // this.HideFilter(true)
+                    },
+                    onClose: function () {
+                        _this.HideFilter(true);
+                    },
+                }
+            }).$mount();
+            //放入html
+            Common.InsertBeforeDynamicDom(_this.VueFilter.$el);
             //绑定事件
             _this.BindActions();
         });
@@ -232,7 +287,7 @@ var ProcessFilterClass = /** @class */ (function () {
             var version = ProcessData.VersionList[i];
             item.Inputs.push({ Value: version.Vid, Label: version.Ver, Checked: false, Title: VersionManager.GetVersionFullname(version), });
         }
-        this.VueFilter.itemVid = item;
+        this.VueFilter.vid = item;
         //版本刷新 每次打开时刷新一下版本
         var oldVid = this.Pack.Vid;
         if (oldVid > 0) {

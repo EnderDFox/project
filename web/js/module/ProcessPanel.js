@@ -8,7 +8,7 @@ var ProcessPanel = {
 	},
 	//入口协议
 	Index: function () {
-		WSConn.sendMsg(C2L.C2L_PROCESS_VIEW, ProcessFilter.GetPack())
+		WSConn.sendMsg(C2L.C2L_PROCESS_VIEW, ProcessFilter.GetSvrPack())
 	},
 	//设置时间范围
 	SetDateRange: function () {
