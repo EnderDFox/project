@@ -1,6 +1,6 @@
 <li class="FilterItemTextField">
     <div class="name">{{item.Name}}</div>
     <div class="info">
-        <input type="text" :name="item.InputName" :placeholder="item.Placeholder" v-mode="item.Value">
+        <input type="text" :name="item.InputName" :placeholder="item.Placeholder" v-model="item.Value">
     </div>
 </li>

@@ -173,7 +173,8 @@ var ProcessFilterClass = /** @class */ (function () {
                     onSubmit: function () {
                         var vids = _this.GetCheckBoxValues(_this.VueFilter.itemVid.Inputs);
                         console.log("[info]", vids, ":[vids]");
-                        _this.GetTextFieldValues(_this.VueFilter.itemModeName);
+                        var modeNames = _this.GetTextFieldValues(_this.VueFilter.itemModeName);
+                        console.log("[info]", modeNames, ":[modeNames]");
                         //# backup
                         // this.FillPack()
                         /*  Main.Over(() => {
@@ -188,7 +189,6 @@ var ProcessFilterClass = /** @class */ (function () {
             Common.InsertBeforeDynamicDom(_this.VueFilter.$el);
             //初始化数据
             _this.VueFilter.itemModeName = { Uuid: _this.VueUuid++, Name: '功能名称', InputName: 'ModeName', Placeholder: '输入功能名称', Value: '' };
-            //
             _this.VueFilter.itemModeStatus = {
                 Uuid: _this.VueUuid++, Name: '功能归档', InputName: 'ModeStatus', ShowLen: -1, ShowLenMin: 0, ShowLenMax: 0,
                 Inputs: [
@@ -196,10 +196,8 @@ var ProcessFilterClass = /** @class */ (function () {
                     { Value: '1', Label: '已归档的', Checked: false, Title: '', },
                 ]
             };
-            //
             _this.VueFilter.itemLinkName = { Uuid: _this.VueUuid++, Name: '流程名称', InputName: 'LinkName', Placeholder: '输入流程名称', Value: '' };
             _this.VueFilter.itemLinkUserName = { Uuid: _this.VueUuid++, Name: '流程负责', InputName: 'LinkUserName', Placeholder: '输入负责人', Value: '' };
-            //
             _this.VueFilter.itemLinkStatus = {
                 Uuid: _this.VueUuid++, Name: '流程归档', InputName: 'LinkStatus', ShowLen: -1, ShowLenMin: 0, ShowLenMax: 0,
                 Inputs: [
@@ -312,7 +310,13 @@ var ProcessFilterClass = /** @class */ (function () {
     ProcessFilterClass.prototype.GetTextFieldValues = function (item) {
         var val = item.Value.toString();
         val = val.trim();
-        return val.split(' ');
+        var vals = val.split(' ');
+        for (var i = vals.length - 1; i >= 0; i--) {
+            if (vals[i] == "") {
+                vals.splice(i, 1);
+            }
+        }
+        return vals;
     };
     return ProcessFilterClass;
 }());

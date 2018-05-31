@@ -1,20 +1,24 @@
+interface ILoadGroup {
+    path: string
+    files: string[]
+}
 //内容加载
-var Loader = {
-    isDebug: false,
+class LoaderClass {
+    isDebug = false
     //版本号 由外部传入
-    Ver: '0.0.0',
+    Ver = '0.0.0'
     //模块Id
-    Needs: {},
+    Needs: { [key: number]: boolean } = {}
     //语言环境
-    Lang: ['zh'],
+    Lang = ['zh']
     //需要加载的css文件列表
     //     <link rel="stylesheet" href="css/common.css?v=v1.3.59" />
-    CssList: [
+    CssList: ILoadGroup[] = [
         { path: "", files: ['common', 'project'] }
-    ],
+    ]
     //需要加载的js文件列表  jquery必须提前加载
     //< script src = "js/Loader1.js?v=v1.3.59" > </script>
-    JsList: [
+    JsList: ILoadGroup[] = [
         { path: "", files: ['Define', 'PrototypeExtend', 'JQueryExtend', 'Protocol', 'Config', 'WSConn', 'Commond', 'Common', 'DateTime', 'Search', 'Templet', 'Data', 'Main'] },
         { path: "lib", files: ['vue', 'Echarts.min', 'Cookie', 'jquery.md5'] },
         {
@@ -28,19 +32,19 @@ var Loader = {
         {
             path: "tests", files: []
         }
-    ],
+    ]
     //脚本数量
-    LoadFileSum: 0,
+    LoadFileSum = 0
     //加载状态
-    IsComplete: false,
+    IsComplete = false
     //初始化
-    Init: function (ver: string) {
-        Loader.Ver = ver
+    Init(ver: string) {
+        this.Ver = ver
         //加载脚本
         this.LoadAll()
-    },
+    }
     //注册函数
-    RegisterFunc: function () {
+    RegisterFunc() {
         PopManager.Init()
         //用户管理
         User.RegisterFunc()
@@ -62,15 +66,15 @@ var Loader = {
         NoticeManager.RegisterFunc()
         //上传管理(测试)
         UploadManager.RegisterFunc()
-    },
+    }
     //设置协议
-    SetNeedCode: function () {
+    SetNeedCode() {
         this.Needs[L2C.L2C_SESSION_LOGIN] = true
         this.Needs[L2C.L2C_USER_LIST] = true
         this.Needs[L2C.L2C_DEPARTMENT_LIST] = true
-    },
+    }
     //检查环境
-    CheckEnviroment: function () {
+    CheckEnviroment() {
         if (window.location.href.toLowerCase().indexOf('isdebug=true') > -1) {
             this.isDebug = true;
         } else if (window.location.href.toLowerCase().indexOf('isdebug=false') > -1) {
@@ -83,9 +87,9 @@ var Loader = {
                 this.isDebug = false;
             }
         }
-    },
+    }
     //调试 初始化
-    InitForDebug: function () {
+    InitForDebug() {
         var key = '23528d0315eac50e44927b0051e6e75f'
         var account: string = 'fengjw'
         var str = window.location.href.toLowerCase()
@@ -99,9 +103,9 @@ var Loader = {
         console.log("[info]", account, ":[account]", verify, ":[verify]")
         $.cookie("set", { duration: 0, name: 'Account', value: account })
         $.cookie("set", { duration: 0, name: 'Verify', value: verify })
-    },
+    }
     //脚本加载完毕
-    ScriptComplete: function () {
+    ScriptComplete() {
         //调试
         if (this.isDebug) {
             this.InitForDebug()
@@ -112,72 +116,72 @@ var Loader = {
         this.SetNeedCode()
         //链接服务器
         this.Connect()
-    },
+    }
     //同步css
-    AsyncCss: function (list: string[], path: string) {
+    AsyncCss(list: string[], path: string) {
         for (var i in list) {
             var v = list[i]
-            Loader.loadSingleCss(path + v, function () {
-                Loader.LoadFileSum--
-                if (Loader.LoadFileSum == 0) {
-                    Loader.ScriptComplete()
+            this.loadSingleCss(path + v, () => {
+                this.LoadFileSum--
+                if (this.LoadFileSum == 0) {
+                    this.ScriptComplete()
                 }
             })
         }
-    },
+    }
     //同步脚本
-    AsyncScript: function (list: string[], path: string) {
+    AsyncScript(list: string[], path: string) {
         for (var i in list) {
             var v = list[i]
             //方法1 这样编译器能断点  浏览器console中可以显示正确的位置
-            Loader.loadSingleScript(path + v, function () {
-                Loader.LoadFileSum--
-                if (Loader.LoadFileSum == 0) {
+            this.loadSingleScript(path + v, () => {
+                this.LoadFileSum--
+                if (this.LoadFileSum == 0) {
                     //脚本加载完毕
-                    Loader.ScriptComplete()
+                    this.ScriptComplete()
                 }
             })
             //方法2 这样无法断点  浏览器console中显示的位置也是VM的位置
             /* $.ajax({
                 url:path+v+'.js',dataType:'script',async:true,
-                success:function(res,textStatus){
-                    Loader.LoadSrcNum--
-                    if(Loader.LoadSrcNum == 0){
+                success:(res,textStatus)=>{
+                    this.LoadSrcNum--
+                    if(this.LoadSrcNum == 0){
                         //脚本加载完毕
-                        Loader.ScriptComplete()
+                        this.ScriptComplete()
                     }
                 }
             }) */
         }
-    },
-    loadSingleCss: function (src: string, callback: Function) {
+    }
+    loadSingleCss(src: string, callback: () => void) {
         var s = document.createElement('link');
         s.rel = 'stylesheet';
         s.type = 'text/css';
         // s.async = true;
-        s.href = `css/${src}.css?v=${Loader.Ver}`
+        s.href = `css/${src}.css?v=${this.Ver}`
         s.id = src
         s.addEventListener('load', function () {
             s.removeEventListener('load', (arguments.callee as EventListenerOrEventListenerObject), false);
             callback();
         }, false);
         document.head.appendChild(s);
-    },
-    loadSingleScript: function (src: string, callback: Function) {
+    }
+    loadSingleScript(src: string, callback: () => void) {
         var s = document.createElement('script');
         s.async = true;
-        s.src = `js/${src}.js?v=${Loader.Ver}`
+        s.src = `js/${src}.js?v=${this.Ver}`
         s.addEventListener('load', function () {
             (s.parentNode as Node).removeChild(s)
             s.removeEventListener('load', (arguments.callee as EventListenerOrEventListenerObject), false);
             callback()
         }, false);
         document.body.appendChild(s);
-    },
+    }
     //加载脚本
-    LoadAll: function () {
+    LoadAll() {
         //先加载jquery否则需要他的资源无法使用
-        this.loadSingleScript("lib/jquery-3.2.1.min", (): void => {
+        this.loadSingleScript("lib/jquery-3.2.1.min", () => {
             //计算总数
             this.LoadFileSum = 0
             for (var i in this.CssList) {
@@ -196,9 +200,9 @@ var Loader = {
                 this.AsyncScript(item.files, item.path + '/')
             }
         })
-    },
+    }
     //链接初始化
-    Connect: function () {
+    Connect() {
         //链接服务
         WSConn.Init()
         //登陆
@@ -210,57 +214,56 @@ var Loader = {
             location.reload()
         })
         //收到
-        WSConn.onMessage(function (msg: { Cid: number, Data: any }) {
+        WSConn.onMessage((msg: { Cid: number, Data: any }) => {
             //函数执行
             Commond.Execute(msg.Cid, msg.Data)
             //执行完毕
-            Loader.MsgAsync(msg.Cid)
+            this.MsgAsync(msg.Cid)
         })
-    },
+    }
     //消息回调
-    MsgCall: function () {
+    MsgCall() {
         //程序入口
         Main.Init()
-    },
+    }
     //消息同步完成
-    MsgAsync: function (cid: number): any {
+    MsgAsync(cid: number): void {
         if (this.IsComplete) {
-            return false
+            return
         }
         delete this.Needs[cid]
         var len = 0
         $.each(this.Needs, function () {
             len++
-            return false
+            return
         })
         //完毕
         if (len == 0) {
             this.IsComplete = true
             this.MsgCall()
         }
-    },
+    }
     /**vue模板缓存 */
-    VueTemplateLoaded: {},
+    VueTemplateLoaded: { [key: string]: string } = {}
     /**加载vue模板
      * @tplName 模板路径名称, 对应``vue_template`目录下的html文件, e.g. `template\EditTplModeDetail`
      */
-    LoadVueTemplate: function (tplName: string, callback: (tpl: string, tplName: string) => void) {
-        if (Loader.VueTemplateLoaded[tplName]) {
-            callback(Loader.VueTemplateLoaded[tplName], tplName)
+    LoadVueTemplate(tplName: string, callback: (tpl: string, tplName: string) => void) {
+        if (this.VueTemplateLoaded[tplName]) {
+            callback(this.VueTemplateLoaded[tplName], tplName)
         } else {
             $.ajax({
-                url: "vue_template/" + tplName + ".html?v" + Loader.Ver, dataType: 'text', async: true,
-                success: function (tpl: string, textStatus: any) {
-                    Loader.VueTemplateLoaded[tplName] = tpl;
+                url: `vue_template/${tplName}.html?v=${this.Ver}`, dataType: 'text', async: true, success: (tpl: string) => {
+                    this.VueTemplateLoaded[tplName] = tpl;
                     if (callback) {
                         callback(tpl, tplName)
                     }
                 }
             })
         }
-    },
+    }
     /**批量加载vue模板 */
-    LoadVueTemplateList: function (tplNameList: string[], callback: (tplList: string[], tplNameList: string[]) => void) {
+    LoadVueTemplateList(tplNameList: string[], callback: (tplList: string[], tplNameList: string[]) => void) {
         var _tplNameList = tplNameList.concat()
         var _tplTxtList: string[] = []
         var _doLoad = () => {
@@ -277,7 +280,8 @@ var Loader = {
         _doLoad()
     }
 }
-
+//
+var Loader = new LoaderClass()
 //准备完毕
 window.onload = function () {
     Loader.CheckEnviroment()
