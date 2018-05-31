@@ -7,13 +7,11 @@
 	<div class="body">
 		<ul>
 			<li>
-				<div class="name">日
-					<!-- 防止换行符占位 必须前后紧贴 不要换行
-					 -->
-					<span style="visibility: hidden;">占位</span>期</div>
+				<div class="name">日<!-- 防止换行符占位 必须前后紧贴 不要换行
+					 --><span style="visibility: hidden;">占位</span>期</div>
 				<div class="info">
-					<input type="text" class="date" placeholder="选择开始日期" name="BeginDate" readonly v-model="beginDate" @click="onClickDate($event,1)" /> ~
-					<input type="text" class="date" placeholder="选择结束日期" name="EndDate" readonly v-model="endDate" @click="onClickDate($event,2)"/>
+					<input type="text" class="date" title="选择开始日期" placeholder="选择开始日期" name="BeginDate" readonly v-model="beginDate" @click="onClickDate($event,1)" /> ~
+					<input type="text" class="date" title="选择结束日期" placeholder="选择结束日期" name="EndDate" readonly v-model="endDate" @click="onClickDate($event,2)"/>
 				</div>
 			</li>
 			<FilterItemCheckBox v-if="vid" :item="vid"></FilterItemCheckBox>
@@ -22,6 +20,8 @@
 			<FilterItemTextField v-if="linkName" :item="linkName"></FilterItemTextField>
 			<FilterItemTextField v-if="linkUserName" :item="linkUserName" @inputChange="onInputChange"></FilterItemTextField>
 			<FilterItemCheckBox v-if="linkStatus" :item="linkStatus"></FilterItemCheckBox>
+			<FilterItemCheckBox v-if="workStatus" :item="workStatus"></FilterItemCheckBox>
+			<FilterItemCheckBox v-if="workFile" :item="workFile"></FilterItemCheckBox>
 		</ul>
 		<!-- backup -->
 		<ul class="search" style="border: 1px solid #FF0000;display:none;">

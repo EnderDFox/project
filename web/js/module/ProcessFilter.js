@@ -24,21 +24,64 @@ var ProcessFilterClass = /** @class */ (function () {
         this.Pack.LinkStatus = [];
         this.Pack.LinkName = [];
         this.Pack.LinkUserName = [];
+        this.Pack.WorkStatus = [];
+        this.Pack.WorkFile = [];
     };
     /**重置 VueFilter 但不变Pack, 以免点击了取消后还要恢复 */
     ProcessFilterClass.prototype.ResetVueFilter = function () {
         this.VueFilter.beginDate = Common.GetDate(-7);
         this.VueFilter.endDate = Common.GetDate(31);
-        this.SetCheckBoxValues(this.VueFilter.vid.Inputs, []);
+        this.SetCheckBoxValues(this.VueFilter.vid, []);
         this.SetTextFieldValues(this.VueFilter.modeName, []);
-        this.SetCheckBoxValues(this.VueFilter.modeStatus.Inputs, []);
+        this.SetCheckBoxValues(this.VueFilter.modeStatus, []);
         this.SetTextFieldValues(this.VueFilter.linkName, []);
         this.SetTextFieldValues(this.VueFilter.linkUserName, []);
-        this.SetCheckBoxValues(this.VueFilter.linkStatus.Inputs, []);
+        this.SetCheckBoxValues(this.VueFilter.linkStatus, []);
+        this.SetCheckBoxValues(this.VueFilter.workStatus, []);
+        this.SetCheckBoxValues(this.VueFilter.workFile, []);
     };
-    //设置Pack
-    ProcessFilterClass.prototype.SetPack = function (key, val) {
-        this.Pack[key] = val;
+    /**将VueFilter填充到Pack*/
+    ProcessFilterClass.prototype.VueFilterToPack = function () {
+        // console.log("[log]", this.VueFilter.beginDate.toString(), this.VueFilter.endDate.toString())
+        //
+        var beginDateTs = Common.DateStr2TimeStamp(this.VueFilter.beginDate);
+        var endDateTs = Common.DateStr2TimeStamp(this.VueFilter.endDate);
+        if (endDateTs >= beginDateTs) {
+            this.Pack.BeginDate = this.VueFilter.beginDate.toString();
+            this.Pack.EndDate = this.VueFilter.endDate.toString();
+        }
+        else {
+            this.Pack.BeginDate = this.VueFilter.endDate.toString();
+            this.Pack.EndDate = this.VueFilter.beginDate.toString();
+        }
+        //
+        this.Pack.Vid = this.GetCheckBoxValues(this.VueFilter.vid);
+        this.Pack.ModeName = this.GetTextFieldValues(this.VueFilter.modeName);
+        this.Pack.ModeStatus = this.GetCheckBoxValues(this.VueFilter.modeStatus);
+        this.Pack.LinkName = this.GetTextFieldValues(this.VueFilter.linkName);
+        this.Pack.LinkUserName = this.GetTextFieldValues(this.VueFilter.linkUserName);
+        this.Pack.LinkStatus = this.GetCheckBoxValues(this.VueFilter.linkStatus);
+        this.Pack.WorkStatus = this.GetCheckBoxValues(this.VueFilter.workStatus);
+        this.Pack.WorkFile = this.GetCheckBoxValues(this.VueFilter.workFile);
+    };
+    /**将Pack中的数据填充到VueFilter */
+    ProcessFilterClass.prototype.PackToVueFilter = function () {
+        this.VueFilter.beginDate = this.Pack.BeginDate;
+        this.VueFilter.endDate = this.Pack.EndDate;
+        //vid必须每次都重新设置,因为完结可以编辑
+        this.VueFilter.vid.Inputs.splice(0, this.VueFilter.vid.Inputs.length);
+        var len = ProcessData.VersionList.length;
+        for (var i = 0; i < len; i++) {
+            var version = ProcessData.VersionList[i];
+            this.VueFilter.vid.Inputs.push({ Value: version.Vid, Label: version.Ver, Checked: this.Pack.Vid.indexOf(version.Vid) > -1, Title: VersionManager.GetVersionFullname(version), });
+        }
+        this.SetTextFieldValues(this.VueFilter.modeName, this.Pack.ModeName);
+        this.SetCheckBoxValues(this.VueFilter.modeStatus, this.Pack.ModeStatus);
+        this.SetTextFieldValues(this.VueFilter.linkName, this.Pack.LinkName);
+        this.SetTextFieldValues(this.VueFilter.linkUserName, this.Pack.LinkUserName);
+        this.SetCheckBoxValues(this.VueFilter.linkStatus, this.Pack.LinkStatus);
+        this.SetCheckBoxValues(this.VueFilter.workStatus, this.Pack.WorkStatus);
+        this.SetCheckBoxValues(this.VueFilter.workFile, this.Pack.WorkFile);
     };
     //获取发送给服务器的数据
     ProcessFilterClass.prototype.GetSvrPack = function () {
@@ -99,8 +142,8 @@ var ProcessFilterClass = /** @class */ (function () {
             data.modeStatus = {
                 Uuid: _this.VueUuid++, Name: '功能归档', InputName: 'ModeStatus', ShowLen: -1, ShowLenMin: 0, ShowLenMax: 0,
                 Inputs: [
-                    { Value: '0', Label: '进行中的', Checked: false, Title: '', },
-                    { Value: '1', Label: '已归档的', Checked: false, Title: '', },
+                    { Value: 0, Label: '进行中的', Checked: false, Title: '', },
+                    { Value: 1, Label: '已归档的', Checked: false, Title: '', },
                 ]
             };
             data.linkName = { Uuid: _this.VueUuid++, Name: '流程名称', InputName: 'LinkName', Placeholder: '输入流程名称', Value: '', Prompt: '', };
@@ -108,8 +151,25 @@ var ProcessFilterClass = /** @class */ (function () {
             data.linkStatus = {
                 Uuid: _this.VueUuid++, Name: '流程归档', InputName: 'LinkStatus', ShowLen: -1, ShowLenMin: 0, ShowLenMax: 0,
                 Inputs: [
-                    { Value: '0', Label: '进行中的', Checked: false, Title: '', },
-                    { Value: '1', Label: '已归档的', Checked: false, Title: '', },
+                    { Value: 0, Label: '进行中的', Checked: false, Title: '', },
+                    { Value: 1, Label: '已归档的', Checked: false, Title: '', },
+                ]
+            };
+            data.workStatus = {
+                Uuid: _this.VueUuid++, Name: '工作状态', InputName: 'WorkStatus', ShowLen: -1, ShowLenMin: 0, ShowLenMax: 0,
+                Inputs: [
+                    { Value: WorkStatusField.WORK, Label: '工作', Checked: false, Title: '', },
+                    { Value: WorkStatusField.FINISH, Label: '完成', Checked: false, Title: '', },
+                    { Value: WorkStatusField.DELAY, Label: '延期', Checked: false, Title: '', },
+                    { Value: WorkStatusField.WAIT, Label: '等待', Checked: false, Title: '', },
+                    { Value: WorkStatusField.REST, Label: '休假', Checked: false, Title: '', },
+                    { Value: WorkStatusField.OPTIMIZE, Label: '优化', Checked: false, Title: '', },
+                ]
+            };
+            data.workFile = {
+                Uuid: _this.VueUuid++, Name: '工作附件', InputName: 'WorkStatus', ShowLen: -1, ShowLenMin: 0, ShowLenMax: 0,
+                Inputs: [
+                    { Value: 1, Label: '有附件', Checked: false, Title: '', },
                 ]
             };
             var oldLeft;
@@ -196,8 +256,6 @@ var ProcessFilterClass = /** @class */ (function () {
                                     console.log("[info]", before, ":[before]", after, ":[after]");
                                     item.Value = before + menuItem.Label + after;
                                     $(dom).select();
-                                    // $(dom).val(item.Label)
-                                    // self.SetPack(stype, item.Key)
                                 });
                                 break;
                         }
@@ -205,11 +263,11 @@ var ProcessFilterClass = /** @class */ (function () {
                     onReset: _this.ResetVueFilter.bind(_this),
                     onSubmit: function () {
                         _this.VueFilterToPack();
-                        /*  Main.Over(() => {
-                             ProcessPanel.Index()
-                        }) */
-                        // ProcessPanel.HideMenu()
-                        // this.HideFilter(true)
+                        Main.Over(function () {
+                            ProcessPanel.Index();
+                        });
+                        ProcessPanel.HideMenu();
+                        _this.HideFilter(true);
                     },
                     onClose: function () {
                         _this.HideFilter(true);
@@ -225,50 +283,10 @@ var ProcessFilterClass = /** @class */ (function () {
     //显示面板
     ProcessFilterClass.prototype.ShowFilter = function (o, e) {
         this.PackToVueFilter();
-        this.VueFilter.vid.ShowLen = this.VueFilter.vid.ShowLenMin.valueOf();
         var plan = $(this.VueFilter.$el);
         var top = $(o).offset().top + 50;
         var left = $(o).offset().left - plan.outerWidth();
         plan.css({ top: top, left: left }).show();
-    };
-    /**将VueFilter填充到Pack*/
-    ProcessFilterClass.prototype.VueFilterToPack = function () {
-        // console.log("[log]", this.VueFilter.beginDate.toString(), this.VueFilter.endDate.toString())
-        //
-        var beginDateTs = Common.DateStr2TimeStamp(this.VueFilter.beginDate);
-        var endDateTs = Common.DateStr2TimeStamp(this.VueFilter.endDate);
-        if (endDateTs >= beginDateTs) {
-            this.Pack.BeginDate = this.VueFilter.beginDate.toString();
-            this.Pack.EndDate = this.VueFilter.endDate.toString();
-        }
-        else {
-            this.Pack.BeginDate = this.VueFilter.endDate.toString();
-            this.Pack.EndDate = this.VueFilter.beginDate.toString();
-        }
-        //
-        this.Pack.Vid = this.GetCheckBoxValues(this.VueFilter.vid.Inputs);
-        this.Pack.ModeName = this.GetTextFieldValues(this.VueFilter.modeName);
-        this.Pack.ModeStatus = this.GetCheckBoxValues(this.VueFilter.modeStatus.Inputs);
-        this.Pack.LinkName = this.GetTextFieldValues(this.VueFilter.linkName);
-        this.Pack.LinkUserName = this.GetTextFieldValues(this.VueFilter.linkUserName);
-        this.Pack.LinkStatus = this.GetCheckBoxValues(this.VueFilter.linkStatus.Inputs);
-    };
-    /**将Pack中的数据填充到VueFilter */
-    ProcessFilterClass.prototype.PackToVueFilter = function () {
-        this.VueFilter.beginDate = this.Pack.BeginDate;
-        this.VueFilter.endDate = this.Pack.EndDate;
-        //vid必须每次都重新设置,因为完结可以编辑
-        this.VueFilter.vid.Inputs.splice(0, this.VueFilter.vid.Inputs.length);
-        var len = ProcessData.VersionList.length;
-        for (var i = 0; i < len; i++) {
-            var version = ProcessData.VersionList[i];
-            this.VueFilter.vid.Inputs.push({ Value: version.Vid, Label: version.Ver, Checked: this.Pack.Vid.indexOf(version.Vid) > -1, Title: VersionManager.GetVersionFullname(version), });
-        }
-        this.SetTextFieldValues(this.VueFilter.modeName, this.Pack.ModeName);
-        this.SetCheckBoxValues(this.VueFilter.modeStatus.Inputs, this.Pack.ModeStatus);
-        this.SetTextFieldValues(this.VueFilter.linkName, this.Pack.LinkName);
-        this.SetTextFieldValues(this.VueFilter.linkUserName, this.Pack.LinkUserName);
-        this.SetCheckBoxValues(this.VueFilter.linkStatus.Inputs, this.Pack.LinkStatus);
     };
     ProcessFilterClass.prototype.HideFilter = function (fade) {
         if (this.VueFilter) {
@@ -285,21 +303,21 @@ var ProcessFilterClass = /** @class */ (function () {
         Common.HidePullDownMenu();
     };
     //得到checkbox全部值
-    ProcessFilterClass.prototype.GetCheckBoxValues = function (inputs) {
+    ProcessFilterClass.prototype.GetCheckBoxValues = function (item) {
         var vals = [];
-        var len = inputs.length;
+        var len = item.Inputs.length;
         for (var i = 0; i < len; i++) {
-            var input = inputs[i];
+            var input = item.Inputs[i];
             if (input.Checked) {
                 vals.push(parseInt(input.Value.toString()));
             }
         }
         return vals;
     };
-    ProcessFilterClass.prototype.SetCheckBoxValues = function (inputs, vals) {
-        var len = inputs.length;
+    ProcessFilterClass.prototype.SetCheckBoxValues = function (item, vals) {
+        var len = item.Inputs.length;
         for (var i = 0; i < len; i++) {
-            var input = inputs[i];
+            var input = item.Inputs[i];
             input.Checked = (vals.indexOf(input.Value) > -1);
         }
     };

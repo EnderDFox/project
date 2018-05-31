@@ -34,7 +34,7 @@ interface ModeSingle {
     Mid?: uint64
     Vid?: uint64
     Ver?: string[]
-    Name?: string[]
+    Name?: string
     Color?: uint32
     LinkSort?: string[]
     Did?: DidField
@@ -54,6 +54,7 @@ interface WorkSingle {
     Lid?: number
     Date?: string
     Wid?: number
+    Status?: WorkStatusField
     FileList?: FileSingle[]
     uploading?: boolean  //是否正在上传
 }
@@ -133,7 +134,7 @@ declare class DataClass {
     DepartmentUserMap: { [key: number]: { [key: number]: UserSingle } }
     RegisterFunc(): void
     GetUser(uid: number): UserSingle
-    UserList:UserSingle[]
+    UserList: UserSingle[]
 }
 declare var Data: DataClass;
 /** */

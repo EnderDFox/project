@@ -1,12 +1,12 @@
 <li class="FilterItemCheckBox">
     <div class="name">{{item.Name}}</div>
     <!--<div class="info"><input type="text" placeholder="输入版本号" name="Vid" /></div>-->
-    <div class="info" style="width: 350px;">
+    <div class="info" :style="{'width': (item.ShowLen==-1?'400px':'350px')}">
         <!-- <button class="btnSelectAll">全选</button> -->
-        <span class="cursor_pointer user_select_none" style="display: inline-block;min-width: 60px;margin-right: 10px" v-for="input,index in item.Inputs" :key="input.Value" v-if="item.ShowLen==-1 || index<item.ShowLen" @click="input.Checked=!input.Checked" :title="input.Title">
+        <span class="cursor_pointer user_select_none" style="display: inline-block;margin-right: 10px" :style="{'min-width': (item.ShowLen==-1?'50px':'60px')}" v-for="input,index in item.Inputs" :key="input.Value" v-if="item.ShowLen==-1 || index<item.ShowLen" @click="input.Checked=!input.Checked" :title="input.Title">
             <input type="checkbox" :name="item.InputName" :value="input.Value" v-model="input.Checked"/>
             <span>{{input.Label}}</span>
         </span>
     </div>
-    <div class="display_inline_block cursor_pointer user_select_none"  style="vertical-align: top;" @click="item.ShowLen=(item.ShowLen==item.ShowLenMin?item.ShowLenMax:item.ShowLenMin)" v-if="item.ShowLen>-1"><button class="btnSelectAll" v-text="(item.ShowLen==item.ShowLenMin?'更多▽':'收起△')"></button></div>
+    <div class="display_inline_block cursor_pointer user_select_none"  style="vertical-align: top;" @click="item.ShowLen=(item.ShowLen==item.ShowLenMin?item.ShowLenMax:item.ShowLenMin)" v-if="item.ShowLen>-1"><button class="btnMore" v-text="(item.ShowLen==item.ShowLenMin?'更多▽':'收起△')"></button></div>
 </li>

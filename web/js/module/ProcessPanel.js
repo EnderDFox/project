@@ -128,10 +128,10 @@ var ProcessPanel = {
 		}).delegate('td', 'mouseenter', function (e) {
 			e.stopPropagation()
 			// if($(this).find('.stroke').length == 1){//判断仅有date_line的
-				var top = $(this).offset().top + $(this).height() + 2
-				var left = $(this).offset().left + $(this).width() + 2
-				var dateLine = $(this).attr('date_line')
-				VersionManager.ShowTableHeaderTooltip(dateLine,left,top)
+			var top = $(this).offset().top + $(this).height() + 2
+			var left = $(this).offset().left + $(this).width() + 2
+			var dateLine = $(this).attr('date_line')
+			VersionManager.ShowTableHeaderTooltip(dateLine, left, top)
 			// }
 		}).delegate('td', 'mouseleave', function (e) {
 			e.stopPropagation()
@@ -164,11 +164,11 @@ var ProcessPanel = {
 			} else {
 				html += '<td'
 			}
-			html += ' date_line="'+info.s+'">'
+			html += ' date_line="' + info.s + '">'
 			html += '<div class="info">' + info.d + '</div>'
-			if (ProcessData.HasVersionDateLineMap(info.s) ){
+			if (ProcessData.HasVersionDateLineMap(info.s)) {
 				var _genre = ProcessData.VersionDateLineMap[info.s][0].Genre
-				html += '<div class="stroke sk_' + _genre + '" date_line="'+info.s+'"></div>'
+				html += '<div class="stroke sk_' + _genre + '" date_line="' + info.s + '"></div>'
 			}
 			html += '</td>'
 		})
@@ -203,8 +203,10 @@ var ProcessPanel = {
 		var html = ''
 		html += '<table class="linkMap">'
 		$.each(mode.LinkSort, function (k, lid) {
-			//流程与进度
-			html += ProcessPanel.GetLinkHtml(lid)
+			if (ProcessData.LinkMap[lid]) {
+				//流程与进度
+				html += ProcessPanel.GetLinkHtml(lid)
+			}
 		})
 		html += '</table>'
 		return html
@@ -275,7 +277,7 @@ var ProcessPanel = {
 		$(e).data('lid', lid)
 	},
 	//显示一个work格子内容
-	ShowWorkGrid: function (dom,grid, work) {
+	ShowWorkGrid: function (dom, grid, work) {
 		var info = work.Tag
 		if (info == '') {
 			info = CollateData.StatusList[work.Status].Tag
@@ -369,11 +371,11 @@ var ProcessPanel = {
 			})
 		}
 		//版本
-		VersionManager.BindSelect("#place_versionSelect",mode.Vid, function(dom) {
+		VersionManager.BindSelect("#place_versionSelect", mode.Vid, function (dom) {
 			if (cid == C2L.C2L_PROCESS_MODE_EDIT) {
-				if(ProcessData.VersionMap[mode.Vid]){
+				if (ProcessData.VersionMap[mode.Vid]) {
 					$(dom).val(mode.Vid)
-				}else{
+				} else {
 					$(dom).val(0)//已经被删除了
 				}
 			} else {
@@ -608,7 +610,7 @@ var ProcessPanel = {
 		var index = $(o).index() - 3
 		var info = ProcessPanel.DateList.list[index]
 		ProcessPanel.HideMenu()
-		VersionManager.ShowTableHeaderMenu(info.s,left,top)
+		VersionManager.ShowTableHeaderMenu(info.s, left, top)
 		/* $('#pubMenu').css({ left: left, top: top }).unbind().delegate('.row', 'click', function () {
 			var type = $(this).attr('type')
 			switch (type) {

@@ -12,95 +12,142 @@ var ProcessDataClass = /** @class */ (function () {
         this.ModeMap = {};
         this.ScoreMap = {};
         this.LinkWorkMap = {};
-        //过滤可用流程 key:LinkSingle.Mid	item:LinkSingle
-        var checkMode = {};
         //过滤可用用户 key:UserSingle.Uid
         var checkUser = Data.DepartmentUserMap[ProjectNav.FilterDid];
-        //环节过滤
-        $.each(data.LinkList, function (k, v) {
+        //过滤可用的link key:WorkSingle.Lid value:true
+        var checkLink = {};
+        //过滤可用流程 key:LinkSingle.Mid	value:true
+        var checkMode = {};
+        //是否需要过滤work
+        var isFilterWork = ProcessFilter.Pack.WorkStatus.length > 0 || ProcessFilter.Pack.WorkFile.length > 0;
+        //work过滤  通过判断的 会将work.Lid放入checkMode 没通过的则用`return true`跳过
+        $.each(data.WorkList, function (k, work) {
+            if (isFilterWork) {
+                if (_this.CheckNumberArray(work.Status, ProcessFilter.Pack.WorkStatus) == false) {
+                    return true;
+                }
+                //附件检查, filter要求有附件,但work却没有附件
+                if (ProcessFilter.Pack.WorkFile.length > 0 && (!work.FileList || work.FileList.length == 0)) {
+                    return true;
+                }
+            }
+            checkLink[work.Lid] = true;
+            return true;
+        });
+        //环节过滤  通过判断的 会将link.Mid放入checkMode 没通过的则用`return true`跳过
+        $.each(data.LinkList, function (k, link) {
             //流程名查询
-            if (v.Name.indexOf(ProcessFilter.Pack.LinkName) == -1) {
+            if (_this.CheckStringArray(link.Name, ProcessFilter.Pack.LinkName) == false) {
                 return true;
             }
-            //负责人查询
-            if (Data.GetUser(v.Uid).Name.indexOf(ProcessFilter.Pack.LinkUserName) == -1) {
+            //流程负责人查询
+            if (_this.CheckStringArray(Data.GetUser(link.Uid).Name, ProcessFilter.Pack.LinkUserName) == false) {
                 return true;
             }
-            //是否归档
-            if (ProcessFilter.Pack.LinkStatus != -1 && v.Status != ProcessFilter.Pack.LinkStatus) {
+            //流程是否归档
+            if (_this.CheckNumberArray(link.Status, ProcessFilter.Pack.LinkStatus) == false) {
                 return true;
             }
             //策划特例
             if (ProjectNav.FilterDid == DidField.DESIGN) {
                 //用户检查			
-                if (checkUser && !checkUser[v.Uid]) {
+                if (checkUser && !checkUser[link.Uid]) {
                     return true;
                 }
                 //环节保存
-                _this.LinkMap[v.Lid] = v;
+                if (isFilterWork) {
+                    if (checkLink[link.Lid]) {
+                        _this.LinkMap[link.Lid] = link;
+                    }
+                    else {
+                        return true;
+                    }
+                }
+                else {
+                    _this.LinkMap[link.Lid] = link;
+                }
             }
             else {
                 //环节保存
-                _this.LinkMap[v.Lid] = v;
+                if (isFilterWork) {
+                    if (checkLink[link.Lid]) {
+                        _this.LinkMap[link.Lid] = link;
+                    }
+                    else {
+                        return true;
+                    }
+                }
+                else {
+                    _this.LinkMap[link.Lid] = link;
+                }
                 //用户检查			
-                if (checkUser && !checkUser[v.Uid]) {
+                if (checkUser && !checkUser[link.Uid]) {
                     return true;
                 }
             }
-            //环节保存
-            _this.LinkMap[v.Lid] = v;
-            //用户检查			
-            if (checkUser && !checkUser[v.Uid]) {
+            /* //环节保存
+            if (isFilterWork) {
+                if (checkLink[link.Lid]) {
+                    this.LinkMap[link.Lid] = link
+                } else {
+                    return true
+                }
+            } else {
+                this.LinkMap[link.Lid] = link
+            }
+            //##
+            //用户检查
+            if (checkUser && !checkUser[link.Uid]) {
+                return true
+            }*/
+            //过滤无效Link
+            if (!checkLink[link.Lid]) {
                 return true;
             }
             //有效模块
-            checkMode[v.Mid] = v.Mid;
+            checkMode[link.Mid] = true;
             return true;
         });
         //模块过滤
-        $.each(data.ModeList, function (k, v) {
+        $.each(data.ModeList, function (k, mode) {
             //功能类型
             /*
             if(ProjectNav.FilterDid != DidValue.ALL && ProjectNav.FilterDid != v.Did){
                 return true
             }
             */
+            if (ProjectNav.FilterDid == DidField.VERSION && DidField.VERSION != mode.Did) {
+                return true;
+            }
+            if (ProjectNav.FilterDid == DidField.QA && DidField.QA != mode.Did) {
+                return true;
+            }
             //查看版本
-            if (ProjectNav.FilterDid == DidField.VERSION && DidField.VERSION != v.Did) {
-                return true;
-            }
-            if (ProjectNav.FilterDid == DidField.QA && DidField.QA != v.Did) {
-                return true;
-            }
-            /* //版本号查询
-            if (v.Ver.indexOf(ProcessFilter.Pack.Ver) == -1) {
-                return true
-            } */
-            if (ProcessFilter.Pack.Vid && ProcessFilter.Pack.Vid != v.Vid) {
+            if (_this.CheckNumberArray(mode.Vid, ProcessFilter.Pack.Vid) == false) {
                 return true;
             }
             //功能名查询
-            if (v.Name.indexOf(ProcessFilter.Pack.ModeName) == -1) {
+            if (_this.CheckStringArray(mode.Name, ProcessFilter.Pack.ModeName) == false) {
                 return true;
             }
             //是否归档
-            if (ProcessFilter.Pack.ModeStatus != -1 && v.Status != ProcessFilter.Pack.ModeStatus) {
+            if (_this.CheckNumberArray(mode.Status, ProcessFilter.Pack.ModeStatus) == false) {
                 return true;
             }
             //过滤无效功能
-            if (!checkMode[v.Mid]) {
+            if (!checkMode[mode.Mid]) {
                 return true;
             }
-            _this.ModeMap[v.Mid] = v;
+            _this.ModeMap[mode.Mid] = mode;
             return true;
         });
-        //进度
-        $.each(data.WorkList, function (k, v) {
-            _this.WorkMap[v.Wid] = v;
-            if (!_this.LinkWorkMap[v.Lid]) {
-                _this.LinkWorkMap[v.Lid] = {};
+        //可用进度
+        $.each(data.WorkList, function (k, work) {
+            _this.WorkMap[work.Wid] = work;
+            if (!_this.LinkWorkMap[work.Lid]) {
+                _this.LinkWorkMap[work.Lid] = {};
             }
-            _this.LinkWorkMap[v.Lid][v.Date] = v;
+            _this.LinkWorkMap[work.Lid][work.Date] = work;
         });
         //评分
         $.each(data.ScoreList, function (k, v) {
@@ -182,6 +229,33 @@ var ProcessDataClass = /** @class */ (function () {
                 }
             }
         }
+    };
+    /**
+     * 检查 val 中是否符合 checkArr 的要求
+     * @param val
+     * @param checkArr:string[] 只要val包含其中一个值 就返回true
+     */
+    ProcessDataClass.prototype.CheckStringArray = function (val, checkArr) {
+        if (checkArr.length == 0) {
+            return true;
+        }
+        var len = checkArr.length;
+        for (var i = 0; i < len; i++) {
+            var check = checkArr[i];
+            if (val.indexOf(check) > -1) {
+                return true;
+            }
+        }
+        return false;
+    };
+    ProcessDataClass.prototype.CheckNumberArray = function (val, checkArr) {
+        if (checkArr.length == 0) {
+            return true;
+        }
+        if (checkArr.indexOf(val) > -1) {
+            return true;
+        }
+        return false;
     };
     return ProcessDataClass;
 }());

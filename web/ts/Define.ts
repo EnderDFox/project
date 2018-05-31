@@ -30,3 +30,13 @@ enum GenreField {
     PUB = 5,
     SUMMARY = 6,
 }
+
+// 0:工作 3:完成 1:延期 2:等待 4:休假 5:优化
+enum WorkStatusField{
+    WORK = 0,
+    FINISH = 3,
+    DELAY = 1,
+    WAIT = 2,
+    REST = 4,
+    OPTIMIZE = 5,
+}

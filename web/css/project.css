@@ -352,7 +352,7 @@
 */
 /* 进度 筛选 */
 .ProcessFilter{
-  width: 535px;
+  width: 510px;
 }
 .ProcessFilter .prompt{
   color: rgb(151, 151, 151);
@@ -360,7 +360,10 @@
   font-size: 80%;
   width: 230px;
   float: left;
-  margin-left: 40px;
+  margin-left: 15px;
+}
+.ProcessFilter .body ul{
+  padding-left: 15px;
 }
 .ProcessFilter .body li{
   margin-top: 8px;
@@ -394,7 +397,7 @@
   cursor: pointer;
   width: 188px;
 }
-.ProcessFilter .body li .btnSelectAll{
+.ProcessFilter .body li .btnMore{
   margin: 0px;
   padding: 0px;
   width: 46px;

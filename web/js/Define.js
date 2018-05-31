@@ -23,4 +23,14 @@ var GenreField;
     GenreField[GenreField["PUB"] = 5] = "PUB";
     GenreField[GenreField["SUMMARY"] = 6] = "SUMMARY";
 })(GenreField || (GenreField = {}));
+// 0:工作 3:完成 1:延期 2:等待 4:休假 5:优化
+var WorkStatusField;
+(function (WorkStatusField) {
+    WorkStatusField[WorkStatusField["WORK"] = 0] = "WORK";
+    WorkStatusField[WorkStatusField["FINISH"] = 3] = "FINISH";
+    WorkStatusField[WorkStatusField["DELAY"] = 1] = "DELAY";
+    WorkStatusField[WorkStatusField["WAIT"] = 2] = "WAIT";
+    WorkStatusField[WorkStatusField["REST"] = 4] = "REST";
+    WorkStatusField[WorkStatusField["OPTIMIZE"] = 5] = "OPTIMIZE";
+})(WorkStatusField || (WorkStatusField = {}));
 //# sourceMappingURL=Define.js.map
