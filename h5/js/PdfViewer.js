@@ -49,14 +49,14 @@ var PdfViewer = /** @class */ (function () {
                 onToggleItem: function (item) {
                     // console.log("[info]", item.isOpen, ":[toggleItem]", item)
                     item.isOpen = !item.isOpen;
-                }
+                },
             }
         });
         //# 自定义指令: drag
         Vue.directive('drag', {
-            bind: function (trigger, binding) {
+            bind: function (el, binding) {
                 var onStart = function (x, y) {
-                    var dragTarget = binding.value() || trigger;
+                    var dragTarget = (binding.value && binding.value()) || el;
                     //鼠标按下，计算当前元素距离可视区的距离
                     var disX = x - dragTarget.offsetLeft;
                     var disY = y - dragTarget.offsetTop;
@@ -94,13 +94,13 @@ var PdfViewer = /** @class */ (function () {
                     }
                 };
                 if (Common.IsPC()) {
-                    trigger.onmousedown = function (e) {
+                    el.onmousedown = function (e) {
                         e.preventDefault();
                         onStart(e.clientX, e.clientY);
                     };
                 }
                 else {
-                    trigger.ontouchstart = function (e) {
+                    el.ontouchstart = function (e) {
                         e.preventDefault();
                         onStart(e.touches[0].clientX, e.touches[0].clientY);
                     };
@@ -116,13 +116,13 @@ var PdfViewer = /** @class */ (function () {
                 pageScale: 1,
             },
             methods: {
-                getDragTarget: function () {
-                    return _this.vueDoc.$refs.canvas;
-                },
                 onPagePrev: this.onPagePrev.bind(this),
                 onPageNext: this.onPageNext.bind(this),
                 onZoomOut: this.onZoomOut.bind(this),
                 onZoomIn: this.onZoomIn.bind(this),
+                onMouseWheel: function (e) {
+                    _this.renderScale(_this.vueDoc.pageScale - e.deltaY / 1000);
+                },
             }
         });
         this.vueOutline = new Vue({
@@ -200,6 +200,10 @@ var PdfViewer = /** @class */ (function () {
     };
     PdfViewer.prototype.renderScale = function (val) {
         val = Math.round(val * 10) / 10;
+        val = Math.min(Math.max(val, 0.2), 5);
+        if (this.vueDoc.pageScale == val) {
+            return;
+        }
         this.vueDoc.pageScale = val;
         this.renderPage(this.vueDoc.pageNum);
     };

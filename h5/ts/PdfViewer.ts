@@ -59,14 +59,14 @@ class PdfViewer {
                 onToggleItem: (item: ITreeItem) => {
                     // console.log("[info]", item.isOpen, ":[toggleItem]", item)
                     item.isOpen = !item.isOpen
-                }
+                },
             }
         })
         //# 自定义指令: drag
         Vue.directive('drag', {
-            bind: function (trigger, binding) {
+            bind: (el: HTMLElement, binding: VNodeDirective) => {
                 var onStart = (x: number, y: number) => {
-                    var dragTarget = binding.value() || trigger
+                    var dragTarget = (binding.value && binding.value()) || el
                     //鼠标按下，计算当前元素距离可视区的距离
                     let disX = x - dragTarget.offsetLeft;
                     let disY = y - dragTarget.offsetTop;
@@ -103,19 +103,18 @@ class PdfViewer {
                     }
                 };
                 if (Common.IsPC()) {
-                    trigger.onmousedown = (e: MouseEvent) => {
+                    el.onmousedown = (e: MouseEvent) => {
                         e.preventDefault()
                         onStart(e.clientX, e.clientY)
                     }
                 } else {
-                    trigger.ontouchstart = (e: TouchEvent) => {
+                    el.ontouchstart = (e: TouchEvent) => {
                         e.preventDefault()
                         onStart(e.touches[0].clientX, e.touches[0].clientY)
                     }
                 }
             }
-        }
-        );
+        });
         //#
         this.vueDoc = new Vue({
             el: '.doc',
@@ -125,13 +124,13 @@ class PdfViewer {
                 pageScale: 1,
             },
             methods: {
-                getDragTarget: () => {
-                    return this.vueDoc.$refs.canvas;
-                },
                 onPagePrev: this.onPagePrev.bind(this),
                 onPageNext: this.onPageNext.bind(this),
                 onZoomOut: this.onZoomOut.bind(this),
                 onZoomIn: this.onZoomIn.bind(this),
+                onMouseWheel: (e: MouseWheelEvent) => {
+                    this.renderScale(this.vueDoc.pageScale - e.deltaY / 1000)
+                },
             }
         })
         this.vueOutline = new Vue({
@@ -210,6 +209,10 @@ class PdfViewer {
     }
     renderScale(val: number) {
         val = Math.round(val * 10) / 10
+        val = Math.min(Math.max(val,0.2),5)
+        if(this.vueDoc.pageScale==val){
+            return
+        }
         this.vueDoc.pageScale = val
         this.renderPage(this.vueDoc.pageNum);
     }

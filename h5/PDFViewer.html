@@ -125,7 +125,7 @@
       <!-- <button class="btn_drag" v-drag="getDragTarget">Drag</button> -->
     </div>
     <!-- canvas -->
-    <canvas ref='canvas' v-drag="getDragTarget">Your canvas is not supported</canvas>
+    <canvas ref='canvas' v-drag @mouseWheel="onMouseWheel($event)">Your canvas is not supported</canvas>
   </section>
   <!-- outline -->
   <section class="outline">
