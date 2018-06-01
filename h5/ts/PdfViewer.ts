@@ -65,29 +65,13 @@ class PdfViewer {
         //# 自定义指令: drag
         Vue.directive('drag', {
             bind: (el: HTMLElement, binding: VNodeDirective) => {
+                var disX: number
+                var disY: number
+                var dragTarget = (binding.value && binding.value()) || el
                 var onStart = (x: number, y: number) => {
-                    var dragTarget = (binding.value && binding.value()) || el
                     //鼠标按下，计算当前元素距离可视区的距离
-                    let disX = x - dragTarget.offsetLeft;
-                    let disY = y - dragTarget.offsetTop;
-                    var onMove = (x: number, y: number) => {
-                        //移动当前元素  
-                        dragTarget.style.left = x - disX + 'px';
-                        dragTarget.style.top = y - disY + 'px';
-                        //将此时的位置传出去
-                        // binding.value({ x: e.pageX, y: e.pageY })
-                    };
-                    var onEnd = (e) => {
-                        // e.preventDefault()
-                        if (Common.IsPC()) {
-                            document.onmousemove = null;
-                            document.onmouseup = null;
-                        } else {
-                            document.ontouchmove = null;
-                            document.ontouchend = null;
-
-                        }
-                    };
+                    disX = x - dragTarget.offsetLeft;
+                    disY = y - dragTarget.offsetTop;
                     if (Common.IsPC()) {
                         document.onmousemove = (e: MouseEvent) => {
                             e.preventDefault()
@@ -97,11 +81,36 @@ class PdfViewer {
                     } else {
                         document.ontouchmove = (e: TouchEvent) => {
                             // e.preventDefault()
-                            onMove(e.touches[0].clientX, e.touches[0].clientY)
+                            if (e.touches.length == 1) {
+                                onMove(e.touches[0].clientX, e.touches[0].clientY)
+                            } else {
+                                onCancel()
+                            }
                         }
                         document.ontouchend = onEnd
                     }
                 };
+                var onMove = (x: number, y: number) => {
+                    //移动当前元素  
+                    dragTarget.style.left = x - disX + 'px';
+                    dragTarget.style.top = y - disY + 'px';
+                    //将此时的位置传出去
+                    // binding.value({ x: e.pageX, y: e.pageY })
+                };
+                var onCancel = (e: Event = null) => {
+                    if (Common.IsPC()) {
+                        document.onmousemove = null;
+                        document.onmouseup = null;
+                    } else {
+                        document.ontouchmove = null;
+                        document.ontouchend = null;
+
+                    }
+                }
+                var onEnd = (e: Event = null) => {
+                    // e.preventDefault()
+                    onCancel(e)
+                }
                 if (Common.IsPC()) {
                     el.onmousedown = (e: MouseEvent) => {
                         e.preventDefault()
@@ -110,7 +119,11 @@ class PdfViewer {
                 } else {
                     el.ontouchstart = (e: TouchEvent) => {
                         e.preventDefault()
-                        onStart(e.touches[0].clientX, e.touches[0].clientY)
+                        if (e.touches.length == 1) {
+                            onStart(e.touches[0].clientX, e.touches[0].clientY)
+                        } else {
+                            onCancel()
+                        }
                     }
                 }
             }
@@ -209,8 +222,8 @@ class PdfViewer {
     }
     renderScale(val: number) {
         val = Math.round(val * 10) / 10
-        val = Math.min(Math.max(val,0.2),5)
-        if(this.vueDoc.pageScale==val){
+        val = Math.min(Math.max(val, 0.2), 5)
+        if (this.vueDoc.pageScale == val) {
             return
         }
         this.vueDoc.pageScale = val
