@@ -203,10 +203,8 @@ var ProcessPanel = {
 		var html = ''
 		html += '<table class="linkMap">'
 		$.each(mode.LinkSort, function (k, lid) {
-			if (ProcessData.LinkMap[lid]) {
-				//流程与进度
-				html += ProcessPanel.GetLinkHtml(lid)
-			}
+			//流程与进度
+			html += ProcessPanel.GetLinkHtml(lid)
 		})
 		html += '</table>'
 		return html
