@@ -2,6 +2,9 @@
 var CommonClass = /** @class */ (function () {
     function CommonClass() {
     }
+    CommonClass.prototype.NewXY = function (x, y) {
+        return { x: x, y: y };
+    };
     /**格式化时间 格式化为 yyyy-MM-dd 格式 */
     CommonClass.prototype.FmtDate = function (date) {
         var Y = date.getFullYear();
@@ -115,5 +118,38 @@ var ArrayUtil = /** @class */ (function () {
         return -1;
     };
     return ArrayUtil;
+}());
+var MathUtil = /** @class */ (function () {
+    function MathUtil() {
+    }
+    MathUtil.round = function (val, digit) {
+        digit = Math.pow(10, digit);
+        return Math.round(val * digit) / digit;
+    };
+    MathUtil.distance = function () {
+        var args = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            args[_i] = arguments[_i];
+        }
+        var gapX, gapY;
+        if (args.length == 2) {
+            if (typeof args[0] == 'number') {
+                gapX = args[0];
+                gapY = args[1];
+            }
+            else {
+                var p0 = args[0];
+                var p1 = args[1];
+                gapX = p1.x - p0.x;
+                gapY = p1.y - p0.y;
+            }
+        }
+        else {
+            gapX = args[2] - args[0];
+            gapY = args[3] - args[1];
+        }
+        return Math.sqrt(gapX * gapX + gapY * gapY);
+    };
+    return MathUtil;
 }());
 //# sourceMappingURL=Common.js.map

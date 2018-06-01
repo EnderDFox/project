@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <title>hello touch</title>
+    <!-- lib3 -->
+    <script type="text/javascript" src="lib3/path.js"></script>
+    <script type="text/javascript" src="lib3/jquery-3.2.1.min.js"></script>
+    <script type="text/javascript" src="lib3/bootstrap-3.3.7-dist/js/bootstrap.js"></script>
+    <script type="text/javascript" src="lib3/vue.js"></script>
+    <!-- lib1 -->
+    <script type="text/javascript" src="js/lib1/Common.js"></script>
+    <script type="text/javascript" src="js/lib1/JQueryExtend.js"></script>
+    <!-- my js -->
+    <script type="text/javascript" src="js/HelloTouch.js"></script>
+    <style>
+        #div1 {
+            width: 600px;
+            height: 400px;
+            border: 1px dashed #FF9900;
+            background-color: blanchedalmond;
+        }
+
+        #toolBar {
+            position: absolute;
+            left: 20px;
+            top: 420px;
+            width: 700px;
+            border: 1px dashed #FF9900;
+        }
+
+        #logTxt {
+            height: 300px;
+            overflow-y: scroll;
+        }
+
+        #div1,
+        #p,
+        #p span {
+            position: absolute;
+            left: 0px;
+            top: 0px;
+            border: 1px dotted #333333;
+        }
+
+        #p>span {
+            left: 0px;
+            top: 0px;
+        }
+
+        #p span .pChild {
+            line-height: 20px;
+            text-align: center;
+            border-radius: 50%;
+            background-color:#f546d848;
+            width: 80px;
+            height: 80px;
+            left: -40px;
+            top: -40px;
+            user-select: none;
+        }
+    </style>
+</head>
+
+<body onload="helloTouch.init()">
+    <div id="div1">
+
+    </div>
+    <div id="p">
+        <span id="p0">
+            <span class="pChild">0</span>
+        </span>
+        <span id="p1">
+            <span class="pChild">1</span>
+        </span>
+        <span id="p2">
+            <span class="pChild">2</span>
+        </span>
+    </div>
+    <div id="toolBar">
+        <div>
+            <button onclick="helloTouch.clear()">clear</button>
+        </div>
+        <div id="logTxt">
+
+        </div>
+    </div>
+</body>

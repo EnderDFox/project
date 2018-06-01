@@ -1,5 +1,8 @@
 //通用类
 class CommonClass {
+    NewXY(x: number, y: number): IXY {
+        return { x: x, y: y };
+    }
     /**格式化时间 格式化为 yyyy-MM-dd 格式 */
     FmtDate(date: Date): string {
         var Y = date.getFullYear()
@@ -78,7 +81,7 @@ class CommonClass {
         var _preventDefaultSingle = function (e) {
             e.preventDefault();
         };
-        var _preventDragDefault = (target:any)=>{
+        var _preventDragDefault = (target: any) => {
             target.addEventListener("dragleave", _preventDefaultSingle); //拖离
             target.addEventListener("drop", _preventDefaultSingle); //拖后放
             target.addEventListener("dragenter", _preventDefaultSingle); //拖进
@@ -114,5 +117,33 @@ class ArrayUtil {
             }
         }
         return -1;
+    }
+}
+
+class MathUtil {
+    static round(val:number,digit:number):number{
+        digit = Math.pow(10, digit)
+        return Math.round(val*digit)/digit
+    }
+    static distance(gapX: number, gapY: number): number;
+    static distance(p0: IXY, p1: IXY): number;
+    static distance(x0: number, y0: number, x1: number, y1: number): number;
+    static distance(...args): number {
+        var gapX: number, gapY: number
+        if (args.length == 2) {
+            if (typeof args[0] == 'number') {
+                gapX = args[0]
+                gapY = args[1]
+            } else {
+                var p0: IXY = args[0]
+                var p1: IXY = args[1]
+                gapX = p1.x - p0.x
+                gapY = p1.y - p0.y
+            }
+        } else {
+            gapX = args[2] - args[0]
+            gapY = args[3] - args[1]
+        }
+        return Math.sqrt(gapX * gapX + gapY * gapY)
     }
 }
