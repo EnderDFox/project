@@ -28,6 +28,30 @@ $.fn.extend({
             return this;
         }
     },
+    w: function (vw) {
+        if (vw == undefined || vw == null) {
+            return this.width();
+        }
+        else {
+            return this.width(vw);
+        }
+    },
+    h: function (vh) {
+        if (vh == undefined || vh == null) {
+            return this.height();
+        }
+        else {
+            return this.height(vh);
+        }
+    },
+    wh: function (vw, vh) {
+        if (vw == undefined || vw == null) {
+            return { x: this.width(), y: this.height() };
+        }
+        else {
+            return this.width(vw).height(vh);
+        }
+    },
     isShow: function () {
         return this.is(":visible");
     },

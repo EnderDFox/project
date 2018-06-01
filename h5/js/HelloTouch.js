@@ -23,7 +23,7 @@ var HelloTouch = /** @class */ (function () {
         var onStart = function (e) {
             p0 = Common.NewXY(e.touches[0].screenX, e.touches[0].screenY);
             p1 = Common.NewXY(e.touches[1].screenX, e.touches[1].screenY);
-            _this.log("[info]onStart:", p0.x, p0.y, p1.x, p1.y);
+            // this.log("[info]onStart:", p0.x, p0.y, p1.x, p1.y)
             // this.log("[info]", "onStart")
             // this.pList[0].xy(x, y)
             if (Common.IsPC()) {
@@ -52,16 +52,25 @@ var HelloTouch = /** @class */ (function () {
         // 
         var onMove = function (e) {
             // this.log("[info]","onMove")
-            _this.refreshPoisByTouchEvent(e);
+            // this.refreshPoisByTouchEvent(e)
             var d = MathUtil.distance(p0, p1);
             var cp0 = Common.NewXY(e.touches[0].screenX, e.touches[0].screenY);
             var cp1 = Common.NewXY(e.touches[1].screenX, e.touches[1].screenY);
             var cd = MathUtil.distance(cp0, cp1);
+            var oldXY = _this.$div1.xy();
+            var oldWH = _this.$div1.wh();
+            //
+            var pinchCenter = Common.NewXY((p1.x + p0.x) / 2, (p1.y + p0.y) / 2);
+            var c_pinchCenter = Common.NewXY((cp1.x + cp0.x) / 2, (cp1.y + cp0.y) / 2);
+            // var pinchRate:IXY = Common.NewXY(pinchCenter.x/oldWH.x, pinchCenter.y/oldWH.y)
             var gapX = Math.abs(cp1.x - cp0.x) - Math.abs(p1.x - p0.x);
             var gapY = Math.abs(cp1.y - cp0.y) - Math.abs(p1.y - p0.y);
-            _this.log("move", gapX, ":[gapX]", gapY, ":[gapY]");
-            _this.$div1.width(_this.$div1.width() + gapX).height(_this.$div1.height() + gapY);
-            // this.log("move:", cd - d, cp0.x, cp0.y, cp1.x, cp1.y)
+            _this.$div1.xy(oldXY.x - gapX / 2 + (c_pinchCenter.x - pinchCenter.x), oldXY.y - gapY / 2 + (c_pinchCenter.y - pinchCenter.y));
+            //
+            // this.log("move", gapX, ":[gapX]", gapY, ":[gapY]")
+            var whRate = _this.$div1.h() / _this.$div1.w();
+            var gap = (gapX + gapY);
+            _this.$div1.wh(Math.max(_this.$div1.w() + gap, 100), Math.max(_this.$div1.h() + gap * whRate, 100 * whRate));
             p0 = cp0;
             p1 = cp1;
             return;

@@ -1,66 +1,87 @@
 //扩展类
 $.fn.extend({
     //获取css left 数字值
-    x: function(this:JQuery<HTMLElement>,vx){
-        if(vx==undefined || vx==null){
+    x: function (this: JQuery<HTMLElement>, vx) {
+        if (vx == undefined || vx == null) {
             return this.position().left
-        }else{
-            this.css('left',vx+"px")
+        } else {
+            this.css('left', vx + "px")
             return this;
         }
     },
-    y: function(this:JQuery<HTMLElement>,vy){
-        if(vy==undefined || vy==null){
+    y: function (this: JQuery<HTMLElement>, vy) {
+        if (vy == undefined || vy == null) {
             return this.position().top
-        }else{
-            this.css('top',vy+"px")
+        } else {
+            this.css('top', vy + "px")
             return this;
         }
     },
-    xy: function(this:JQuery<HTMLElement>,vx,vy){
-        if(vx==undefined || vx==null){
-            return {x:this.position().left,y:this.position().top}
-        }else{
-            this.css({'left':vx+'px','top':vy+'px'})
+    xy: function (this: JQuery<HTMLElement>, vx, vy) {
+        if (vx == undefined || vx == null) {
+            return { x: this.position().left, y: this.position().top }
+        } else {
+            this.css({ 'left': vx + 'px', 'top': vy + 'px' })
             return this;
         }
     },
-    isShow: function(this:JQuery<HTMLElement>){
+    w: function (this: JQuery<HTMLElement>, vw) {
+        if (vw == undefined || vw == null) {
+            return this.width()
+        } else {
+            return this.width(vw);
+        }
+    },
+    h: function (this: JQuery<HTMLElement>, vh) {
+        if (vh == undefined || vh == null) {
+            return this.height()
+        } else {
+            return this.height(vh);
+        }
+    },
+    wh: function (this: JQuery<HTMLElement>, vw, vh) {
+        if (vw == undefined || vw == null) {
+            return { x: this.width(), y: this.height() }
+        } else {
+            return this.width(vw).height(vh);
+        }
+    },
+    isShow: function (this: JQuery<HTMLElement>) {
         return this.is(":visible")
     },
-    isVisible: function(this:JQuery<HTMLElement>){
+    isVisible: function (this: JQuery<HTMLElement>) {
         return this.is(":visible")
     },
     //修正位置
-    adjust: function (this:JQuery<HTMLElement>,number) {
+    adjust: function (this: JQuery<HTMLElement>, number) {
         var eleW = this.outerWidth()
         var eleH = this.outerHeight()
         var maxL = this.offset().left + eleW
         var maxT = this.offset().top + eleH
         var winL = $(window).innerWidth() + $(window).scrollLeft()
         var winH = $(window).innerHeight() + $(window).scrollTop()
-        if (maxL > winL){
+        if (maxL > winL) {
             var left = Math.min(maxL, winL) - eleW + number
-            this.css({'left': left})
+            this.css({ 'left': left })
         }
         if (maxT > winH) {
             var top = Math.min(maxT, winH) - eleH + number
-            this.css({'top': top})
+            this.css({ 'top': top })
         }
         return this
     },
     //冻结窗口
-    freezeTop: function (this:JQuery<HTMLElement>) {
+    freezeTop: function (this: JQuery<HTMLElement>) {
         //Fixed issue #按住shift滚动鼠标,会横向滚动表格,但标题(freezeTop)没有跟着滚动
         //注意:shift+鼠标滚动  仅chrome内核是横向滚动 ,其它浏览器都是翻页,
         //scroll事件太频繁,导致IE浏览器下很卡,chrome本身性能高,不卡但也有性能隐患, 所以需要setTimeout来处理
         //------
-        var $dom:JQuery<HTMLElement> = this
+        var $dom: JQuery<HTMLElement> = this
         var win = $(window);
         //方案三
         var timeoutId = -1
         var prevScrollX = win.scrollLeft()
-        var resetFixed = function(){
+        var resetFixed = function () {
             $dom.css({
                 position: 'fixed',
                 'left': -win.scrollLeft(),
@@ -75,12 +96,12 @@ $.fn.extend({
                     'left': 0,
                     'top': win.scrollTop()
                 })
-                if(timeoutId>=0){
+                if (timeoutId >= 0) {
                     clearTimeout(timeoutId)
                 }
                 timeoutId = <number><any>setTimeout(resetFixed, 1000)
-            }else {
-                if(timeoutId>=0){
+            } else {
+                if (timeoutId >= 0) {
                     clearTimeout(timeoutId)
                     timeoutId = -1
                     resetFixed()
@@ -124,8 +145,8 @@ $.fn.extend({
             }
 
         })*/
-       /*  $(window).resize(function(){
-            $dom.css({'left':-$(this).scrollLeft()})
-        }) */
+        /*  $(window).resize(function(){
+             $dom.css({'left':-$(this).scrollLeft()})
+         }) */
     }
 })

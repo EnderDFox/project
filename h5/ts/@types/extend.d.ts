@@ -11,12 +11,12 @@ interface Array<T> {
 //------Date扩展
 interface Date {
     //'yyyy-MM-dd h:m:s'
-    format(format:string):string
+    format(format: string): string
 }
 
 //======JQuery扩展 必须和 JQueryExtend.ts一致
-interface JQueryStatic{
-    md5(val:string):string
+interface JQueryStatic {
+    md5(val: string): string
 }
 interface JQuery<TElement extends Node = HTMLElement> extends Iterable<TElement> {
     x(): number
@@ -25,6 +25,12 @@ interface JQuery<TElement extends Node = HTMLElement> extends Iterable<TElement>
     y(vy: number): this
     xy(): IXY
     xy(vx: number, vy: number): this
+    w(): number
+    w(vw: number): this
+    h(): number
+    h(vh: number): this
+    wh(): IXY
+    wh(vw: number, vh: number): this
     isShow(): boolean
     adjust(offsetY: number): this
 }
@@ -35,17 +41,17 @@ declare type CombinedVueInstance1<Data> = Vue & Data;
 
 
 //======pdfjs
-interface PDFJSStatic{
-    GlobalWorkerOptions:any
+interface PDFJSStatic {
+    GlobalWorkerOptions: any
 }
 
-interface PDFRenderTask{
-    promise:any
+interface PDFRenderTask {
+    promise: any
 }
 
 
-interface PDFDocumentProxy{
-    getPageIndex(dest:any): PDFPromise<number>
+interface PDFDocumentProxy {
+    getPageIndex(dest: any): PDFPromise<number>
 }
 
 
