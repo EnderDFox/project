@@ -3,24 +3,47 @@
 
 <head>
     <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes" />
     <title>hello hammer.js</title>
     <script type="text/javascript" src="lib3/hammer.js"></script>
+    <script type="text/javascript" src="js/lib1/Common.js"></script>
     <script type="text/javascript" src="js/HelloHammer.js"></script>
     <style>
         #div1 {
             position: absolute;
-            left: 10px;
-            top: 20px;
-            width: 400px;
-            height: 300px;
+            left: 60px;
+            top: 30px;
+            width: 600px;
+            height: 400px;
             border: 1px dashed #FF9900;
             background-color: blanchedalmond;
+            z-index: 1;
+        }
+        #toolBar{
+            position: absolute;
+            left: 20px;
+            top: 500px;
+            width: 700px;
+            border: 1px dashed #FF9900;
+        }
+        #logTxt{
+            height: 300px;
+            overflow-y: scroll;
         }
     </style>
 </head>
 
-<body onload="new HelloHammer().init()">
+<body onload="helloHammer.init()">
     <div id="div1">
 
+    </div>
+    <div id="toolBar">
+        <div>
+            <button onclick="helloHammer.clear()">clear</button>
+        </div>
+        <div id="logTxt">
+    
+        </div>
     </div>
 </body>

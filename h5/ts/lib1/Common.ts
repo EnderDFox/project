@@ -73,6 +73,26 @@ class CommonClass {
     AlertFloatMsg(txt: string, e: MouseEvent): void {
         alert(txt)
     }
+
+    preventDragDefault() {
+        var _preventDefaultSingle = function (e) {
+            e.preventDefault();
+        };
+        var _preventDragDefault = (target:any)=>{
+            target.addEventListener("dragleave", _preventDefaultSingle); //拖离
+            target.addEventListener("drop", _preventDefaultSingle); //拖后放
+            target.addEventListener("dragenter", _preventDefaultSingle); //拖进
+            target.addEventListener("dragover", _preventDefaultSingle); //拖来拖去
+            // target.addEventListener("mousedown", _preventDefaultSingle);
+            // target.addEventListener("mouseup", _preventDefaultSingle);
+            // target.addEventListener("mousemove", _preventDefaultSingle);
+            // target.addEventListener("touchstart", _preventDefaultSingle);
+            // target.addEventListener("touchmove", _preventDefaultSingle);
+            // target.addEventListener("touchend", _preventDefaultSingle);
+        }
+        _preventDragDefault(document)
+        _preventDragDefault(document.body)
+    }
 }
 var Common = new CommonClass()
 interface IPullDownMenuItem {

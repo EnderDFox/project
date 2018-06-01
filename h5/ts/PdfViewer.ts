@@ -13,13 +13,13 @@ class PdfViewer {
     pageRendering = false
     pageNumPending = null
     init() {
+        Common.preventDragDefault()
+        //
         var pdfPath = 'assets/Go in Action CN.pdf';
         // Loaded via <script> tag, create shortcut to access PDF.js exports.
         this.pdfjsLib = window['pdfjs-dist/build/pdf'];
         // The workerSrc property shall be specified.
         this.pdfjsLib.GlobalWorkerOptions.workerSrc = 'js/pdfjs/pdf.worker.js';
-        //
-        this.preventDragDefault()
         //
         this.initVue()
         /**
@@ -36,23 +36,6 @@ class PdfViewer {
             });
         });
 
-    }
-
-    preventDragDefault() {
-        var _preventDefault = function (e) {
-            e.preventDefault();
-        };
-        document.addEventListener("dragleave", _preventDefault); //拖离
-        document.addEventListener("drop", _preventDefault); //拖后放
-        document.addEventListener("dragenter", _preventDefault); //拖进
-        document.addEventListener("dragover", _preventDefault); //拖来拖去
-        // document.addEventListener("touchmove", preventDefault);
-        document.addEventListener("mousedown", _preventDefault);
-        document.addEventListener("mouseup", _preventDefault);
-        document.addEventListener("mousemove", _preventDefault);
-        document.addEventListener("touchstart", _preventDefault);
-        document.addEventListener("touchmove", _preventDefault);
-        document.addEventListener("touchend", _preventDefault);
     }
 
     initVue() {
@@ -82,22 +65,20 @@ class PdfViewer {
         //# 自定义指令: drag
         Vue.directive('drag', {
             bind: function (trigger, binding) {
-                var onStart = (e) => {
+                var onStart = (x: number, y: number) => {
                     var dragTarget = binding.value() || trigger
                     //鼠标按下，计算当前元素距离可视区的距离
-                    let disX = e.clientX - dragTarget.offsetLeft;
-                    let disY = e.clientY - dragTarget.offsetTop;
-                    var onMove = (e) => {
-                        //通过事件委托，计算移动的距离 
-                        let l = e.clientX - disX;
-                        let t = e.clientY - disY;
+                    let disX = x - dragTarget.offsetLeft;
+                    let disY = y - dragTarget.offsetTop;
+                    var onMove = (x: number, y: number) => {
                         //移动当前元素  
-                        dragTarget.style.left = l + 'px';
-                        dragTarget.style.top = t + 'px';
+                        dragTarget.style.left = x - disX + 'px';
+                        dragTarget.style.top = y - disY + 'px';
                         //将此时的位置传出去
                         // binding.value({ x: e.pageX, y: e.pageY })
                     };
                     var onEnd = (e) => {
+                        // e.preventDefault()
                         if (Common.IsPC()) {
                             document.onmousemove = null;
                             document.onmouseup = null;
@@ -108,17 +89,29 @@ class PdfViewer {
                         }
                     };
                     if (Common.IsPC()) {
-                        document.onmousemove = onMove
+                        document.onmousemove = (e: MouseEvent) => {
+                            e.preventDefault()
+                            onMove(e.clientX, e.clientY)
+                        }
                         document.onmouseup = onEnd
                     } else {
-                        document.ontouchmove = onMove
+                        document.ontouchmove = (e: TouchEvent) => {
+                            // e.preventDefault()
+                            onMove(e.touches[0].clientX, e.touches[0].clientY)
+                        }
                         document.ontouchend = onEnd
                     }
                 };
                 if (Common.IsPC()) {
-                    trigger.onmousedown = onStart
+                    trigger.onmousedown = (e: MouseEvent) => {
+                        e.preventDefault()
+                        onStart(e.clientX, e.clientY)
+                    }
                 } else {
-                    trigger.ontouchstart = onStart
+                    trigger.ontouchstart = (e: TouchEvent) => {
+                        e.preventDefault()
+                        onStart(e.touches[0].clientX, e.touches[0].clientY)
+                    }
                 }
             }
         }

@@ -5,13 +5,13 @@ var PdfViewer = /** @class */ (function () {
     }
     PdfViewer.prototype.init = function () {
         var _this = this;
+        Common.preventDragDefault();
+        //
         var pdfPath = 'assets/Go in Action CN.pdf';
         // Loaded via <script> tag, create shortcut to access PDF.js exports.
         this.pdfjsLib = window['pdfjs-dist/build/pdf'];
         // The workerSrc property shall be specified.
         this.pdfjsLib.GlobalWorkerOptions.workerSrc = 'js/pdfjs/pdf.worker.js';
-        //
-        this.preventDragDefault();
         //
         this.initVue();
         /**
@@ -27,22 +27,6 @@ var PdfViewer = /** @class */ (function () {
                 _this._renderPage(_this.vueDoc.pageNum);
             });
         });
-    };
-    PdfViewer.prototype.preventDragDefault = function () {
-        var _preventDefault = function (e) {
-            e.preventDefault();
-        };
-        document.addEventListener("dragleave", _preventDefault); //拖离
-        document.addEventListener("drop", _preventDefault); //拖后放
-        document.addEventListener("dragenter", _preventDefault); //拖进
-        document.addEventListener("dragover", _preventDefault); //拖来拖去
-        // document.addEventListener("touchmove", preventDefault);
-        document.addEventListener("mousedown", _preventDefault);
-        document.addEventListener("mouseup", _preventDefault);
-        document.addEventListener("mousemove", _preventDefault);
-        document.addEventListener("touchstart", _preventDefault);
-        document.addEventListener("touchmove", _preventDefault);
-        document.addEventListener("touchend", _preventDefault);
     };
     PdfViewer.prototype.initVue = function () {
         var _this = this;
@@ -71,22 +55,20 @@ var PdfViewer = /** @class */ (function () {
         //# 自定义指令: drag
         Vue.directive('drag', {
             bind: function (trigger, binding) {
-                var onStart = function (e) {
+                var onStart = function (x, y) {
                     var dragTarget = binding.value() || trigger;
                     //鼠标按下，计算当前元素距离可视区的距离
-                    var disX = e.clientX - dragTarget.offsetLeft;
-                    var disY = e.clientY - dragTarget.offsetTop;
-                    var onMove = function (e) {
-                        //通过事件委托，计算移动的距离 
-                        var l = e.clientX - disX;
-                        var t = e.clientY - disY;
+                    var disX = x - dragTarget.offsetLeft;
+                    var disY = y - dragTarget.offsetTop;
+                    var onMove = function (x, y) {
                         //移动当前元素  
-                        dragTarget.style.left = l + 'px';
-                        dragTarget.style.top = t + 'px';
+                        dragTarget.style.left = x - disX + 'px';
+                        dragTarget.style.top = y - disY + 'px';
                         //将此时的位置传出去
                         // binding.value({ x: e.pageX, y: e.pageY })
                     };
                     var onEnd = function (e) {
+                        // e.preventDefault()
                         if (Common.IsPC()) {
                             document.onmousemove = null;
                             document.onmouseup = null;
@@ -97,19 +79,31 @@ var PdfViewer = /** @class */ (function () {
                         }
                     };
                     if (Common.IsPC()) {
-                        document.onmousemove = onMove;
+                        document.onmousemove = function (e) {
+                            e.preventDefault();
+                            onMove(e.clientX, e.clientY);
+                        };
                         document.onmouseup = onEnd;
                     }
                     else {
-                        document.ontouchmove = onMove;
+                        document.ontouchmove = function (e) {
+                            // e.preventDefault()
+                            onMove(e.touches[0].clientX, e.touches[0].clientY);
+                        };
                         document.ontouchend = onEnd;
                     }
                 };
                 if (Common.IsPC()) {
-                    trigger.onmousedown = onStart;
+                    trigger.onmousedown = function (e) {
+                        e.preventDefault();
+                        onStart(e.clientX, e.clientY);
+                    };
                 }
                 else {
-                    trigger.ontouchstart = onStart;
+                    trigger.ontouchstart = function (e) {
+                        e.preventDefault();
+                        onStart(e.touches[0].clientX, e.touches[0].clientY);
+                    };
                 }
             }
         });

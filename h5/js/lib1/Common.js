@@ -75,6 +75,25 @@ var CommonClass = /** @class */ (function () {
     CommonClass.prototype.AlertFloatMsg = function (txt, e) {
         alert(txt);
     };
+    CommonClass.prototype.preventDragDefault = function () {
+        var _preventDefaultSingle = function (e) {
+            e.preventDefault();
+        };
+        var _preventDragDefault = function (target) {
+            target.addEventListener("dragleave", _preventDefaultSingle); //拖离
+            target.addEventListener("drop", _preventDefaultSingle); //拖后放
+            target.addEventListener("dragenter", _preventDefaultSingle); //拖进
+            target.addEventListener("dragover", _preventDefaultSingle); //拖来拖去
+            // target.addEventListener("mousedown", _preventDefaultSingle);
+            // target.addEventListener("mouseup", _preventDefaultSingle);
+            // target.addEventListener("mousemove", _preventDefaultSingle);
+            // target.addEventListener("touchstart", _preventDefaultSingle);
+            // target.addEventListener("touchmove", _preventDefaultSingle);
+            // target.addEventListener("touchend", _preventDefaultSingle);
+        };
+        _preventDragDefault(document);
+        _preventDragDefault(document.body);
+    };
     return CommonClass;
 }());
 var Common = new CommonClass();

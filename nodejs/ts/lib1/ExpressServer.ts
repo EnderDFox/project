@@ -59,7 +59,7 @@ export class ExpressServer {
         //start server
         var port = this.args.port || 80
         app.listen(port, () => {
-            console.log(`Server started on http://${this.getIPAdress()}:${port} , press Ctrl-C to terminate.`);
+            console.log(`Server started on http://${this.getIPAdress()}:${port} or http://localhost:${port}, press Ctrl-C to terminate.`);
         });
     }
     getIPAdress() {

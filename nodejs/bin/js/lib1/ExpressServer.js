@@ -58,7 +58,7 @@ var ExpressServer = /** @class */ (function () {
         //start server
         var port = this.args.port || 80;
         app.listen(port, function () {
-            console.log("Server started on http://" + _this.getIPAdress() + ":" + port + " , press Ctrl-C to terminate.");
+            console.log("Server started on http://" + _this.getIPAdress() + ":" + port + " or http://localhost:" + port + ", press Ctrl-C to terminate.");
         });
     };
     ExpressServer.prototype.getIPAdress = function () {
