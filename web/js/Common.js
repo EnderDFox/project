@@ -13,10 +13,13 @@ var CommonClass = /** @class */ (function () {
         var DStr = D >= 10 ? D.toString() : ('0' + D);
         return Y + '-' + MStr + '-' + DStr;
     };
-    /**时间计算*/
-    CommonClass.prototype.GetDate = function (day) {
+    /**
+     * 获取当前时间偏移后的 DateLine
+     * @param offsetDay 偏移天数
+     */
+    CommonClass.prototype.GetDate = function (offsetDay) {
         var date = new Date();
-        date.setDate(date.getDate() + day);
+        date.setDate(date.getDate() + offsetDay);
         return Common.FmtDate(date);
     };
     /**本周周几*/
@@ -37,6 +40,15 @@ var CommonClass = /** @class */ (function () {
     CommonClass.prototype.DateStr2TimeStamp = function (dateLine) {
         var date = new Date(dateLine);
         return date.getTime();
+    };
+    /**
+     * timestamp(单位毫秒) 转 yyyy-MM-dd
+     * @param dateLine
+     */
+    CommonClass.prototype.TimeStamp2DateStr = function (time) {
+        var date = new Date();
+        date.setTime(time);
+        return this.FmtDate(date);
     };
     //两个DateLine的间隔日
     CommonClass.prototype.DateLineSpaceDay = function (dateLine1, dateLine2) {

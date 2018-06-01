@@ -9,10 +9,13 @@ class CommonClass {
 		var DStr: string = D >= 10 ? D.toString() : ('0' + D)
 		return Y + '-' + MStr + '-' + DStr
 	}
-	/**时间计算*/
-	GetDate(day: number): string {
+	/**
+	 * 获取当前时间偏移后的 DateLine
+	 * @param offsetDay 偏移天数
+	 */
+	GetDate(offsetDay: number): string {
 		var date = new Date()
-		date.setDate(date.getDate() + day)
+		date.setDate(date.getDate() + offsetDay)
 		return Common.FmtDate(date)
 	}
 	/**本周周几*/
@@ -33,6 +36,15 @@ class CommonClass {
 	DateStr2TimeStamp(dateLine: string): number {
 		var date = new Date(dateLine)
 		return date.getTime()
+	}
+	/**
+	 * timestamp(单位毫秒) 转 yyyy-MM-dd 
+	 * @param dateLine 
+	 */
+	TimeStamp2DateStr(time: number):string  {
+		var date = new Date()
+		date.setTime(time)
+		return this.FmtDate(date)
 	}
 	//两个DateLine的间隔日
 	DateLineSpaceDay(dateLine1: string, dateLine2: string): number {
