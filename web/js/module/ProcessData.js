@@ -48,7 +48,10 @@ var ProcessDataClass = /** @class */ (function () {
             if (_this.CheckNumberArray(link.Status, ProcessFilter.Pack.LinkStatus) == false) {
                 return true;
             }
-            //策划特例
+            if (_this.CheckNumberArray(Data.GetUser(link.Uid).Did, ProcessFilter.Pack.LinkUserDid) == false) {
+                return true;
+            }
+            //策划特例  策划仅显示自己部门负责的流程,因此要先checkUser再保存环节
             if (ProjectNav.FilterDid == DidField.DESIGN) {
                 //用户检查			
                 if (checkUser && !checkUser[link.Uid]) {
@@ -85,24 +88,11 @@ var ProcessDataClass = /** @class */ (function () {
                     return true;
                 }
             }
-            /* //环节保存
-            if (isFilterWork) {
-                if (checkLink[link.Lid]) {
-                    this.LinkMap[link.Lid] = link
-                } else {
-                    return true
-                }
-            } else {
-                this.LinkMap[link.Lid] = link
-            }
-            //##
-            //用户检查
-            if (checkUser && !checkUser[link.Uid]) {
-                return true
-            }*/
             //过滤无效Link
-            if (!checkLink[link.Lid]) {
-                return true;
+            if (isFilterWork) { //没过滤work时就不要checkLink了, 因为checkLink仅报错了有work的link, 没有work的link会被弃掉
+                if (!checkLink[link.Lid]) {
+                    return true;
+                }
             }
             //有效模块
             checkMode[link.Mid] = true;

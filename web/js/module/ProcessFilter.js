@@ -21,9 +21,10 @@ var ProcessFilterClass = /** @class */ (function () {
         this.Pack.ModeName = [];
         this.Pack.Vid = [];
         this.Pack.ModeStatus = [];
-        this.Pack.LinkStatus = [];
         this.Pack.LinkName = [];
         this.Pack.LinkUserName = [];
+        this.Pack.LinkStatus = [];
+        this.Pack.LinkUserDid = [];
         this.Pack.WorkStatus = [];
         this.Pack.WorkFile = [];
     };
@@ -37,6 +38,7 @@ var ProcessFilterClass = /** @class */ (function () {
         this.SetTextFieldValues(this.VueFilter.linkName, []);
         this.SetTextFieldValues(this.VueFilter.linkUserName, []);
         this.SetCheckBoxValues(this.VueFilter.linkStatus, []);
+        this.SetCheckBoxValues(this.VueFilter.linkUserDid, []);
         this.SetCheckBoxValues(this.VueFilter.workStatus, []);
         this.SetCheckBoxValues(this.VueFilter.workFile, []);
     };
@@ -61,6 +63,7 @@ var ProcessFilterClass = /** @class */ (function () {
         this.Pack.LinkName = this.GetTextFieldValues(this.VueFilter.linkName);
         this.Pack.LinkUserName = this.GetTextFieldValues(this.VueFilter.linkUserName);
         this.Pack.LinkStatus = this.GetCheckBoxValues(this.VueFilter.linkStatus);
+        this.Pack.LinkUserDid = this.GetCheckBoxValues(this.VueFilter.linkUserDid);
         this.Pack.WorkStatus = this.GetCheckBoxValues(this.VueFilter.workStatus);
         this.Pack.WorkFile = this.GetCheckBoxValues(this.VueFilter.workFile);
     };
@@ -80,6 +83,7 @@ var ProcessFilterClass = /** @class */ (function () {
         this.SetTextFieldValues(this.VueFilter.linkName, this.Pack.LinkName);
         this.SetTextFieldValues(this.VueFilter.linkUserName, this.Pack.LinkUserName);
         this.SetCheckBoxValues(this.VueFilter.linkStatus, this.Pack.LinkStatus);
+        this.SetCheckBoxValues(this.VueFilter.linkUserDid, this.Pack.LinkUserDid);
         this.SetCheckBoxValues(this.VueFilter.workStatus, this.Pack.WorkStatus);
         this.SetCheckBoxValues(this.VueFilter.workFile, this.Pack.WorkFile);
     };
@@ -135,7 +139,7 @@ var ProcessFilterClass = /** @class */ (function () {
             data.beginDate = '';
             data.endDate = '';
             data.vid = {
-                Uuid: _this.VueUuid++, Name: '功能版本', InputName: 'Vid', ShowLen: VersionManager.ListShowMax, ShowLenMin: VersionManager.ListShowMax, ShowLenMax: 20,
+                Uuid: _this.VueUuid++, Name: '功能版本', InputName: 'Vid', ShowLen: VersionManager.ListShowMax, ShowLenMin: VersionManager.ListShowMax, ShowLenMax: 10000,
                 Inputs: []
             };
             data.modeName = { Uuid: _this.VueUuid++, Name: '功能名称', InputName: 'ModeName', Placeholder: '输入功能名称', Value: '', Prompt: '', };
@@ -155,6 +159,18 @@ var ProcessFilterClass = /** @class */ (function () {
                     { Value: 1, Label: '已归档的', Checked: false, Title: '', },
                 ]
             };
+            data.linkUserDid = {
+                Uuid: _this.VueUuid++, Name: '负责部门', InputName: 'LinkUserDid', ShowLen: -1, ShowLenMin: 0, ShowLenMax: 0,
+                Inputs: []
+            };
+            //读取部门保存为数组
+            var departments = [];
+            var len = Data.DepartmentLoop.length;
+            for (var i = 0; i < len; i++) {
+                var dinfo = Data.DepartmentLoop[i].info;
+                data.linkUserDid.Inputs.push({ Value: dinfo.Did, Label: dinfo.Name, Checked: false, Title: '', });
+            }
+            //
             data.workStatus = {
                 Uuid: _this.VueUuid++, Name: '工作状态', InputName: 'WorkStatus', ShowLen: -1, ShowLenMin: 0, ShowLenMax: 0,
                 Inputs: [
@@ -191,6 +207,14 @@ var ProcessFilterClass = /** @class */ (function () {
                                     break;
                             }
                         });
+                    },
+                    onCheckBoxMouseEnter: function (e, item, input) {
+                        var left = $(e.target).offset().left + $(e.target).width() + 2;
+                        var top = $(e.target).offset().top + $(e.target).height() + 2;
+                        VersionManager.ShowTableHeaderTooltip(parseInt(input.Value.toString()), left, top, false);
+                    },
+                    onCheckBoxMouseOut: function () {
+                        $('#workTips').hide();
                     },
                     //数据框变化(暂时仅用于负责人)
                     onInputChange: function (e, item) {

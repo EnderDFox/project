@@ -66,7 +66,7 @@
 .process .weekend{background:#d9d9d9;}		/*节假日*/
 
 /*工作Tips*/
-.workTips{z-index:1;border-radius:3px;padding:7px;min-height:70px;color:#000000;font-size:14px;background:#ffffe1;min-width:135px;position:absolute;box-shadow:0px 0px 5px #333333;display:none;}
+.workTips{z-index:1000;border-radius:3px;padding:7px;min-height:70px;color:#000000;font-size:14px;background:#ffffe1;min-width:135px;position:absolute;box-shadow:0px 0px 5px #333333;display:none;}
 
 /*编辑环节*/
 .editLink .text{text-align:center;}
@@ -366,8 +366,8 @@
   padding-left: 15px;
 }
 .ProcessFilter .body li{
-  margin-top: 8px;
-  margin-bottom: 8px;
+  margin-top: 4px;
+  margin-bottom: 4px;
 }
 .ProcessFilter .body li .name{
   /* float: left; */
@@ -377,6 +377,9 @@
   text-align: center;
   white-space: nowrap;
   vertical-align: top;
+  height: 30px;
+  min-height: 30px;
+  margin-top: 4px;
 }
 .ProcessFilter .body li .name::after{
   content:"：";
@@ -392,13 +395,35 @@
 .ProcessFilter .body li input[type="text"]{
   display: inline-block;
   width: 400px;
+  min-height:28px;
+  height: 28px; 
+  padding: 0px;
+}
+.ProcessFilter .body li input[type="checkbox"]{
+  display: inline-block;
+  margin: 0px;
+  vertical-align: middle;
+  min-height:28px;
+  height: 28px; 
+  padding: 0px;
+}
+.ProcessFilter .body li .checkbox_name{
+  display: inline-block;
+  vertical-align: middle;
+  min-height:28px;
+  height: 28px; 
+  line-height: 28px;
+  padding: 0px;
 }
 .ProcessFilter .body li .info .date{
   cursor: pointer;
   width: 188px;
 }
 .ProcessFilter .body li .btnMore{
-  margin: 0px;
+  margin-top: 6px;
+  margin-left: 0px;
+  margin-right: 0px;
+  margin-bottom: 0px;
   padding: 0px;
   width: 46px;
   height: 20px;

@@ -112,6 +112,7 @@ var VersionManagerClass = /** @class */ (function () {
         }
     };
     VersionManagerClass.prototype.onL2C_VersionChangeSort = function (data) {
+        var _a;
         var x, y;
         var v1, v2;
         var len = this.VersionList.length;
@@ -132,7 +133,6 @@ var VersionManagerClass = /** @class */ (function () {
         v2.Sort = sort;
         //
         (_a = this.VueVersionList.versions).splice.apply(_a, [x, 1].concat(this.VueVersionList.versions.splice(y, 1, this.VueVersionList.versions[x])));
-        var _a;
     };
     /**
      *
@@ -457,47 +457,70 @@ var VersionManagerClass = /** @class */ (function () {
             this.ShowVersionList();
         }
     };
-    VersionManagerClass.prototype.ShowTableHeaderTooltip = function (dateLine, x, y) {
+    VersionManagerClass.prototype.ShowTableHeaderTooltip = function () {
         var _this = this;
+        var args = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            args[_i] = arguments[_i];
+        }
+        var x = args[1];
+        var y = args[2];
+        var showWrite;
+        if (args[3] == undefined) {
+            showWrite = User.IsWrite;
+        }
+        else {
+            showWrite = Boolean(showWrite);
+        }
         var _show = function () {
+            var dateLine = null;
             var items = [];
-            if (ProcessData.HasVersionDateLineMap(dateLine)) {
-                var pList = ProcessData.VersionDateLineMap[dateLine];
-                var len = pList.length;
-                for (var i = 0; i < len; i++) {
-                    var p = pList[i];
-                    var v = ProcessData.VersionMap[p.Vid];
-                    _this.ClearSpaceDayCount(v.PublishList);
-                    items.push({ version: v, publish: p });
-                }
-                //
-                if (items.length == 1) {
-                    var np = _this.GetNextNearestPublish(dateLine, false, items[0].version);
-                    if (np) {
-                        np.SubDayCount = Common.DateLineSpaceDay(dateLine, np.DateLine);
+            if (typeof args[0] == 'string') {
+                dateLine = args[0];
+                //通过dateLine查询
+                if (ProcessData.HasVersionDateLineMap(dateLine)) {
+                    var pList = ProcessData.VersionDateLineMap[dateLine];
+                    var len = pList.length;
+                    for (var i = 0; i < len; i++) {
+                        var p = pList[i];
+                        var v = ProcessData.VersionMap[p.Vid];
+                        _this.ClearSpaceDayCount(v.PublishList);
+                        items.push({ version: v, publish: p });
                     }
-                }
-            }
-            else {
-                var nearestVersion = _this.GetNearestVersion(dateLine);
-                if (nearestVersion) {
-                    _this.ClearSpaceDayCount(nearestVersion.PublishList);
                     //
-                    var p = _this.GetPrevNearestPublish(dateLine, false);
-                    if (p) {
-                        p.SubDayCount = -Common.DateLineSpaceDay(dateLine, p.DateLine);
-                        items.push({ version: nearestVersion, publish: p });
-                        var np = _this.GetNextNearestPublish(dateLine, false);
+                    if (items.length == 1) {
+                        var np = _this.GetNextNearestPublish(dateLine, false, items[0].version);
                         if (np) {
                             np.SubDayCount = Common.DateLineSpaceDay(dateLine, np.DateLine);
                         }
                     }
                 }
+                else {
+                    var nearestVersion = _this.GetNearestVersion(dateLine);
+                    if (nearestVersion) {
+                        _this.ClearSpaceDayCount(nearestVersion.PublishList);
+                        //
+                        var p = _this.GetPrevNearestPublish(dateLine, false);
+                        if (p) {
+                            p.SubDayCount = -Common.DateLineSpaceDay(dateLine, p.DateLine);
+                            items.push({ version: nearestVersion, publish: p });
+                            var np = _this.GetNextNearestPublish(dateLine, false);
+                            if (np) {
+                                np.SubDayCount = Common.DateLineSpaceDay(dateLine, np.DateLine);
+                            }
+                        }
+                    }
+                }
+            }
+            else {
+                //通过vid查询
+                var vid = args[0];
+                items.push({ version: ProcessData.VersionMap[vid], publish: null });
             }
             //
             _this.VueTableHeaderTooltip.currDateLine = dateLine;
             _this.VueTableHeaderTooltip.items = items;
-            _this.VueTableHeaderTooltip.IsWrite = User.IsWrite;
+            _this.VueTableHeaderTooltip.IsWrite = showWrite;
             //
             $(_this.VueTableHeaderTooltip.$el).css({ 'width': items.length > 1 ? items.length * 160 : 200 });
             _this.VueTableHeaderTooltip.$nextTick(function () {

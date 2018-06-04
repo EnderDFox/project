@@ -2,6 +2,7 @@ interface IVueFilter {
     beginDate?: string, endDate?: string,
     vid?: IFilterItemCheckBox, modeName?: IFilterItemTextField, modeStatus?: IFilterItemCheckBox,
     linkName?: IFilterItemTextField, linkUserName?: IFilterItemTextField, linkStatus?: IFilterItemCheckBox,
+    linkUserDid?: IFilterItemCheckBox,
     workStatus?: IFilterItemCheckBox, workFile?: IFilterItemCheckBox,
 }
 interface IProcessFilterPack {
@@ -13,6 +14,7 @@ interface IProcessFilterPack {
     LinkName?: string[]
     LinkUserName?: string[]
     LinkStatus?: number[]
+    LinkUserDid?: number[]
     WorkStatus?: number[]
     WorkFile?: number[]//是否有附件, 只有一个选项 `有附件`
 }
@@ -62,9 +64,10 @@ class ProcessFilterClass {
         this.Pack.ModeName = []
         this.Pack.Vid = []
         this.Pack.ModeStatus = []
-        this.Pack.LinkStatus = []
         this.Pack.LinkName = []
         this.Pack.LinkUserName = []
+        this.Pack.LinkStatus = []
+        this.Pack.LinkUserDid = []
         this.Pack.WorkStatus = []
         this.Pack.WorkFile = []
     }
@@ -78,6 +81,7 @@ class ProcessFilterClass {
         this.SetTextFieldValues(this.VueFilter.linkName, [])
         this.SetTextFieldValues(this.VueFilter.linkUserName, [])
         this.SetCheckBoxValues(this.VueFilter.linkStatus, [])
+        this.SetCheckBoxValues(this.VueFilter.linkUserDid, [])
         this.SetCheckBoxValues(this.VueFilter.workStatus, [])
         this.SetCheckBoxValues(this.VueFilter.workFile, [])
     }
@@ -101,6 +105,7 @@ class ProcessFilterClass {
         this.Pack.LinkName = this.GetTextFieldValues(this.VueFilter.linkName)
         this.Pack.LinkUserName = this.GetTextFieldValues(this.VueFilter.linkUserName)
         this.Pack.LinkStatus = this.GetCheckBoxValues(this.VueFilter.linkStatus)
+        this.Pack.LinkUserDid = this.GetCheckBoxValues(this.VueFilter.linkUserDid)
         this.Pack.WorkStatus = this.GetCheckBoxValues(this.VueFilter.workStatus)
         this.Pack.WorkFile = this.GetCheckBoxValues(this.VueFilter.workFile)
     }
@@ -120,6 +125,7 @@ class ProcessFilterClass {
         this.SetTextFieldValues(this.VueFilter.linkName, this.Pack.LinkName)
         this.SetTextFieldValues(this.VueFilter.linkUserName, this.Pack.LinkUserName)
         this.SetCheckBoxValues(this.VueFilter.linkStatus, this.Pack.LinkStatus)
+        this.SetCheckBoxValues(this.VueFilter.linkUserDid, this.Pack.LinkUserDid)
         this.SetCheckBoxValues(this.VueFilter.workStatus, this.Pack.WorkStatus)
         this.SetCheckBoxValues(this.VueFilter.workFile, this.Pack.WorkFile)
     }
@@ -182,7 +188,7 @@ class ProcessFilterClass {
             data.beginDate = ''
             data.endDate = ''
             data.vid = {
-                Uuid: this.VueUuid++, Name: '功能版本', InputName: 'Vid', ShowLen: VersionManager.ListShowMax, ShowLenMin: VersionManager.ListShowMax, ShowLenMax: 20,
+                Uuid: this.VueUuid++, Name: '功能版本', InputName: 'Vid', ShowLen: VersionManager.ListShowMax, ShowLenMin: VersionManager.ListShowMax, ShowLenMax: 10000,
                 Inputs: []
             }
             data.modeName = { Uuid: this.VueUuid++, Name: '功能名称', InputName: 'ModeName', Placeholder: '输入功能名称', Value: '', Prompt: '', }
@@ -202,6 +208,18 @@ class ProcessFilterClass {
                     { Value: 1, Label: '已归档的', Checked: false, Title: '', },
                 ]
             }
+            data.linkUserDid = {
+                Uuid: this.VueUuid++, Name: '负责部门', InputName: 'LinkUserDid', ShowLen: -1, ShowLenMin: 0, ShowLenMax: 0,
+                Inputs: []
+            }
+            //读取部门保存为数组
+            var departments: IDepartmentItem[] = [];
+            var len = Data.DepartmentLoop.length
+            for (var i = 0; i < len; i++) {
+                var dinfo = Data.DepartmentLoop[i].info;
+                data.linkUserDid.Inputs.push({ Value: dinfo.Did, Label: dinfo.Name, Checked: false, Title: '', })
+            }
+            //
             data.workStatus = {
                 Uuid: this.VueUuid++, Name: '工作状态', InputName: 'WorkStatus', ShowLen: -1, ShowLenMin: 0, ShowLenMax: 0,
                 Inputs: [// 0:工作 3:完成 1:延期 2:等待 4:休假 5:优化
@@ -238,6 +256,14 @@ class ProcessFilterClass {
                                     break;
                             }
                         })
+                    },
+                    onCheckBoxMouseEnter: (e:Event,item:IFilterItemCheckBox,input:IFilterItemCheckBoxInput) => {
+                        var left = $(e.target).offset().left + $(e.target).width() + 2
+                        var top = $(e.target).offset().top + $(e.target).height() + 2
+                        VersionManager.ShowTableHeaderTooltip(parseInt(input.Value.toString()), left, top,false)
+                    },
+                    onCheckBoxMouseOut:()=>{
+                        $('#workTips').hide()
                     },
                     //数据框变化(暂时仅用于负责人)
                     onInputChange: (e: Event, item: IFilterItemTextField) => {

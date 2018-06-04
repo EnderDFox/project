@@ -14,12 +14,13 @@
 					<input type="text" class="date" title="选择结束日期" placeholder="选择结束日期" name="EndDate" readonly v-model="endDate" @click="onClickDate($event,2)"/>
 				</div>
 			</li>
-			<FilterItemCheckBox v-if="vid" :item="vid"></FilterItemCheckBox>
+			<FilterItemCheckBox v-if="vid" :item="vid" @checkBoxMouseEnter="onCheckBoxMouseEnter" @checkBoxMouseOut="onCheckBoxMouseOut"></FilterItemCheckBox>
 			<FilterItemTextField v-if="modeName" :item="modeName"></FilterItemTextField>
 			<FilterItemCheckBox v-if="modeStatus" :item="modeStatus"></FilterItemCheckBox>
 			<FilterItemTextField v-if="linkName" :item="linkName"></FilterItemTextField>
 			<FilterItemTextField v-if="linkUserName" :item="linkUserName" @inputChange="onInputChange"></FilterItemTextField>
 			<FilterItemCheckBox v-if="linkStatus" :item="linkStatus"></FilterItemCheckBox>
+			<FilterItemCheckBox v-if="linkUserDid" :item="linkUserDid"></FilterItemCheckBox>
 			<FilterItemCheckBox v-if="workStatus" :item="workStatus"></FilterItemCheckBox>
 			<FilterItemCheckBox v-if="workFile" :item="workFile"></FilterItemCheckBox>
 		</ul>

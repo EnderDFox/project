@@ -1,5 +1,5 @@
 <div class="table_header_tooltip">
-    <div style="margin-bottom: 4px;margin-left: 4px;font-size: 16px;">
+    <div style="margin-bottom: 4px;margin-left: 4px;font-size: 16px;" v-if="currDateLine">
         日期:
         <span style="font-weight: bold;">{{currDateLine}}</span>
     </div>
@@ -12,9 +12,9 @@
             <span style="display:inline-block;width:inherit; font-size: 16px;margin-bottom: 6px;" class="text-overflow-hide versionFullname">版本: {{GetVersionFullname(item.version)}}</span>
             <br/>
             <ul class="no-mbp">
-                <li v-for="pItem,pIndex in item.version.PublishList" v-if="Boolean(pItem.DateLine)" class="list-style-type-none" :class="{'font_bold':pItem.Genre==item.publish.Genre}">
+                <li v-for="pItem,pIndex in item.version.PublishList" v-if="Boolean(pItem.DateLine)" class="list-style-type-none" :class="{'font_bold':item.publish && pItem.Genre==item.publish.Genre}">
                     <span :class="['sk_color_'+pItem.Genre]" style="width: 38px;">{{GetPublishName(pItem.Genre)}}: </span>
-                    <span :class="{'font_bold':pItem.Genre==item.publish.Genre,'font_color_black3':pItem.Genre!=item.publish.Genre}" style="width: 82px;">{{pItem.DateLine||'空'}}</span>
+                    <span :class="{'font_bold':item.publish && pItem.Genre==item.publish.Genre,'font_color_black3':item.publish && pItem.Genre!=item.publish.Genre}" style="width: 82px;">{{pItem.DateLine||'空'}}</span>
                     <span v-if="items.length==1 && pItem.SubDayCount!=0" style="font-weight: normal;">({{pItem.SubDayCount
                         <0? -pItem.SubDayCount+'天前': pItem.SubDayCount+'天后'}})</span>
                 </li>

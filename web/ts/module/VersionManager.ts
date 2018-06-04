@@ -496,45 +496,66 @@ class VersionManagerClass {
     }
     /**显示进度页面 表格头 日期格子中的tooltip */
     VueTableHeaderTooltip: CombinedVueInstance1<{ currDateLine: string, items: TooltipItem[], IsWrite: boolean }>
-    ShowTableHeaderTooltip(dateLine: string, x: number, y: number) {
+    ShowTableHeaderTooltip(dateLine: string, x: number, y: number);
+    ShowTableHeaderTooltip(dateLine: string, x: number, y: number, showWrite: boolean);
+    ShowTableHeaderTooltip(vid: number, x: number, y: number);
+    ShowTableHeaderTooltip(vid: number, x: number, y: number, showWrite: boolean);
+    ShowTableHeaderTooltip(...args) {
+        var x: number = args[1]
+        var y: number = args[2]
+        var showWrite: boolean
+        if (args[3] == undefined) {
+            showWrite = User.IsWrite
+        } else {
+            showWrite = Boolean(showWrite)
+        }
         var _show = () => {
+            var dateLine = null
             var items: TooltipItem[] = []
-            if (ProcessData.HasVersionDateLineMap(dateLine)) {
-                var pList: PublishSingle[] = ProcessData.VersionDateLineMap[dateLine]
-                var len = pList.length
-                for (var i = 0; i < len; i++) {
-                    var p: PublishSingle = pList[i]
-                    var v: VersionSingle = ProcessData.VersionMap[p.Vid]
-                    this.ClearSpaceDayCount(v.PublishList)
-                    items.push({ version: v, publish: p })
-                }
-                //
-                if (items.length == 1) {
-                    var np = this.GetNextNearestPublish(dateLine, false, items[0].version)
-                    if (np) {
-                        np.SubDayCount = Common.DateLineSpaceDay(dateLine, np.DateLine)
+            if (typeof args[0] == 'string') {
+                dateLine = args[0]
+                //通过dateLine查询
+                if (ProcessData.HasVersionDateLineMap(dateLine)) {
+                    var pList: PublishSingle[] = ProcessData.VersionDateLineMap[dateLine]
+                    var len = pList.length
+                    for (var i = 0; i < len; i++) {
+                        var p: PublishSingle = pList[i]
+                        var v: VersionSingle = ProcessData.VersionMap[p.Vid]
+                        this.ClearSpaceDayCount(v.PublishList)
+                        items.push({ version: v, publish: p })
                     }
-                }
-            } else {
-                var nearestVersion = this.GetNearestVersion(dateLine)
-                if (nearestVersion) {
-                    this.ClearSpaceDayCount(nearestVersion.PublishList)
                     //
-                    var p = this.GetPrevNearestPublish(dateLine, false)
-                    if (p) {
-                        p.SubDayCount = -Common.DateLineSpaceDay(dateLine, p.DateLine)
-                        items.push({ version: nearestVersion, publish: p })
-                        var np = this.GetNextNearestPublish(dateLine, false)
+                    if (items.length == 1) {
+                        var np = this.GetNextNearestPublish(dateLine, false, items[0].version)
                         if (np) {
                             np.SubDayCount = Common.DateLineSpaceDay(dateLine, np.DateLine)
                         }
                     }
+                } else {
+                    var nearestVersion = this.GetNearestVersion(dateLine)
+                    if (nearestVersion) {
+                        this.ClearSpaceDayCount(nearestVersion.PublishList)
+                        //
+                        var p = this.GetPrevNearestPublish(dateLine, false)
+                        if (p) {
+                            p.SubDayCount = -Common.DateLineSpaceDay(dateLine, p.DateLine)
+                            items.push({ version: nearestVersion, publish: p })
+                            var np = this.GetNextNearestPublish(dateLine, false)
+                            if (np) {
+                                np.SubDayCount = Common.DateLineSpaceDay(dateLine, np.DateLine)
+                            }
+                        }
+                    }
                 }
+            } else {
+                //通过vid查询
+                var vid = args[0]
+                items.push({ version: ProcessData.VersionMap[vid], publish: null })
             }
             //
             this.VueTableHeaderTooltip.currDateLine = dateLine
             this.VueTableHeaderTooltip.items = items
-            this.VueTableHeaderTooltip.IsWrite = User.IsWrite
+            this.VueTableHeaderTooltip.IsWrite = showWrite
             //
             $(this.VueTableHeaderTooltip.$el).css({ 'width': items.length > 1 ? items.length * 160 : 200 })
             this.VueTableHeaderTooltip.$nextTick(() => {
