@@ -98,11 +98,12 @@ class PdfViewer {
                     disX = x - dragTarget.offsetLeft;
                     disY = y - dragTarget.offsetTop;
                     if (Common.IsDesktop()) {
-                        document.addEventListener('mousemove', onMouseMove)
-                        document.addEventListener('mouseup', onEnd)
+                        document.addEventListener(EventName.mousemove, onMouseMove)
+                        document.addEventListener(EventName.mouseup, onEnd)
                     } else {
-                        document.addEventListener('touchmove', onTouchMove)
-                        document.addEventListener('touchend', onEnd)
+                        document.addEventListener(EventName.touchmove, onTouchMove)
+                        document.addEventListener(EventName.touchend, onEnd)
+                        document.addEventListener(EventName.touchcancel, onEnd)
                     }
                 };
                 var onDragMove = (x: number, y: number) => {
@@ -111,20 +112,21 @@ class PdfViewer {
                 };
                 var onCancel = (e: Event = null) => {
                     if (Common.IsDesktop()) {
-                        document.removeEventListener('mousemove', onMouseMove)
-                        document.removeEventListener('mouseup', onEnd)
+                        document.removeEventListener(EventName.mousemove, onMouseMove)
+                        document.removeEventListener(EventName.mouseup, onEnd)
                     } else {
-                        document.removeEventListener('touchmove', onTouchMove)
-                        document.removeEventListener('touchend', onEnd)
+                        document.removeEventListener(EventName.touchmove, onTouchMove)
+                        document.removeEventListener(EventName.touchend, onEnd)
+                        document.removeEventListener(EventName.touchcancel, onEnd)
                     }
                 }
                 var onEnd = (e: Event = null) => {
                     onCancel(e)
                 }
                 if (Common.IsDesktop()) {
-                    el.addEventListener('mousedown', onMouseStart)
+                    el.addEventListener(EventName.mousedown, onMouseStart)
                 } else {
-                    el.addEventListener('touchstart', onTouchStart)
+                    el.addEventListener(EventName.touchstart, onTouchStart)
                 }
             }
         });

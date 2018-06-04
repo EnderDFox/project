@@ -1,3 +1,19 @@
+//# defind
+var EventName = /** @class */ (function () {
+    function EventName() {
+    }
+    EventName.mousedown = 'mousedown';
+    EventName.mousemove = 'mousemove';
+    EventName.mouseup = 'mouseup';
+    //
+    EventName.touchstart = 'touchstart';
+    EventName.touchmove = 'touchmove';
+    EventName.touchend = 'touchend';
+    EventName.touchcancel = 'touchcancel';
+    //
+    EventName.mousewheel = 'mousewheel';
+    return EventName;
+}());
 //通用类
 var CommonClass = /** @class */ (function () {
     function CommonClass() {

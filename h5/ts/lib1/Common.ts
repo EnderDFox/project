@@ -1,3 +1,18 @@
+//# defind
+
+class EventName{
+    static mousedown = 'mousedown'
+    static mousemove = 'mousemove'
+    static mouseup = 'mouseup'
+    //
+    static touchstart = 'touchstart'
+    static touchmove = 'touchmove'
+    static touchend = 'touchend'
+    static touchcancel = 'touchcancel'
+    //
+    static mousewheel = 'mousewheel'
+}
+
 //通用类
 class CommonClass {
     NewXY(x: number, y: number): IXY {
@@ -96,6 +111,7 @@ class CommonClass {
         _preventDragDefault(document)
         _preventDragDefault(document.body)
     }
+
 }
 var Common = new CommonClass()
 interface IPullDownMenuItem {
