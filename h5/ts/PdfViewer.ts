@@ -233,7 +233,7 @@ class PdfViewer {
                             var canvas = this.vueDoc.$refs.canvas
                             var _w:number = $(canvas).w()+gapW
                             _w = Math.max(_w, 100)
-                            this.renderScale(this.vueDoc.pageScale*(_w/ $(canvas).w())
+                            this.renderScale(this.vueDoc.pageScale*(_w/ $(canvas).w()))
                         },
                     }
                 },
