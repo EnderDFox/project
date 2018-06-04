@@ -67,66 +67,134 @@ class PdfViewer {
             bind: (el: HTMLElement, binding: VNodeDirective) => {
                 var disX: number
                 var disY: number
-                var dragTarget: HTMLElement
+                var p0: IXY
+                var p1: IXY
+                var $dragTarget: JQuery
+                var touchingCount = 0
                 //for desktop
-                var onMouseStart = (e: MouseEvent) => {
+                var doMouseStart = (e: MouseEvent) => {
                     e.preventDefault()
-                    onDragStart(e.clientX, e.clientY)
+                    doTouchOneStart({ x: e.screenX, y: e.screenY })
                 }
                 var onMouseMove = (e: MouseEvent) => {
                     e.preventDefault()
-                    onDragMove(e.clientX, e.clientY)
+                    doTouchOneMove({ x: e.screenX, y: e.screenY })
                 }
-                var onTouchStart = (e: TouchEvent) => {
-                    if (e.touches.length == 1) {
-                        onDragStart(e.touches[0].clientX, e.touches[0].clientY)
-                    } else {
-                        onCancel()
+                //for mobile
+                var doTouchStart = (e: TouchEvent) => {
+                    switch (e.touches.length) {
+                        case 1:
+                            if (touchingCount == 2) {
+                                onCancel()
+                                return
+                            } else {
+                                doTouchOneStart({ x: e.touches[0].screenX, y: e.touches[0].screenY })
+                            }
+                            break;
+                        case 2:
+                            if (touchingCount == 1) {
+                                onCancel()
+                                return
+                            } else {
+                                doTouchTwoStart({ x: e.touches[0].screenX, y: e.touches[0].screenY }, { x: e.touches[1].screenX, y: e.touches[1].screenY })
+                            }
+                            break;
+                        default:
+                            onCancel()
+                            break;
                     }
                 }
                 var onTouchMove = (e: TouchEvent) => {
-                    if (e.touches.length == 1) {
-                        onDragMove(e.touches[0].clientX, e.touches[0].clientY)
-                    } else {
-                        onCancel()
+                    switch (e.touches.length) {
+                        case 1:
+                            if (touchingCount == 1) {
+                                doTouchOneMove({ x: e.touches[0].screenX, y: e.touches[0].screenY })
+                            } else {
+                                onCancel()
+                            }
+                            break;
+                        case 2:
+                            if (touchingCount == 2) {
+                                doTouchTwoMove({ x: e.touches[0].screenX, y: e.touches[0].screenY }, { x: e.touches[1].screenX, y: e.touches[1].screenY })
+                            } else {
+                                onCancel()
+                            }
+                            break;
+                        default:
+                            onCancel()
+                            break;
                     }
                 }
-                //for mobile
-                var onDragStart = (x: number, y: number) => {
-                    dragTarget = (binding.value && binding.value()) || el   //必须在start时再获取,bind时获取到的是vue修改之前的模板元素
-                    //鼠标按下，计算当前元素距离可视区的距离
-                    disX = x - dragTarget.offsetLeft;
-                    disY = y - dragTarget.offsetTop;
-                    if (Common.IsDesktop()) {
-                        document.addEventListener(EventName.mousemove, onMouseMove)
-                        document.addEventListener(EventName.mouseup, onEnd)
-                    } else {
-                        document.addEventListener(EventName.touchmove, onTouchMove)
-                        document.addEventListener(EventName.touchend, onEnd)
-                        document.addEventListener(EventName.touchcancel, onEnd)
-                    }
+                var doTouchOneStart = (_p0: IXY) => {
+                    touchingCount = 1
+                    $dragTarget = $((binding.value && binding.value()) || el)   //必须在start时再获取,bind时获取到的是vue修改之前的模板元素
+                    p0 = _p0
+                    toggleEventListeners(true)
                 };
-                var onDragMove = (x: number, y: number) => {
-                    dragTarget.style.left = x - disX + 'px';
-                    dragTarget.style.top = y - disY + 'px';
+                var doTouchTwoStart = (_p0: IXY, _p1: IXY) => {
+                    touchingCount = 2
+                    $dragTarget = $((binding.value && binding.value()) || el)   //必须在start时再获取,bind时获取到的是vue修改之前的模板元素
+                    p0 = _p0
+                    p1 = _p1
+                    toggleEventListeners(true)
+                }
+                var doTouchOneMove = (_p0: IXY) => {
+                    $dragTarget.xy($dragTarget.x() + (_p0.x - p0.x), $dragTarget.y() + (_p0.y - p0.y))
+                    p0 = _p0
                 };
+                var doTouchTwoMove = (_p0: IXY, _p1: IXY) => {
+                    var dist = MathUtil.distance(p0, p1)
+                    var _dist = MathUtil.distance(_p0, _p1)
+                    //
+                    var oldXY = $dragTarget.xy()
+                    var oldWH = $dragTarget.wh()
+                    var pinchCenter = Common.NewXY((p1.x + p0.x) / 2, (p1.y + p0.y) / 2)
+                    var _pinchCenter = Common.NewXY((_p1.x + _p0.x) / 2, (_p1.y + _p0.y) / 2)
+                    //
+                    var gapX = Math.abs(_p1.x - _p0.x) - Math.abs(p1.x - p0.x)
+                    var gapY = Math.abs(_p1.y - _p0.y) - Math.abs(p1.y - p0.y)
+                    $dragTarget.xy(oldXY.x - gapX / 2 + (_pinchCenter.x - pinchCenter.x), oldXY.y - gapY / 2 + (_pinchCenter.y - pinchCenter.y))
+                    //
+                    var whRate = $dragTarget.h() / $dragTarget.w()
+                    var gap = (gapX + gapY)
+                    $dragTarget.wh(Math.max($dragTarget.w() + gap, 100), Math.max($dragTarget.h() + gap * whRate, 100 * whRate))
+                    //
+                    p0 = _p0
+                    p1 = _p1
+                }
                 var onCancel = (e: Event = null) => {
-                    if (Common.IsDesktop()) {
-                        document.removeEventListener(EventName.mousemove, onMouseMove)
-                        document.removeEventListener(EventName.mouseup, onEnd)
-                    } else {
-                        document.removeEventListener(EventName.touchmove, onTouchMove)
-                        document.removeEventListener(EventName.touchend, onEnd)
-                        document.removeEventListener(EventName.touchcancel, onEnd)
-                    }
+                    toggleEventListeners(false)
                 }
                 var onEnd = (e: Event = null) => {
                     onCancel(e)
                 }
+                //
+                var toggleEventListeners = (bl: boolean) => {
+                    if (bl) {
+                        if (Common.IsDesktop()) {
+                            document.addEventListener(EventName.mousemove, onMouseMove)
+                            document.addEventListener(EventName.mouseup, onEnd)
+                        } else {
+                            document.addEventListener(EventName.touchmove, onTouchMove)
+                            document.addEventListener(EventName.touchend, onEnd)
+                            document.addEventListener(EventName.touchcancel, onEnd)
+                        }
+                    } else {
+                        if (Common.IsDesktop()) {
+                            document.removeEventListener(EventName.mousemove, onMouseMove)
+                            document.removeEventListener(EventName.mouseup, onEnd)
+                        } else {
+                            document.removeEventListener(EventName.touchmove, onTouchMove)
+                            document.removeEventListener(EventName.touchend, onEnd)
+                            document.removeEventListener(EventName.touchcancel, onEnd)
+                        }
+                    }
+                }
+                //
                 if (Common.IsDesktop()) {
-                    el.addEventListener(EventName.mousedown, onMouseStart)
+                    el.addEventListener(EventName.mousedown, doMouseStart)
                 } else {
-                    el.addEventListener(EventName.touchstart, onTouchStart)
+                    el.addEventListener(EventName.touchstart, doTouchStart)
                 }
             }
         });
