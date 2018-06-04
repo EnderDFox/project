@@ -1,7 +1,7 @@
 //======interface
 declare interface IXY {
-    x: number
-    y: number
+    x?: number
+    y?: number
 }
 //======原生扩展 js代码位于Common.js
 //------Array扩展

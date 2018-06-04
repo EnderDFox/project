@@ -59,10 +59,18 @@ var PdfViewer = /** @class */ (function () {
                 var disY;
                 var p0;
                 var p1;
+                var touchOption;
                 var $dragTarget;
                 var touchingCount = 0;
                 //for desktop
-                var doMouseStart = function (e) {
+                var initTouchOption = function () {
+                    if (!touchOption) {
+                        touchOption = (binding.value && binding.value() || {});
+                        $dragTarget = $(touchOption.dragTarget ? touchOption.dragTarget : el);
+                    }
+                };
+                var onMouseStart = function (e) {
+                    initTouchOption();
                     e.preventDefault();
                     doTouchOneStart({ x: e.screenX, y: e.screenY });
                 };
@@ -71,28 +79,17 @@ var PdfViewer = /** @class */ (function () {
                     doTouchOneMove({ x: e.screenX, y: e.screenY });
                 };
                 //for mobile
-                var doTouchStart = function (e) {
+                var onTouchStart = function (e) {
+                    initTouchOption();
+                    onCancel();
                     switch (e.touches.length) {
                         case 1:
-                            if (touchingCount == 2) {
-                                onCancel();
-                                return;
-                            }
-                            else {
-                                doTouchOneStart({ x: e.touches[0].screenX, y: e.touches[0].screenY });
-                            }
+                            doTouchOneStart({ x: e.touches[0].screenX, y: e.touches[0].screenY });
                             break;
                         case 2:
-                            if (touchingCount == 1) {
-                                onCancel();
-                                return;
-                            }
-                            else {
+                            if (touchOption.useTouchTwo) {
                                 doTouchTwoStart({ x: e.touches[0].screenX, y: e.touches[0].screenY }, { x: e.touches[1].screenX, y: e.touches[1].screenY });
                             }
-                            break;
-                        default:
-                            onCancel();
                             break;
                     }
                 };
@@ -121,13 +118,11 @@ var PdfViewer = /** @class */ (function () {
                 };
                 var doTouchOneStart = function (_p0) {
                     touchingCount = 1;
-                    $dragTarget = $((binding.value && binding.value()) || el); //必须在start时再获取,bind时获取到的是vue修改之前的模板元素
                     p0 = _p0;
                     toggleEventListeners(true);
                 };
                 var doTouchTwoStart = function (_p0, _p1) {
                     touchingCount = 2;
-                    $dragTarget = $((binding.value && binding.value()) || el); //必须在start时再获取,bind时获取到的是vue修改之前的模板元素
                     p0 = _p0;
                     p1 = _p1;
                     toggleEventListeners(true);
@@ -139,19 +134,29 @@ var PdfViewer = /** @class */ (function () {
                 var doTouchTwoMove = function (_p0, _p1) {
                     var dist = MathUtil.distance(p0, p1);
                     var _dist = MathUtil.distance(_p0, _p1);
+                    // this.log(dist, ":[dist]", _dist, ":[_dist]")
                     //
                     var oldXY = $dragTarget.xy();
                     var oldWH = $dragTarget.wh();
                     var pinchCenter = Common.NewXY((p1.x + p0.x) / 2, (p1.y + p0.y) / 2);
                     var _pinchCenter = Common.NewXY((_p1.x + _p0.x) / 2, (_p1.y + _p0.y) / 2);
+                    // this.log(oldXY.x, oldXY.y, ":[oldXY]", oldWH.x, oldWH.y, ":[oldWH]")
+                    // this.log(pinchCenter.x, pinchCenter.y, ":[pinchCenter]", _pinchCenter.x, _pinchCenter.y, ":[_pinchCenter]")
                     //
                     var gapX = Math.abs(_p1.x - _p0.x) - Math.abs(p1.x - p0.x);
                     var gapY = Math.abs(_p1.y - _p0.y) - Math.abs(p1.y - p0.y);
+                    // this.log(gapX, ":[gapX]", gapY, ":[gapY]")
                     $dragTarget.xy(oldXY.x - gapX / 2 + (_pinchCenter.x - pinchCenter.x), oldXY.y - gapY / 2 + (_pinchCenter.y - pinchCenter.y));
                     //
                     var whRate = $dragTarget.h() / $dragTarget.w();
                     var gap = (gapX + gapY);
-                    $dragTarget.wh(Math.max($dragTarget.w() + gap, 100), Math.max($dragTarget.h() + gap * whRate, 100 * whRate));
+                    // this.log(whRate, ":[whRate]", gap, ":[gap]")
+                    if (touchOption.touchTwoCallback) {
+                        touchOption.touchTwoCallback(gap, gap * whRate);
+                    }
+                    else {
+                        $dragTarget.wh(Math.max($dragTarget.w() + gap, 100), Math.max($dragTarget.h() + gap * whRate, 100 * whRate));
+                    }
                     //
                     p0 = _p0;
                     p1 = _p1;
@@ -191,15 +196,11 @@ var PdfViewer = /** @class */ (function () {
                 };
                 //
                 if (Common.IsDesktop()) {
-                    el.addEventListener(EventName.mousedown, doMouseStart);
+                    el.addEventListener(EventName.mousedown, onMouseStart);
                 }
                 else {
-                    el.addEventListener(EventName.touchstart, doTouchStart);
+                    el.addEventListener(EventName.touchstart, onTouchStart);
                 }
-            }
-        });
-        Vue.directive('touchTwo', {
-            bind: function (el, binding) {
             }
         });
         //#
@@ -218,19 +219,51 @@ var PdfViewer = /** @class */ (function () {
                 onMouseWheel: function (e) {
                     _this.renderScale(_this.vueDoc.pageScale - e.deltaY / 1000);
                 },
+                getTouchOption: function () {
+                    return {
+                        dragTarget: null,
+                        useTouchTwo: true,
+                        touchTwoCallback: function (gapW, gapH) {
+                            var canvas = _this.vueDoc.$refs.canvas;
+                            var _w = $(canvas).w() + gapW;
+                            _w = Math.max(_w, 100);
+                            _this.renderScale(_this.vueDoc.pageScale * (_w / $(canvas).w()));
+                        },
+                    };
+                },
             }
         });
         this.vueOutline = new Vue({
             data: {
-                showOutline: true,
+                showContent: true,
                 treeData: [],
             },
             methods: {
-                getDragTarget: function () {
-                    return this.$el;
-                }
+                getTouchOption: function () {
+                    return {
+                        dragTarget: this.$el,
+                        useTouchTwo: false,
+                        touchTwoCallback: null,
+                    };
+                },
             }
-        }).$mount('#outline');
+        }).$mount('.outline');
+        this.vueLog = new Vue({
+            data: {
+                showContent: true,
+                content: '',
+            },
+            methods: {
+                getTouchOption: function () {
+                    return {
+                        dragTarget: this.$el,
+                        useTouchTwo: false,
+                        touchTwoCallback: null,
+                    };
+                },
+            }
+        }).$mount('.log');
+        this.log('init vue!');
     };
     PdfViewer.prototype.initVueData = function () {
         var _this = this;
@@ -259,6 +292,17 @@ var PdfViewer = /** @class */ (function () {
             // console.log("[info]", logItems(outline, 0), ":[logItems(outline, 0)]")
             _this.vueOutline.treeData = logItems(outline, 0);
         });
+    };
+    PdfViewer.prototype.log = function () {
+        var args = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            args[_i] = arguments[_i];
+        }
+        this.vueLog.content += args.join(' ') + '<br/>';
+        if (this.vueLog.showContent) {
+            var _content = this.vueLog.$refs.content;
+            _content.scrollTo({ left: 0, top: _content.scrollHeight });
+        }
     };
     PdfViewer.prototype.renderPage = function (num) {
         if (this.pageRendering) {
@@ -301,6 +345,7 @@ var PdfViewer = /** @class */ (function () {
         this.vueDoc.pageScale = val;
         this.renderPage(this.vueDoc.pageNum);
     };
+    // pageWHScale1:IXY
     PdfViewer.prototype._renderPage = function (num) {
         var _this = this;
         this.vueDoc.pageNum = num;
@@ -318,6 +363,10 @@ var PdfViewer = /** @class */ (function () {
             });
             // Wait for rendering to finish
             renderTask.promise.then(function () {
+                /* if(!this.pageWHScale1){
+                     var canvas:HTMLCanvasElement = this.vueDoc.$refs.canvas as HTMLCanvasElement
+                     this.pageWHScale1 = $(canvas).wh()
+                 } */
                 //render pending page
                 _this.pageRendering = false;
                 if (_this.pageNumPending !== null) {

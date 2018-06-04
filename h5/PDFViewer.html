@@ -38,13 +38,14 @@
       z-index: -1;
     }
 
-    .outline {
+    .log,.outline {
       position: absolute;
       top: 30px;
       left: 14px;
       border: 1px solid #313131;
       background-color: rgba(255, 255, 255, 0.82);
       max-height: 90%;
+      min-width: 200px;
       overflow-y: auto;
       padding-right: 8px;
       white-space: nowrap; /* 防止拖到右侧边缘后  宽度修改(因为document宽度小,把outline宽度挤窄了)*/
@@ -125,17 +126,26 @@
       <button @click="onZoomIn">+</button>
     </div>
     <!-- canvas -->
-    <canvas ref='canvas' v-drag @mouseWheel="onMouseWheel($event)">Your canvas is not supported</canvas>
+    <canvas ref='canvas' v-drag="getTouchOption" @mouseWheel="onMouseWheel($event)">Your canvas is not supported</canvas>
   </section>
   <!-- outline -->
-  <section class="outline" id="outline">
-    <div class="buttonBar" v-drag="getDragTarget">
+  <section class="outline">
+    <div class="buttonBar" v-drag="getTouchOption">
       <span class="section_name">Outline:</span>
-      <button @click="showOutline=!showOutline">Toggle</button>
+      <button @click="showContent=!showContent">Toggle</button>
       <!-- <button class="btn_drag" v-drag="getDragTarget">Drag</button> -->
     </div>
-    <item class="children0" :models="treeData" v-if="showOutline">
+    <item class="children0" :models="treeData" v-if="showContent">
     </item>
+  </section>
+  <!-- log -->
+  <section class="log">
+    <div class="buttonBar" v-drag="getTouchOption">
+      <span class="section_name">Log:</span>
+      <button @click="showContent=!showContent">Toggle</button>
+      <!-- <button class="btn_drag" v-drag="getDragTarget">Drag</button> -->
+    </div>
+    <div v-if="showContent" ref="content" v-html="content"></div>
   </section>
   <!-- vue 组件 -->
   <template id="template_outline_item">

@@ -5,6 +5,11 @@ interface ITreeItem {
     isOpen?: boolean
     dest?: any[]
 }
+interface ITouchOption {
+    dragTarget?: HTMLElement
+    useTouchTwo?: boolean
+    touchTwoCallback?: (gapW: number, gapH: number) => void
+}
 class PdfViewer {
     canvas: HTMLCanvasElement
     ctx: CanvasRenderingContext2D
@@ -69,10 +74,18 @@ class PdfViewer {
                 var disY: number
                 var p0: IXY
                 var p1: IXY
+                var touchOption: ITouchOption
                 var $dragTarget: JQuery
                 var touchingCount = 0
                 //for desktop
-                var doMouseStart = (e: MouseEvent) => {
+                var initTouchOption = () => {
+                    if (!touchOption) {
+                        touchOption = (binding.value && binding.value() || {}) as ITouchOption
+                        $dragTarget = $(touchOption.dragTarget ? touchOption.dragTarget : el)
+                    }
+                }
+                var onMouseStart = (e: MouseEvent) => {
+                    initTouchOption()
                     e.preventDefault()
                     doTouchOneStart({ x: e.screenX, y: e.screenY })
                 }
@@ -81,26 +94,17 @@ class PdfViewer {
                     doTouchOneMove({ x: e.screenX, y: e.screenY })
                 }
                 //for mobile
-                var doTouchStart = (e: TouchEvent) => {
+                var onTouchStart = (e: TouchEvent) => {
+                    initTouchOption()
+                    onCancel()
                     switch (e.touches.length) {
                         case 1:
-                            if (touchingCount == 2) {
-                                onCancel()
-                                return
-                            } else {
-                                doTouchOneStart({ x: e.touches[0].screenX, y: e.touches[0].screenY })
-                            }
+                            doTouchOneStart({ x: e.touches[0].screenX, y: e.touches[0].screenY })
                             break;
                         case 2:
-                            if (touchingCount == 1) {
-                                onCancel()
-                                return
-                            } else {
+                            if (touchOption.useTouchTwo) {
                                 doTouchTwoStart({ x: e.touches[0].screenX, y: e.touches[0].screenY }, { x: e.touches[1].screenX, y: e.touches[1].screenY })
                             }
-                            break;
-                        default:
-                            onCancel()
                             break;
                     }
                 }
@@ -127,13 +131,11 @@ class PdfViewer {
                 }
                 var doTouchOneStart = (_p0: IXY) => {
                     touchingCount = 1
-                    $dragTarget = $((binding.value && binding.value()) || el)   //必须在start时再获取,bind时获取到的是vue修改之前的模板元素
                     p0 = _p0
                     toggleEventListeners(true)
                 };
                 var doTouchTwoStart = (_p0: IXY, _p1: IXY) => {
                     touchingCount = 2
-                    $dragTarget = $((binding.value && binding.value()) || el)   //必须在start时再获取,bind时获取到的是vue修改之前的模板元素
                     p0 = _p0
                     p1 = _p1
                     toggleEventListeners(true)
@@ -145,19 +147,28 @@ class PdfViewer {
                 var doTouchTwoMove = (_p0: IXY, _p1: IXY) => {
                     var dist = MathUtil.distance(p0, p1)
                     var _dist = MathUtil.distance(_p0, _p1)
+                    // this.log(dist, ":[dist]", _dist, ":[_dist]")
                     //
                     var oldXY = $dragTarget.xy()
                     var oldWH = $dragTarget.wh()
                     var pinchCenter = Common.NewXY((p1.x + p0.x) / 2, (p1.y + p0.y) / 2)
                     var _pinchCenter = Common.NewXY((_p1.x + _p0.x) / 2, (_p1.y + _p0.y) / 2)
+                    // this.log(oldXY.x, oldXY.y, ":[oldXY]", oldWH.x, oldWH.y, ":[oldWH]")
+                    // this.log(pinchCenter.x, pinchCenter.y, ":[pinchCenter]", _pinchCenter.x, _pinchCenter.y, ":[_pinchCenter]")
                     //
                     var gapX = Math.abs(_p1.x - _p0.x) - Math.abs(p1.x - p0.x)
                     var gapY = Math.abs(_p1.y - _p0.y) - Math.abs(p1.y - p0.y)
+                    // this.log(gapX, ":[gapX]", gapY, ":[gapY]")
                     $dragTarget.xy(oldXY.x - gapX / 2 + (_pinchCenter.x - pinchCenter.x), oldXY.y - gapY / 2 + (_pinchCenter.y - pinchCenter.y))
                     //
                     var whRate = $dragTarget.h() / $dragTarget.w()
                     var gap = (gapX + gapY)
-                    $dragTarget.wh(Math.max($dragTarget.w() + gap, 100), Math.max($dragTarget.h() + gap * whRate, 100 * whRate))
+                    // this.log(whRate, ":[whRate]", gap, ":[gap]")
+                    if (touchOption.touchTwoCallback) {
+                        touchOption.touchTwoCallback(gap, gap * whRate)
+                    } else {
+                        $dragTarget.wh(Math.max($dragTarget.w() + gap, 100), Math.max($dragTarget.h() + gap * whRate, 100 * whRate))
+                    }
                     //
                     p0 = _p0
                     p1 = _p1
@@ -192,17 +203,12 @@ class PdfViewer {
                 }
                 //
                 if (Common.IsDesktop()) {
-                    el.addEventListener(EventName.mousedown, doMouseStart)
+                    el.addEventListener(EventName.mousedown, onMouseStart)
                 } else {
-                    el.addEventListener(EventName.touchstart, doTouchStart)
+                    el.addEventListener(EventName.touchstart, onTouchStart)
                 }
             }
         });
-        Vue.directive('touchTwo', {
-            bind: (el: HTMLElement, binding: VNodeDirective) => {
-
-            }
-        })
         //#
         this.vueDoc = new Vue({
             el: '.doc',
@@ -219,23 +225,55 @@ class PdfViewer {
                 onMouseWheel: (e: MouseWheelEvent) => {
                     this.renderScale(this.vueDoc.pageScale - e.deltaY / 1000)
                 },
+                getTouchOption: (): ITouchOption => {
+                    return {
+                        dragTarget: null,
+                        useTouchTwo: true,
+                        touchTwoCallback: (gapW: number, gapH: number) => {
+                            var canvas = this.vueDoc.$refs.canvas
+                            var _w:number = $(canvas).w()+gapW
+                            _w = Math.max(_w, 100)
+                            this.renderScale(this.vueDoc.pageScale*(_w/ $(canvas).w())
+                        },
+                    }
+                },
             }
         })
         this.vueOutline = new Vue({
             data: {
-                showOutline: true,
+                showContent: true,
                 treeData: [],
             },
             methods: {
-                getDragTarget: function (this: Vue) {
-                    return this.$el
-                }
+                getTouchOption: function (): ITouchOption {
+                    return {
+                        dragTarget: this.$el,
+                        useTouchTwo: false,
+                        touchTwoCallback: null,
+                    }
+                },
             }
-        }).$mount('#outline')
-
+        }).$mount('.outline')
+        this.vueLog = new Vue({
+            data: {
+                showContent: true,
+                content: '',
+            },
+            methods: {
+                getTouchOption: function (): ITouchOption {
+                    return {
+                        dragTarget: this.$el,
+                        useTouchTwo: false,
+                        touchTwoCallback: null,
+                    }
+                },
+            }
+        }).$mount('.log')
+        this.log('init vue!')
     }
     vueDoc: CombinedVueInstance1<{ pageNum: number, pageTotal: number, pageScale: number, }>
-    vueOutline: CombinedVueInstance1<{ showOutline: boolean, treeData: ITreeItem[], }>
+    vueOutline: CombinedVueInstance1<{ showContent: boolean, treeData: ITreeItem[], }>
+    vueLog: CombinedVueInstance1<{ showContent: boolean, content: string }>
     initVueData() {
         this.vueDoc.pageTotal = this.pdfDoc.numPages;
         // this.vueOutline 
@@ -261,6 +299,13 @@ class PdfViewer {
             // console.log("[info]", logItems(outline, 0), ":[logItems(outline, 0)]")
             this.vueOutline.treeData = logItems(outline, 0)
         })
+    }
+    log(...args: any[]) {
+        this.vueLog.content += args.join(' ') + '<br/>'
+        if(this.vueLog.showContent){
+            var _content: HTMLElement = this.vueLog.$refs.content as HTMLElement
+            _content.scrollTo({ left: 0, top: _content.scrollHeight })
+        }
     }
     renderPage(num) {
         if (this.pageRendering) {
@@ -303,6 +348,7 @@ class PdfViewer {
         this.vueDoc.pageScale = val
         this.renderPage(this.vueDoc.pageNum);
     }
+    // pageWHScale1:IXY
     _renderPage(num: number) {
         this.vueDoc.pageNum = num
         this.pageRendering = true;
@@ -319,6 +365,10 @@ class PdfViewer {
             });
             // Wait for rendering to finish
             renderTask.promise.then(() => {
+                /* if(!this.pageWHScale1){
+                     var canvas:HTMLCanvasElement = this.vueDoc.$refs.canvas as HTMLCanvasElement
+                     this.pageWHScale1 = $(canvas).wh()
+                 } */
                 //render pending page
                 this.pageRendering = false;
                 if (this.pageNumPending !== null) {
