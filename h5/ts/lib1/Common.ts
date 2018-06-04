@@ -44,8 +44,8 @@ class CommonClass {
         var ts = Math.abs(ts1 - ts2)
         return Math.floor(ts / 1000 / 3600 / 24)
     }
-    /**终端判定*/
-    IsPC(): boolean {
+    /**终端判定 是台式机*/
+    IsDesktop (): boolean {
         var userAgentInfo = navigator.userAgent
         var Agents = ['Android', 'iPhone', 'SymbianOS', 'Windows Phone', 'iPad', 'iPod']
         var flag = true;

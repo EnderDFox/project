@@ -46,8 +46,8 @@ var CommonClass = /** @class */ (function () {
         var ts = Math.abs(ts1 - ts2);
         return Math.floor(ts / 1000 / 3600 / 24);
     };
-    /**终端判定*/
-    CommonClass.prototype.IsPC = function () {
+    /**终端判定 是台式机*/
+    CommonClass.prototype.IsDesktop = function () {
         var userAgentInfo = navigator.userAgent;
         var Agents = ['Android', 'iPhone', 'SymbianOS', 'Windows Phone', 'iPad', 'iPod'];
         var flag = true;

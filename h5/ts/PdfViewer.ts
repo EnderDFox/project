@@ -67,67 +67,72 @@ class PdfViewer {
             bind: (el: HTMLElement, binding: VNodeDirective) => {
                 var disX: number
                 var disY: number
-                var dragTarget = (binding.value && binding.value()) || el
-                var onStart = (x: number, y: number) => {
+                var dragTarget: HTMLElement
+                //for desktop
+                var onMouseStart = (e: MouseEvent) => {
+                    e.preventDefault()
+                    onDragStart(e.clientX, e.clientY)
+                }
+                var onMouseMove = (e: MouseEvent) => {
+                    e.preventDefault()
+                    onDragMove(e.clientX, e.clientY)
+                }
+                var onTouchStart = (e: TouchEvent) => {
+                    if (e.touches.length == 1) {
+                        onDragStart(e.touches[0].clientX, e.touches[0].clientY)
+                    } else {
+                        onCancel()
+                    }
+                }
+                var onTouchMove = (e: TouchEvent) => {
+                    if (e.touches.length == 1) {
+                        onDragMove(e.touches[0].clientX, e.touches[0].clientY)
+                    } else {
+                        onCancel()
+                    }
+                }
+                //for mobile
+                var onDragStart = (x: number, y: number) => {
+                    dragTarget = (binding.value && binding.value()) || el   //必须在start时再获取,bind时获取到的是vue修改之前的模板元素
                     //鼠标按下，计算当前元素距离可视区的距离
                     disX = x - dragTarget.offsetLeft;
                     disY = y - dragTarget.offsetTop;
-                    if (Common.IsPC()) {
-                        document.onmousemove = (e: MouseEvent) => {
-                            e.preventDefault()
-                            onMove(e.clientX, e.clientY)
-                        }
-                        document.onmouseup = onEnd
+                    if (Common.IsDesktop()) {
+                        document.addEventListener('mousemove', onMouseMove)
+                        document.addEventListener('mouseup', onEnd)
                     } else {
-                        document.ontouchmove = (e: TouchEvent) => {
-                            // e.preventDefault()
-                            if (e.touches.length == 1) {
-                                onMove(e.touches[0].clientX, e.touches[0].clientY)
-                            } else {
-                                onCancel()
-                            }
-                        }
-                        document.ontouchend = onEnd
+                        document.addEventListener('touchmove', onTouchMove)
+                        document.addEventListener('touchend', onEnd)
                     }
                 };
-                var onMove = (x: number, y: number) => {
-                    //移动当前元素  
+                var onDragMove = (x: number, y: number) => {
                     dragTarget.style.left = x - disX + 'px';
                     dragTarget.style.top = y - disY + 'px';
-                    //将此时的位置传出去
-                    // binding.value({ x: e.pageX, y: e.pageY })
                 };
                 var onCancel = (e: Event = null) => {
-                    if (Common.IsPC()) {
-                        document.onmousemove = null;
-                        document.onmouseup = null;
+                    if (Common.IsDesktop()) {
+                        document.removeEventListener('mousemove', onMouseMove)
+                        document.removeEventListener('mouseup', onEnd)
                     } else {
-                        document.ontouchmove = null;
-                        document.ontouchend = null;
-
+                        document.removeEventListener('touchmove', onTouchMove)
+                        document.removeEventListener('touchend', onEnd)
                     }
                 }
                 var onEnd = (e: Event = null) => {
-                    // e.preventDefault()
                     onCancel(e)
                 }
-                if (Common.IsPC()) {
-                    el.onmousedown = (e: MouseEvent) => {
-                        e.preventDefault()
-                        onStart(e.clientX, e.clientY)
-                    }
+                if (Common.IsDesktop()) {
+                    el.addEventListener('mousedown', onMouseStart)
                 } else {
-                    el.ontouchstart = (e: TouchEvent) => {
-                        e.preventDefault()
-                        if (e.touches.length == 1) {
-                            onStart(e.touches[0].clientX, e.touches[0].clientY)
-                        } else {
-                            onCancel()
-                        }
-                    }
+                    el.addEventListener('touchstart', onTouchStart)
                 }
             }
         });
+        Vue.directive('touchTwo', {
+            bind: (el: HTMLElement, binding: VNodeDirective) => {
+
+            }
+        })
         //#
         this.vueDoc = new Vue({
             el: '.doc',
@@ -147,17 +152,16 @@ class PdfViewer {
             }
         })
         this.vueOutline = new Vue({
-            el: '.outline',
             data: {
                 showOutline: true,
                 treeData: [],
             },
             methods: {
-                getDragTarget: () => {
-                    return this.vueOutline.$el
+                getDragTarget: function (this: Vue) {
+                    return this.$el
                 }
             }
-        })
+        }).$mount('#outline')
 
     }
     vueDoc: CombinedVueInstance1<{ pageNum: number, pageTotal: number, pageScale: number, }>

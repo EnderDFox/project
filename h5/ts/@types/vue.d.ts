@@ -185,7 +185,7 @@ type Constructor = {
 declare type Component<Data=DefaultData<Vue>, Methods=DefaultMethods<Vue>, Computed=DefaultComputed, Props=DefaultProps> =
   | typeof Vue
   | FunctionalComponentOptions<Props>
-  | ThisTypedComponentOptionsWithArrayProps<Vue, Data, Methods, Computed, keyof Props>
+  // | ThisTypedComponentOptionsWithArrayProps<Vue, Data, Methods, Computed, keyof Props>
   | ThisTypedComponentOptionsWithRecordProps<Vue, Data, Methods, Computed, Props>;
 
 interface EsModuleComponent {

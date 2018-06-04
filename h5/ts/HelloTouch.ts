@@ -25,7 +25,7 @@ class HelloTouch {
             // this.log("[info]onStart:", p0.x, p0.y, p1.x, p1.y)
             // this.log("[info]", "onStart")
             // this.pList[0].xy(x, y)
-            if (Common.IsPC()) {
+            if (Common.IsDesktop ()) {
                 document.onmousemove = (e: MouseEvent) => {
                     e.preventDefault()
                     // onMove(e.clientX, e.clientY)
@@ -79,7 +79,7 @@ class HelloTouch {
         };
         var onCancel = (e: Event = null) => {
             // this.log("onCancel")
-            if (Common.IsPC()) {
+            if (Common.IsDesktop ()) {
                 document.onmousemove = null;
                 document.onmouseup = null;
             } else {
@@ -91,8 +91,8 @@ class HelloTouch {
             // e.preventDefault()
             onCancel(e)
         }
-        this.log("[info]", Common.IsPC(), ":[Common.IsPC()]")
-        if (Common.IsPC()) {
+        this.log("[info]", Common.IsDesktop (), ":[Common.IsPC()]")
+        if (Common.IsDesktop ()) {
             el.onmousedown = (e: MouseEvent) => {
                 e.preventDefault()
                 this.log("[info]", e)

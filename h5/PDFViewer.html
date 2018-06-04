@@ -42,7 +42,7 @@
     .outline {
       position: absolute;
       top: 30px;
-      left: 4px;
+      left: 14px;
       border: 1px solid #313131;
       background-color: rgba(255, 255, 255, 0.82);
       max-height: 90%;
@@ -124,13 +124,12 @@
         <span>{{pageScale}}</span>
       </span>
       <button @click="onZoomIn">+</button>
-      <!-- <button class="btn_drag" v-drag="getDragTarget">Drag</button> -->
     </div>
     <!-- canvas -->
     <canvas ref='canvas' v-drag @mouseWheel="onMouseWheel($event)">Your canvas is not supported</canvas>
   </section>
   <!-- outline -->
-  <section class="outline">
+  <section class="outline" id="outline">
     <div class="buttonBar" v-drag="getDragTarget">
       <span class="section_name">Outline:</span>
       <button @click="showOutline=!showOutline">Toggle</button>
