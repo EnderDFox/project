@@ -10,7 +10,7 @@ import * as process from 'process';
  * - 安装protobufjs:  cnpm i protobufjs -g
  * - 引入 protogbuf.js 来源: (C:/Users/hubin/AppData/Roaming/npm/node_modules/protobufjs/dist/minimal/protobuf.js) 
  * - 工程加入 protobuf.d.ts 来源: (C:/Users/hubin/AppData/Roaming/npm/node_modules/protobufjs/index.d.ts) 
- * - 修改 protobuf.d.ts 的 `export interface Long {` 去掉 `export`
+ * - 找到 protobuf.d.ts 的 `export interface Long {...}` 复制到工程内一个合适的.d.ts中 (注意要去掉 `export`)
  * - 引入 本工具生成的 .js和 .d.ts
  * # e.g.
  * ```TypeScript
@@ -111,8 +111,8 @@ if (argv.help || (!argv.proto || !argv.js || !argv.tsd)) {
     //
     inst.generatePbJs();
     inst.generatePbTsd();
-    // inst.modifyJs();
-    // inst.modifyTs();
+    inst.modifyJs();
+    inst.modifyTs();
     console.log("Complete!");
 }
 process.exit(1);

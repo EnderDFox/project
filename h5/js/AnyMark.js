@@ -18,16 +18,17 @@ var PdfViewer = /** @class */ (function () {
         // Loaded via <script> tag, create shortcut to access PDF.js exports.
         this.pdfjsLib = window['pdfjs-dist/build/pdf'];
         // The workerSrc property shall be specified.
-        this.pdfjsLib.GlobalWorkerOptions.workerSrc = 'js/pdfjs/pdf.worker.js';
+        this.pdfjsLib.GlobalWorkerOptions.workerSrc = 'js/lib3/pdfjs/pdf.worker.js';
         //
         this.initVue();
         /**
          * Asynchronously downloads PDF.
          */
         Vue.nextTick(function () {
-            _this.canvas = _this.vueDoc.$refs.canvas;
+            _this.canvasView = _this.vueDoc.$refs.canvasView;
             _this.canvasMark = _this.vueDoc.$refs.canvasMark;
-            _this.ctx = _this.canvas.getContext('2d');
+            $([_this.canvasView, _this.canvasMark]).hide();
+            _this.ctx = _this.canvasView.getContext('2d');
             _this.pdfjsLib.getDocument(pdfPath).then(function (pdfDoc_) {
                 _this.pdfDoc = pdfDoc_;
                 _this.initVueData();
@@ -260,10 +261,10 @@ var PdfViewer = /** @class */ (function () {
                             }
                         },
                         touchTwoCallback: function (kind, gapW, gapH) {
-                            $(_this.canvas).xy($(_this.canvasMark).xy());
-                            var _w = $(_this.canvas).w() + gapW;
+                            $(_this.canvasView).xy($(_this.canvasMark).xy());
+                            var _w = $(_this.canvasView).w() + gapW;
                             _w = Math.max(_w, 100);
-                            _this.renderScale(_this.vueDoc.pageScale * (_w / $(_this.canvas).w()));
+                            _this.renderScale(_this.vueDoc.pageScale * (_w / $(_this.canvasView).w()));
                         },
                     };
                 },
@@ -379,8 +380,8 @@ var PdfViewer = /** @class */ (function () {
             return;
         }
         this.vueDoc.pageScale = val;
-        $(this.canvas).wh(this.pageWHScale1.x * val, this.pageWHScale1.y * val);
-        $(this.canvasMark).wh($(this.canvas).wh());
+        $(this.canvasView).wh(this.pageWHScale1.x * val, this.pageWHScale1.y * val);
+        $(this.canvasMark).wh($(this.canvasView).wh());
         this.delayRenderPage(this.vueDoc.pageNum);
     };
     PdfViewer.prototype.delayRenderPage = function (num) {
@@ -399,8 +400,8 @@ var PdfViewer = /** @class */ (function () {
         this.pdfDoc.getPage(num).then(function (page) {
             var viewport = page.getViewport(_this.vueDoc.pageScale);
             //
-            _this.canvas.height = viewport.height;
-            _this.canvas.width = viewport.width;
+            _this.canvasView.height = viewport.height;
+            _this.canvasView.width = viewport.width;
             // Render PDF page into canvas context
             var renderTask = page.render({
                 canvasContext: _this.ctx,
@@ -424,10 +425,11 @@ var PdfViewer = /** @class */ (function () {
             //only run when first
             return;
         }
-        this.pageWHScale1 = $(this.canvas).wh();
-        $(this.canvasMark).wh($(this.canvas).wh());
-        $(this.canvasMark).xy($(this.canvas).xy());
+        $([this.canvasView, this.canvasMark]).show();
         //
+        this.pageWHScale1 = $(this.canvasView).wh();
+        $(this.canvasMark).wh($(this.canvasView).wh());
+        $(this.canvasMark).xy($(this.canvasView).xy());
     };
     PdfViewer.prototype.countWebglXY = function (clientXY) {
         console.log("[info]", $(this.canvasMark).y(), ":[$(this.canvasMark).y()]");
@@ -438,4 +440,4 @@ var PdfViewer = /** @class */ (function () {
     };
     return PdfViewer;
 }());
-//# sourceMappingURL=PdfViewer.js.map
+//# sourceMappingURL=AnyMark.js.map

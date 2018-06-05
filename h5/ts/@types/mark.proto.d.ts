@@ -208,127 +208,127 @@ declare module pb {
             public toJSON(): { [k: string]: any };
         }
 
-        /** Properties of a MarkBody. */
-        interface IMarkBody {
+        /** Properties of a MarkDoc. */
+        interface IMarkDoc {
 
-            /** MarkBody mid */
+            /** MarkDoc mid */
             mid?: (number|Long|null);
 
-            /** MarkBody name */
+            /** MarkDoc name */
             name?: (string|null);
 
-            /** MarkBody kind */
+            /** MarkDoc kind */
             kind?: (number|null);
 
-            /** MarkBody refName */
+            /** MarkDoc refName */
             refName?: (string|null);
 
-            /** MarkBody refPath */
+            /** MarkDoc refPath */
             refPath?: (string|null);
 
-            /** MarkBody lines */
+            /** MarkDoc lines */
             lines?: (pb.mark.ILine[]|null);
 
-            /** MarkBody bookmarks */
+            /** MarkDoc bookmarks */
             bookmarks?: (pb.mark.IBookmark[]|null);
         }
 
-        /** Represents a MarkBody. */
-        class MarkBody implements IMarkBody {
+        /** Represents a MarkDoc. */
+        class MarkDoc implements IMarkDoc {
 
             /**
-             * Constructs a new MarkBody.
+             * Constructs a new MarkDoc.
              * @param [properties] Properties to set
              */
-            constructor(properties?: pb.mark.IMarkBody);
+            constructor(properties?: pb.mark.IMarkDoc);
 
-            /** MarkBody mid. */
+            /** MarkDoc mid. */
             public mid: (number|Long);
 
-            /** MarkBody name. */
+            /** MarkDoc name. */
             public name: string;
 
-            /** MarkBody kind. */
+            /** MarkDoc kind. */
             public kind: number;
 
-            /** MarkBody refName. */
+            /** MarkDoc refName. */
             public refName: string;
 
-            /** MarkBody refPath. */
+            /** MarkDoc refPath. */
             public refPath: string;
 
-            /** MarkBody lines. */
+            /** MarkDoc lines. */
             public lines: pb.mark.ILine[];
 
-            /** MarkBody bookmarks. */
+            /** MarkDoc bookmarks. */
             public bookmarks: pb.mark.IBookmark[];
 
             /**
-             * Creates a new MarkBody instance using the specified properties.
+             * Creates a new MarkDoc instance using the specified properties.
              * @param [properties] Properties to set
-             * @returns MarkBody instance
+             * @returns MarkDoc instance
              */
-            public static create(properties?: pb.mark.IMarkBody): pb.mark.MarkBody;
+            public static create(properties?: pb.mark.IMarkDoc): pb.mark.MarkDoc;
 
             /**
-             * Encodes the specified MarkBody message. Does not implicitly {@link pb.mark.MarkBody.verify|verify} messages.
-             * @param message MarkBody message or plain object to encode
+             * Encodes the specified MarkDoc message. Does not implicitly {@link pb.mark.MarkDoc.verify|verify} messages.
+             * @param message MarkDoc message or plain object to encode
              * @param [writer] Writer to encode to
              * @returns Writer
              */
-            public static encode(message: pb.mark.IMarkBody, writer?: $protobuf.Writer): $protobuf.Writer;
+            public static encode(message: pb.mark.IMarkDoc, writer?: $protobuf.Writer): $protobuf.Writer;
 
             /**
-             * Encodes the specified MarkBody message, length delimited. Does not implicitly {@link pb.mark.MarkBody.verify|verify} messages.
-             * @param message MarkBody message or plain object to encode
+             * Encodes the specified MarkDoc message, length delimited. Does not implicitly {@link pb.mark.MarkDoc.verify|verify} messages.
+             * @param message MarkDoc message or plain object to encode
              * @param [writer] Writer to encode to
              * @returns Writer
              */
-            public static encodeDelimited(message: pb.mark.IMarkBody, writer?: $protobuf.Writer): $protobuf.Writer;
+            public static encodeDelimited(message: pb.mark.IMarkDoc, writer?: $protobuf.Writer): $protobuf.Writer;
 
             /**
-             * Decodes a MarkBody message from the specified reader or buffer.
+             * Decodes a MarkDoc message from the specified reader or buffer.
              * @param reader Reader or buffer to decode from
              * @param [length] Message length if known beforehand
-             * @returns MarkBody
+             * @returns MarkDoc
              * @throws {Error} If the payload is not a reader or valid buffer
              * @throws {$protobuf.util.ProtocolError} If required fields are missing
              */
-            public static decode(reader: ($protobuf.Reader|Uint8Array), length?: number): pb.mark.MarkBody;
+            public static decode(reader: ($protobuf.Reader|Uint8Array), length?: number): pb.mark.MarkDoc;
 
             /**
-             * Decodes a MarkBody message from the specified reader or buffer, length delimited.
+             * Decodes a MarkDoc message from the specified reader or buffer, length delimited.
              * @param reader Reader or buffer to decode from
-             * @returns MarkBody
+             * @returns MarkDoc
              * @throws {Error} If the payload is not a reader or valid buffer
              * @throws {$protobuf.util.ProtocolError} If required fields are missing
              */
-            public static decodeDelimited(reader: ($protobuf.Reader|Uint8Array)): pb.mark.MarkBody;
+            public static decodeDelimited(reader: ($protobuf.Reader|Uint8Array)): pb.mark.MarkDoc;
 
             /**
-             * Verifies a MarkBody message.
+             * Verifies a MarkDoc message.
              * @param message Plain object to verify
              * @returns `null` if valid, otherwise the reason why it is not
              */
             public static verify(message: { [k: string]: any }): (string|null);
 
             /**
-             * Creates a MarkBody message from a plain object. Also converts values to their respective internal types.
+             * Creates a MarkDoc message from a plain object. Also converts values to their respective internal types.
              * @param object Plain object
-             * @returns MarkBody
+             * @returns MarkDoc
              */
-            public static fromObject(object: { [k: string]: any }): pb.mark.MarkBody;
+            public static fromObject(object: { [k: string]: any }): pb.mark.MarkDoc;
 
             /**
-             * Creates a plain object from a MarkBody message. Also converts values to other types if specified.
-             * @param message MarkBody
+             * Creates a plain object from a MarkDoc message. Also converts values to other types if specified.
+             * @param message MarkDoc
              * @param [options] Conversion options
              * @returns Plain object
              */
-            public static toObject(message: pb.mark.MarkBody, options?: $protobuf.IConversionOptions): { [k: string]: any };
+            public static toObject(message: pb.mark.MarkDoc, options?: $protobuf.IConversionOptions): { [k: string]: any };
 
             /**
-             * Converts this MarkBody to JSON.
+             * Converts this MarkDoc to JSON.
              * @returns JSON object
              */
             public toJSON(): { [k: string]: any };
@@ -349,8 +349,8 @@ declare module pb {
             /** Bookmark page */
             page?: (number|null);
 
-            /** Bookmark scorllXY */
-            scorllXY?: (pb.mark.IXY|null);
+            /** Bookmark path */
+            path?: (string|null);
         }
 
         /** Represents a Bookmark. */
@@ -374,8 +374,8 @@ declare module pb {
             /** Bookmark page. */
             public page: number;
 
-            /** Bookmark scorllXY. */
-            public scorllXY?: (pb.mark.IXY|null);
+            /** Bookmark path. */
+            public path: string;
 
             /**
              * Creates a new Bookmark instance using the specified properties.

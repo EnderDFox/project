@@ -19,7 +19,7 @@ interface ITouchOption {
 }
 class PdfViewer {
     mark: MarkWebgl
-    canvas: HTMLCanvasElement
+    canvasView: HTMLCanvasElement
     ctx: CanvasRenderingContext2D
     canvasMark: HTMLCanvasElement
 
@@ -36,16 +36,17 @@ class PdfViewer {
         // Loaded via <script> tag, create shortcut to access PDF.js exports.
         this.pdfjsLib = window['pdfjs-dist/build/pdf'];
         // The workerSrc property shall be specified.
-        this.pdfjsLib.GlobalWorkerOptions.workerSrc = 'js/pdfjs/pdf.worker.js';
+        this.pdfjsLib.GlobalWorkerOptions.workerSrc = 'js/lib3/pdfjs/pdf.worker.js';
         //
         this.initVue()
         /**
          * Asynchronously downloads PDF.
          */
         Vue.nextTick(() => {
-            this.canvas = this.vueDoc.$refs.canvas as HTMLCanvasElement
+            this.canvasView = this.vueDoc.$refs.canvasView as HTMLCanvasElement
             this.canvasMark = this.vueDoc.$refs.canvasMark as HTMLCanvasElement
-            this.ctx = this.canvas.getContext('2d')
+            $([this.canvasView,this.canvasMark]).hide()
+            this.ctx = this.canvasView.getContext('2d')
             this.pdfjsLib.getDocument(pdfPath).then((pdfDoc_: PDFDocumentProxy) => {
                 this.pdfDoc = pdfDoc_;
                 this.initVueData()
@@ -270,10 +271,10 @@ class PdfViewer {
                             }
                         },
                         touchTwoCallback: (kind: TouchKind, gapW: number, gapH: number) => {
-                            $(this.canvas).xy($(this.canvasMark).xy())
-                            var _w: number = $(this.canvas).w() + gapW
+                            $(this.canvasView).xy($(this.canvasMark).xy())
+                            var _w: number = $(this.canvasView).w() + gapW
                             _w = Math.max(_w, 100)
-                            this.renderScale(this.vueDoc.pageScale * (_w / $(this.canvas).w()))
+                            this.renderScale(this.vueDoc.pageScale * (_w / $(this.canvasView).w()))
                         },
                     }
                 },
@@ -386,8 +387,8 @@ class PdfViewer {
             return
         }
         this.vueDoc.pageScale = val
-        $(this.canvas).wh(this.pageWHScale1.x * val, this.pageWHScale1.y * val)
-        $(this.canvasMark).wh($(this.canvas).wh())
+        $(this.canvasView).wh(this.pageWHScale1.x * val, this.pageWHScale1.y * val)
+        $(this.canvasMark).wh($(this.canvasView).wh())
         this.delayRenderPage(this.vueDoc.pageNum);
     }
     delayRenderPageNum: number
@@ -409,8 +410,8 @@ class PdfViewer {
         this.pdfDoc.getPage(num).then((page: PDFPageProxy) => {
             var viewport: PDFPageViewport = page.getViewport(this.vueDoc.pageScale);
             //
-            this.canvas.height = viewport.height;
-            this.canvas.width = viewport.width;
+            this.canvasView.height = viewport.height;
+            this.canvasView.width = viewport.width;
             // Render PDF page into canvas context
             var renderTask = page.render({
                 canvasContext: this.ctx,
@@ -434,11 +435,11 @@ class PdfViewer {
             //only run when first
             return
         }
-        this.pageWHScale1 = $(this.canvas).wh()
-        $(this.canvasMark).wh($(this.canvas).wh())
-        $(this.canvasMark).xy($(this.canvas).xy())
+        $([this.canvasView,this.canvasMark]).show()
         //
-
+        this.pageWHScale1 = $(this.canvasView).wh()
+        $(this.canvasMark).wh($(this.canvasView).wh())
+        $(this.canvasMark).xy($(this.canvasView).xy())
     }
     countWebglXY(clientXY: IXY): IXY {
         console.log("[info]", $(this.canvasMark).y(), ":[$(this.canvasMark).y()]")

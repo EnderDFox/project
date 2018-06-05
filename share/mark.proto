@@ -23,7 +23,7 @@ message XY{
     optional float y = 2; 
 }
 
-message MarkBody{
+message MarkDoc{
     optional uint64 mid = 1;//唯一id
     optional string name = 2;//本标记的name
     optional uint32 kind = 3;//1:pdf 2:url
@@ -38,7 +38,7 @@ message Bookmark{
     optional string title = 2;
     optional string content = 3;
     optional uint32 page = 4;//仅限于 pdf
-    optional XY scorllXY = 5;//仅限于 url 记录了页面滚动的位置
+    optional string path = 5;//路径 仅限于 url 
 }
 
 // 线型标记

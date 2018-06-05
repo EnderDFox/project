@@ -11,7 +11,7 @@
 
   <title>PDF</title>
   <!--  -->
-  <link href="lib3/bootstrap-3.3.7-dist/css/bootstrap.css" rel="stylesheet">
+  <link href="js/lib3/bootstrap-3.3.7-dist/css/bootstrap.css" rel="stylesheet">
   <style type="text/css">
     body {
       overflow: hidden;
@@ -99,25 +99,25 @@
       margin-left: 0px;
     }
   </style>
-  <!-- lib3 -->
-  <script type="text/javascript" src="lib3/path.js"></script>
-  <script type="text/javascript" src="lib3/jquery-3.2.1.min.js"></script>
-  <script type="text/javascript" src="lib3/bootstrap-3.3.7-dist/js/bootstrap.js"></script>
-  <script type="text/javascript" src="lib3/vue.js"></script>
-  <!-- lib3 -->
-  <script type="text/javascript" src="js/pdfjs/pdf.js"></script>
-  <script type="text/javascript" src="lib3/protobuf.js"></script>
+  <!-- js/lib3 -->
+  <script type="text/javascript" src="js/lib3/path.js"></script>
+  <script type="text/javascript" src="js/lib3/jquery-3.2.1.min.js"></script>
+  <script type="text/javascript" src="js/lib3/bootstrap-3.3.7-dist/js/bootstrap.js"></script>
+  <script type="text/javascript" src="js/lib3/vue.js"></script>
+  <!-- js/lib3 -->
+  <script type="text/javascript" src="js/lib3/pdfjs/pdf.js"></script>
+  <script type="text/javascript" src="js/lib3/protobuf.js"></script>
   <!-- lib1 -->
   <script type="text/javascript" src="js/lib1/Common.js"></script>
   <script type="text/javascript" src="js/lib1/JQueryExtend.js"></script>
   <!-- webgl lib -->
-  <script src="../lib3/webgl.lib/webgl-utils.js"></script>
-  <script src="../lib3/webgl.lib/webgl-debug.js"></script>
-  <script src="../lib3/webgl.lib/cuon-utils.js"></script>
+  <script src="../js/lib3/webgl.lib/webgl-utils.js"></script>
+  <script src="../js/lib3/webgl.lib/webgl-debug.js"></script>
+  <script src="../js/lib3/webgl.lib/cuon-utils.js"></script>
   <!-- my js -->
   <script type="text/javascript" src="js/lib1/mark.proto.js"></script>
   <script type="text/javascript" src="js/MarkWebgl.js"></script>
-  <script type="text/javascript" src="js/PdfViewer.js"></script>
+  <script type="text/javascript" src="js/AnyMark.js"></script>
   <script type="text/javascript">
     window.onload = function () {
       new PdfViewer().init()
@@ -147,7 +147,7 @@
       <button @click="onZoomIn">+</button>
     </div>
     <!-- canvas -->
-    <canvas ref='canvas'>Canvas is not supported</canvas>
+    <canvas ref='canvasView'>Canvas is not supported</canvas>
     <canvas ref='canvasMark' v-drag="getTouchOption" @mouseWheel="onMouseWheel($event)"></canvas>
   </section>
   <!-- outline -->

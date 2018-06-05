@@ -465,30 +465,30 @@ $root.pb = (function() {
             return XY;
         })();
 
-        mark.MarkBody = (function() {
+        mark.MarkDoc = (function() {
 
             /**
-             * Properties of a MarkBody.
+             * Properties of a MarkDoc.
              * @memberof pb.mark
-             * @interface IMarkBody
-             * @property {number|Long|null} [mid] MarkBody mid
-             * @property {string|null} [name] MarkBody name
-             * @property {number|null} [kind] MarkBody kind
-             * @property {string|null} [refName] MarkBody refName
-             * @property {string|null} [refPath] MarkBody refPath
-             * @property {Array.<pb.mark.ILine>|null} [lines] MarkBody lines
-             * @property {Array.<pb.mark.IBookmark>|null} [bookmarks] MarkBody bookmarks
+             * @interface IMarkDoc
+             * @property {number|Long|null} [mid] MarkDoc mid
+             * @property {string|null} [name] MarkDoc name
+             * @property {number|null} [kind] MarkDoc kind
+             * @property {string|null} [refName] MarkDoc refName
+             * @property {string|null} [refPath] MarkDoc refPath
+             * @property {Array.<pb.mark.ILine>|null} [lines] MarkDoc lines
+             * @property {Array.<pb.mark.IBookmark>|null} [bookmarks] MarkDoc bookmarks
              */
 
             /**
-             * Constructs a new MarkBody.
+             * Constructs a new MarkDoc.
              * @memberof pb.mark
-             * @classdesc Represents a MarkBody.
-             * @implements IMarkBody
+             * @classdesc Represents a MarkDoc.
+             * @implements IMarkDoc
              * @constructor
-             * @param {pb.mark.IMarkBody=} [properties] Properties to set
+             * @param {pb.mark.IMarkDoc=} [properties] Properties to set
              */
-            function MarkBody(properties) {
+            function MarkDoc(properties) {
                 this.lines = [];
                 this.bookmarks = [];
                 if (properties)
@@ -498,83 +498,83 @@ $root.pb = (function() {
             }
 
             /**
-             * MarkBody mid.
+             * MarkDoc mid.
              * @member {number|Long} mid
-             * @memberof pb.mark.MarkBody
+             * @memberof pb.mark.MarkDoc
              * @instance
              */
-            MarkBody.prototype.mid = $util.Long ? $util.Long.fromBits(0,0,true) : 0;
+            MarkDoc.prototype.mid = $util.Long ? $util.Long.fromBits(0,0,true) : 0;
 
             /**
-             * MarkBody name.
+             * MarkDoc name.
              * @member {string} name
-             * @memberof pb.mark.MarkBody
+             * @memberof pb.mark.MarkDoc
              * @instance
              */
-            MarkBody.prototype.name = "";
+            MarkDoc.prototype.name = "";
 
             /**
-             * MarkBody kind.
+             * MarkDoc kind.
              * @member {number} kind
-             * @memberof pb.mark.MarkBody
+             * @memberof pb.mark.MarkDoc
              * @instance
              */
-            MarkBody.prototype.kind = 0;
+            MarkDoc.prototype.kind = 0;
 
             /**
-             * MarkBody refName.
+             * MarkDoc refName.
              * @member {string} refName
-             * @memberof pb.mark.MarkBody
+             * @memberof pb.mark.MarkDoc
              * @instance
              */
-            MarkBody.prototype.refName = "";
+            MarkDoc.prototype.refName = "";
 
             /**
-             * MarkBody refPath.
+             * MarkDoc refPath.
              * @member {string} refPath
-             * @memberof pb.mark.MarkBody
+             * @memberof pb.mark.MarkDoc
              * @instance
              */
-            MarkBody.prototype.refPath = "";
+            MarkDoc.prototype.refPath = "";
 
             /**
-             * MarkBody lines.
+             * MarkDoc lines.
              * @member {Array.<pb.mark.ILine>} lines
-             * @memberof pb.mark.MarkBody
+             * @memberof pb.mark.MarkDoc
              * @instance
              */
-            MarkBody.prototype.lines = $util.emptyArray;
+            MarkDoc.prototype.lines = $util.emptyArray;
 
             /**
-             * MarkBody bookmarks.
+             * MarkDoc bookmarks.
              * @member {Array.<pb.mark.IBookmark>} bookmarks
-             * @memberof pb.mark.MarkBody
+             * @memberof pb.mark.MarkDoc
              * @instance
              */
-            MarkBody.prototype.bookmarks = $util.emptyArray;
+            MarkDoc.prototype.bookmarks = $util.emptyArray;
 
             /**
-             * Creates a new MarkBody instance using the specified properties.
+             * Creates a new MarkDoc instance using the specified properties.
              * @function create
-             * @memberof pb.mark.MarkBody
+             * @memberof pb.mark.MarkDoc
              * @static
-             * @param {pb.mark.IMarkBody=} [properties] Properties to set
-             * @returns {pb.mark.MarkBody} MarkBody instance
+             * @param {pb.mark.IMarkDoc=} [properties] Properties to set
+             * @returns {pb.mark.MarkDoc} MarkDoc instance
              */
-            MarkBody.create = function create(properties) {
-                return new MarkBody(properties);
+            MarkDoc.create = function create(properties) {
+                return new MarkDoc(properties);
             };
 
             /**
-             * Encodes the specified MarkBody message. Does not implicitly {@link pb.mark.MarkBody.verify|verify} messages.
+             * Encodes the specified MarkDoc message. Does not implicitly {@link pb.mark.MarkDoc.verify|verify} messages.
              * @function encode
-             * @memberof pb.mark.MarkBody
+             * @memberof pb.mark.MarkDoc
              * @static
-             * @param {pb.mark.IMarkBody} message MarkBody message or plain object to encode
+             * @param {pb.mark.IMarkDoc} message MarkDoc message or plain object to encode
              * @param {$protobuf.Writer} [writer] Writer to encode to
              * @returns {$protobuf.Writer} Writer
              */
-            MarkBody.encode = function encode(message, writer) {
+            MarkDoc.encode = function encode(message, writer) {
                 if (!writer)
                     writer = $Writer.create();
                 if (message.mid != null && message.hasOwnProperty("mid"))
@@ -597,33 +597,33 @@ $root.pb = (function() {
             };
 
             /**
-             * Encodes the specified MarkBody message, length delimited. Does not implicitly {@link pb.mark.MarkBody.verify|verify} messages.
+             * Encodes the specified MarkDoc message, length delimited. Does not implicitly {@link pb.mark.MarkDoc.verify|verify} messages.
              * @function encodeDelimited
-             * @memberof pb.mark.MarkBody
+             * @memberof pb.mark.MarkDoc
              * @static
-             * @param {pb.mark.IMarkBody} message MarkBody message or plain object to encode
+             * @param {pb.mark.IMarkDoc} message MarkDoc message or plain object to encode
              * @param {$protobuf.Writer} [writer] Writer to encode to
              * @returns {$protobuf.Writer} Writer
              */
-            MarkBody.encodeDelimited = function encodeDelimited(message, writer) {
+            MarkDoc.encodeDelimited = function encodeDelimited(message, writer) {
                 return this.encode(message, writer).ldelim();
             };
 
             /**
-             * Decodes a MarkBody message from the specified reader or buffer.
+             * Decodes a MarkDoc message from the specified reader or buffer.
              * @function decode
-             * @memberof pb.mark.MarkBody
+             * @memberof pb.mark.MarkDoc
              * @static
              * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
              * @param {number} [length] Message length if known beforehand
-             * @returns {pb.mark.MarkBody} MarkBody
+             * @returns {pb.mark.MarkDoc} MarkDoc
              * @throws {Error} If the payload is not a reader or valid buffer
              * @throws {$protobuf.util.ProtocolError} If required fields are missing
              */
-            MarkBody.decode = function decode(reader, length) {
+            MarkDoc.decode = function decode(reader, length) {
                 if (!(reader instanceof $Reader))
                     reader = $Reader.create(reader);
-                var end = length === undefined ? reader.len : reader.pos + length, message = new $root.pb.mark.MarkBody();
+                var end = length === undefined ? reader.len : reader.pos + length, message = new $root.pb.mark.MarkDoc();
                 while (reader.pos < end) {
                     var tag = reader.uint32();
                     switch (tag >>> 3) {
@@ -661,30 +661,30 @@ $root.pb = (function() {
             };
 
             /**
-             * Decodes a MarkBody message from the specified reader or buffer, length delimited.
+             * Decodes a MarkDoc message from the specified reader or buffer, length delimited.
              * @function decodeDelimited
-             * @memberof pb.mark.MarkBody
+             * @memberof pb.mark.MarkDoc
              * @static
              * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
-             * @returns {pb.mark.MarkBody} MarkBody
+             * @returns {pb.mark.MarkDoc} MarkDoc
              * @throws {Error} If the payload is not a reader or valid buffer
              * @throws {$protobuf.util.ProtocolError} If required fields are missing
              */
-            MarkBody.decodeDelimited = function decodeDelimited(reader) {
+            MarkDoc.decodeDelimited = function decodeDelimited(reader) {
                 if (!(reader instanceof $Reader))
                     reader = new $Reader(reader);
                 return this.decode(reader, reader.uint32());
             };
 
             /**
-             * Verifies a MarkBody message.
+             * Verifies a MarkDoc message.
              * @function verify
-             * @memberof pb.mark.MarkBody
+             * @memberof pb.mark.MarkDoc
              * @static
              * @param {Object.<string,*>} message Plain object to verify
              * @returns {string|null} `null` if valid, otherwise the reason why it is not
              */
-            MarkBody.verify = function verify(message) {
+            MarkDoc.verify = function verify(message) {
                 if (typeof message !== "object" || message === null)
                     return "object expected";
                 if (message.mid != null && message.hasOwnProperty("mid"))
@@ -724,17 +724,17 @@ $root.pb = (function() {
             };
 
             /**
-             * Creates a MarkBody message from a plain object. Also converts values to their respective internal types.
+             * Creates a MarkDoc message from a plain object. Also converts values to their respective internal types.
              * @function fromObject
-             * @memberof pb.mark.MarkBody
+             * @memberof pb.mark.MarkDoc
              * @static
              * @param {Object.<string,*>} object Plain object
-             * @returns {pb.mark.MarkBody} MarkBody
+             * @returns {pb.mark.MarkDoc} MarkDoc
              */
-            MarkBody.fromObject = function fromObject(object) {
-                if (object instanceof $root.pb.mark.MarkBody)
+            MarkDoc.fromObject = function fromObject(object) {
+                if (object instanceof $root.pb.mark.MarkDoc)
                     return object;
-                var message = new $root.pb.mark.MarkBody();
+                var message = new $root.pb.mark.MarkDoc();
                 if (object.mid != null)
                     if ($util.Long)
                         (message.mid = $util.Long.fromValue(object.mid)).unsigned = true;
@@ -754,21 +754,21 @@ $root.pb = (function() {
                     message.refPath = String(object.refPath);
                 if (object.lines) {
                     if (!Array.isArray(object.lines))
-                        throw TypeError(".pb.mark.MarkBody.lines: array expected");
+                        throw TypeError(".pb.mark.MarkDoc.lines: array expected");
                     message.lines = [];
                     for (var i = 0; i < object.lines.length; ++i) {
                         if (typeof object.lines[i] !== "object")
-                            throw TypeError(".pb.mark.MarkBody.lines: object expected");
+                            throw TypeError(".pb.mark.MarkDoc.lines: object expected");
                         message.lines[i] = $root.pb.mark.Line.fromObject(object.lines[i]);
                     }
                 }
                 if (object.bookmarks) {
                     if (!Array.isArray(object.bookmarks))
-                        throw TypeError(".pb.mark.MarkBody.bookmarks: array expected");
+                        throw TypeError(".pb.mark.MarkDoc.bookmarks: array expected");
                     message.bookmarks = [];
                     for (var i = 0; i < object.bookmarks.length; ++i) {
                         if (typeof object.bookmarks[i] !== "object")
-                            throw TypeError(".pb.mark.MarkBody.bookmarks: object expected");
+                            throw TypeError(".pb.mark.MarkDoc.bookmarks: object expected");
                         message.bookmarks[i] = $root.pb.mark.Bookmark.fromObject(object.bookmarks[i]);
                     }
                 }
@@ -776,15 +776,15 @@ $root.pb = (function() {
             };
 
             /**
-             * Creates a plain object from a MarkBody message. Also converts values to other types if specified.
+             * Creates a plain object from a MarkDoc message. Also converts values to other types if specified.
              * @function toObject
-             * @memberof pb.mark.MarkBody
+             * @memberof pb.mark.MarkDoc
              * @static
-             * @param {pb.mark.MarkBody} message MarkBody
+             * @param {pb.mark.MarkDoc} message MarkDoc
              * @param {$protobuf.IConversionOptions} [options] Conversion options
              * @returns {Object.<string,*>} Plain object
              */
-            MarkBody.toObject = function toObject(message, options) {
+            MarkDoc.toObject = function toObject(message, options) {
                 if (!options)
                     options = {};
                 var object = {};
@@ -830,17 +830,17 @@ $root.pb = (function() {
             };
 
             /**
-             * Converts this MarkBody to JSON.
+             * Converts this MarkDoc to JSON.
              * @function toJSON
-             * @memberof pb.mark.MarkBody
+             * @memberof pb.mark.MarkDoc
              * @instance
              * @returns {Object.<string,*>} JSON object
              */
-            MarkBody.prototype.toJSON = function toJSON() {
+            MarkDoc.prototype.toJSON = function toJSON() {
                 return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
             };
 
-            return MarkBody;
+            return MarkDoc;
         })();
 
         mark.Bookmark = (function() {
@@ -853,7 +853,7 @@ $root.pb = (function() {
              * @property {string|null} [title] Bookmark title
              * @property {string|null} [content] Bookmark content
              * @property {number|null} [page] Bookmark page
-             * @property {pb.mark.IXY|null} [scorllXY] Bookmark scorllXY
+             * @property {string|null} [path] Bookmark path
              */
 
             /**
@@ -904,12 +904,12 @@ $root.pb = (function() {
             Bookmark.prototype.page = 0;
 
             /**
-             * Bookmark scorllXY.
-             * @member {pb.mark.IXY|null|undefined} scorllXY
+             * Bookmark path.
+             * @member {string} path
              * @memberof pb.mark.Bookmark
              * @instance
              */
-            Bookmark.prototype.scorllXY = null;
+            Bookmark.prototype.path = "";
 
             /**
              * Creates a new Bookmark instance using the specified properties.
@@ -943,8 +943,8 @@ $root.pb = (function() {
                     writer.uint32(/* id 3, wireType 2 =*/26).string(message.content);
                 if (message.page != null && message.hasOwnProperty("page"))
                     writer.uint32(/* id 4, wireType 0 =*/32).uint32(message.page);
-                if (message.scorllXY != null && message.hasOwnProperty("scorllXY"))
-                    $root.pb.mark.XY.encode(message.scorllXY, writer.uint32(/* id 5, wireType 2 =*/42).fork()).ldelim();
+                if (message.path != null && message.hasOwnProperty("path"))
+                    writer.uint32(/* id 5, wireType 2 =*/42).string(message.path);
                 return writer;
             };
 
@@ -992,7 +992,7 @@ $root.pb = (function() {
                         message.page = reader.uint32();
                         break;
                     case 5:
-                        message.scorllXY = $root.pb.mark.XY.decode(reader, reader.uint32());
+                        message.path = reader.string();
                         break;
                     default:
                         reader.skipType(tag & 7);
@@ -1041,11 +1041,9 @@ $root.pb = (function() {
                 if (message.page != null && message.hasOwnProperty("page"))
                     if (!$util.isInteger(message.page))
                         return "page: integer expected";
-                if (message.scorllXY != null && message.hasOwnProperty("scorllXY")) {
-                    var error = $root.pb.mark.XY.verify(message.scorllXY);
-                    if (error)
-                        return "scorllXY." + error;
-                }
+                if (message.path != null && message.hasOwnProperty("path"))
+                    if (!$util.isString(message.path))
+                        return "path: string expected";
                 return null;
             };
 
@@ -1069,11 +1067,8 @@ $root.pb = (function() {
                     message.content = String(object.content);
                 if (object.page != null)
                     message.page = object.page >>> 0;
-                if (object.scorllXY != null) {
-                    if (typeof object.scorllXY !== "object")
-                        throw TypeError(".pb.mark.Bookmark.scorllXY: object expected");
-                    message.scorllXY = $root.pb.mark.XY.fromObject(object.scorllXY);
-                }
+                if (object.path != null)
+                    message.path = String(object.path);
                 return message;
             };
 
@@ -1095,7 +1090,7 @@ $root.pb = (function() {
                     object.title = "";
                     object.content = "";
                     object.page = 0;
-                    object.scorllXY = null;
+                    object.path = "";
                 }
                 if (message.depth != null && message.hasOwnProperty("depth"))
                     object.depth = message.depth;
@@ -1105,8 +1100,8 @@ $root.pb = (function() {
                     object.content = message.content;
                 if (message.page != null && message.hasOwnProperty("page"))
                     object.page = message.page;
-                if (message.scorllXY != null && message.hasOwnProperty("scorllXY"))
-                    object.scorllXY = $root.pb.mark.XY.toObject(message.scorllXY, options);
+                if (message.path != null && message.hasOwnProperty("path"))
+                    object.path = message.path;
                 return object;
             };
 

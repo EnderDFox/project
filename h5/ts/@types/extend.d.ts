@@ -56,4 +56,17 @@ interface PDFDocumentProxy {
     getPageIndex(dest: any): PDFPromise<number>
 }
 
+//------protobufjs
+interface Long {
+
+    /** Low bits */
+    low: number;
+
+    /** High bits */
+    high: number;
+
+    /** Whether unsigned or not */
+    unsigned: boolean;
+}
+
 
