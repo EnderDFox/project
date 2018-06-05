@@ -14,36 +14,41 @@ enum cmd{
     //
 }
 message Login {
-    required string account = 1;
-    required string password = 2;
+    required string Account = 1;
+    required string Password = 2;
 }
 
 message XY{
-    optional float x = 1; 
-    optional float y = 2; 
+    optional float X = 1; 
+    optional float Y = 2; 
+}
+
+message MarkDocList{
+    repeated MarkDoc MarkDocList = 1;
 }
 
 message MarkDoc{
-    optional uint64 mid = 1;//唯一id
-    optional string name = 2;//本标记的name
-    optional uint32 kind = 3;//1:pdf 2:url
-    optional string refName = 4;//位置 pdf:pdf名 2:url标题
-    optional string refPath = 5;//位置 本地路径或url
-    repeated Line lines = 6;
-    repeated Bookmark bookmarks = 7;
+    optional uint64 Mid = 1;//唯一id
+    optional string Name = 2;//本标记文档的name
+    optional uint32 Kind = 3;//1:pdf 2:url
+    optional string CreateDate = 4;//创建时间
+    optional string RefName = 5;//位置 pdf:pdf名    2:url 都保存在bookmark中,这里不需要
+    repeated Line Lines = 6;
+    repeated Bookmark BookmarkList = 7;
 }
 // 书签 
 message Bookmark{
-    optional uint32 depth = 1;//深度级别 默认 0
-    optional string title = 2;
-    optional string content = 3;
-    optional uint32 page = 4;//仅限于 pdf
-    optional string path = 5;//路径 仅限于 url 
+    optional uint32 Depth = 1;//深度级别 默认 0
+    optional string Title = 2;
+    optional string Content = 3;
+    optional uint32 PageNum = 4;//仅限于 pdf
+    optional string RefPath = 5;//路径 仅限于 url 
 }
 
 // 线型标记
 message Line{
-    repeated XY poiList = 1;
-    optional uint32 page = 2;//url是没有page的
+    repeated XY PoiList = 1;
+    optional uint32 PageNum = 2;//url是没有page的
+    optional XY RefXY = 3;//滚动位置
 }
 

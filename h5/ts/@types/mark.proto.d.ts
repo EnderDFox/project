@@ -208,29 +208,119 @@ declare module pb {
             public toJSON(): { [k: string]: any };
         }
 
+        /** Properties of a MarkDocList. */
+        interface IMarkDocList {
+
+            /** MarkDocList MarkDocList */
+            MarkDocList?: (pb.mark.IMarkDoc[]|null);
+        }
+
+        /** Represents a MarkDocList. */
+        class MarkDocList implements IMarkDocList {
+
+            /**
+             * Constructs a new MarkDocList.
+             * @param [properties] Properties to set
+             */
+            constructor(properties?: pb.mark.IMarkDocList);
+
+            /** MarkDocList MarkDocList. */
+            public MarkDocList: pb.mark.IMarkDoc[];
+
+            /**
+             * Creates a new MarkDocList instance using the specified properties.
+             * @param [properties] Properties to set
+             * @returns MarkDocList instance
+             */
+            public static create(properties?: pb.mark.IMarkDocList): pb.mark.MarkDocList;
+
+            /**
+             * Encodes the specified MarkDocList message. Does not implicitly {@link pb.mark.MarkDocList.verify|verify} messages.
+             * @param message MarkDocList message or plain object to encode
+             * @param [writer] Writer to encode to
+             * @returns Writer
+             */
+            public static encode(message: pb.mark.IMarkDocList, writer?: $protobuf.Writer): $protobuf.Writer;
+
+            /**
+             * Encodes the specified MarkDocList message, length delimited. Does not implicitly {@link pb.mark.MarkDocList.verify|verify} messages.
+             * @param message MarkDocList message or plain object to encode
+             * @param [writer] Writer to encode to
+             * @returns Writer
+             */
+            public static encodeDelimited(message: pb.mark.IMarkDocList, writer?: $protobuf.Writer): $protobuf.Writer;
+
+            /**
+             * Decodes a MarkDocList message from the specified reader or buffer.
+             * @param reader Reader or buffer to decode from
+             * @param [length] Message length if known beforehand
+             * @returns MarkDocList
+             * @throws {Error} If the payload is not a reader or valid buffer
+             * @throws {$protobuf.util.ProtocolError} If required fields are missing
+             */
+            public static decode(reader: ($protobuf.Reader|Uint8Array), length?: number): pb.mark.MarkDocList;
+
+            /**
+             * Decodes a MarkDocList message from the specified reader or buffer, length delimited.
+             * @param reader Reader or buffer to decode from
+             * @returns MarkDocList
+             * @throws {Error} If the payload is not a reader or valid buffer
+             * @throws {$protobuf.util.ProtocolError} If required fields are missing
+             */
+            public static decodeDelimited(reader: ($protobuf.Reader|Uint8Array)): pb.mark.MarkDocList;
+
+            /**
+             * Verifies a MarkDocList message.
+             * @param message Plain object to verify
+             * @returns `null` if valid, otherwise the reason why it is not
+             */
+            public static verify(message: { [k: string]: any }): (string|null);
+
+            /**
+             * Creates a MarkDocList message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns MarkDocList
+             */
+            public static fromObject(object: { [k: string]: any }): pb.mark.MarkDocList;
+
+            /**
+             * Creates a plain object from a MarkDocList message. Also converts values to other types if specified.
+             * @param message MarkDocList
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: pb.mark.MarkDocList, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this MarkDocList to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
+        }
+
         /** Properties of a MarkDoc. */
         interface IMarkDoc {
 
-            /** MarkDoc mid */
-            mid?: (number|Long|null);
+            /** MarkDoc Mid */
+            Mid?: (number|Long|null);
 
-            /** MarkDoc name */
-            name?: (string|null);
+            /** MarkDoc Name */
+            Name?: (string|null);
 
-            /** MarkDoc kind */
-            kind?: (number|null);
+            /** MarkDoc Kind */
+            Kind?: (number|null);
 
-            /** MarkDoc refName */
-            refName?: (string|null);
+            /** MarkDoc CreateDate */
+            CreateDate?: (string|null);
 
-            /** MarkDoc refPath */
-            refPath?: (string|null);
+            /** MarkDoc RefName */
+            RefName?: (string|null);
 
-            /** MarkDoc lines */
-            lines?: (pb.mark.ILine[]|null);
+            /** MarkDoc Lines */
+            Lines?: (pb.mark.ILine[]|null);
 
-            /** MarkDoc bookmarks */
-            bookmarks?: (pb.mark.IBookmark[]|null);
+            /** MarkDoc BookmarkList */
+            BookmarkList?: (pb.mark.IBookmark[]|null);
         }
 
         /** Represents a MarkDoc. */
@@ -242,26 +332,26 @@ declare module pb {
              */
             constructor(properties?: pb.mark.IMarkDoc);
 
-            /** MarkDoc mid. */
-            public mid: (number|Long);
+            /** MarkDoc Mid. */
+            public Mid: (number|Long);
 
-            /** MarkDoc name. */
-            public name: string;
+            /** MarkDoc Name. */
+            public Name: string;
 
-            /** MarkDoc kind. */
-            public kind: number;
+            /** MarkDoc Kind. */
+            public Kind: number;
 
-            /** MarkDoc refName. */
-            public refName: string;
+            /** MarkDoc CreateDate. */
+            public CreateDate: string;
 
-            /** MarkDoc refPath. */
-            public refPath: string;
+            /** MarkDoc RefName. */
+            public RefName: string;
 
-            /** MarkDoc lines. */
-            public lines: pb.mark.ILine[];
+            /** MarkDoc Lines. */
+            public Lines: pb.mark.ILine[];
 
-            /** MarkDoc bookmarks. */
-            public bookmarks: pb.mark.IBookmark[];
+            /** MarkDoc BookmarkList. */
+            public BookmarkList: pb.mark.IBookmark[];
 
             /**
              * Creates a new MarkDoc instance using the specified properties.
@@ -337,20 +427,20 @@ declare module pb {
         /** Properties of a Bookmark. */
         interface IBookmark {
 
-            /** Bookmark depth */
-            depth?: (number|null);
+            /** Bookmark Depth */
+            Depth?: (number|null);
 
-            /** Bookmark title */
-            title?: (string|null);
+            /** Bookmark Title */
+            Title?: (string|null);
 
-            /** Bookmark content */
-            content?: (string|null);
+            /** Bookmark Content */
+            Content?: (string|null);
 
-            /** Bookmark page */
-            page?: (number|null);
+            /** Bookmark PageNum */
+            PageNum?: (number|null);
 
-            /** Bookmark path */
-            path?: (string|null);
+            /** Bookmark RefPath */
+            RefPath?: (string|null);
         }
 
         /** Represents a Bookmark. */
@@ -362,20 +452,20 @@ declare module pb {
              */
             constructor(properties?: pb.mark.IBookmark);
 
-            /** Bookmark depth. */
-            public depth: number;
+            /** Bookmark Depth. */
+            public Depth: number;
 
-            /** Bookmark title. */
-            public title: string;
+            /** Bookmark Title. */
+            public Title: string;
 
-            /** Bookmark content. */
-            public content: string;
+            /** Bookmark Content. */
+            public Content: string;
 
-            /** Bookmark page. */
-            public page: number;
+            /** Bookmark PageNum. */
+            public PageNum: number;
 
-            /** Bookmark path. */
-            public path: string;
+            /** Bookmark RefPath. */
+            public RefPath: string;
 
             /**
              * Creates a new Bookmark instance using the specified properties.
@@ -451,11 +541,14 @@ declare module pb {
         /** Properties of a Line. */
         interface ILine {
 
-            /** Line poiList */
-            poiList?: (pb.mark.IXY[]|null);
+            /** Line PoiList */
+            PoiList?: (pb.mark.IXY[]|null);
 
-            /** Line page */
-            page?: (number|null);
+            /** Line PageNum */
+            PageNum?: (number|null);
+
+            /** Line RefXY */
+            RefXY?: (pb.mark.IXY|null);
         }
 
         /** Represents a Line. */
@@ -467,11 +560,14 @@ declare module pb {
              */
             constructor(properties?: pb.mark.ILine);
 
-            /** Line poiList. */
-            public poiList: pb.mark.IXY[];
+            /** Line PoiList. */
+            public PoiList: pb.mark.IXY[];
 
-            /** Line page. */
-            public page: number;
+            /** Line PageNum. */
+            public PageNum: number;
+
+            /** Line RefXY. */
+            public RefXY?: (pb.mark.IXY|null);
 
             /**
              * Creates a new Line instance using the specified properties.

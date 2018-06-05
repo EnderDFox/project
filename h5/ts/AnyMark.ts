@@ -348,7 +348,7 @@ class PdfViewer {
             _content.scrollTo({ left: 0, top: _content.scrollHeight })
         }
     }
-    renderPage(num) {
+    renderPage(num:number) {
         if (this.pageRendering) {
             this.pageNumPending = num;
         } else {
