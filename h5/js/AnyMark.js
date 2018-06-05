@@ -27,7 +27,7 @@ var PdfViewer = /** @class */ (function () {
         Vue.nextTick(function () {
             _this.canvasView = _this.vueDoc.$refs.canvasView;
             _this.canvasMark = _this.vueDoc.$refs.canvasMark;
-            $([_this.canvasView, _this.canvasMark]).hide();
+            $([_this.vueDoc.$el, _this.vueOutline.$el]).hide();
             _this.ctx = _this.canvasView.getContext('2d');
             _this.pdfjsLib.getDocument(pdfPath).then(function (pdfDoc_) {
                 _this.pdfDoc = pdfDoc_;
@@ -67,8 +67,6 @@ var PdfViewer = /** @class */ (function () {
         //# 自定义指令: drag
         Vue.directive('drag', {
             bind: function (el, binding) {
-                var disX;
-                var disY;
                 var p0;
                 var p1;
                 var touchOption;
@@ -99,9 +97,9 @@ var PdfViewer = /** @class */ (function () {
                             doTouchOneStart({ x: e.touches[0].clientX, y: e.touches[0].clientY });
                             break;
                         case 2:
-                            if (touchOption.useTouchTwo) {
-                                doTouchTwoStart({ x: e.touches[0].clientX, y: e.touches[0].clientY }, { x: e.touches[1].clientX, y: e.touches[1].clientY });
-                            }
+                            // if (touchOption.useTouchTwo) {
+                            doTouchTwoStart({ x: e.touches[0].clientX, y: e.touches[0].clientY }, { x: e.touches[1].clientX, y: e.touches[1].clientY });
+                            // }
                             break;
                     }
                 };
@@ -132,9 +130,6 @@ var PdfViewer = /** @class */ (function () {
                     touchingCount = 1;
                     p0 = _p0;
                     toggleEventListeners(true);
-                    if (touchOption.touchOneCallback) {
-                        touchOption.touchOneCallback(TouchKind.START, p0);
-                    }
                 };
                 var doTouchTwoStart = function (_p0, _p1) {
                     touchingCount = 2;
@@ -144,12 +139,7 @@ var PdfViewer = /** @class */ (function () {
                 };
                 var doTouchOneMove = function (_p0) {
                     p0 = _p0;
-                    if (touchOption.touchOneCallback) {
-                        touchOption.touchOneCallback(TouchKind.MOVE, p0);
-                    }
-                    else {
-                        $dragTarget.xy($dragTarget.x() + (_p0.x - p0.x), $dragTarget.y() + (_p0.y - p0.y));
-                    }
+                    $dragTarget.xy($dragTarget.x() + (_p0.x - p0.x), $dragTarget.y() + (_p0.y - p0.y));
                 };
                 var doTouchTwoMove = function (_p0, _p1) {
                     var dist = MathUtil.distance(p0, p1);
@@ -169,12 +159,7 @@ var PdfViewer = /** @class */ (function () {
                     var whRate = $dragTarget.h() / $dragTarget.w();
                     var gap = (gapX + gapY);
                     // this.log(whRate, ":[whRate]", gap, ":[gap]")
-                    if (touchOption.touchTwoCallback) {
-                        touchOption.touchTwoCallback(TouchKind.MOVE, gap, gap * whRate);
-                    }
-                    else {
-                        $dragTarget.wh(Math.max($dragTarget.w() + gap, 100), Math.max($dragTarget.h() + gap * whRate, 100 * whRate));
-                    }
+                    $dragTarget.wh(Math.max($dragTarget.w() + gap, 100), Math.max($dragTarget.h() + gap * whRate, 100 * whRate));
                     //
                     p0 = _p0;
                     p1 = _p1;
@@ -182,9 +167,6 @@ var PdfViewer = /** @class */ (function () {
                 var onCancel = function (e) {
                     if (e === void 0) { e = null; }
                     toggleEventListeners(false);
-                    if (touchOption.touchOneCallback) {
-                        touchOption.touchOneCallback(TouchKind.END, null);
-                    }
                 };
                 var onEnd = function (e) {
                     if (e === void 0) { e = null; }
@@ -237,37 +219,6 @@ var PdfViewer = /** @class */ (function () {
                 onPageNext: this.onPageNext.bind(this),
                 onZoomOut: this.onZoomOut.bind(this),
                 onZoomIn: this.onZoomIn.bind(this),
-                onMouseWheel: function (e) {
-                    _this.renderScale(_this.vueDoc.pageScale - e.deltaY / 1000);
-                },
-                getTouchOption: function () {
-                    return {
-                        dragTarget: null,
-                        useTouchTwo: true,
-                        touchOneCallback: function (kind, poi) {
-                            switch (kind) {
-                                case TouchKind.START:
-                                    var wp = _this.countWebglXY(poi);
-                                    _this.mark.poiArrList.push(_this.mark.currLine = [wp.x, wp.y]);
-                                    break;
-                                case TouchKind.MOVE:
-                                    var wp = _this.countWebglXY(poi);
-                                    _this.mark.currLine.push(wp.x, wp.y);
-                                    _this.mark.renderDirty = true;
-                                    break;
-                                case TouchKind.END:
-                                    _this.mark.currLine = null;
-                                    break;
-                            }
-                        },
-                        touchTwoCallback: function (kind, gapW, gapH) {
-                            $(_this.canvasView).xy($(_this.canvasMark).xy());
-                            var _w = $(_this.canvasView).w() + gapW;
-                            _w = Math.max(_w, 100);
-                            _this.renderScale(_this.vueDoc.pageScale * (_w / $(_this.canvasView).w()));
-                        },
-                    };
-                },
             }
         });
         this.vueOutline = new Vue({
@@ -278,9 +229,7 @@ var PdfViewer = /** @class */ (function () {
             methods: {
                 getTouchOption: function () {
                     return {
-                        dragTarget: this.$el,
-                        useTouchTwo: false,
-                        touchTwoCallback: null,
+                        dragTarget: this.$el
                     };
                 },
             }
@@ -293,9 +242,7 @@ var PdfViewer = /** @class */ (function () {
             methods: {
                 getTouchOption: function () {
                     return {
-                        dragTarget: this.$el,
-                        useTouchTwo: false,
-                        touchTwoCallback: null,
+                        dragTarget: this.$el
                     };
                 },
             }
@@ -425,11 +372,157 @@ var PdfViewer = /** @class */ (function () {
             //only run when first
             return;
         }
-        $([this.canvasView, this.canvasMark]).show();
+        $([this.vueDoc.$el, this.vueOutline.$el]).show();
         //
         this.pageWHScale1 = $(this.canvasView).wh();
         $(this.canvasMark).wh($(this.canvasView).wh());
         $(this.canvasMark).xy($(this.canvasView).xy());
+        //
+        this.initCanvasEvent();
+    };
+    PdfViewer.prototype.initCanvasEvent = function () {
+        var _this = this;
+        var p0;
+        var p1;
+        var touchingCount = 0;
+        var el = this.canvasMark;
+        var $dragTarget = $(el);
+        //## desktop EventListener
+        el.addEventListener(EventName.mousewheel, function (e) {
+            _this.renderScale(_this.vueDoc.pageScale - e.deltaY / 1000);
+        });
+        var onMouseStart = function (e) {
+            e.preventDefault();
+            doPoiOneStart({ x: e.clientX, y: e.clientY });
+        };
+        var onMouseMove = function (e) {
+            e.preventDefault();
+            doPointOneMove({ x: e.clientX, y: e.clientY });
+        };
+        //## mobile EventListener
+        var onTouchStart = function (e) {
+            onCancel();
+            switch (e.touches.length) {
+                case 1:
+                    doPoiOneStart({ x: e.touches[0].clientX, y: e.touches[0].clientY });
+                    break;
+                case 2:
+                    // if (touchOption.useTouchTwo) {
+                    doPointTwoStart({ x: e.touches[0].clientX, y: e.touches[0].clientY }, { x: e.touches[1].clientX, y: e.touches[1].clientY });
+                    // }
+                    break;
+            }
+        };
+        var onTouchMove = function (e) {
+            switch (e.touches.length) {
+                case 1:
+                    if (touchingCount == 1) {
+                        doPointOneMove({ x: e.touches[0].clientX, y: e.touches[0].clientY });
+                    }
+                    else {
+                        onCancel();
+                    }
+                    break;
+                case 2:
+                    if (touchingCount == 2) {
+                        doPointTwoMove({ x: e.touches[0].clientX, y: e.touches[0].clientY }, { x: e.touches[1].clientX, y: e.touches[1].clientY });
+                    }
+                    else {
+                        onCancel();
+                    }
+                    break;
+                default:
+                    onCancel();
+                    break;
+            }
+        };
+        //
+        var doPoiOneStart = function (_p0) {
+            touchingCount = 1;
+            p0 = _p0;
+            toggleEventListeners(true);
+            //
+            var wp = _this.countWebglXY(p0);
+            _this.mark.poiArrList.push(_this.mark.currLine = [wp.x, wp.y]);
+        };
+        var doPointTwoStart = function (_p0, _p1) {
+            touchingCount = 2;
+            p0 = _p0;
+            p1 = _p1;
+            toggleEventListeners(true);
+        };
+        var doPointOneMove = function (_p0) {
+            p0 = _p0;
+            //
+            var wp = _this.countWebglXY(p0);
+            _this.mark.currLine.push(wp.x, wp.y);
+            _this.mark.renderDirty = true;
+        };
+        var doPointTwoMove = function (_p0, _p1) {
+            var dist = MathUtil.distance(p0, p1);
+            var _dist = MathUtil.distance(_p0, _p1);
+            // this.log(dist, ":[dist]", _dist, ":[_dist]")
+            var oldXY = $dragTarget.xy();
+            var oldWH = $dragTarget.wh();
+            var pinchCenter = NewXY((p1.x + p0.x) / 2, (p1.y + p0.y) / 2);
+            var _pinchCenter = NewXY((_p1.x + _p0.x) / 2, (_p1.y + _p0.y) / 2);
+            // this.log(oldXY.x, oldXY.y, ":[oldXY]", oldWH.x, oldWH.y, ":[oldWH]")
+            // this.log(pinchCenter.x, pinchCenter.y, ":[pinchCenter]", _pinchCenter.x, _pinchCenter.y, ":[_pinchCenter]")
+            var gapX = Math.abs(_p1.x - _p0.x) - Math.abs(p1.x - p0.x);
+            var gapY = Math.abs(_p1.y - _p0.y) - Math.abs(p1.y - p0.y);
+            // this.log(gapX, ":[gapX]", gapY, ":[gapY]")
+            $dragTarget.xy(oldXY.x - gapX / 2 + (_pinchCenter.x - pinchCenter.x), oldXY.y - gapY / 2 + (_pinchCenter.y - pinchCenter.y));
+            $(_this.canvasView).xy($(_this.canvasMark).xy());
+            //
+            var whRate = $dragTarget.h() / $dragTarget.w();
+            var gap = (gapX + gapY);
+            // this.log(whRate, ":[whRate]", gap, ":[gap]")
+            var _w = $(_this.canvasView).w() + gap;
+            _w = Math.max(_w, 100);
+            _this.renderScale(_this.vueDoc.pageScale * (_w / $(_this.canvasView).w()));
+            //
+            p0 = _p0;
+            p1 = _p1;
+        };
+        //
+        var onCancel = function (e) {
+            if (e === void 0) { e = null; }
+            toggleEventListeners(false);
+            _this.mark.currLine = null;
+        };
+        var onEnd = onCancel;
+        //
+        var toggleEventListeners = function (bl) {
+            if (bl) {
+                if (Common.IsDesktop()) {
+                    document.addEventListener(EventName.mousemove, onMouseMove);
+                    document.addEventListener(EventName.mouseup, onEnd);
+                }
+                else {
+                    document.addEventListener(EventName.touchmove, onTouchMove);
+                    document.addEventListener(EventName.touchend, onEnd);
+                    document.addEventListener(EventName.touchcancel, onEnd);
+                }
+            }
+            else {
+                if (Common.IsDesktop()) {
+                    document.removeEventListener(EventName.mousemove, onMouseMove);
+                    document.removeEventListener(EventName.mouseup, onEnd);
+                }
+                else {
+                    document.removeEventListener(EventName.touchmove, onTouchMove);
+                    document.removeEventListener(EventName.touchend, onEnd);
+                    document.removeEventListener(EventName.touchcancel, onEnd);
+                }
+            }
+        };
+        //
+        if (Common.IsDesktop()) {
+            el.addEventListener(EventName.mousedown, onMouseStart);
+        }
+        else {
+            el.addEventListener(EventName.touchstart, onTouchStart);
+        }
     };
     PdfViewer.prototype.countWebglXY = function (clientXY) {
         console.log("[info]", $(this.canvasMark).y(), ":[$(this.canvasMark).y()]");
