@@ -230,10 +230,9 @@ class PdfViewer {
                         dragTarget: null,
                         useTouchTwo: true,
                         touchTwoCallback: (gapW: number, gapH: number) => {
-                            var canvas = this.vueDoc.$refs.canvas
-                            var _w:number = $(canvas).w()+gapW
+                            var _w: number = $(this.canvas).w() + gapW
                             _w = Math.max(_w, 100)
-                            this.renderScale(this.vueDoc.pageScale*(_w/ $(canvas).w()))
+                            this.renderScale(this.vueDoc.pageScale * (_w / $(this.canvas).w()))
                         },
                     }
                 },
@@ -302,7 +301,7 @@ class PdfViewer {
     }
     log(...args: any[]) {
         this.vueLog.content += args.join(' ') + '<br/>'
-        if(this.vueLog.showContent){
+        if (this.vueLog.showContent) {
             var _content: HTMLElement = this.vueLog.$refs.content as HTMLElement
             _content.scrollTo({ left: 0, top: _content.scrollHeight })
         }
@@ -346,9 +345,21 @@ class PdfViewer {
             return
         }
         this.vueDoc.pageScale = val
-        this.renderPage(this.vueDoc.pageNum);
+        $(this.canvas).wh(this.pageWHScale1.x*val,this.pageWHScale1.y*val)
+        this.delayRenderPage(this.vueDoc.pageNum);
     }
-    // pageWHScale1:IXY
+    delayRenderPageNum:number
+    delayRenderPageId:number
+    delayRenderPage(num:number){
+        this.delayRenderPageNum = num
+        clearTimeout(this.delayRenderPageId)
+        this.delayRenderPageId = setTimeout(this._delayRenderPage.bind(this), 1000);
+    }
+    _delayRenderPage(){
+        this.renderPage(this.delayRenderPageNum)
+    }
+    
+    pageWHScale1: IXY
     _renderPage(num: number) {
         this.vueDoc.pageNum = num
         this.pageRendering = true;
@@ -365,10 +376,9 @@ class PdfViewer {
             });
             // Wait for rendering to finish
             renderTask.promise.then(() => {
-                /* if(!this.pageWHScale1){
-                     var canvas:HTMLCanvasElement = this.vueDoc.$refs.canvas as HTMLCanvasElement
-                     this.pageWHScale1 = $(canvas).wh()
-                 } */
+                if (!this.pageWHScale1) {
+                    this.pageWHScale1 = $(this.canvas).wh()
+                }
                 //render pending page
                 this.pageRendering = false;
                 if (this.pageNumPending !== null) {

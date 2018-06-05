@@ -13,9 +13,10 @@
   <!--  -->
   <link href="lib3/bootstrap-3.3.7-dist/css/bootstrap.css" rel="stylesheet">
   <style type="text/css">
-    body{
+    body {
       overflow: hidden;
     }
+
     .doc {
       /* position: absolute; */
       /* border: 1px solid #313131; */
@@ -30,6 +31,12 @@
       float: right;
     }
 
+    .doc .label_scale {
+      min-width: 30px;
+      display: inline-block;
+      text-align: center;
+    }
+
     .doc canvas {
       border: 1px solid rgb(65, 65, 65);
       position: absolute;
@@ -38,7 +45,8 @@
       z-index: -1;
     }
 
-    .log,.outline {
+    .log,
+    .outline {
       position: absolute;
       top: 30px;
       left: 14px;
@@ -48,7 +56,8 @@
       min-width: 200px;
       overflow-y: auto;
       padding-right: 8px;
-      white-space: nowrap; /* 防止拖到右侧边缘后  宽度修改(因为document宽度小,把outline宽度挤窄了)*/
+      white-space: nowrap;
+      /* 防止拖到右侧边缘后  宽度修改(因为document宽度小,把outline宽度挤窄了)*/
     }
 
     .outline .children0 {
@@ -121,7 +130,7 @@
       <span>Scale:</span>
       <button @click="onZoomOut">-</button>
       <span>
-        <span>{{pageScale}}</span>
+        <span class="label_scale">{{pageScale}}</span>
       </span>
       <button @click="onZoomIn">+</button>
     </div>

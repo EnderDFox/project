@@ -224,10 +224,9 @@ var PdfViewer = /** @class */ (function () {
                         dragTarget: null,
                         useTouchTwo: true,
                         touchTwoCallback: function (gapW, gapH) {
-                            var canvas = _this.vueDoc.$refs.canvas;
-                            var _w = $(canvas).w() + gapW;
+                            var _w = $(_this.canvas).w() + gapW;
                             _w = Math.max(_w, 100);
-                            _this.renderScale(_this.vueDoc.pageScale * (_w / $(canvas).w()));
+                            _this.renderScale(_this.vueDoc.pageScale * (_w / $(_this.canvas).w()));
                         },
                     };
                 },
@@ -343,9 +342,17 @@ var PdfViewer = /** @class */ (function () {
             return;
         }
         this.vueDoc.pageScale = val;
-        this.renderPage(this.vueDoc.pageNum);
+        $(this.canvas).wh(this.pageWHScale1.x * val, this.pageWHScale1.y * val);
+        this.delayRenderPage(this.vueDoc.pageNum);
     };
-    // pageWHScale1:IXY
+    PdfViewer.prototype.delayRenderPage = function (num) {
+        this.delayRenderPageNum = num;
+        clearTimeout(this.delayRenderPageId);
+        this.delayRenderPageId = setTimeout(this._delayRenderPage.bind(this), 1000);
+    };
+    PdfViewer.prototype._delayRenderPage = function () {
+        this.renderPage(this.delayRenderPageNum);
+    };
     PdfViewer.prototype._renderPage = function (num) {
         var _this = this;
         this.vueDoc.pageNum = num;
@@ -363,10 +370,9 @@ var PdfViewer = /** @class */ (function () {
             });
             // Wait for rendering to finish
             renderTask.promise.then(function () {
-                /* if(!this.pageWHScale1){
-                     var canvas:HTMLCanvasElement = this.vueDoc.$refs.canvas as HTMLCanvasElement
-                     this.pageWHScale1 = $(canvas).wh()
-                 } */
+                if (!_this.pageWHScale1) {
+                    _this.pageWHScale1 = $(_this.canvas).wh();
+                }
                 //render pending page
                 _this.pageRendering = false;
                 if (_this.pageNumPending !== null) {
