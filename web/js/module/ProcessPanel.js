@@ -131,7 +131,9 @@ var ProcessPanel = {
 			var top = $(this).offset().top + $(this).height() + 2
 			var left = $(this).offset().left + $(this).width() + 2
 			var dateLine = $(this).attr('date_line')
-			VersionManager.ShowTableHeaderTooltip(dateLine, left, top)
+			if(dateLine){
+				VersionManager.ShowTableHeaderTooltip(dateLine, left, top)
+			}
 			// }
 		}).delegate('td', 'mouseleave', function (e) {
 			e.stopPropagation()
