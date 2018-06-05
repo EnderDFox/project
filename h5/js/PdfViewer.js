@@ -11,6 +11,13 @@ var PdfViewer = /** @class */ (function () {
     }
     PdfViewer.prototype.init = function () {
         var _this = this;
+        var login = new pb.Login();
+        login.account = "my acc";
+        login.password = "my pwd";
+        var bufferWriter = pb.Login.encode(login);
+        var loginB = pb.Login.decode(bufferWriter.finish());
+        console.log("[debug]", loginB, ":[loginB]");
+        //
         Common.preventDragDefault();
         //
         var pdfPath = 'assets/Go in Action CN.pdf';

@@ -28,6 +28,13 @@ class PdfViewer {
     pageNumPending = null
 
     init() {
+        var login = new pb.Login()
+        login.account = "my acc"
+        login.password = "my pwd"
+        var bufferWriter = pb.Login.encode(login)
+        var loginB = pb.Login.decode(bufferWriter.finish())
+        console.log("[debug]",loginB,":[loginB]")
+        //
         Common.preventDragDefault()
         //
         var pdfPath = 'assets/Go in Action CN.pdf';
@@ -439,8 +446,8 @@ class PdfViewer {
 
     }
     countWebglXY(clientXY: IXY): IXY {
-        console.log("[info]",$(this.canvasMark).y(),":[$(this.canvasMark).y()]")
-        var xy = {x:clientXY.x-$(this.canvasMark).x(),y:clientXY.y-$(this.canvasMark).y()}
+        console.log("[info]", $(this.canvasMark).y(), ":[$(this.canvasMark).y()]")
+        var xy = { x: clientXY.x - $(this.canvasMark).x(), y: clientXY.y - $(this.canvasMark).y() }
         xy.x = xy.x / $(this.canvasMark).w() * 2 - 1
         xy.y = -(xy.y / $(this.canvasMark).h() * 2 - 1)
         return xy

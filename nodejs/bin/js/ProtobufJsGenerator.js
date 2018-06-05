@@ -5,6 +5,23 @@ var child_process = require("child_process");
 var path = require("path");
 var parseArgs = require("minimist");
 var process = require("process");
+/**
+ * 调用protobufjs生成 UMD下可以使用的 js和 d.ts
+ * # 准备工作:
+ * - 安装protobufjs:  cnpm i protobufjs -g
+ * - 引入 protogbuf.js 来源: (C:/Users/hubin/AppData/Roaming/npm/node_modules/protobufjs/dist/minimal/protobuf.js)
+ * - 工程加入 protobuf.d.ts 来源: (C:/Users/hubin/AppData/Roaming/npm/node_modules/protobufjs/index.d.ts)
+ * - 引入 本工具生成的 pb.js和pb.d.ts
+ * # e.g.
+ * ```TypeScript
+    var login = new pb.Login()
+    login.account = "my acc"
+    login.password = "my pwd"
+    var bufferWriter = pb.Login.encode(login)
+    var loginB = pb.Login.decode(bufferWriter.finish())
+    console.log("[debug]",loginB,":[loginB]")
+ * ```
+ */
 var ProtobufJsHelper = /** @class */ (function () {
     function ProtobufJsHelper() {
         this.line_separator = "\r\n";
@@ -23,7 +40,7 @@ var ProtobufJsHelper = /** @class */ (function () {
             console.log("out:", out.toString());
         }
         else {
-            console.log("No news is good news.");
+            console.log("Doing generatePbJs complete! No news is good news.");
         }
     };
     ProtobufJsHelper.prototype.generatePbTsd = function () {
@@ -33,9 +50,10 @@ var ProtobufJsHelper = /** @class */ (function () {
             console.log("out:", out.toString());
         }
         else {
-            console.log("No news is good news.");
+            console.log("Doing generatePbTsd complete! No news is good news.");
         }
     };
+    /**protobufjs生成的代码无法直接使用, 需要自己处理一下 */
     ProtobufJsHelper.prototype.modifyJs = function () {
         var path = this.path_pb_js;
         var buf = fs.readFileSync(path);
@@ -90,4 +108,4 @@ else {
     console.log("Complete!");
 }
 process.exit(1);
-//# sourceMappingURL=ProtobufJsHelper.js.map
+//# sourceMappingURL=ProtobufJsGenerator.js.map
