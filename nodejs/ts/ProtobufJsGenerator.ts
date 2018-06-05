@@ -5,12 +5,13 @@ import * as parseArgs from "minimist";
 import * as process from 'process';
 
 /**
- * 调用protobufjs生成 UMD下可以使用的 js和 d.ts
+ * 调用protobufjs生成 UMD下可以使用的 .js和 .d.ts
  * # 准备工作:
  * - 安装protobufjs:  cnpm i protobufjs -g
  * - 引入 protogbuf.js 来源: (C:/Users/hubin/AppData/Roaming/npm/node_modules/protobufjs/dist/minimal/protobuf.js) 
  * - 工程加入 protobuf.d.ts 来源: (C:/Users/hubin/AppData/Roaming/npm/node_modules/protobufjs/index.d.ts) 
- * - 引入 本工具生成的 pb.js和pb.d.ts
+ * - 修改 protobuf.d.ts 的 `export interface Long {` 去掉 `export`
+ * - 引入 本工具生成的 .js和 .d.ts
  * # e.g.
  * ```TypeScript
     var login = new hellopbjs.Login()
@@ -20,6 +21,8 @@ import * as process from 'process';
     var loginB = hellopbjs.Login.decode(bufferWriter.finish())
     console.log("[debug]",loginB,":[loginB]")
  * ```
+ * # TODO
+ * modify的namespace有问题还是`pb`呢,应该改成.proto中定义的namespace, 最省事方法就是所有.proto中的namespace用 pb开头例如pb.hello.myproject
  * # other
  * # 有关long的问题
  * long都是用 js默认的number (53 bit integer) 不是真64 但方便,
@@ -108,8 +111,8 @@ if (argv.help || (!argv.proto || !argv.js || !argv.tsd)) {
     //
     inst.generatePbJs();
     inst.generatePbTsd();
-    inst.modifyJs();
-    inst.modifyTs();
+    // inst.modifyJs();
+    // inst.modifyTs();
     console.log("Complete!");
 }
 process.exit(1);

@@ -1,9 +1,8 @@
-var $protobuf = protobuf;
 // Common aliases
 var $Reader = $protobuf.Reader, $Writer = $protobuf.Writer, $util = $protobuf.util;
 
 // Exported root namespace
-var $root = $protobuf.roots["default"] || ($protobuf.roots["default"] = {});
+var $root = $protobuf.roots.hpb || ($protobuf.roots.hpb = {});
 
 $root.hellopbjs = (function() {
 
@@ -498,4 +497,3 @@ $root.hellopbjs = (function() {
 
     return hellopbjs;
 })();
-pb = $root.pb
