@@ -1,7 +1,9 @@
-//# defind
-function NewXY(x: number, y: number): IXY {
-    return { x: x, y: y };
+//# define
+enum MarkBodyKid{
+    PDF = 1,
+    URL = 2,
 }
+
 class EventName{
     static mousedown = 'mousedown'
     static mousemove = 'mousemove'
@@ -13,6 +15,10 @@ class EventName{
     static touchcancel = 'touchcancel'
     //
     static mousewheel = 'mousewheel'
+}
+
+function NewXY(x: number, y: number): IXY {
+    return { x: x, y: y };
 }
 
 //通用类

@@ -1,0 +1,49 @@
+syntax = "proto2";
+
+package pb.mark;
+
+enum cmd{
+    NONE = 0;
+    CONNECT_SUCCESS = 101;
+    CONNECT_EXCEPTION = 102;
+    CONNECT_FAILURE = 103;
+    CONNECT_BREAK = 104;
+    // 通用协议段: 1000 - 2000
+    //错误信息
+    COMMON_MSG 		= 	1000;
+    //
+}
+message Login {
+    required string account = 1;
+    required string password = 2;
+}
+
+message XY{
+    optional float x = 1; 
+    optional float y = 2; 
+}
+
+message MarkBody{
+    optional uint64 mid = 1;//唯一id
+    optional string name = 2;//本标记的name
+    optional uint32 kind = 3;//1:pdf 2:url
+    optional string refName = 4;//位置 pdf:pdf名 2:url标题
+    optional string refPath = 5;//位置 本地路径或url
+    repeated Line lines = 6;
+    repeated Bookmark bookmarks = 7;
+}
+// 书签 
+message Bookmark{
+    optional uint32 depth = 1;//深度级别 默认 0
+    optional string title = 2;
+    optional string content = 3;
+    optional uint32 page = 4;//仅限于 pdf
+    optional XY scorllXY = 5;//仅限于 url 记录了页面滚动的位置
+}
+
+// 线型标记
+message Line{
+    repeated XY poiList = 1;
+    optional uint32 page = 2;//url是没有page的
+}
+

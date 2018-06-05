@@ -1,7 +1,9 @@
-//# defind
-function NewXY(x, y) {
-    return { x: x, y: y };
-}
+//# define
+var MarkBodyKid;
+(function (MarkBodyKid) {
+    MarkBodyKid[MarkBodyKid["PDF"] = 1] = "PDF";
+    MarkBodyKid[MarkBodyKid["URL"] = 2] = "URL";
+})(MarkBodyKid || (MarkBodyKid = {}));
 var EventName = /** @class */ (function () {
     function EventName() {
     }
@@ -17,6 +19,9 @@ var EventName = /** @class */ (function () {
     EventName.mousewheel = 'mousewheel';
     return EventName;
 }());
+function NewXY(x, y) {
+    return { x: x, y: y };
+}
 //通用类
 var CommonClass = /** @class */ (function () {
     function CommonClass() {

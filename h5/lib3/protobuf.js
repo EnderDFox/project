@@ -1628,7 +1628,7 @@ LongBits.prototype.toNumber = function toNumber(unsigned) {
 /**
  * Converts this long bits to a long.
  * @param {boolean} [unsigned=false] Whether unsigned or not
- * @returns {Long} Long
+ * @returns {Long} LongLong
  */
 LongBits.prototype.toLong = function toLong(unsigned) {
     return util.Long

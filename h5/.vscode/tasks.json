@@ -1,0 +1,19 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "ProtobufJsGenerator",
+            "type": "shell",
+            "command": "node ",
+            "args": [
+                "D:/code/projects/FoxTool/nodejs/bin/js/ProtobufJsGenerator.js",
+                "--dir","D:/code/projects/FoxTool/",
+                "--proto","share/mark.proto",
+                "--js","h5/js/lib1/mark.proto.js",
+                "--tsd","h5/ts/@types/mark.proto.d.ts",
+            ]
+        }
+    ]
+}

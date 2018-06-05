@@ -14,11 +14,11 @@ var process = require("process");
  * - 引入 本工具生成的 pb.js和pb.d.ts
  * # e.g.
  * ```TypeScript
-    var login = new pb.Login()
+    var login = new hellopbjs.Login()
     login.account = "my acc"
     login.password = "my pwd"
-    var bufferWriter = pb.Login.encode(login)
-    var loginB = pb.Login.decode(bufferWriter.finish())
+    var bufferWriter = hellopbjs.Login.encode(login)
+    var loginB = hellopbjs.Login.decode(bufferWriter.finish())
     console.log("[debug]",loginB,":[loginB]")
  * ```
  */
@@ -33,7 +33,7 @@ var ProtobufJsHelper = /** @class */ (function () {
     }
     ProtobufJsHelper.prototype.generatePbJs = function () {
         //e.g. pbjs -t static -w CommonJS -o c:\fox\projects\tools\NodeJsTools\test\pb.js c:\fox\projects\tools\NodeJsTools\test\pb.proto
-        var cmdStr = "pbjs -t static -w CommonJS -o " + this.path_pb_js + " " + this.path_pb_proto;
+        var cmdStr = "pbjs -t static --force-long -w CommonJS -o " + this.path_pb_js + " " + this.path_pb_proto;
         console.log("Doing generatePbJs: ", cmdStr);
         var out = child_process.execSync(cmdStr);
         if (out.toString()) {
@@ -83,13 +83,13 @@ var argv = parseArgs(process.argv.slice(2), {
     alias: {
         'help': 'h',
         'dir': 'd',
-        'protobuf': 'p',
+        'proto': 'p',
         'js': 'j',
-        'tsd': 't'
+        'tsd': 't' //生成的.d.ts文件位置
     }
 });
-if (argv.help || (!argv.protobuf || !argv.js || !argv.tsd)) {
-    console.log("Help in here!\r\n", "e.g.  bin/ProtobufJsHelper.js -d test --protobuf pb.proto -j pb.js -t pb.d.ts");
+if (argv.help || (!argv.proto || !argv.js || !argv.tsd)) {
+    console.log("Help in here!\r\n", "e.g.  bin/ProtobufJsHelper.js -d test --proto pb.proto -j pb.js -t pb.d.ts");
 }
 else {
     var dir = argv.dir;
@@ -97,7 +97,7 @@ else {
         dir = "";
     }
     var inst = new ProtobufJsHelper();
-    inst.path_pb_proto = path.resolve(dir, argv.protobuf);
+    inst.path_pb_proto = path.resolve(dir, argv.proto);
     inst.path_pb_js = path.resolve(dir, argv.js);
     inst.path_pb_tsd = path.resolve(dir, argv.tsd);
     //

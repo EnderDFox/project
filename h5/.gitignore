@@ -60,3 +60,5 @@ typings/
 assets/tracemonkey.pdf
 assets/Go in Action CN.pdf
 *.map
+
+assets/mark.proto

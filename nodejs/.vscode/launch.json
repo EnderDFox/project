@@ -123,19 +123,19 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "Launch ProtobufJsHelper",
-            "program": "${workspaceFolder}/bin/js/ProtobufJsHelper.js",
+            "name": "Launch ProtobufJsGenerator",
+            "program": "${workspaceFolder}/bin/js/ProtobufJsGenerator.js",
             "cwd": "${workspaceFolder}",
             "args": [
                 // "-h",
                 "-d",
                 "test",
                 "-p",
-                "pb.proto",
+                "hellopbjs.proto",
                 "-j",
-                "pb.js",
+                "hellopbjs.proto.js",
                 "-t",
-                "pb.d.ts"
+                "hellopbjs.proto.d.ts"
             ],
             "outFiles": [
                 "${workspaceFolder}/*/*.js"

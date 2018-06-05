@@ -1,7 +1,6 @@
-import $protobuf = protobuf;
 
-/** Namespace pb. */
-declare module pb {
+/** Namespace hellopbjs. */
+export namespace hellopbjs {
 
     /** cmd enum. */
     enum cmd {
@@ -23,6 +22,9 @@ declare module pb {
 
         /** Login password */
         password: string;
+
+        /** Login uid */
+        uid?: (number|Long|null);
     }
 
     /** Represents a Login. */
@@ -32,7 +34,7 @@ declare module pb {
          * Constructs a new Login.
          * @param [properties] Properties to set
          */
-        constructor(properties?: pb.ILogin);
+        constructor(properties?: hellopbjs.ILogin);
 
         /** Login account. */
         public account: string;
@@ -40,28 +42,31 @@ declare module pb {
         /** Login password. */
         public password: string;
 
+        /** Login uid. */
+        public uid: (number|Long);
+
         /**
          * Creates a new Login instance using the specified properties.
          * @param [properties] Properties to set
          * @returns Login instance
          */
-        public static create(properties?: pb.ILogin): pb.Login;
+        public static create(properties?: hellopbjs.ILogin): hellopbjs.Login;
 
         /**
-         * Encodes the specified Login message. Does not implicitly {@link pb.Login.verify|verify} messages.
+         * Encodes the specified Login message. Does not implicitly {@link hellopbjs.Login.verify|verify} messages.
          * @param message Login message or plain object to encode
          * @param [writer] Writer to encode to
          * @returns Writer
          */
-        public static encode(message: pb.ILogin, writer?: $protobuf.Writer): $protobuf.Writer;
+        public static encode(message: hellopbjs.ILogin, writer?: $protobuf.Writer): $protobuf.Writer;
 
         /**
-         * Encodes the specified Login message, length delimited. Does not implicitly {@link pb.Login.verify|verify} messages.
+         * Encodes the specified Login message, length delimited. Does not implicitly {@link hellopbjs.Login.verify|verify} messages.
          * @param message Login message or plain object to encode
          * @param [writer] Writer to encode to
          * @returns Writer
          */
-        public static encodeDelimited(message: pb.ILogin, writer?: $protobuf.Writer): $protobuf.Writer;
+        public static encodeDelimited(message: hellopbjs.ILogin, writer?: $protobuf.Writer): $protobuf.Writer;
 
         /**
          * Decodes a Login message from the specified reader or buffer.
@@ -71,7 +76,7 @@ declare module pb {
          * @throws {Error} If the payload is not a reader or valid buffer
          * @throws {$protobuf.util.ProtocolError} If required fields are missing
          */
-        public static decode(reader: ($protobuf.Reader|Uint8Array), length?: number): pb.Login;
+        public static decode(reader: ($protobuf.Reader|Uint8Array), length?: number): hellopbjs.Login;
 
         /**
          * Decodes a Login message from the specified reader or buffer, length delimited.
@@ -80,7 +85,7 @@ declare module pb {
          * @throws {Error} If the payload is not a reader or valid buffer
          * @throws {$protobuf.util.ProtocolError} If required fields are missing
          */
-        public static decodeDelimited(reader: ($protobuf.Reader|Uint8Array)): pb.Login;
+        public static decodeDelimited(reader: ($protobuf.Reader|Uint8Array)): hellopbjs.Login;
 
         /**
          * Verifies a Login message.
@@ -94,7 +99,7 @@ declare module pb {
          * @param object Plain object
          * @returns Login
          */
-        public static fromObject(object: { [k: string]: any }): pb.Login;
+        public static fromObject(object: { [k: string]: any }): hellopbjs.Login;
 
         /**
          * Creates a plain object from a Login message. Also converts values to other types if specified.
@@ -102,7 +107,7 @@ declare module pb {
          * @param [options] Conversion options
          * @returns Plain object
          */
-        public static toObject(message: pb.Login, options?: $protobuf.IConversionOptions): { [k: string]: any };
+        public static toObject(message: hellopbjs.Login, options?: $protobuf.IConversionOptions): { [k: string]: any };
 
         /**
          * Converts this Login to JSON.
@@ -128,7 +133,7 @@ declare module pb {
          * Constructs a new createRole.
          * @param [properties] Properties to set
          */
-        constructor(properties?: pb.IcreateRole);
+        constructor(properties?: hellopbjs.IcreateRole);
 
         /** createRole name. */
         public name: string;
@@ -141,23 +146,23 @@ declare module pb {
          * @param [properties] Properties to set
          * @returns createRole instance
          */
-        public static create(properties?: pb.IcreateRole): pb.createRole;
+        public static create(properties?: hellopbjs.IcreateRole): hellopbjs.createRole;
 
         /**
-         * Encodes the specified createRole message. Does not implicitly {@link pb.createRole.verify|verify} messages.
+         * Encodes the specified createRole message. Does not implicitly {@link hellopbjs.createRole.verify|verify} messages.
          * @param message createRole message or plain object to encode
          * @param [writer] Writer to encode to
          * @returns Writer
          */
-        public static encode(message: pb.IcreateRole, writer?: $protobuf.Writer): $protobuf.Writer;
+        public static encode(message: hellopbjs.IcreateRole, writer?: $protobuf.Writer): $protobuf.Writer;
 
         /**
-         * Encodes the specified createRole message, length delimited. Does not implicitly {@link pb.createRole.verify|verify} messages.
+         * Encodes the specified createRole message, length delimited. Does not implicitly {@link hellopbjs.createRole.verify|verify} messages.
          * @param message createRole message or plain object to encode
          * @param [writer] Writer to encode to
          * @returns Writer
          */
-        public static encodeDelimited(message: pb.IcreateRole, writer?: $protobuf.Writer): $protobuf.Writer;
+        public static encodeDelimited(message: hellopbjs.IcreateRole, writer?: $protobuf.Writer): $protobuf.Writer;
 
         /**
          * Decodes a createRole message from the specified reader or buffer.
@@ -167,7 +172,7 @@ declare module pb {
          * @throws {Error} If the payload is not a reader or valid buffer
          * @throws {$protobuf.util.ProtocolError} If required fields are missing
          */
-        public static decode(reader: ($protobuf.Reader|Uint8Array), length?: number): pb.createRole;
+        public static decode(reader: ($protobuf.Reader|Uint8Array), length?: number): hellopbjs.createRole;
 
         /**
          * Decodes a createRole message from the specified reader or buffer, length delimited.
@@ -176,7 +181,7 @@ declare module pb {
          * @throws {Error} If the payload is not a reader or valid buffer
          * @throws {$protobuf.util.ProtocolError} If required fields are missing
          */
-        public static decodeDelimited(reader: ($protobuf.Reader|Uint8Array)): pb.createRole;
+        public static decodeDelimited(reader: ($protobuf.Reader|Uint8Array)): hellopbjs.createRole;
 
         /**
          * Verifies a createRole message.
@@ -190,7 +195,7 @@ declare module pb {
          * @param object Plain object
          * @returns createRole
          */
-        public static fromObject(object: { [k: string]: any }): pb.createRole;
+        public static fromObject(object: { [k: string]: any }): hellopbjs.createRole;
 
         /**
          * Creates a plain object from a createRole message. Also converts values to other types if specified.
@@ -198,7 +203,7 @@ declare module pb {
          * @param [options] Conversion options
          * @returns Plain object
          */
-        public static toObject(message: pb.createRole, options?: $protobuf.IConversionOptions): { [k: string]: any };
+        public static toObject(message: hellopbjs.createRole, options?: $protobuf.IConversionOptions): { [k: string]: any };
 
         /**
          * Converts this createRole to JSON.
