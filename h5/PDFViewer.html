@@ -48,8 +48,8 @@
     .log,
     .outline {
       position: absolute;
-      top: 30px;
       left: 14px;
+      top: 30px;
       border: 1px solid #313131;
       background-color: rgba(255, 255, 255, 0.82);
       max-height: 90%;
@@ -58,6 +58,11 @@
       padding-right: 8px;
       white-space: nowrap;
       /* 防止拖到右侧边缘后  宽度修改(因为document宽度小,把outline宽度挤窄了)*/
+    }
+
+    .log{
+      left: 300px;
+      top:0px;
     }
 
     .outline .children0 {
@@ -104,7 +109,12 @@
   <!-- lib1 -->
   <script type="text/javascript" src="js/lib1/Common.js"></script>
   <script type="text/javascript" src="js/lib1/JQueryExtend.js"></script>
+  <!-- webgl lib -->
+  <script src="../lib3/webgl.lib/webgl-utils.js"></script>
+  <script src="../lib3/webgl.lib/webgl-debug.js"></script>
+  <script src="../lib3/webgl.lib/cuon-utils.js"></script>
   <!-- my js -->
+  <script type="text/javascript" src="js/MarkWebgl.js"></script>
   <script type="text/javascript" src="js/PdfViewer.js"></script>
   <script type="text/javascript">
     window.onload = function () {
@@ -135,7 +145,8 @@
       <button @click="onZoomIn">+</button>
     </div>
     <!-- canvas -->
-    <canvas ref='canvas' v-drag="getTouchOption" @mouseWheel="onMouseWheel($event)">Your canvas is not supported</canvas>
+    <canvas ref='canvas' v-drag="getTouchOption" @mouseWheel="onMouseWheel($event)">Canvas is not supported</canvas>
+    <canvas ref='canvasMark'></canvas>
   </section>
   <!-- outline -->
   <section class="outline">

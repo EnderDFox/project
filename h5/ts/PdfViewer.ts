@@ -13,6 +13,8 @@ interface ITouchOption {
 class PdfViewer {
     canvas: HTMLCanvasElement
     ctx: CanvasRenderingContext2D
+    canvasMark: HTMLCanvasElement
+    
     pdfjsLib: PDFJSStatic
     pdfDoc: PDFDocumentProxy
     pageRendering = false
@@ -32,6 +34,7 @@ class PdfViewer {
          */
         Vue.nextTick(() => {
             this.canvas = this.vueDoc.$refs.canvas as HTMLCanvasElement
+            this.canvasMark = this.vueDoc.$refs.canvasMark as HTMLCanvasElement
             this.ctx = this.canvas.getContext('2d')
             this.pdfjsLib.getDocument(pdfPath).then((pdfDoc_: PDFDocumentProxy) => {
                 this.pdfDoc = pdfDoc_;
@@ -39,6 +42,8 @@ class PdfViewer {
                 // Initial/first page rendering
                 this._renderPage(this.vueDoc.pageNum);
             });
+            //
+            new MarkWebgl().init(this.canvasMark)
         });
 
     }

@@ -44,7 +44,8 @@
                 "-p",
                 "823",
                 "-d",
-                "D:/",
+                // "D:/",
+                "D:/book/WebGL",
                 "-f",
                 "D:/download"
                 // "--dir","C:/fox/projects/performance/egret"

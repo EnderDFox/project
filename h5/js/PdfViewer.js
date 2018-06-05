@@ -19,6 +19,7 @@ var PdfViewer = /** @class */ (function () {
          */
         Vue.nextTick(function () {
             _this.canvas = _this.vueDoc.$refs.canvas;
+            _this.canvasMark = _this.vueDoc.$refs.canvasMark;
             _this.ctx = _this.canvas.getContext('2d');
             _this.pdfjsLib.getDocument(pdfPath).then(function (pdfDoc_) {
                 _this.pdfDoc = pdfDoc_;
@@ -26,6 +27,8 @@ var PdfViewer = /** @class */ (function () {
                 // Initial/first page rendering
                 _this._renderPage(_this.vueDoc.pageNum);
             });
+            //
+            new MarkWebgl().init(_this.canvasMark);
         });
     };
     PdfViewer.prototype.initVue = function () {

@@ -80,6 +80,7 @@ export class ExpressServer {
         var reqUrl: string = req.url;
         if (reqUrl.indexOf('/') == 0) {
             reqUrl = reqUrl.replace('/', '')
+            reqUrl = decodeURI(reqUrl)
         }
         var folder = path.resolve(this.staticPath, reqUrl)
         // console.log("[debug]", "will showFolderContent:", folder)
@@ -93,9 +94,11 @@ export class ExpressServer {
                 res.end(t)
                 return true;
             } else {
+                console.log("[warn]", `showFolderContent: is not Directory`, folder, ":[folder]", reqUrl, ":[reqUrl]")
                 return false;
             }
         } else {
+            console.log("[warn]", `showFolderContent: is not exists`, folder, ":[folder]", reqUrl, ":[reqUrl]")
             return false;
         }
     }
@@ -118,19 +121,21 @@ export class ExpressServer {
             try {
                 var stat = fs.lstatSync(fullname);
                 if (ignoreFunc != null && ignoreFunc(file)) {
-                    // if(file.indexOf(".") == 0 || file.indexOf("$") == 0) {
-                    // console.info("[info]", "过滤掉以 . 开头的File");
                 } else {
-                    fileList.push(
-                        {
-                            uuid: fileList.length,
-                            isDir: stat.isDirectory(),
-                            name: path.parse(fullname).base,
-                            newName: path.parse(fullname).base,
-                            parent: path.parse(fullname).dir,
-                            selected: !stat.isDirectory(),
-                        }
-                    )
+                    if (file.indexOf(".") == 0 || file.indexOf("$") == 0) {
+                    } else {
+                        // console.info("[info]", "过滤掉以 . 开头的File");
+                        fileList.push(
+                            {
+                                uuid: fileList.length,
+                                isDir: stat.isDirectory(),
+                                name: path.parse(fullname).base,
+                                newName: path.parse(fullname).base,
+                                parent: path.parse(fullname).dir,
+                                selected: !stat.isDirectory(),
+                            }
+                        )
+                    }
                 }
             } catch (error) {
                 console.log("[debug] catch error:", error)
