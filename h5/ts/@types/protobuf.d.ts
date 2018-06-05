@@ -1817,7 +1817,7 @@ export interface Buffer extends Uint8Array {
  * Any compatible Long instance.
  * This is a minimal stand-alone definition of a Long instance. The actual type is that exported by long.js.
  */
-export interface Long {
+interface Long {
 
     /** Low bits */
     low: number;

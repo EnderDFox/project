@@ -212,7 +212,7 @@ declare module pb {
         interface IMarkBody {
 
             /** MarkBody mid */
-            mid?: (Long|null);
+            mid?: (number|Long|null);
 
             /** MarkBody name */
             name?: (string|null);
@@ -243,7 +243,7 @@ declare module pb {
             constructor(properties?: pb.mark.IMarkBody);
 
             /** MarkBody mid. */
-            public mid: Long;
+            public mid: (number|Long);
 
             /** MarkBody name. */
             public name: string;

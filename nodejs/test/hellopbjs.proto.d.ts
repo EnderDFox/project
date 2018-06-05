@@ -24,7 +24,7 @@ export namespace hellopbjs {
         password: string;
 
         /** Login uid */
-        uid?: (number|Long|null);
+        uid?: (Long|null);
     }
 
     /** Represents a Login. */
@@ -43,7 +43,7 @@ export namespace hellopbjs {
         public password: string;
 
         /** Login uid. */
-        public uid: (number|Long);
+        public uid: Long;
 
         /**
          * Creates a new Login instance using the specified properties.

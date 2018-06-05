@@ -21,6 +21,13 @@ var process = require("process");
     var loginB = hellopbjs.Login.decode(bufferWriter.finish())
     console.log("[debug]",loginB,":[loginB]")
  * ```
+ * # other
+ * # 有关long的问题
+ * long都是用 js默认的number (53 bit integer) 不是真64 但方便,
+ * 要用真64, 比较麻烦, 步骤如下(没测试过)
+ * - 执行pdjs时要加参数 --force-long
+ * - 需要引入long.js
+ * - 设置protobuf.util.Long = Long.js中导出的Long
  */
 var ProtobufJsHelper = /** @class */ (function () {
     function ProtobufJsHelper() {
@@ -33,7 +40,8 @@ var ProtobufJsHelper = /** @class */ (function () {
     }
     ProtobufJsHelper.prototype.generatePbJs = function () {
         //e.g. pbjs -t static -w CommonJS -o c:\fox\projects\tools\NodeJsTools\test\pb.js c:\fox\projects\tools\NodeJsTools\test\pb.proto
-        var cmdStr = "pbjs -t static --force-long -w CommonJS -o " + this.path_pb_js + " " + this.path_pb_proto;
+        var cmdStr = "pbjs -t static -w CommonJS -o " + this.path_pb_js + " " + this.path_pb_proto;
+        // var cmdStr = `pbjs -t static --force-long -w CommonJS -o ${this.path_pb_js} ${this.path_pb_proto}`;
         console.log("Doing generatePbJs: ", cmdStr);
         var out = child_process.execSync(cmdStr);
         if (out.toString()) {

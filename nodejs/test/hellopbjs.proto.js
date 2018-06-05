@@ -48,7 +48,7 @@ $root.hellopbjs = (function() {
          * @interface ILogin
          * @property {string} account Login account
          * @property {string} password Login password
-         * @property {number|Long|null} [uid] Login uid
+         * @property {Long|null} [uid] Login uid
          */
 
         /**
@@ -84,7 +84,7 @@ $root.hellopbjs = (function() {
 
         /**
          * Login uid.
-         * @member {number|Long} uid
+         * @member {Long} uid
          * @memberof hellopbjs.Login
          * @instance
          */

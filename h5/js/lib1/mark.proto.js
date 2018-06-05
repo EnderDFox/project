@@ -471,7 +471,7 @@ $root.pb = (function() {
              * Properties of a MarkBody.
              * @memberof pb.mark
              * @interface IMarkBody
-             * @property {Long|null} [mid] MarkBody mid
+             * @property {number|Long|null} [mid] MarkBody mid
              * @property {string|null} [name] MarkBody name
              * @property {number|null} [kind] MarkBody kind
              * @property {string|null} [refName] MarkBody refName
@@ -499,7 +499,7 @@ $root.pb = (function() {
 
             /**
              * MarkBody mid.
-             * @member {Long} mid
+             * @member {number|Long} mid
              * @memberof pb.mark.MarkBody
              * @instance
              */

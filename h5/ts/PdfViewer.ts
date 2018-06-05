@@ -30,14 +30,6 @@ class PdfViewer {
 
     init() {
         //
-        var mb = new pb.mark.MarkBody()
-        mb.mid = 9323370368547758311
-        // mb.mid = 2147483647
-        mb.kind = MarkBodyKid.PDF
-        var msg = pb.mark.MarkBody.encode(mb).finish()
-        mb = pb.mark.MarkBody.decode(msg)
-        console.log("[info]",mb,":[mb]")
-        //
         Common.preventDragDefault()
         //
         var pdfPath = 'assets/Go in Action CN.pdf';
@@ -453,7 +445,6 @@ class PdfViewer {
         var xy = { x: clientXY.x - $(this.canvasMark).x(), y: clientXY.y - $(this.canvasMark).y() }
         xy.x = xy.x / $(this.canvasMark).w() * 2 - 1
         xy.y = -(xy.y / $(this.canvasMark).h() * 2 - 1)
-        var a:Long
         return xy
     }
 }
