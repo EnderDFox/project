@@ -40,8 +40,8 @@
     .doc canvas {
       border: 1px solid rgb(65, 65, 65);
       position: absolute;
-      left: 4px;
-      top: 34px;
+      left: 30px;
+      top: 30px;
       z-index: -1;
     }
 
@@ -60,9 +60,9 @@
       /* 防止拖到右侧边缘后  宽度修改(因为document宽度小,把outline宽度挤窄了)*/
     }
 
-    .log{
+    .log {
       left: 300px;
-      top:0px;
+      top: 0px;
     }
 
     .outline .children0 {
@@ -145,8 +145,8 @@
       <button @click="onZoomIn">+</button>
     </div>
     <!-- canvas -->
-    <canvas ref='canvas' v-drag="getTouchOption" @mouseWheel="onMouseWheel($event)">Canvas is not supported</canvas>
-    <canvas ref='canvasMark'></canvas>
+    <canvas ref='canvas'>Canvas is not supported</canvas>
+    <canvas ref='canvasMark' v-drag="getTouchOption" @mouseWheel="onMouseWheel($event)"></canvas>
   </section>
   <!-- outline -->
   <section class="outline">

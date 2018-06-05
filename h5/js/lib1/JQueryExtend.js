@@ -19,11 +19,20 @@ $.fn.extend({
             return this;
         }
     },
-    xy: function (vx, vy) {
-        if (vx == undefined || vx == null) {
+    xy: function () {
+        if (arguments.length == 0) {
             return { x: this.position().left, y: this.position().top };
         }
         else {
+            var vx, vy;
+            if (arguments.length == 2) {
+                vx = arguments[0];
+                vy = arguments[1];
+            }
+            else if (arguments.length == 1) {
+                vx = arguments[0].x;
+                vy = arguments[0].y;
+            }
             this.css({ 'left': vx + 'px', 'top': vy + 'px' });
             return this;
         }
@@ -44,11 +53,20 @@ $.fn.extend({
             return this.height(vh);
         }
     },
-    wh: function (vw, vh) {
-        if (vw == undefined || vw == null) {
+    wh: function () {
+        if (arguments.length == 0) {
             return { x: this.width(), y: this.height() };
         }
         else {
+            var vw, vh;
+            if (arguments.length == 2) {
+                vw = arguments[0];
+                vh = arguments[1];
+            }
+            else if (arguments.length == 1) {
+                vw = arguments[0].x;
+                vh = arguments[0].y;
+            }
             return this.width(vw).height(vh);
         }
     },

@@ -1,4 +1,7 @@
 //# defind
+function NewXY(x, y) {
+    return { x: x, y: y };
+}
 var EventName = /** @class */ (function () {
     function EventName() {
     }
@@ -18,9 +21,6 @@ var EventName = /** @class */ (function () {
 var CommonClass = /** @class */ (function () {
     function CommonClass() {
     }
-    CommonClass.prototype.NewXY = function (x, y) {
-        return { x: x, y: y };
-    };
     /**格式化时间 格式化为 yyyy-MM-dd 格式 */
     CommonClass.prototype.FmtDate = function (date) {
         var Y = date.getFullYear();

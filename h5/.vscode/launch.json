@@ -25,7 +25,7 @@
         {
             "type": "chrome",
             "request": "launch",
-            "name": "Chrome PDFViewerPage",
+            "name": "Chrome PdfViewer",
             "url": "http://localhost:833/PdfViewer.html",
             // "file": "${workspaceRoot}/index.html",
             "runtimeExecutable": "C:/Program Files (x86)/Google/Chrome/Application/chrome.exe",

@@ -1,5 +1,7 @@
 //# defind
-
+function NewXY(x: number, y: number): IXY {
+    return { x: x, y: y };
+}
 class EventName{
     static mousedown = 'mousedown'
     static mousemove = 'mousemove'
@@ -15,9 +17,6 @@ class EventName{
 
 //通用类
 class CommonClass {
-    NewXY(x: number, y: number): IXY {
-        return { x: x, y: y };
-    }
     /**格式化时间 格式化为 yyyy-MM-dd 格式 */
     FmtDate(date: Date): string {
         var Y = date.getFullYear()

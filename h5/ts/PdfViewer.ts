@@ -5,20 +5,28 @@ interface ITreeItem {
     isOpen?: boolean
     dest?: any[]
 }
+enum TouchKind {
+    START = 1,
+    MOVE = 2,
+    END = 3,
+}
 interface ITouchOption {
     dragTarget?: HTMLElement
     useTouchTwo?: boolean
-    touchTwoCallback?: (gapW: number, gapH: number) => void
+    touchOneCallback?: (kind: TouchKind, poi: IXY) => void
+    touchTwoCallback?: (kind: TouchKind, gapW: number, gapH: number) => void
 }
 class PdfViewer {
+    mark: MarkWebgl
     canvas: HTMLCanvasElement
     ctx: CanvasRenderingContext2D
     canvasMark: HTMLCanvasElement
-    
+
     pdfjsLib: PDFJSStatic
     pdfDoc: PDFDocumentProxy
     pageRendering = false
     pageNumPending = null
+
     init() {
         Common.preventDragDefault()
         //
@@ -43,7 +51,8 @@ class PdfViewer {
                 this._renderPage(this.vueDoc.pageNum);
             });
             //
-            new MarkWebgl().init(this.canvasMark)
+            this.mark = new MarkWebgl()
+            this.mark.init(this.canvasMark)
         });
 
     }
@@ -92,11 +101,11 @@ class PdfViewer {
                 var onMouseStart = (e: MouseEvent) => {
                     initTouchOption()
                     e.preventDefault()
-                    doTouchOneStart({ x: e.screenX, y: e.screenY })
+                    doTouchOneStart({ x: e.clientX, y: e.clientY })
                 }
                 var onMouseMove = (e: MouseEvent) => {
                     e.preventDefault()
-                    doTouchOneMove({ x: e.screenX, y: e.screenY })
+                    doTouchOneMove({ x: e.clientX, y: e.clientY })
                 }
                 //for mobile
                 var onTouchStart = (e: TouchEvent) => {
@@ -104,11 +113,11 @@ class PdfViewer {
                     onCancel()
                     switch (e.touches.length) {
                         case 1:
-                            doTouchOneStart({ x: e.touches[0].screenX, y: e.touches[0].screenY })
+                            doTouchOneStart({ x: e.touches[0].clientX, y: e.touches[0].clientY })
                             break;
                         case 2:
                             if (touchOption.useTouchTwo) {
-                                doTouchTwoStart({ x: e.touches[0].screenX, y: e.touches[0].screenY }, { x: e.touches[1].screenX, y: e.touches[1].screenY })
+                                doTouchTwoStart({ x: e.touches[0].clientX, y: e.touches[0].clientY }, { x: e.touches[1].clientX, y: e.touches[1].clientY })
                             }
                             break;
                     }
@@ -117,14 +126,14 @@ class PdfViewer {
                     switch (e.touches.length) {
                         case 1:
                             if (touchingCount == 1) {
-                                doTouchOneMove({ x: e.touches[0].screenX, y: e.touches[0].screenY })
+                                doTouchOneMove({ x: e.touches[0].clientX, y: e.touches[0].clientY })
                             } else {
                                 onCancel()
                             }
                             break;
                         case 2:
                             if (touchingCount == 2) {
-                                doTouchTwoMove({ x: e.touches[0].screenX, y: e.touches[0].screenY }, { x: e.touches[1].screenX, y: e.touches[1].screenY })
+                                doTouchTwoMove({ x: e.touches[0].clientX, y: e.touches[0].clientY }, { x: e.touches[1].clientX, y: e.touches[1].clientY })
                             } else {
                                 onCancel()
                             }
@@ -138,6 +147,9 @@ class PdfViewer {
                     touchingCount = 1
                     p0 = _p0
                     toggleEventListeners(true)
+                    if (touchOption.touchOneCallback) {
+                        touchOption.touchOneCallback(TouchKind.START, p0)
+                    }
                 };
                 var doTouchTwoStart = (_p0: IXY, _p1: IXY) => {
                     touchingCount = 2
@@ -146,21 +158,23 @@ class PdfViewer {
                     toggleEventListeners(true)
                 }
                 var doTouchOneMove = (_p0: IXY) => {
-                    $dragTarget.xy($dragTarget.x() + (_p0.x - p0.x), $dragTarget.y() + (_p0.y - p0.y))
                     p0 = _p0
+                    if (touchOption.touchOneCallback) {
+                        touchOption.touchOneCallback(TouchKind.MOVE, p0)
+                    } else {
+                        $dragTarget.xy($dragTarget.x() + (_p0.x - p0.x), $dragTarget.y() + (_p0.y - p0.y))
+                    }
                 };
                 var doTouchTwoMove = (_p0: IXY, _p1: IXY) => {
                     var dist = MathUtil.distance(p0, p1)
                     var _dist = MathUtil.distance(_p0, _p1)
                     // this.log(dist, ":[dist]", _dist, ":[_dist]")
-                    //
                     var oldXY = $dragTarget.xy()
                     var oldWH = $dragTarget.wh()
-                    var pinchCenter = Common.NewXY((p1.x + p0.x) / 2, (p1.y + p0.y) / 2)
-                    var _pinchCenter = Common.NewXY((_p1.x + _p0.x) / 2, (_p1.y + _p0.y) / 2)
+                    var pinchCenter = NewXY((p1.x + p0.x) / 2, (p1.y + p0.y) / 2)
+                    var _pinchCenter = NewXY((_p1.x + _p0.x) / 2, (_p1.y + _p0.y) / 2)
                     // this.log(oldXY.x, oldXY.y, ":[oldXY]", oldWH.x, oldWH.y, ":[oldWH]")
                     // this.log(pinchCenter.x, pinchCenter.y, ":[pinchCenter]", _pinchCenter.x, _pinchCenter.y, ":[_pinchCenter]")
-                    //
                     var gapX = Math.abs(_p1.x - _p0.x) - Math.abs(p1.x - p0.x)
                     var gapY = Math.abs(_p1.y - _p0.y) - Math.abs(p1.y - p0.y)
                     // this.log(gapX, ":[gapX]", gapY, ":[gapY]")
@@ -170,7 +184,7 @@ class PdfViewer {
                     var gap = (gapX + gapY)
                     // this.log(whRate, ":[whRate]", gap, ":[gap]")
                     if (touchOption.touchTwoCallback) {
-                        touchOption.touchTwoCallback(gap, gap * whRate)
+                        touchOption.touchTwoCallback(TouchKind.MOVE, gap, gap * whRate)
                     } else {
                         $dragTarget.wh(Math.max($dragTarget.w() + gap, 100), Math.max($dragTarget.h() + gap * whRate, 100 * whRate))
                     }
@@ -180,6 +194,9 @@ class PdfViewer {
                 }
                 var onCancel = (e: Event = null) => {
                     toggleEventListeners(false)
+                    if (touchOption.touchOneCallback) {
+                        touchOption.touchOneCallback(TouchKind.END, null)
+                    }
                 }
                 var onEnd = (e: Event = null) => {
                     onCancel(e)
@@ -234,7 +251,24 @@ class PdfViewer {
                     return {
                         dragTarget: null,
                         useTouchTwo: true,
-                        touchTwoCallback: (gapW: number, gapH: number) => {
+                        touchOneCallback: (kind: TouchKind, poi: IXY) => {
+                            switch (kind) {
+                                case TouchKind.START:
+                                    var wp: IXY = this.countWebglXY(poi)
+                                    this.mark.poiArrList.push(this.mark.currLine = [wp.x, wp.y])
+                                    break;
+                                case TouchKind.MOVE:
+                                    var wp: IXY = this.countWebglXY(poi)
+                                    this.mark.currLine.push(wp.x, wp.y)
+                                    this.mark.renderDirty = true
+                                    break;
+                                case TouchKind.END:
+                                    this.mark.currLine = null
+                                    break;
+                            }
+                        },
+                        touchTwoCallback: (kind: TouchKind, gapW: number, gapH: number) => {
+                            $(this.canvas).xy($(this.canvasMark).xy())
                             var _w: number = $(this.canvas).w() + gapW
                             _w = Math.max(_w, 100)
                             this.renderScale(this.vueDoc.pageScale * (_w / $(this.canvas).w()))
@@ -245,7 +279,7 @@ class PdfViewer {
         })
         this.vueOutline = new Vue({
             data: {
-                showContent: true,
+                showContent: false,
                 treeData: [],
             },
             methods: {
@@ -260,7 +294,7 @@ class PdfViewer {
         }).$mount('.outline')
         this.vueLog = new Vue({
             data: {
-                showContent: true,
+                showContent: false,
                 content: '',
             },
             methods: {
@@ -350,20 +384,21 @@ class PdfViewer {
             return
         }
         this.vueDoc.pageScale = val
-        $(this.canvas).wh(this.pageWHScale1.x*val,this.pageWHScale1.y*val)
+        $(this.canvas).wh(this.pageWHScale1.x * val, this.pageWHScale1.y * val)
+        $(this.canvasMark).wh($(this.canvas).wh())
         this.delayRenderPage(this.vueDoc.pageNum);
     }
-    delayRenderPageNum:number
-    delayRenderPageId:number
-    delayRenderPage(num:number){
+    delayRenderPageNum: number
+    delayRenderPageId: number
+    delayRenderPage(num: number) {
         this.delayRenderPageNum = num
         clearTimeout(this.delayRenderPageId)
-        this.delayRenderPageId = setTimeout(this._delayRenderPage.bind(this), 1000);
+        this.delayRenderPageId = setTimeout(this._delayRenderPage.bind(this), 3000);
     }
-    _delayRenderPage(){
+    _delayRenderPage() {
         this.renderPage(this.delayRenderPageNum)
     }
-    
+
     pageWHScale1: IXY
     _renderPage(num: number) {
         this.vueDoc.pageNum = num
@@ -381,9 +416,7 @@ class PdfViewer {
             });
             // Wait for rendering to finish
             renderTask.promise.then(() => {
-                if (!this.pageWHScale1) {
-                    this.pageWHScale1 = $(this.canvas).wh()
-                }
+                this.initWhenRenderFirst()
                 //render pending page
                 this.pageRendering = false;
                 if (this.pageNumPending !== null) {
@@ -393,5 +426,23 @@ class PdfViewer {
                 }
             });
         });
+    }
+    initWhenRenderFirst() {
+        if (this.pageWHScale1) {
+            //only run when first
+            return
+        }
+        this.pageWHScale1 = $(this.canvas).wh()
+        $(this.canvasMark).wh($(this.canvas).wh())
+        $(this.canvasMark).xy($(this.canvas).xy())
+        //
+
+    }
+    countWebglXY(clientXY: IXY): IXY {
+        console.log("[info]",$(this.canvasMark).y(),":[$(this.canvasMark).y()]")
+        var xy = {x:clientXY.x-$(this.canvasMark).x(),y:clientXY.y-$(this.canvasMark).y()}
+        xy.x = xy.x / $(this.canvasMark).w() * 2 - 1
+        xy.y = -(xy.y / $(this.canvasMark).h() * 2 - 1)
+        return xy
     }
 }

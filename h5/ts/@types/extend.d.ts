@@ -24,12 +24,14 @@ interface JQuery<TElement extends Node = HTMLElement> extends Iterable<TElement>
     y(): number
     y(vy: number): this
     xy(): IXY
+    xy(vxy: IXY): this
     xy(vx: number, vy: number): this
     w(): number
     w(vw: number): this
     h(): number
     h(vh: number): this
     wh(): IXY
+    wh(vwh: IXY): this
     wh(vw: number, vh: number): this
     isShow(): boolean
     adjust(offsetY: number): this
