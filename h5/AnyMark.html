@@ -12,93 +12,7 @@
   <title>PDF</title>
   <!--  -->
   <link href="js/lib3/bootstrap-3.3.7-dist/css/bootstrap.css" rel="stylesheet">
-  <style type="text/css">
-    body {
-      overflow: hidden;
-    }
-
-    .doc {
-      /* position: absolute; */
-      /* border: 1px solid #313131; */
-      width: 100%;
-      height: 100%;
-    }
-
-    /* .doc .buttonBar {
-    } */
-
-    .doc .btn_drag {
-      float: right;
-    }
-
-    .doc .label_scale {
-      min-width: 30px;
-      display: inline-block;
-      text-align: center;
-    }
-
-    .doc canvas {
-      border: 1px solid rgb(65, 65, 65);
-      position: absolute;
-      left: 30px;
-      top: 30px;
-      z-index: -1;
-    }
-
-    .log,
-    .outline {
-      position: absolute;
-      left: 14px;
-      top: 30px;
-      border: 1px solid #313131;
-      background-color: rgba(255, 255, 255, 0.82);
-      max-height: 90%;
-      min-width: 200px;
-      overflow-y: auto;
-      padding-right: 8px;
-      white-space: nowrap;
-      /* 防止拖到右侧边缘后  宽度修改(因为document宽度小,把outline宽度挤窄了)*/
-    }
-
-    .log {
-      left: 300px;
-      top: 0px;
-    }
-
-    .outline .children0 {
-      border-top: 1px solid #313131;
-    }
-
-    .outline ul {
-      padding-left: 0px;
-    }
-
-    .outline .children {
-      padding-left: 25px;
-    }
-
-    /* .outline ul .item_toggle { */
-
-    /* display: inline-block; */
-
-    /* width: 16px; */
-
-    /* height: 16px; */
-
-    /* line-height: 16px; */
-
-    /* text-align: center; */
-
-    /* vertical-align: middle; */
-
-    /* background-color: rgba(255, 255, 255, 0.452) */
-
-    /* } */
-
-    .outline ul .item_name {
-      margin-left: 0px;
-    }
-  </style>
+  <link href="css/AnyMark.css" rel="stylesheet">
   <!-- js/lib3 -->
   <script type="text/javascript" src="js/lib3/path.js"></script>
   <script type="text/javascript" src="js/lib3/jquery-3.2.1.min.js"></script>
@@ -129,44 +43,59 @@
   <!-- doc -->
   <section class="doc">
     <!-- button bar -->
-    <div class="buttonBar">
+    <nav class="navbar navbar-default buttonBar">
       <!-- page -->
-      <span>Page:</span>
-      <button @click='onPagePrev'>-</button>
-      <span>
-        <span>{{pageNum}}</span> /
-        <span>{{pageTotal}}</span>
-      </span>
-      <button @click='onPageNext'>+</button>
+      <div class="input-group">
+        <span class="input-group-addon">Page:</span>
+        <button type="button" class="btn btn-default btn-sm" @click='onPagePrev'>
+          <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
+        </button>
+        <span class="input-group-addon">{{pageNum}} / {{pageTotal}}</span>
+        <button type="button" class="btn btn-default btn-sm" @click='onPageNext'>
+          <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>
+        </button>
+      </div>
       <!-- scale -->
-      <span>Scale:</span>
-      <button @click="onZoomOut">-</button>
-      <span>
-        <span class="label_scale">{{pageScale}}</span>
-      </span>
-      <button @click="onZoomIn">+</button>
-    </div>
+      <div class="input-group">
+        <span class="input-group-addon">Scale:</span>
+        <button type="button" class="btn btn-default btn-sm" @click='onZoomOut'>
+          <span class="glyphicon glyphicon glyphicon-minus-sign" aria-hidden="true"></span>
+        </button>
+        <span class="input-group-addon">{{pageScale}}</span>
+        <button type="button" class="btn btn-default btn-sm" @click='onZoomIn'>
+          <span class="glyphicon glyphicon glyphicon-plus-sign" aria-hidden="true"></span>
+        </button>
+      </div>
+    </nav>
     <!-- canvas -->
     <canvas ref='canvasView'>Canvas is not supported</canvas>
     <canvas ref='canvasMark'></canvas>
   </section>
   <!-- outline -->
   <section class="outline">
-    <div class="buttonBar" v-drag="getTouchOption">
-      <span class="section_name">Outline:</span>
-      <button @click="showContent=!showContent">Toggle</button>
-      <!-- <button class="btn_drag" v-drag="getDragTarget">Drag</button> -->
-    </div>
+    <nav class="navbar navbar-default buttonBar" v-drag="getTouchOption">
+      <div class="input-group">
+        <span class="input-group-addon">Outline:</span>
+        <button type="button" class="btn btn-default btn-sm" @click='showContent=!showContent'>
+          <span class="glyphicon" :class="[{'glyphicon-expand':!showContent},{'glyphicon-collapse-down':showContent}]"
+            aria-hidden="true"></span>
+        </button>
+      </div>
+    </nav>
     <item class="children0" :models="treeData" v-if="showContent">
     </item>
   </section>
   <!-- log -->
   <section class="log">
-    <div class="buttonBar" v-drag="getTouchOption">
-      <span class="section_name">Log:</span>
-      <button @click="showContent=!showContent">Toggle</button>
-      <!-- <button class="btn_drag" v-drag="getDragTarget">Drag</button> -->
-    </div>
+    <nav class="navbar navbar-default buttonBar" v-drag="getTouchOption">
+      <div class="input-group">
+        <span class="input-group-addon">Log:</span>
+        <button type="button" class="btn btn-default btn-sm" @click='showContent=!showContent'>
+          <span class="glyphicon" :class="[{'glyphicon-expand':!showContent},{'glyphicon-collapse-down':showContent}]"
+            aria-hidden="true"></span>
+        </button>
+      </div>
+    </nav>
     <div v-if="showContent" ref="content" v-html="content"></div>
   </section>
   <!-- vue 组件 -->
@@ -174,8 +103,11 @@
     <ul>
       <li class="list-unstyled" v-for="model in models" :key="model.uuid">
         <div>
-          <button @click="onToggleItem(model)" role="button" class="item_toggle" :style="{'visibility': model.children.length>0?'visible':'hidden'}">{{model.isOpen?'-':'+'}}</button>
-          <button @click="onLinkItem(model)" role="button" class="item_name">{{model.name}}</button>
+          <button type="button" class="btn btn-default btn-sm" @click='onToggleItem(model)' :style="{'visibility': model.children.length>0?'visible':'hidden'}">
+            <span class="glyphicon" :class="[{'glyphicon-expand':!model.isOpen},{'glyphicon-collapse-down':model.isOpen}]"
+              aria-hidden="true"></span>
+          </button>
+          <button  class="btn btn-default" @click="onLinkItem(model)">{{model.name}}</button>
         </div>
         <!-- 组件中引用当前组件，传入下级数据 -->
         <item class="children" :models="model.children" v-show="model.isOpen">

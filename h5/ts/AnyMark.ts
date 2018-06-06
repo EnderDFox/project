@@ -42,7 +42,7 @@ class PdfViewer {
         Vue.nextTick(() => {
             this.canvasView = this.vueDoc.$refs.canvasView as HTMLCanvasElement
             this.canvasMark = this.vueDoc.$refs.canvasMark as HTMLCanvasElement
-            $([this.vueDoc.$el, this.vueOutline.$el]).hide()
+            // $([this.vueDoc.$el, this.vueOutline.$el]).hide()
             this.ctx = this.canvasView.getContext('2d')
             this.pdfjsLib.getDocument(pdfPath).then((pdfDoc_: PDFDocumentProxy) => {
                 this.pdfDoc = pdfDoc_;
@@ -96,6 +96,9 @@ class PdfViewer {
                     }
                 }
                 var onMouseStart = (e: MouseEvent) => {
+                    if (e.target != el) {
+                        return
+                    }
                     initTouchOption()
                     e.preventDefault()
                     doPointOneStart({ x: e.clientX, y: e.clientY })
@@ -106,6 +109,9 @@ class PdfViewer {
                 }
                 //for mobile
                 var onTouchStart = (e: TouchEvent) => {
+                    if (e.target != el) {
+                        return
+                    }
                     initTouchOption()
                     onCancel()
                     switch (e.touches.length) {
@@ -182,37 +188,6 @@ class PdfViewer {
                 onPageNext: this.onPageNext.bind(this),
                 onZoomOut: this.onZoomOut.bind(this),
                 onZoomIn: this.onZoomIn.bind(this),
-                /*onMouseWheel: (e: MouseWheelEvent) => {
-                    this.renderScale(this.vueDoc.pageScale - e.deltaY / 1000)
-                },
-                 getTouchOption: (): ITouchOption => {
-                    return {
-                        dragTarget: null,
-                        useTouchTwo: true,
-                        touchOneCallback: (kind: TouchKind, poi: IXY) => {
-                            switch (kind) {
-                                case TouchKind.START:
-                                    var wp: IXY = this.countWebglXY(poi)
-                                    this.mark.poiArrList.push(this.mark.currLine = [wp.x, wp.y])
-                                    break;
-                                case TouchKind.MOVE:
-                                    var wp: IXY = this.countWebglXY(poi)
-                                    this.mark.currLine.push(wp.x, wp.y)
-                                    this.mark.renderDirty = true
-                                    break;
-                                case TouchKind.END:
-                                    this.mark.currLine = null
-                                    break;
-                            }
-                        },
-                        touchTwoCallback: (kind: TouchKind, gapW: number, gapH: number) => {
-                            $(this.canvasView).xy($(this.canvasMark).xy())
-                            var _w: number = $(this.canvasView).w() + gapW
-                            _w = Math.max(_w, 100)
-                            this.renderScale(this.vueDoc.pageScale * (_w / $(this.canvasView).w()))
-                        },
-                    }
-                }, */
             }
         })
         this.vueOutline = new Vue({
@@ -446,7 +421,7 @@ class PdfViewer {
             toggleEventListeners(true)
             //画线
             var wp: IXY = this.countWebglXY(p0)
-            if (!this.mark.currLine) {
+            if (this.mark.currLine) {
                 if (this.mark.currLine.length < 2) {
                     this.mark.poiArrList.pop()//currLine太短,放弃掉
                 }
@@ -496,7 +471,7 @@ class PdfViewer {
         //
         var onCancel = (e: Event = null) => {
             toggleEventListeners(false)
-            if (!this.mark.currLine) {
+            if (this.mark.currLine) {
                 if (this.mark.currLine.length < 2) {
                     this.mark.poiArrList.pop()//currLine太短,放弃掉
                 }

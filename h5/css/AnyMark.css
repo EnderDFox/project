@@ -1,0 +1,77 @@
+body {
+    overflow: hidden;
+    user-select: none;
+}
+
+.doc {
+    /* position: absolute; */
+    /* border: 1px solid #313131; */
+    width: 100%;
+    height: 100%;
+}
+
+.doc .btn_drag {
+    float: right;
+}
+
+.doc .label_scale {
+    min-width: 30px;
+    display: inline-block;
+    text-align: center;
+}
+
+.doc canvas {
+    border: 1px solid rgb(65, 65, 65);
+    position: absolute;
+    left: 30px;
+    top: 30px;
+    z-index: -1;
+}
+
+.log,
+.outline {
+    position: absolute;
+    border: 1px solid #313131;
+    background-color: rgba(255, 255, 255, 0.82);
+    max-height: 90%;
+    min-width: 200px;
+    overflow-y: auto;
+    padding-right: 8px;
+    white-space: nowrap;
+    /* 防止拖到右侧边缘后  宽度修改(因为document宽度小,把outline宽度挤窄了)*/
+}
+
+.log {
+    left: 10px;
+    top: 130px;
+}
+
+.outline {
+    left: 10px;
+    top: 170px;
+}
+
+.outline .children0 {
+    border-top: 1px solid #313131;
+}
+
+.outline ul {
+    padding-left: 0px;
+}
+
+.outline .children {
+    padding-left: 25px;
+}
+
+/* override bootstrap.css */
+
+.navbar {
+    min-height: auto;
+    margin-bottom: 0px;
+}
+
+.input-group {
+    float: left;
+    /* 设置一个很小的值 以便被内容撑开*/
+    width: 1em;
+}

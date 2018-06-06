@@ -27,7 +27,7 @@ var PdfViewer = /** @class */ (function () {
         Vue.nextTick(function () {
             _this.canvasView = _this.vueDoc.$refs.canvasView;
             _this.canvasMark = _this.vueDoc.$refs.canvasMark;
-            $([_this.vueDoc.$el, _this.vueOutline.$el]).hide();
+            // $([this.vueDoc.$el, this.vueOutline.$el]).hide()
             _this.ctx = _this.canvasView.getContext('2d');
             _this.pdfjsLib.getDocument(pdfPath).then(function (pdfDoc_) {
                 _this.pdfDoc = pdfDoc_;
@@ -79,6 +79,9 @@ var PdfViewer = /** @class */ (function () {
                     }
                 };
                 var onMouseStart = function (e) {
+                    if (e.target != el) {
+                        return;
+                    }
                     initTouchOption();
                     e.preventDefault();
                     doPointOneStart({ x: e.clientX, y: e.clientY });
@@ -89,6 +92,9 @@ var PdfViewer = /** @class */ (function () {
                 };
                 //for mobile
                 var onTouchStart = function (e) {
+                    if (e.target != el) {
+                        return;
+                    }
                     initTouchOption();
                     onCancel();
                     switch (e.touches.length) {
@@ -410,7 +416,7 @@ var PdfViewer = /** @class */ (function () {
             toggleEventListeners(true);
             //画线
             var wp = _this.countWebglXY(p0);
-            if (!_this.mark.currLine) {
+            if (_this.mark.currLine) {
                 if (_this.mark.currLine.length < 2) {
                     _this.mark.poiArrList.pop(); //currLine太短,放弃掉
                 }
@@ -461,7 +467,7 @@ var PdfViewer = /** @class */ (function () {
         var onCancel = function (e) {
             if (e === void 0) { e = null; }
             toggleEventListeners(false);
-            if (!_this.mark.currLine) {
+            if (_this.mark.currLine) {
                 if (_this.mark.currLine.length < 2) {
                     _this.mark.poiArrList.pop(); //currLine太短,放弃掉
                 }

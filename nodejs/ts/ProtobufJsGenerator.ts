@@ -56,7 +56,7 @@ class ProtobufJsHelper {
             console.log("Doing generatePbTsd complete! No news is good news.");
         }
     }
-    private line_separator: string = "\r\n";
+    private line_separator: string = "\n";
     private var$protobuf: string = "var $protobuf = protobuf;";
     private pb$root: string = "pb = $root.pb";
     private export_namespace_pb: string = "export namespace pb";

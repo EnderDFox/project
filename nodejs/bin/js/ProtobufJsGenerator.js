@@ -34,7 +34,7 @@ var process = require("process");
  */
 var ProtobufJsHelper = /** @class */ (function () {
     function ProtobufJsHelper() {
-        this.line_separator = "\r\n";
+        this.line_separator = "\n";
         this.var$protobuf = "var $protobuf = protobuf;";
         this.pb$root = "pb = $root.pb";
         this.export_namespace_pb = "export namespace pb";
