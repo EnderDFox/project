@@ -1,10 +1,12 @@
-#在 cd /root/trunk_beta/src/pm 后 执行命令 sh ./run.beta.sh
+#------本文件使用方法
+#shell中输入下面的命令
+# cd /root/trunk/src/pm_beta ; sh ./run.beta.sh
+#------
 #svn更新
 svn up ../../
 #copy 文件
-mv ./*.go ../pm_beta -f
-cp -rf ./config.beta.xml ../pm_beta/config.xml
-cd ../pm_beta
+\cp -rf ../pm/*.go ./
+# \cp -rf ./config.beta.xml ../pm_beta/config.xml
 #代码编译
 go build
 echo 1.编译完成

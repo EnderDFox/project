@@ -1,10 +1,13 @@
-#在 cd /root/trunk/src/pm 后 执行命令sh ./run.svr.sh
+#------本文件使用方法
+#shell中输入下面的命令
+# cd /root/trunk/src/pm ; sh ./run.svr.sh
+#------
 #svn更新
 svn up ../../
 #copy 文件
 mv ./*.go /data/web/pm -f
-# cp 会提示覆盖  \cp 就不会了
-\cp -rf ../../web /data/web/pm/web
+# cp 会提示覆盖  用 \cp代替 下次部署时再试试 手动上传吧,  上传web下的js css vue_template index.html 
+\cp -rf ../../web /data/web/pm
 \cp -rf ./config.svr.xml /data/web/pm/config.xml
 cd /data/web/pm
 #代码编译

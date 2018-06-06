@@ -31,7 +31,7 @@ var Templet = {
 		<ul class="tools"> \
 			<li id="projectSer">筛选</li> \
 		</ul> \
-		<ul class="tools" style="display:none;"> \
+		<ul class="tools"> \
 			<li id="saveFile">保存</li> \
 			<li style="display:none;">统计</li> \
 		</ul> \

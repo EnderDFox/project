@@ -63,24 +63,24 @@ class ProcessFilterClass {
         this.Pack.EndDate = Common.GetDate(31)
         this.Pack.ModeName = []
         this.Pack.Vid = []
-        this.Pack.ModeStatus = []
+        this.Pack.ModeStatus = [0]  //默认0:进行中
         this.Pack.LinkName = []
         this.Pack.LinkUserName = []
-        this.Pack.LinkStatus = []
+        this.Pack.LinkStatus = [0]  //默认0:进行中
         this.Pack.LinkUserDid = []
         this.Pack.WorkStatus = []
         this.Pack.WorkFile = []
     }
-    /**重置 VueFilter 但不变Pack, 以免点击了取消后还要恢复 */
+    /**重置 VueFilter 但不变Pack, 知道点了`确定`后才应用到Pack, 点`取消`则恢复到当前Pack */
     ResetVueFilter() {
         this.VueFilter.beginDate = Common.GetDate(-7)
         this.VueFilter.endDate = Common.GetDate(31)
         this.SetCheckBoxValues(this.VueFilter.vid, [])
         this.SetTextFieldValues(this.VueFilter.modeName, [])
-        this.SetCheckBoxValues(this.VueFilter.modeStatus, [])
+        this.SetCheckBoxValues(this.VueFilter.modeStatus, [0])
         this.SetTextFieldValues(this.VueFilter.linkName, [])
         this.SetTextFieldValues(this.VueFilter.linkUserName, [])
-        this.SetCheckBoxValues(this.VueFilter.linkStatus, [])
+        this.SetCheckBoxValues(this.VueFilter.linkStatus, [0])
         this.SetCheckBoxValues(this.VueFilter.linkUserDid, [])
         this.SetCheckBoxValues(this.VueFilter.workStatus, [])
         this.SetCheckBoxValues(this.VueFilter.workFile, [])
