@@ -44,27 +44,55 @@
   <section class="doc">
     <!-- button bar -->
     <nav class="navbar navbar-default buttonBar">
-      <!-- page -->
-      <div class="input-group">
-        <span class="input-group-addon">Page:</span>
-        <button type="button" class="btn btn-default btn-sm" @click='onPagePrev'>
-          <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
+      <!-- Single button -->
+      <div class="btn-group">
+        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          PDF
+          <span class="caret"></span>
         </button>
-        <span class="input-group-addon">{{pageNum}} / {{pageTotal}}</span>
-        <button type="button" class="btn btn-default btn-sm" @click='onPageNext'>
-          <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>
-        </button>
+        <ul class="dropdown-menu">
+          <li>
+            <a href="#">PDF</a>
+          </li>
+          <li role="separator" class="divider"></li>
+          <li>
+            <a href="#">URL</a>
+          </li>
+        </ul>
       </div>
-      <!-- scale -->
-      <div class="input-group">
-        <span class="input-group-addon">Scale:</span>
-        <button type="button" class="btn btn-default btn-sm" @click='onZoomOut'>
-          <span class="glyphicon glyphicon glyphicon-minus-sign" aria-hidden="true"></span>
+
+      <div class="pathBar">
+        <div class="input-group">
+          <input type="text" class="form-control input-sm" placeholder="Please input url" style="width: 500px;">
+        </div>
+        <button type="button" class="btn btn-default btn-sm">
+          <span class="glyphicon glyphicon-play" aria-hidden="true"></span>
         </button>
-        <span class="input-group-addon">{{pageScale}}</span>
-        <button type="button" class="btn btn-default btn-sm" @click='onZoomIn'>
-          <span class="glyphicon glyphicon glyphicon-plus-sign" aria-hidden="true"></span>
-        </button>
+        <!-- open-file -->
+      </div>
+      <div class="funcBar">
+        <!-- page -->
+        <div class="input-group">
+          <span class="input-group-addon">Page:</span>
+          <button type="button" class="btn btn-default btn-sm" @click='onPagePrev'>
+            <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
+          </button>
+          <span class="input-group-addon">{{pageNum}} / {{pageTotal}}</span>
+          <button type="button" class="btn btn-default btn-sm" @click='onPageNext'>
+            <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>
+          </button>
+        </div>
+        <!-- scale -->
+        <div class="input-group">
+          <span class="input-group-addon">Scale:</span>
+          <button type="button" class="btn btn-default btn-sm" @click='onZoomOut'>
+            <span class="glyphicon glyphicon glyphicon-minus-sign" aria-hidden="true"></span>
+          </button>
+          <span class="input-group-addon">{{pageScale}}</span>
+          <button type="button" class="btn btn-default btn-sm" @click='onZoomIn'>
+            <span class="glyphicon glyphicon glyphicon-plus-sign" aria-hidden="true"></span>
+          </button>
+        </div>
       </div>
     </nav>
     <!-- canvas -->
@@ -77,8 +105,7 @@
       <div class="input-group">
         <span class="input-group-addon">Outline:</span>
         <button type="button" class="btn btn-default btn-sm" @click='showContent=!showContent'>
-          <span class="glyphicon" :class="[{'glyphicon-expand':!showContent},{'glyphicon-collapse-down':showContent}]"
-            aria-hidden="true"></span>
+          <span class="glyphicon" :class="[{'glyphicon-expand':!showContent},{'glyphicon-collapse-down':showContent}]" aria-hidden="true"></span>
         </button>
       </div>
     </nav>
@@ -91,8 +118,7 @@
       <div class="input-group">
         <span class="input-group-addon">Log:</span>
         <button type="button" class="btn btn-default btn-sm" @click='showContent=!showContent'>
-          <span class="glyphicon" :class="[{'glyphicon-expand':!showContent},{'glyphicon-collapse-down':showContent}]"
-            aria-hidden="true"></span>
+          <span class="glyphicon" :class="[{'glyphicon-expand':!showContent},{'glyphicon-collapse-down':showContent}]" aria-hidden="true"></span>
         </button>
       </div>
     </nav>
@@ -104,10 +130,9 @@
       <li class="list-unstyled" v-for="model in models" :key="model.uuid">
         <div>
           <button type="button" class="btn btn-default btn-sm" @click='onToggleItem(model)' :style="{'visibility': model.children.length>0?'visible':'hidden'}">
-            <span class="glyphicon" :class="[{'glyphicon-expand':!model.isOpen},{'glyphicon-collapse-down':model.isOpen}]"
-              aria-hidden="true"></span>
+            <span class="glyphicon" :class="[{'glyphicon-expand':!model.isOpen},{'glyphicon-collapse-down':model.isOpen}]" aria-hidden="true"></span>
           </button>
-          <button  class="btn btn-default" @click="onLinkItem(model)">{{model.name}}</button>
+          <button class="btn btn-default" @click="onLinkItem(model)">{{model.name}}</button>
         </div>
         <!-- 组件中引用当前组件，传入下级数据 -->
         <item class="children" :models="model.children" v-show="model.isOpen">
