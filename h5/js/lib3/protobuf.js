@@ -2672,4 +2672,3 @@ BufferWriter.prototype.string = function write_string_buffer(value) {
 },{"15":15,"16":16}]},{},[8])
 
 })(typeof window==="object"&&window||typeof self==="object"&&self||this);
-//# sourceMappingURL=protobuf.js.map

@@ -71,7 +71,6 @@ var PdfViewer = /** @class */ (function () {
                 var p1;
                 var touchOption;
                 var $dragTarget;
-                var touchingCount = 0;
                 //for desktop
                 var initTouchOption = function () {
                     if (!touchOption) {
@@ -82,11 +81,11 @@ var PdfViewer = /** @class */ (function () {
                 var onMouseStart = function (e) {
                     initTouchOption();
                     e.preventDefault();
-                    doTouchOneStart({ x: e.clientX, y: e.clientY });
+                    doPointOneStart({ x: e.clientX, y: e.clientY });
                 };
                 var onMouseMove = function (e) {
                     e.preventDefault();
-                    doTouchOneMove({ x: e.clientX, y: e.clientY });
+                    doPointOneMove({ x: e.clientX, y: e.clientY });
                 };
                 //for mobile
                 var onTouchStart = function (e) {
@@ -94,84 +93,36 @@ var PdfViewer = /** @class */ (function () {
                     onCancel();
                     switch (e.touches.length) {
                         case 1:
-                            doTouchOneStart({ x: e.touches[0].clientX, y: e.touches[0].clientY });
-                            break;
-                        case 2:
-                            // if (touchOption.useTouchTwo) {
-                            doTouchTwoStart({ x: e.touches[0].clientX, y: e.touches[0].clientY }, { x: e.touches[1].clientX, y: e.touches[1].clientY });
-                            // }
-                            break;
-                    }
-                };
-                var onTouchMove = function (e) {
-                    switch (e.touches.length) {
-                        case 1:
-                            if (touchingCount == 1) {
-                                doTouchOneMove({ x: e.touches[0].clientX, y: e.touches[0].clientY });
-                            }
-                            else {
-                                onCancel();
-                            }
-                            break;
-                        case 2:
-                            if (touchingCount == 2) {
-                                doTouchTwoMove({ x: e.touches[0].clientX, y: e.touches[0].clientY }, { x: e.touches[1].clientX, y: e.touches[1].clientY });
-                            }
-                            else {
-                                onCancel();
-                            }
+                            doPointOneStart({ x: e.touches[0].clientX, y: e.touches[0].clientY });
                             break;
                         default:
                             onCancel();
                             break;
                     }
                 };
-                var doTouchOneStart = function (_p0) {
-                    touchingCount = 1;
+                var onTouchMove = function (e) {
+                    switch (e.touches.length) {
+                        case 1:
+                            doPointOneMove({ x: e.touches[0].clientX, y: e.touches[0].clientY });
+                            break;
+                        default:
+                            onCancel();
+                            break;
+                    }
+                };
+                var doPointOneStart = function (_p0) {
                     p0 = _p0;
                     toggleEventListeners(true);
                 };
-                var doTouchTwoStart = function (_p0, _p1) {
-                    touchingCount = 2;
-                    p0 = _p0;
-                    p1 = _p1;
-                    toggleEventListeners(true);
-                };
-                var doTouchOneMove = function (_p0) {
-                    p0 = _p0;
+                var doPointOneMove = function (_p0) {
                     $dragTarget.xy($dragTarget.x() + (_p0.x - p0.x), $dragTarget.y() + (_p0.y - p0.y));
-                };
-                var doTouchTwoMove = function (_p0, _p1) {
-                    var dist = MathUtil.distance(p0, p1);
-                    var _dist = MathUtil.distance(_p0, _p1);
-                    // this.log(dist, ":[dist]", _dist, ":[_dist]")
-                    var oldXY = $dragTarget.xy();
-                    var oldWH = $dragTarget.wh();
-                    var pinchCenter = NewXY((p1.x + p0.x) / 2, (p1.y + p0.y) / 2);
-                    var _pinchCenter = NewXY((_p1.x + _p0.x) / 2, (_p1.y + _p0.y) / 2);
-                    // this.log(oldXY.x, oldXY.y, ":[oldXY]", oldWH.x, oldWH.y, ":[oldWH]")
-                    // this.log(pinchCenter.x, pinchCenter.y, ":[pinchCenter]", _pinchCenter.x, _pinchCenter.y, ":[_pinchCenter]")
-                    var gapX = Math.abs(_p1.x - _p0.x) - Math.abs(p1.x - p0.x);
-                    var gapY = Math.abs(_p1.y - _p0.y) - Math.abs(p1.y - p0.y);
-                    // this.log(gapX, ":[gapX]", gapY, ":[gapY]")
-                    $dragTarget.xy(oldXY.x - gapX / 2 + (_pinchCenter.x - pinchCenter.x), oldXY.y - gapY / 2 + (_pinchCenter.y - pinchCenter.y));
-                    //
-                    var whRate = $dragTarget.h() / $dragTarget.w();
-                    var gap = (gapX + gapY);
-                    // this.log(whRate, ":[whRate]", gap, ":[gap]")
-                    $dragTarget.wh(Math.max($dragTarget.w() + gap, 100), Math.max($dragTarget.h() + gap * whRate, 100 * whRate));
-                    //
                     p0 = _p0;
-                    p1 = _p1;
                 };
                 var onCancel = function (e) {
                     if (e === void 0) { e = null; }
                     toggleEventListeners(false);
                 };
-                var onEnd = function (e) {
-                    if (e === void 0) { e = null; }
-                    onCancel(e);
-                };
+                var onEnd = onCancel;
                 //
                 var toggleEventListeners = function (bl) {
                     if (bl) {
@@ -386,18 +337,34 @@ var PdfViewer = /** @class */ (function () {
         var p1;
         var touchingCount = 0;
         var el = this.canvasMark;
-        var $dragTarget = $(el);
+        var $dragTarget = $([this.canvasMark, this.canvasView]);
         //## desktop EventListener
         el.addEventListener(EventName.mousewheel, function (e) {
             _this.renderScale(_this.vueDoc.pageScale - e.deltaY / 1000);
         });
         var onMouseStart = function (e) {
             e.preventDefault();
-            doPoiOneStart({ x: e.clientX, y: e.clientY });
+            if (e.ctrlKey) {
+                doPointTwoStart({ x: e.clientX, y: e.clientY }, { x: e.clientX + 10, y: e.clientY + 10 });
+            }
+            else if (e.shiftKey) {
+                doPointTwoStart({ x: e.clientX, y: e.clientY }, { x: e.clientX + 10, y: e.clientY + 10 });
+            }
+            else {
+                doPoiOneStart({ x: e.clientX, y: e.clientY });
+            }
         };
         var onMouseMove = function (e) {
             e.preventDefault();
-            doPointOneMove({ x: e.clientX, y: e.clientY });
+            if (e.ctrlKey) {
+                doPointTwoMove({ x: e.clientX, y: e.clientY }, { x: e.clientX + 10, y: e.clientY + 10 });
+            }
+            else if (e.shiftKey) {
+                doPointTwoMove({ x: p0.x, y: p0.y }, { x: e.clientX + 10, y: e.clientY + 10 });
+            }
+            else {
+                doPointOneMove({ x: e.clientX, y: e.clientY });
+            }
         };
         //## mobile EventListener
         var onTouchStart = function (e) {
@@ -441,8 +408,13 @@ var PdfViewer = /** @class */ (function () {
             touchingCount = 1;
             p0 = _p0;
             toggleEventListeners(true);
-            //
+            //画线
             var wp = _this.countWebglXY(p0);
+            if (!_this.mark.currLine) {
+                if (_this.mark.currLine.length < 2) {
+                    _this.mark.poiArrList.pop(); //currLine太短,放弃掉
+                }
+            }
             _this.mark.poiArrList.push(_this.mark.currLine = [wp.x, wp.y]);
         };
         var doPointTwoStart = function (_p0, _p1) {
@@ -453,7 +425,7 @@ var PdfViewer = /** @class */ (function () {
         };
         var doPointOneMove = function (_p0) {
             p0 = _p0;
-            //
+            //画线
             var wp = _this.countWebglXY(p0);
             _this.mark.currLine.push(wp.x, wp.y);
             _this.mark.renderDirty = true;
@@ -471,12 +443,13 @@ var PdfViewer = /** @class */ (function () {
             var gapX = Math.abs(_p1.x - _p0.x) - Math.abs(p1.x - p0.x);
             var gapY = Math.abs(_p1.y - _p0.y) - Math.abs(p1.y - p0.y);
             // this.log(gapX, ":[gapX]", gapY, ":[gapY]")
+            //move
             $dragTarget.xy(oldXY.x - gapX / 2 + (_pinchCenter.x - pinchCenter.x), oldXY.y - gapY / 2 + (_pinchCenter.y - pinchCenter.y));
-            $(_this.canvasView).xy($(_this.canvasMark).xy());
             //
             var whRate = $dragTarget.h() / $dragTarget.w();
             var gap = (gapX + gapY);
             // this.log(whRate, ":[whRate]", gap, ":[gap]")
+            //scale
             var _w = $(_this.canvasView).w() + gap;
             _w = Math.max(_w, 100);
             _this.renderScale(_this.vueDoc.pageScale * (_w / $(_this.canvasView).w()));
@@ -488,7 +461,12 @@ var PdfViewer = /** @class */ (function () {
         var onCancel = function (e) {
             if (e === void 0) { e = null; }
             toggleEventListeners(false);
-            _this.mark.currLine = null;
+            if (!_this.mark.currLine) {
+                if (_this.mark.currLine.length < 2) {
+                    _this.mark.poiArrList.pop(); //currLine太短,放弃掉
+                }
+                _this.mark.currLine = null;
+            }
         };
         var onEnd = onCancel;
         //
@@ -525,7 +503,6 @@ var PdfViewer = /** @class */ (function () {
         }
     };
     PdfViewer.prototype.countWebglXY = function (clientXY) {
-        console.log("[info]", $(this.canvasMark).y(), ":[$(this.canvasMark).y()]");
         var xy = { x: clientXY.x - $(this.canvasMark).x(), y: clientXY.y - $(this.canvasMark).y() };
         xy.x = xy.x / $(this.canvasMark).w() * 2 - 1;
         xy.y = -(xy.y / $(this.canvasMark).h() * 2 - 1);

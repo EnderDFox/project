@@ -17,10 +17,12 @@ class FileManager {
         this.server = new ExpressServer()
         //random_ext_xxx: e.g. ['mp4', 'rm', 'rmvb', 'mkv', 'wmv', 'avi']
         this.server.init({ "folder": 'f', 'random_ext_need': 'r', 'random_ext_ignore': 'i' }, this.initGetPostAll.bind(this))
+        console.log("[info]",this.server.args.folder,":[this.folder]")
+        console.log("[info]",this.server.args.random_ext_need,":[this.extNeed]")
+        console.log("[info]",this.server.args.random_ext_ignore,":[this.extIgnore]")
+        console.log("[info]","------")
         this.extNeed = this.server.args.random_ext_need?this.server.args.random_ext_need.split(" "):[]
         this.extIgnore = this.server.args.random_ext_ignore?this.server.args.random_ext_ignore.split(" "):[]
-        console.log("[log]",this.server.args.random_ext_need,this.extNeed,":[this.extNeed]")
-        console.log("[log]",this.server.args.random_ext_ignore,this.extIgnore,":[this.extIgnore]")
     }
     initGetPostAll() {
         var app = this.server.app
