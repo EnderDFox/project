@@ -44,7 +44,32 @@ var TestA = /** @class */ (function () {
         }
         console.log("[info]", rs.join(","));
     };
+    TestA.prototype.Rename = function () {
+        var dir = "D:/AmazingGame/tool_svn/src/pm";
+        var files = fs.readdirSync(dir);
+        var len = files.length;
+        for (var i = 0; i < len; i++) {
+            var file = files[i];
+            if (path.extname(file) == ".go") {
+                fs.renameSync(path.resolve(dir, file), path.resolve(dir, this.GetName(file)));
+            }
+        }
+    };
+    TestA.prototype.GetName = function (file) {
+        var rs = [];
+        var arr = file.split('_');
+        var len = arr.length;
+        for (var i = 0; i < len; i++) {
+            var item = arr[i];
+            if (item) {
+                item = item.substr(0, 1).toUpperCase() + item.substring(1, item.length);
+                rs.push(item);
+            }
+        }
+        return rs.join('');
+    };
     return TestA;
 }());
-new TestA().t3();
+// new TestA().t3();
+new TestA().Rename();
 //# sourceMappingURL=TestA.js.map

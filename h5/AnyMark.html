@@ -46,7 +46,7 @@
     <nav class="navbar navbar-default buttonBar">
       <!-- Single button -->
       <div class="btn-group">
-        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-minused="false">
           PDF
           <span class="caret"></span>
         </button>
@@ -86,7 +86,7 @@
         <div class="input-group">
           <span class="input-group-addon">Scale:</span>
           <button type="button" class="btn btn-default btn-sm" @click='onZoomOut'>
-            <span class="glyphicon glyphicon glyphicon-minus-sign" aria-hidden="true"></span>
+            <span class="glyphicon glyphicon glyphicon-plus-sign" aria-hidden="true"></span>
           </button>
           <span class="input-group-addon">{{pageScale}}</span>
           <button type="button" class="btn btn-default btn-sm" @click='onZoomIn'>
@@ -105,7 +105,7 @@
       <div class="input-group">
         <span class="input-group-addon">Outline:</span>
         <button type="button" class="btn btn-default btn-sm" @click='showContent=!showContent'>
-          <span class="glyphicon" :class="[{'glyphicon-expand':!showContent},{'glyphicon-collapse-down':showContent}]" aria-hidden="true"></span>
+          <span class="glyphicon" :class="[{'glyphicon-plus':!showContent},{'glyphicon-minus':showContent}]" aria-hidden="true"></span>
         </button>
       </div>
     </nav>
@@ -118,7 +118,7 @@
       <div class="input-group">
         <span class="input-group-addon">Log:</span>
         <button type="button" class="btn btn-default btn-sm" @click='showContent=!showContent'>
-          <span class="glyphicon" :class="[{'glyphicon-expand':!showContent},{'glyphicon-collapse-down':showContent}]" aria-hidden="true"></span>
+          <span class="glyphicon" :class="[{'glyphicon-plus':!showContent},{'glyphicon-minus':showContent}]" aria-hidden="true"></span>
         </button>
       </div>
     </nav>
@@ -130,7 +130,7 @@
       <li class="list-unstyled" v-for="model in models" :key="model.uuid">
         <div>
           <button type="button" class="btn btn-default btn-sm" @click='onToggleItem(model)' :style="{'visibility': model.children.length>0?'visible':'hidden'}">
-            <span class="glyphicon" :class="[{'glyphicon-expand':!model.isOpen},{'glyphicon-collapse-down':model.isOpen}]" aria-hidden="true"></span>
+            <span class="glyphicon" :class="[{'glyphicon-plus':!model.isOpen},{'glyphicon-minus':model.isOpen}]" aria-hidden="true"></span>
           </button>
           <button class="btn btn-default" @click="onLinkItem(model)">{{model.name}}</button>
         </div>

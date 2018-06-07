@@ -1,5 +1,7 @@
 import * as fs from "fs"
 import * as path from "path"
+import { FILE } from "dns";
+import { DirectorySize,FileSizeItem } from "./lib1/DirectorySize";
 class TestA {
     public t1() {
         var count = 35;
@@ -44,6 +46,32 @@ class TestA {
         }
         console.log("[info]",rs.join(","));
     }
+
+    Rename(){
+        var dir:string = `D:/AmazingGame/tool_svn/src/pm`
+        var files:string[]=fs.readdirSync(dir)
+        var len = files.length
+        for (var i = 0; i < len; i++) {
+            var file:string = files[i]
+            if(path.extname(file) == ".go"){
+                fs.renameSync(path.resolve(dir,file), path.resolve(dir,this.GetName(file)))
+            }
+        }
+    }
+    GetName(file:string):string{
+        var rs:string[] = []
+        var arr:string[] = file.split('_')
+        var len = arr.length
+        for (var i = 0; i < len; i++) {
+            var item = arr[i]
+            if(item){
+                item = item.substr(0,1).toUpperCase()+item.substring(1,item.length)
+                rs.push(item)
+            }
+        }
+        return rs.join('')
+    }
 }
 
-new TestA().t3();
+// new TestA().t3();
+new TestA().Rename();
