@@ -1,8 +1,8 @@
 //通用类
 var CommonClass = /** @class */ (function () {
     function CommonClass() {
-        //## Aue
-        this.AuePath = 'common/';
+        //## Vue
+        this.VuePath = 'common/';
     }
     /**格式化时间 格式化为 yyyy-MM-dd 格式 */
     CommonClass.prototype.FmtDate = function (date) {
@@ -109,7 +109,7 @@ var CommonClass = /** @class */ (function () {
     CommonClass.prototype.ShowPullDownMenu = function (x, y, itemList, clickCallback) {
         var _this = this;
         if (this.VuePullDownMenu == null) {
-            Loader.LoadVueTemplate(this.AuePath + "PullDownMenu", function (txt) {
+            Loader.LoadVueTemplate(this.VuePath + "PullDownMenu", function (txt) {
                 _this.VuePullDownMenu = new Vue({
                     template: txt,
                     data: {

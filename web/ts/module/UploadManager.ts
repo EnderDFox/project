@@ -593,7 +593,7 @@ class UploadManagerClass {
     currImageEle: JQuery<HTMLElement>
     ShowImageShowcase(images: ImageShowcaseImage[], currPage: number) {
         if (this.vueImageShowcase == null) {
-            Loader.LoadVueTemplate(Common.AuePath + 'ImageShowcase', (txt) => {
+            Loader.LoadVueTemplate(Common.VuePath + 'ImageShowcase', (txt) => {
                 this.vueImageShowcase = new Vue({
                     template: txt,
                     data: {

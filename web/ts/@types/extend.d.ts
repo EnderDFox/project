@@ -10,13 +10,13 @@ interface Date {
      * 
      * @param format yyyy-MM-dd h:m:s
      */
-    format():string
-    format(format:string):string
+    format(): string
+    format(format: string): string
 }
 
 //======JQuery扩展 必须和 JQueryExtend.ts一致
-interface JQueryStatic{
-    md5(val:string):string
+interface JQueryStatic {
+    md5(val: string): string
 }
 interface JQuery<TElement extends Node = HTMLElement> extends Iterable<TElement> {
     x(): number
@@ -27,12 +27,18 @@ interface JQuery<TElement extends Node = HTMLElement> extends Iterable<TElement>
     xy(vx: number, vy: number): this
     isShow(): boolean
     adjust(offsetY: number): this
+    freezeTop()
 }
 
 //======完善其他 d.ts 或为其增加扩展方法  
 //------仅仅是type定义  没有js代码
 declare type CombinedVueInstance1<Data> = Vue & Data;
 
+
+//======echarts
+declare var echarts: {
+    init: (el: HTMLElement) => any
+}
 
 
 

@@ -56,7 +56,7 @@ interface JQueryCookieStatic {
      * @param name The name of the cookie to set
      * @param value The value to set the cookie to
      */
-    (name: string, value: string): void;
+    (name: string, value: string): any;
     /**
      * Gets a cookie by name after applying a conversion function to the value
      * @param name The name of the cookie to get
@@ -75,7 +75,7 @@ interface JQueryCookieStatic {
      * @param name The name of the cookie to set
      * @param value The value to set the cookie to
      */
-    (name: string, value: any): void;
+    (name: string, value: any): any;
     /**
      * Sets a cookie using .toString(), or if $.cookie.json is set to true using JSON.stringify()
      * @param name The name of the cookie to set

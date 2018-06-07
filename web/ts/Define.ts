@@ -32,11 +32,219 @@ enum GenreField {
 }
 
 // 0:工作 3:完成 1:延期 2:等待 4:休假 5:优化
-enum WorkStatusField{
+enum WorkStatusField {
     WORK = 0,
     FINISH = 3,
     DELAY = 1,
     WAIT = 2,
     REST = 4,
     OPTIMIZE = 5,
+}
+
+
+
+//===data struck
+interface IXY {
+    x: number
+    y: number
+}
+
+interface UserSingle {
+    Uid?: number
+    Did?: DidField
+    Name?: string
+    IsDel?: number
+    IsHide?: number
+}
+
+interface DepartmentSingle {
+    Did?: DidField
+    Fid?: DidField//上级部门
+    Name?: string
+}
+
+interface DepartmentInfo {
+    info?: DepartmentSingle
+    list?: DepartmentInfo[]//子部门
+    user?: UserSingle[]
+}
+
+interface ProjectSingle {
+    Pid?: number
+    Name?: string
+    ModeSort?: string[]
+}
+
+interface ModeSingle {
+    Mid?: number
+    Vid?: number
+    Ver?: string[]
+    Name?: string
+    Color?: uint32
+    LinkSort?: string[]
+    Did?: DidField
+    Status?: number
+}
+
+interface LinkSingle {
+    Lid?: number
+    Mid?: number
+    Uid?: number
+    Name?: string
+    Color?: number
+    Status?: number
+}
+
+interface WorkSingle {
+    Wid?: number
+    Lid?: number
+    Status?: WorkStatusField
+    Date?: string
+    Tips?: string
+    MinNum?: number
+    MaxNum?: number
+    Tag?: string
+    Inspect?: number
+    FileList?: FileSingle[]
+    //
+    uploading?: boolean  //是否正在上传
+}
+
+interface ScoreSingle {
+    Wid?: number
+    Info?: string
+    Quality?: number
+    Efficiency?: number
+    Manner?: number
+}
+
+interface VerSingle {
+    Genre?: number
+    DateLine?: string
+}
+
+interface FileSingle {
+    Wid?: number
+    TempId?: number //为了vue过渡的key
+    state?: UploadItemState
+    src?: string    //已上传则这个值是url(缩略图) 没上传则这个值是base64
+    srcOri?: string    //已上传则这个值是url(原图) 没上传则没有这个值(因为base64无法预览)
+    Fid?: number     //仅已上传时可用, 是pm_file.fid
+    Kind?: number
+    CreateTime?: number  //仅已上传时可用, 是创建时间
+    Name?: string
+    buffer?: any[]  //二进制数据
+}
+
+interface VersionSingle {
+    Vid?: number
+    Ver?: string
+    Name?: string
+    Sort?: uint32
+    PublishList?: PublishSingle[]
+}
+
+interface PublishSingle {
+    Vid?: number
+    Genre?: uint32
+    DateLine?: string
+    ErrorMsg?: string
+    SubDayCount?: uint32
+}
+
+interface ProcessFilterPack {
+    BeginDate: string
+    EndDate: string
+    ModeName: string
+    Vid: number
+    // Ver:string
+    ModeStatus: number
+    LinkStatus: number
+    LinkName: string
+    LinkUserName: string
+
+}
+interface ScoreNoticeSingle {
+    Wid: number
+    Lid: number
+    Date: string
+    Uid: number
+    Mid: number
+    Lname: string
+    Did: number
+    Mname: string
+    Ver: string
+}
+
+interface L2C_ProfileView {
+    ProfileList: ProfileSingle[]
+    TagsList: TagSingle[]
+}
+interface ProfileSingle {
+    MName: string
+    LName: string
+    Date: string
+    Tips: string
+    Status: number
+    Inspect: number
+    MinNum: number
+    MaxNum: number
+    Tag: string
+    Ver: string
+}
+interface TagSingle {
+    Tag: string
+    Info: string
+}
+
+
+interface L2C_CollateView {
+    ModeList: ModeSingle[]
+    LinkList: LinkSingle[]
+    WorkList: WorkSingle[]
+    TagsList: TagSingle[]
+    ExtraList: ExtraSingle[]
+    VerList: VerSingle[]
+}
+
+interface ExtraSingle {
+    Eid: number
+    Uid: number
+    Date: string
+    Name: string
+    Inspect: number
+}
+
+interface IDateBeginAndEnd {
+    BeginDate: string
+    EndDate: string
+}
+
+interface IDateItem {
+    s?: string
+    m?: string
+    d?: string
+    y?: number
+    w?: number
+}
+
+interface L2C_ProcessView {
+    ModeList: ModeSingle[]
+    LinkList: LinkSingle[]
+    WorkList: WorkSingle[]
+    ScoreList: ScoreSingle[]
+    VerList: VerSingle[]
+    Project: ProjectSingle
+    VersionList: VersionSingle[]
+}
+
+
+interface C2L_ProcessWorkEdit {
+    Wid?: number
+    Lid?: number
+    Date?: string
+    Tips?: string
+    MinNum?: number
+    MaxNum?: number
+    Tag?: string
 }

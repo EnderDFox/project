@@ -8,7 +8,7 @@
 		<name>mysql</name>
 		<host>localhost</host>
 		<port>3306</port>
-		<user>root</user>
+		<user>wangy</user>
 		<pass>123456</pass>
 		<char>utf8</char>
 	</db>

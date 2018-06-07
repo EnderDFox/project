@@ -77,7 +77,7 @@ class CommonClass {
 		return false
 	}
 	/**警告提示*/
-	Warning(o: HTMLElement, e: MouseEvent, func: Function, txt: string): void {
+	Warning(o: HTMLElement, e: JQuery.Event|MouseEvent, func: Function, txt: string): void {
 		var plan = $('#warning').css({ left: e.pageX, top: e.pageY }).show().adjust(-5)
 		plan.find('.tips').html(txt)
 		plan.find('.cancel,.close').unbind().click(function (e) {
@@ -101,13 +101,13 @@ class CommonClass {
 	AlertFloatMsg(txt: string, e: MouseEvent): void {
 		alert(txt)
 	}
-	//## Aue
-	AuePath = 'common/'
+	//## Vue
+	VuePath = 'common/'
 	VuePullDownMenu: CombinedVueInstance1<{ itemList: IPullDownMenuItem[], clickCallback: (item: IPullDownMenuItem) => void }>
 	//### 下拉菜单
 	ShowPullDownMenu(x: number, y: number, itemList: IPullDownMenuItem[], clickCallback: (item: IPullDownMenuItem) => void) {
 		if (this.VuePullDownMenu == null) {
-			Loader.LoadVueTemplate(this.AuePath + "PullDownMenu", (txt: string) => {
+			Loader.LoadVueTemplate(this.VuePath + "PullDownMenu", (txt: string) => {
 				this.VuePullDownMenu = new Vue({
 					template: txt,
 					data: {

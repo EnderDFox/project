@@ -7,32 +7,29 @@ import (
 	"strings"
 
 	"crypto/md5"
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"strconv"
 	"time"
 
-	"github.com/gorilla/websocket"
-
 	"github.com/disintegration/imaging"
 )
 
 type Upload struct {
+	owner            *User
 	FileMaxEveryWork uint32 //每个work附件上限
 }
 
-func NewUpload() *Upload {
-	ob := &Upload{}
-	ob.FileMaxEveryWork = 6
-	return ob
+func NewUpload(user *User) *Upload {
+	instance := &Upload{}
+	instance.owner = user
+	instance.FileMaxEveryWork = 6
+	return instance
 }
 
 func (this *Upload) RegisterFunction() {
 	this.InitFolderAll()
-	command.Register(C2L_UPLOAD_ADD, &C2L_M_UPLOAD_ADD{})
-	command.Register(C2L_UPLOAD_DELETE, &C2L_M_UPLOAD_DELETE{})
 }
 
 //初始化 所有文件夹 避免上传时再初始化 会慢
@@ -95,58 +92,13 @@ func (this *Upload) GetFileList(kind uint32, obid uint64) []*FileSingle {
 }
 
 //========================结构
-type C2L_UpdateWorkAdd struct {
-	Wid    uint64
-	TempId uint64
-	Kind   uint32
-	Name   string
-	Data   []byte //文件二进制流
-}
-
-type C2L_UpdateWorkDelete struct {
-	Wid  uint64
-	Fids []uint64
-}
-
-type L2C_UpdateWorkAdd struct {
-	Wid        uint64
-	TempId     uint64
-	Fid        uint64
-	Kind       uint32
-	Name       string
-	CreateTime uint32
-}
-
-type L2C_UpdateWorkDelete struct {
-	Wid  uint64
-	Fids []uint64
-}
-
-type FileSingle struct {
-	Fid        uint64
-	Kind       uint32
-	Name       string
-	CreateTime uint32
-}
 
 //新增功能
-type C2L_M_UPLOAD_ADD struct{}
-
-func (this *C2L_M_UPLOAD_ADD) execute(client *websocket.Conn, msg *Message) bool {
-	user := session.GetUser(msg.Uid)
-	if user == nil {
-		return false
-	}
-	param := &C2L_UpdateWorkAdd{}
-	err := json.Unmarshal([]byte(msg.Param), param)
-	if err != nil {
-		log.Println("C2L_M_UPLOAD_ADD json.Unmarshal err:", err)
-		return false
-	}
+func (this *Upload) UploadAdd(param *C2L_UpdateWorkAdd) bool {
 	// time.Sleep(3 * time.Second)
 	// log.Println("----------upload add execute------------")
 	// log.Println("receive file", time.Now().Unix(), param.Kind)
-	if upload.CountFileCount(FILE_JOIN_KIND_WORK, param.Wid) >= upload.FileMaxEveryWork {
+	if this.CountFileCount(FILE_JOIN_KIND_WORK, param.Wid) >= this.FileMaxEveryWork {
 		log.Println(">=upload.FileMaxEveryWork")
 		return false
 	}
@@ -156,7 +108,7 @@ func (this *C2L_M_UPLOAD_ADD) execute(client *websocket.Conn, msg *Message) bool
 	stmt, err := db.GetDb().Prepare(`INSERT INTO ` + config.Pm + `.pm_file (kind,add_uid,name,create_time) VALUES (?,?,?,?)`)
 	defer stmt.Close()
 	db.CheckErr(err)
-	res, err := stmt.Exec(param.Kind, user.Uid, param.Name, create_time)
+	res, err := stmt.Exec(param.Kind, this.owner.Uid, param.Name, create_time)
 	db.CheckErr(err)
 	newFid, err := res.LastInsertId()
 	db.CheckErr(err)
@@ -168,7 +120,7 @@ func (this *C2L_M_UPLOAD_ADD) execute(client *websocket.Conn, msg *Message) bool
 	res, err = stmt.Exec(FILE_JOIN_KIND_WORK, param.Wid, fid, create_time)
 	db.CheckErr(err)
 	//计算文件名
-	folder, fileName := upload.CountFilePath(param.Kind, fid, create_time)
+	folder, fileName := this.CountFilePath(param.Kind, fid, create_time)
 	//写入文件
 	pathFull := config.Upload + "/" + folder + "/" + fileName
 	err_io := ioutil.WriteFile(pathFull, param.Data, os.ModeAppend) //buffer输出到image文件中（不做处理，直接写到文件）
@@ -179,7 +131,7 @@ func (this *C2L_M_UPLOAD_ADD) execute(client *websocket.Conn, msg *Message) bool
 	}
 	//缩略图
 	original_image, _, err := image.Decode(bytes.NewReader(param.Data))
-	upload.CreateThumb(original_image, pathFull+".t.jpg")
+	this.CreateThumb(original_image, pathFull+".t.jpg")
 	//通知前端
 	data := &L2C_UpdateWorkAdd{
 		Wid:        param.Wid,
@@ -189,25 +141,11 @@ func (this *C2L_M_UPLOAD_ADD) execute(client *websocket.Conn, msg *Message) bool
 		Name:       param.Name,
 		CreateTime: create_time,
 	}
-	user.SendTo(L2C_UPLOAD_ADD, data)
+	this.owner.SendTo(L2C_UPLOAD_ADD, data)
 	return true
 }
 
-type C2L_M_UPLOAD_DELETE struct {
-}
-
-func (this *C2L_M_UPLOAD_DELETE) execute(client *websocket.Conn, msg *Message) bool {
-	user := session.GetUser(msg.Uid)
-	if user == nil {
-		return false
-	}
-	param := &C2L_UpdateWorkDelete{}
-	err := json.Unmarshal([]byte(msg.Param), param)
-	if err != nil {
-		// log.Printlog.Println("json.Unmarshal err:", err)
-		return false
-	}
-	//
+func (this *Upload) UploadDelete(param *C2L_UpdateWorkDelete) bool {
 	var strArr []string
 	for _, fid := range param.Fids {
 		strArr = append(strArr, strconv.FormatUint(fid, 10))
@@ -225,7 +163,7 @@ func (this *C2L_M_UPLOAD_DELETE) execute(client *websocket.Conn, msg *Message) b
 		Wid:  param.Wid,
 		Fids: param.Fids,
 	}
-	user.SendTo(L2C_UPLOAD_DELETE, data)
+	this.owner.SendTo(L2C_UPLOAD_DELETE, data)
 	return true
 }
 

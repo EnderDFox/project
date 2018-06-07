@@ -405,7 +405,7 @@ func (this *Process) WorkEdit(lid, minNum, maxNum uint64, date, tips, tag string
 		MinNum:   minNum,
 		MaxNum:   maxNum,
 		Tag:      tag,
-		FileList: upload.GetFileList(FILE_JOIN_KIND_WORK, wid),
+		FileList: this.owner.Upload().GetFileList(FILE_JOIN_KIND_WORK, wid),
 	}
 	this.owner.SendToAll(L2C_PROCESS_WORK_EDIT, data)
 	return true
@@ -616,7 +616,7 @@ func (this *Process) GridChange(lid uint64, date string, status uint64) bool {
 		MaxNum:   maxNum,
 		MinNum:   minNum,
 		Tag:      tag,
-		FileList: upload.GetFileList(FILE_JOIN_KIND_WORK, wid),
+		FileList: this.owner.Upload().GetFileList(FILE_JOIN_KIND_WORK, wid),
 	}
 	this.owner.SendToAll(L2C_PROCESS_GRID_CHANGE, data)
 	return true
@@ -692,7 +692,7 @@ func (this *Process) GetWorkList(BeginDate, EndDate string) []*WorkSingle {
 	for rows.Next() {
 		single := &WorkSingle{}
 		rows.Scan(&single.Wid, &single.Lid, &single.Date, &single.Status, &single.Tips, &single.MinNum, &single.MaxNum, &single.Tag)
-		single.FileList = upload.GetFileList(FILE_JOIN_KIND_WORK, single.Wid)
+		single.FileList = this.owner.Upload().GetFileList(FILE_JOIN_KIND_WORK, single.Wid)
 		workList = append(workList, single)
 	}
 	return workList

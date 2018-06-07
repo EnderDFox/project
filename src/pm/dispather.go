@@ -7,7 +7,7 @@ var (
 	template_manager = NewTemplateManager()
 	collate_manager  = NewCollateManager()
 	save_manager     = NewSaveManager()
-	upload           = NewUpload()
+	upload_manager   = NewUploadManager()
 	version_manager  = NewVersionManager()
 )
 
@@ -33,7 +33,7 @@ func (this *Dispather) Retister() {
 	//保存业务注册
 	save_manager.RegisterFunction()
 	//上传业务
-	upload.RegisterFunction()
+	upload_manager.RegisterFunction()
 	//版本控制
 	version_manager.RegisterFunction()
 }

@@ -194,3 +194,59 @@ type L2C_VersionChangePublish struct {
 	Genre    uint32
 	DateLine string
 }
+
+type L2C_TPLModeView struct {
+	Modes []*TPLModeSingle
+}
+
+type L2C_TplModeAdd struct {
+	Tmid uint64
+	Name string
+}
+
+type L2C_TPLModeEditName struct {
+	Tmid uint64
+	Name string
+}
+
+type L2C_TPLModeDelete struct {
+	Tmid uint64
+}
+
+type L2C_TPLLinkAdd struct {
+	Tlid uint64
+	Tmid uint64
+	Name string
+	Did  uint64
+}
+
+type L2C_TPLLinkEditName struct {
+	Tlid uint64
+	Name string
+}
+
+type L2C_TPLLinkEditDid struct {
+	Tlid uint64
+	Did  uint64
+}
+type L2C_TPLLinkEditSort struct {
+	Tmid     uint64
+	LinkSort []string
+}
+type L2C_TPLLinkDelete struct {
+	Tlid uint64
+}
+
+type L2C_UpdateWorkAdd struct {
+	Wid        uint64
+	TempId     uint64
+	Fid        uint64
+	Kind       uint32
+	Name       string
+	CreateTime uint32
+}
+
+type L2C_UpdateWorkDelete struct {
+	Wid  uint64
+	Fids []uint64
+}

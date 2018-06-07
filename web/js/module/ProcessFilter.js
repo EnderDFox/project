@@ -102,10 +102,10 @@ var ProcessFilterClass = /** @class */ (function () {
         var plan = $(this.VueFilter.$el);
         //关闭日期
         plan.unbind().mousedown(function (e) {
-            if ($(e.target).attr('class') != 'date') {
+            if ($(e.currentTarget).attr('class') != 'date') {
                 DateTime.HideDate();
             }
-            if ($(e.target).attr('class') != 'select') {
+            if ($(e.currentTarget).attr('class') != 'select') {
                 Common.HidePullDownMenu();
             }
         });
@@ -196,7 +196,7 @@ var ProcessFilterClass = /** @class */ (function () {
                 methods: {
                     //日期绑定
                     onClickDate: function (e, kind) {
-                        var dom = e.target;
+                        var dom = e.currentTarget;
                         DateTime.Open(dom, $(dom).val(), function (date) {
                             switch (kind) {
                                 case 1:
@@ -209,8 +209,8 @@ var ProcessFilterClass = /** @class */ (function () {
                         });
                     },
                     onCheckBoxMouseEnter: function (e, item, input) {
-                        var left = $(e.target).offset().left + $(e.target).width() + 2;
-                        var top = $(e.target).offset().top + $(e.target).height() + 2;
+                        var left = $(e.currentTarget).offset().left + $(e.currentTarget).width() + 2;
+                        var top = $(e.currentTarget).offset().top + $(e.currentTarget).height() + 2;
                         VersionManager.ShowTableHeaderTooltip(parseInt(input.Value.toString()), left, top, false);
                     },
                     onCheckBoxMouseOut: function () {
@@ -221,7 +221,7 @@ var ProcessFilterClass = /** @class */ (function () {
                         console.log("[info]", e.type, ":[e.type]");
                         switch (item.InputName) {
                             case _this.VueFilter.linkUserName.InputName:
-                                var dom = e.target;
+                                var dom = e.currentTarget;
                                 //### 获取当前所选的关键字
                                 // console.log("[info]", dom.selectionStart, ":[dom.selectionStart]")
                                 var selectStart = dom.selectionStart;
@@ -313,10 +313,8 @@ var ProcessFilterClass = /** @class */ (function () {
         plan.css({ top: top, left: left }).show();
     };
     ProcessFilterClass.prototype.HideFilter = function (fade) {
+        if (fade === void 0) { fade = true; }
         if (this.VueFilter) {
-            if (fade === void 0) {
-                fade = true;
-            }
             if (fade) {
                 $(this.VueFilter.$el).fadeOut(Config.FadeTime);
             }

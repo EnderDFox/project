@@ -2,11 +2,11 @@
 class PopManagerClass {
     mouseOutList: { selector: any, callback: Function }[] = [];
     Init() {
-        $(document).on('click', (e) => {
+        $(document).on('click', (e:JQuery.Event) => {
             var len = this.mouseOutList.length
             for (var i = 0; i < len; i++) {
                 var item = this.mouseOutList[i];
-                if ($(e.target).closest(item.selector).length == 0) {
+                if ($(e.currentTarget).closest(item.selector).length == 0) {
                     item.callback()
                 }
             }

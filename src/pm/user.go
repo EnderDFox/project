@@ -28,6 +28,7 @@ type User struct {
 	collatePtr *Collate
 	savePtr    *Save
 	versionPtr *Version
+	uploadPtr  *Upload
 }
 
 func NewUser() *User {
@@ -68,6 +69,10 @@ func (this *User) Version() *Version {
 	return this.versionPtr
 }
 
+func (this *User) Upload() *Upload {
+	return this.uploadPtr
+}
+
 //模块初始化
 func (this *User) Init() {
 	//个人模块
@@ -80,6 +85,7 @@ func (this *User) Init() {
 	this.savePtr = NewSave(this)
 	//
 	this.versionPtr = NewVersion(this)
+	this.uploadPtr = NewUpload(this)
 }
 
 //数据发送

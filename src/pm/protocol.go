@@ -133,3 +133,24 @@ type PublishSingle struct {
 	Genre    uint64
 	DateLine string
 }
+
+type TPLModeSingle struct {
+	Tmid     uint64
+	Name     string
+	LinkSort []string
+	Links    []*TPLLinkSingle
+}
+
+type TPLLinkSingle struct {
+	Tlid uint64
+	Tmid uint64
+	Name string
+	Did  uint64
+}
+
+type FileSingle struct {
+	Fid        uint64
+	Kind       uint32
+	Name       string
+	CreateTime uint32
+}

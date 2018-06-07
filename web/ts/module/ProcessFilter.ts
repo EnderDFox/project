@@ -130,7 +130,7 @@ class ProcessFilterClass {
         this.SetCheckBoxValues(this.VueFilter.workFile, this.Pack.WorkFile)
     }
     //获取发送给服务器的数据
-    GetSvrPack() {
+    GetSvrPack(): IDateBeginAndEnd {
         var param = {
             'BeginDate': this.Pack.BeginDate,
             'EndDate': this.Pack.EndDate
@@ -143,11 +143,11 @@ class ProcessFilterClass {
         var self = this
         var plan = $(this.VueFilter.$el)
         //关闭日期
-        plan.unbind().mousedown(function (e) {
-            if ($(e.target).attr('class') != 'date') {
+        plan.unbind().mousedown(function (e:JQuery.Event) {
+            if ($(e.currentTarget).attr('class') != 'date') {
                 DateTime.HideDate()
             }
-            if ($(e.target).attr('class') != 'select') {
+            if ($(e.currentTarget).attr('class') != 'select') {
                 Common.HidePullDownMenu()
             }
         })
@@ -245,7 +245,7 @@ class ProcessFilterClass {
                 methods: {
                     //日期绑定
                     onClickDate: (e: MouseEvent, kind: number) => {
-                        var dom = e.target as HTMLInputElement
+                        var dom = e.currentTarget as HTMLInputElement
                         DateTime.Open(dom, $(dom).val(), (date: string) => {
                             switch (kind) {
                                 case 1:
@@ -257,12 +257,12 @@ class ProcessFilterClass {
                             }
                         })
                     },
-                    onCheckBoxMouseEnter: (e:Event,item:IFilterItemCheckBox,input:IFilterItemCheckBoxInput) => {
-                        var left = $(e.target).offset().left + $(e.target).width() + 2
-                        var top = $(e.target).offset().top + $(e.target).height() + 2
-                        VersionManager.ShowTableHeaderTooltip(parseInt(input.Value.toString()), left, top,false)
+                    onCheckBoxMouseEnter: (e: Event, item: IFilterItemCheckBox, input: IFilterItemCheckBoxInput) => {
+                        var left = $(e.currentTarget).offset().left + $(e.currentTarget).width() + 2
+                        var top = $(e.currentTarget).offset().top + $(e.currentTarget).height() + 2
+                        VersionManager.ShowTableHeaderTooltip(parseInt(input.Value.toString()), left, top, false)
                     },
-                    onCheckBoxMouseOut:()=>{
+                    onCheckBoxMouseOut: () => {
                         $('#workTips').hide()
                     },
                     //数据框变化(暂时仅用于负责人)
@@ -270,7 +270,7 @@ class ProcessFilterClass {
                         console.log("[info]", e.type, ":[e.type]")
                         switch (item.InputName) {
                             case this.VueFilter.linkUserName.InputName:
-                                var dom = e.target as HTMLInputElement
+                                var dom = e.currentTarget as HTMLInputElement
                                 //### 获取当前所选的关键字
                                 // console.log("[info]", dom.selectionStart, ":[dom.selectionStart]")
                                 var selectStart = dom.selectionStart
@@ -358,9 +358,8 @@ class ProcessFilterClass {
         var left = $(o).offset().left - plan.outerWidth()
         plan.css({ top: top, left: left }).show()
     }
-    HideFilter(fade) {
+    HideFilter(fade=true) {
         if (this.VueFilter) {
-            if (fade === void 0) { fade = true; }
             if (fade) {
                 $(this.VueFilter.$el).fadeOut(Config.FadeTime)
             } else {
