@@ -15,6 +15,7 @@ enum cmd{
     BATTLE_ENTER = 5001;
     BATTLE_TANK_MOVE = 5002;
 }
+
 message Login {
     required string account = 1;
     required string password = 2;

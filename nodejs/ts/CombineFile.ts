@@ -11,7 +11,7 @@ class CombineFile {
     extIgnore: string[]
     input: string
     output: string
-    exec() {
+    init() {
         var argsOpts: { [key: string]: string } = {};
         argsOpts['input'] = 'i'
         argsOpts['output'] = 'o'
@@ -28,17 +28,17 @@ class CombineFile {
         this.output = args.output
         this.extNeed = args.ext_need ? args.ext_need.split(" ") : []
         this.extIgnore = args.ext_ignore ? args.ext_ignore.split(" ") : []
-        this.combine()
+        this.exec()
         fs.watch(this.input, { persistent: true, recursive: true }, () => {
-            clearTimeout(this.combineTimeoutId)
-            this.combineTimeoutId = setTimeout(() => {
-                this.combine()
+            clearTimeout(this.execTimeoutId)
+            this.execTimeoutId = setTimeout(() => {
+                this.exec()
             }, 1000);
         })
     }
-    combineTimeoutId: NodeJS.Timer
-    combine() {
-        console.log("[info]", "combine", this.input)
+    execTimeoutId: NodeJS.Timer
+    exec() {
+        console.log("[info]", "File change detected. Starting incremental compilation...", this.input)
         var files: FileItem[] = FileUtil.getFileAll(this.input, this.extNeed, this.extIgnore);
         var rs: { [key: string]: string } = {};
         //
@@ -53,8 +53,9 @@ class CombineFile {
             // console.log("[info]", relativeUrl, ":[relativeUrl]")
         }
         fs.writeFileSync(this.output, JSON.stringify(rs))
+        console.log("[info]", "Watching for file changes.")
     }
 }
 //
 var combineFile = new CombineFile()
-combineFile.exec()
+combineFile.init()

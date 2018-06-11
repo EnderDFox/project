@@ -32,8 +32,8 @@ var process = require("process");
  * - 需要引入long.js
  * - 设置protobuf.util.Long = Long.js中导出的Long
  */
-var ProtobufJsHelper = /** @class */ (function () {
-    function ProtobufJsHelper() {
+var ProtobufJsGenerator = /** @class */ (function () {
+    function ProtobufJsGenerator() {
         this.line_separator = "\n";
         this.var$protobuf = "var $protobuf = protobuf;";
         this.pb$root = "pb = $root.pb";
@@ -41,7 +41,52 @@ var ProtobufJsHelper = /** @class */ (function () {
         this.declare_module_pb = "declare module pb";
         this.import$protobuf = "import $protobuf = protobuf;";
     }
-    ProtobufJsHelper.prototype.generatePbJs = function () {
+    ProtobufJsGenerator.prototype.init = function () {
+        var _this = this;
+        var argv = parseArgs(process.argv.slice(2), {
+            alias: {
+                'help': 'h',
+                'dir': 'd',
+                'proto': 'p',
+                'js': 'j',
+                'tsd': 't' //生成的.d.ts文件位置
+            },
+            boolean: 'watch'
+        });
+        if (argv.help || (!argv.proto || !argv.js || !argv.tsd)) {
+            console.log("Help in here!\r\n", "e.g.  bin/ProtobufJsHelper.js -d test --proto pb.proto -j pb.js -t pb.d.ts");
+        }
+        else {
+            var dir = argv.dir;
+            if (!dir) {
+                dir = "";
+            }
+            this.path_pb_proto = path.resolve(dir, argv.proto);
+            this.path_pb_js = path.resolve(dir, argv.js);
+            this.path_pb_tsd = path.resolve(dir, argv.tsd);
+            //
+            console.log("Complete!");
+            //
+            this.exec();
+            fs.watch(this.path_pb_proto, { persistent: true, recursive: true }, function () {
+                clearTimeout(_this.execTimeoutId);
+                _this.execTimeoutId = setTimeout(function () {
+                    _this.exec();
+                }, 1000);
+            });
+        }
+        // process.exit(1);
+    };
+    ProtobufJsGenerator.prototype.exec = function () {
+        console.log("[info]", "File change detected. Starting incremental compilation...", this.path_pb_proto);
+        this.generatePbJs();
+        this.generatePbTsd();
+        this.modifyJs();
+        this.modifyTs();
+        console.log("[info]", "Watching for file changes.");
+    };
+    //
+    ProtobufJsGenerator.prototype.generatePbJs = function () {
         //e.g. pbjs -t static -w CommonJS -o c:\fox\projects\tools\NodeJsTools\test\pb.js c:\fox\projects\tools\NodeJsTools\test\pb.proto
         var cmdStr = "pbjs -t static -w CommonJS -o " + this.path_pb_js + " " + this.path_pb_proto;
         // var cmdStr = `pbjs -t static --force-long -w CommonJS -o ${this.path_pb_js} ${this.path_pb_proto}`;
@@ -54,7 +99,7 @@ var ProtobufJsHelper = /** @class */ (function () {
             console.log("Doing generatePbJs complete! No news is good news.");
         }
     };
-    ProtobufJsHelper.prototype.generatePbTsd = function () {
+    ProtobufJsGenerator.prototype.generatePbTsd = function () {
         console.log("Doing generatePbTsd");
         var out = child_process.execSync("pbts -o " + this.path_pb_tsd + " " + this.path_pb_js + " -m");
         if (out.toString()) {
@@ -65,7 +110,7 @@ var ProtobufJsHelper = /** @class */ (function () {
         }
     };
     /**protobufjs生成的代码无法直接使用, 需要自己处理一下 */
-    ProtobufJsHelper.prototype.modifyJs = function () {
+    ProtobufJsGenerator.prototype.modifyJs = function () {
         var path = this.path_pb_js;
         var buf = fs.readFileSync(path);
         var content = buf.toString();
@@ -77,7 +122,7 @@ var ProtobufJsHelper = /** @class */ (function () {
         }
         fs.writeFileSync(path, content);
     };
-    ProtobufJsHelper.prototype.modifyTs = function () {
+    ProtobufJsGenerator.prototype.modifyTs = function () {
         var path = this.path_pb_tsd;
         var buf = fs.readFileSync(path);
         var content = buf.toString();
@@ -87,36 +132,8 @@ var ProtobufJsHelper = /** @class */ (function () {
         }
         fs.writeFileSync(path, content);
     };
-    return ProtobufJsHelper;
+    return ProtobufJsGenerator;
 }());
 //---
-var argv = parseArgs(process.argv.slice(2), {
-    alias: {
-        'help': 'h',
-        'dir': 'd',
-        'proto': 'p',
-        'js': 'j',
-        'tsd': 't' //生成的.d.ts文件位置
-    }
-});
-if (argv.help || (!argv.proto || !argv.js || !argv.tsd)) {
-    console.log("Help in here!\r\n", "e.g.  bin/ProtobufJsHelper.js -d test --proto pb.proto -j pb.js -t pb.d.ts");
-}
-else {
-    var dir = argv.dir;
-    if (!dir) {
-        dir = "";
-    }
-    var inst = new ProtobufJsHelper();
-    inst.path_pb_proto = path.resolve(dir, argv.proto);
-    inst.path_pb_js = path.resolve(dir, argv.js);
-    inst.path_pb_tsd = path.resolve(dir, argv.tsd);
-    //
-    inst.generatePbJs();
-    inst.generatePbTsd();
-    inst.modifyJs();
-    inst.modifyTs();
-    console.log("Complete!");
-}
-process.exit(1);
+new ProtobufJsGenerator().init();
 //# sourceMappingURL=ProtobufJsGenerator.js.map

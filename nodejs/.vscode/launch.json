@@ -152,7 +152,8 @@
                 "-j",
                 "hellopbjs.proto.js",
                 "-t",
-                "hellopbjs.proto.d.ts"
+                "hellopbjs.proto.d.ts",
+                "--watch",
             ],
             "outFiles": [
                 "${workspaceFolder}/*/*.js"

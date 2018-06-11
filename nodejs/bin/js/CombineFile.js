@@ -8,7 +8,7 @@ var FileUtil_1 = require("./lib1/FileUtil");
 var CombineFile = /** @class */ (function () {
     function CombineFile() {
     }
-    CombineFile.prototype.exec = function () {
+    CombineFile.prototype.init = function () {
         var _this = this;
         var argsOpts = {};
         argsOpts['input'] = 'i';
@@ -26,16 +26,16 @@ var CombineFile = /** @class */ (function () {
         this.output = args.output;
         this.extNeed = args.ext_need ? args.ext_need.split(" ") : [];
         this.extIgnore = args.ext_ignore ? args.ext_ignore.split(" ") : [];
-        this.combine();
+        this.exec();
         fs.watch(this.input, { persistent: true, recursive: true }, function () {
-            clearTimeout(_this.combineTimeoutId);
-            _this.combineTimeoutId = setTimeout(function () {
-                _this.combine();
+            clearTimeout(_this.execTimeoutId);
+            _this.execTimeoutId = setTimeout(function () {
+                _this.exec();
             }, 1000);
         });
     };
-    CombineFile.prototype.combine = function () {
-        console.log("[info]", "combine", this.input);
+    CombineFile.prototype.exec = function () {
+        console.log("[info]", "File change detected. Starting incremental compilation...", this.input);
         var files = FileUtil_1.FileUtil.getFileAll(this.input, this.extNeed, this.extIgnore);
         var rs = {};
         //
@@ -50,10 +50,11 @@ var CombineFile = /** @class */ (function () {
             // console.log("[info]", relativeUrl, ":[relativeUrl]")
         }
         fs.writeFileSync(this.output, JSON.stringify(rs));
+        console.log("[info]", "Watching for file changes.");
     };
     return CombineFile;
 }());
 //
 var combineFile = new CombineFile();
-combineFile.exec();
+combineFile.init();
 //# sourceMappingURL=CombineFile.js.map

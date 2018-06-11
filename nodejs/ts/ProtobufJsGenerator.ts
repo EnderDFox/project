@@ -31,15 +31,59 @@ import * as process from 'process';
  * - 需要引入long.js
  * - 设置protobuf.util.Long = Long.js中导出的Long
  */
-class ProtobufJsHelper {
+class ProtobufJsGenerator {
     public path_pb_proto: string;
     public path_pb_js: string;
     public path_pb_tsd: string;
+    public init() {
+        var argv = parseArgs(process.argv.slice(2), {
+            alias: {
+                'help': 'h',
+                'dir': 'd',     //文件总的根目录[可选],设置后续 --proto等参数可以使用基于这个目录的相对路径
+                'proto': 'p',   //.proto源文件位置
+                'js': 'j',      //生成的.js文件位置
+                'tsd': 't'      //生成的.d.ts文件位置
+            },
+            boolean: 'watch'
+        });
+        if (argv.help || (!argv.proto || !argv.js || !argv.tsd)) {
+            console.log("Help in here!\r\n", "e.g.  bin/ProtobufJsHelper.js -d test --proto pb.proto -j pb.js -t pb.d.ts");
+        } else {
+            var dir = argv.dir;
+            if (!dir) {
+                dir = "";
+            }
+            this.path_pb_proto = path.resolve(dir, argv.proto);
+            this.path_pb_js = path.resolve(dir, argv.js);
+            this.path_pb_tsd = path.resolve(dir, argv.tsd);
+            //
+            console.log("Complete!");
+            //
+            this.exec()
+            fs.watch(this.path_pb_proto, { persistent: true, recursive: true }, () => {
+                clearTimeout(this.execTimeoutId)
+                this.execTimeoutId = setTimeout(() => {
+                    this.exec()
+                }, 1000);
+            })
+        }
+        // process.exit(1);
+    }
+    execTimeoutId: NodeJS.Timer
+    public exec() {
+        console.log("[info]", "File change detected. Starting incremental compilation...", this.path_pb_proto)
+        this.generatePbJs();
+        this.generatePbTsd();
+        this.modifyJs();
+        this.modifyTs();
+        console.log("[info]", "Watching for file changes.")
+    }
+    //
     public generatePbJs() {
         //e.g. pbjs -t static -w CommonJS -o c:\fox\projects\tools\NodeJsTools\test\pb.js c:\fox\projects\tools\NodeJsTools\test\pb.proto
         var cmdStr = `pbjs -t static -w CommonJS -o ${this.path_pb_js} ${this.path_pb_proto}`;
         // var cmdStr = `pbjs -t static --force-long -w CommonJS -o ${this.path_pb_js} ${this.path_pb_proto}`;
-        console.log("Doing generatePbJs: ",cmdStr);
+        console.log("Doing generatePbJs: ", cmdStr);
         let out: Buffer = child_process.execSync(cmdStr);
         if (out.toString()) {
             console.log("out:", out.toString());
@@ -88,31 +132,4 @@ class ProtobufJsHelper {
 }
 
 //---
-var argv = parseArgs(process.argv.slice(2), {
-    alias: {
-        'help': 'h',
-        'dir': 'd',     //文件总的根目录[可选],设置后续 --proto等参数可以使用基于这个目录的相对路径
-        'proto': 'p',   //.proto源文件位置
-        'js': 'j',      //生成的.js文件位置
-        'tsd': 't'      //生成的.d.ts文件位置
-    }
-});
-if (argv.help || (!argv.proto || !argv.js || !argv.tsd)) {
-    console.log("Help in here!\r\n", "e.g.  bin/ProtobufJsHelper.js -d test --proto pb.proto -j pb.js -t pb.d.ts");
-} else {
-    var dir = argv.dir;
-    if (!dir) {
-        dir = "";
-    }
-    let inst: ProtobufJsHelper = new ProtobufJsHelper();
-    inst.path_pb_proto = path.resolve(dir,argv.proto);
-    inst.path_pb_js = path.resolve(dir,argv.js);
-    inst.path_pb_tsd = path.resolve(dir,argv.tsd);
-    //
-    inst.generatePbJs();
-    inst.generatePbTsd();
-    inst.modifyJs();
-    inst.modifyTs();
-    console.log("Complete!");
-}
-process.exit(1);
+new ProtobufJsGenerator().init()
