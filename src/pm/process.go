@@ -17,45 +17,6 @@ func NewProcess(user *User) *Process {
 	return instance
 }
 
-//版本更新
-func (this *Process) PublishEdit(genre uint64, dateLine string) bool {
-	stmt, err := db.GetDb().Prepare(`REPLACE INTO ` + config.Pm + `.pm_publish (pid,genre,date_line, create_time) VALUES (?,?,?,?)`)
-	defer stmt.Close()
-	db.CheckErr(err)
-	res, err := stmt.Exec(1, genre, dateLine, time.Now().Unix())
-	db.CheckErr(err)
-	num, err := res.RowsAffected()
-	db.CheckErr(err)
-	if num == 0 {
-		return false
-	}
-	data := &L2C_ProcessPublishEdit{
-		Genre:    genre,
-		DateLine: dateLine,
-	}
-	this.owner.SendToAll(L2C_PROCESS_PUBLISH_EDIT, data)
-	return true
-}
-
-//删版本
-func (this *Process) PublishDelete(dateLine string) bool {
-	stmt, err := db.GetDb().Prepare(`DELETE FROM ` + config.Pm + `.pm_publish WHERE pid = ? AND date_line = ?`)
-	defer stmt.Close()
-	db.CheckErr(err)
-	res, err := stmt.Exec(1, dateLine)
-	db.CheckErr(err)
-	num, err := res.RowsAffected()
-	db.CheckErr(err)
-	if num == 0 {
-		return false
-	}
-	data := &L2C_ProcessPublishDelete{
-		DateLine: dateLine,
-	}
-	this.owner.SendToAll(L2C_PROCESS_PUBLISH_DELETE, data)
-	return true
-}
-
 //评分
 func (this *Process) ScoreEdit(wid, quality, efficiency, manner uint64, info string) bool {
 	if wid == 0 {
@@ -83,11 +44,11 @@ func (this *Process) ScoreEdit(wid, quality, efficiency, manner uint64, info str
 }
 
 //归档
-func (this *Process) ModeStore(mid uint64) bool {
-	stmt, err := db.GetDb().Prepare(`UPDATE ` + config.Pm + `.pm_mode SET status = 1 WHERE mid = ?`)
+func (this *Process) ModeStore(mid uint64, status uint8) bool {
+	stmt, err := db.GetDb().Prepare(`UPDATE ` + config.Pm + `.pm_mode SET status = ? WHERE mid = ?`)
 	defer stmt.Close()
 	db.CheckErr(err)
-	res, err := stmt.Exec(mid)
+	res, err := stmt.Exec(status, mid)
 	db.CheckErr(err)
 	num, err := res.RowsAffected()
 	db.CheckErr(err)
@@ -95,18 +56,19 @@ func (this *Process) ModeStore(mid uint64) bool {
 		return false
 	}
 	data := &L2C_ProcessModeStore{
-		Mid: mid,
+		Mid:    mid,
+		Status: status,
 	}
 	this.owner.SendToAll(L2C_PROCESS_MODE_STORE, data)
 	return true
 }
 
 //归档
-func (this *Process) LinkStore(lid uint64) bool {
-	stmt, err := db.GetDb().Prepare(`UPDATE ` + config.Pm + `.pm_link SET status = 1 WHERE lid = ?`)
+func (this *Process) LinkStore(lid uint64, status uint8) bool {
+	stmt, err := db.GetDb().Prepare(`UPDATE ` + config.Pm + `.pm_link SET status = ? WHERE lid = ?`)
 	defer stmt.Close()
 	db.CheckErr(err)
-	res, err := stmt.Exec(lid)
+	res, err := stmt.Exec(status, lid)
 	db.CheckErr(err)
 	num, err := res.RowsAffected()
 	db.CheckErr(err)
@@ -114,7 +76,8 @@ func (this *Process) LinkStore(lid uint64) bool {
 		return false
 	}
 	data := &L2C_ProcessLinkStore{
-		Lid: lid,
+		Lid:    lid,
+		Status: status,
 	}
 	this.owner.SendToAll(L2C_PROCESS_LINK_STORE, data)
 	return true
@@ -284,7 +247,7 @@ func (this *Process) ModeAdd(mid uint64, name string, vid uint64, did uint64, tm
 		//
 	} else {
 		//按照模板中插入环节
-		var tplMode = template_manager.GetTplModeByTmid(tmid)
+		var tplMode = this.owner.Template().GetTplModeByTmid(tmid)
 		if len(tplMode.LinkSort) == 0 {
 			//模板里没有流程 插入一个空环节
 			linkSingle := this.LinkAddOne(uint64(newMid))
@@ -293,7 +256,7 @@ func (this *Process) ModeAdd(mid uint64, name string, vid uint64, did uint64, tm
 		} else {
 			didToUidMap := *timer.getDidToUidMap()
 			for _, tlid := range tplMode.LinkSort {
-				var tplLink = template_manager.GetTplLinkByTlid_string(tlid)
+				var tplLink = this.owner.Template().GetTplLinkByTlid_string(tlid)
 				//stmt, err = db.GetDb().Prepare(`INSERT INTO ` + config.Pm + `.pm_link (mid,uid,add_uid,create_time,name) SELECT ?,?,?,?,name FROM pm.pm_template_link WHERE tlid = ?`)
 				//res, err = stmt.Exec(newMid, this.owner.GetUid(), this.owner.GetUid(), time.Now().Unix(),tlid)
 				stmt, err = db.GetDb().Prepare(`INSERT INTO ` + config.Pm + `.pm_link (mid,uid,add_uid,create_time,name) VALUES (?,?,?,?,?)`)
@@ -711,23 +674,6 @@ func (this *Process) GetProject() *ProjectSingle {
 	return project
 }
 
-//版本内容
-func (this *Process) GetVerList() []*VerSingle {
-	stmt, err := db.GetDb().Prepare(`SELECT genre,date_line FROM ` + config.Pm + `.pm_publish WHERE pid = ?`)
-	defer stmt.Close()
-	db.CheckErr(err)
-	rows, err := stmt.Query(1)
-	defer rows.Close()
-	db.CheckErr(err)
-	var verList []*VerSingle
-	for rows.Next() {
-		single := &VerSingle{}
-		rows.Scan(&single.Genre, &single.DateLine)
-		verList = append(verList, single)
-	}
-	return verList
-}
-
 //获取评分列表
 func (this *Process) GetScoreList() []*ScoreSingle {
 	stmt, err := db.GetDb().Prepare(`SELECT wid,quality,efficiency,manner,info FROM ` + config.Pm + `.pm_work_score`)
@@ -757,14 +703,11 @@ func (this *Process) View(BeginDate, EndDate string) bool {
 	scoreList := this.GetScoreList()
 	//项目
 	project := this.GetProject()
-	//版本
-	verList := this.GetVerList()
 	data := &L2C_ProcessView{
 		ModeList:    modeList,
 		LinkList:    linkList,
 		WorkList:    workList,
 		ScoreList:   scoreList,
-		VerList:     verList,
 		Project:     project,
 		VersionList: this.owner.Version().VersionList(),
 	}

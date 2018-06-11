@@ -10,7 +10,7 @@ var NoticePanelClass = /** @class */ (function () {
             html += '<li wid="' + v.Wid + '"><div class="chunk"><table class="box"> \
 				<tr><td colspan="3" class="del"><div>x</div></td></tr> \
 				<tr><td class="name">时间</td><td class="info">' + v.Date + '</td><td rowspan="3" class="user">' + Data.GetUser(v.Uid).Name + '</td></tr> \
-				<tr><td class="name">功能</td><td class="info">' + v.Ver + v.Mname + '</td></tr> \
+				<tr><td class="name">功能</td><td class="info">' + VersionManager.GetVersionVer(v.Vid) + v.Mname + '</td></tr> \
 				<tr><td class="name">流程</td><td class="info">' + v.Lname + '</td></tr>';
             html += '</table></div></li>';
         });

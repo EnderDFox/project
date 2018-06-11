@@ -47,7 +47,7 @@ func (this *Timer) ProcessScore() bool {
 	//管理者管理的部门
 	didToUidMap := *this.getDidToUidMap()
 	//需要通知评价内容
-	stmt, err := db.GetDb().Prepare(`SELECT t5.*,t6.name AS mname,t6.ver FROM (SELECT t3.*,t4.did FROM (SELECT t1.*,t2.uid,t2.mid,t2.name AS lname FROM (
+	stmt, err := db.GetDb().Prepare(`SELECT t5.*,t6.name AS mname,t6.vid FROM (SELECT t3.*,t4.did FROM (SELECT t1.*,t2.uid,t2.mid,t2.name AS lname FROM (
 	SELECT wid,lid,date FROM ` + config.Pm + `.pm_work WHERE date BETWEEN DATE_ADD(CURDATE(),INTERVAL -7 DAY) AND DATE_ADD(CURDATE(),INTERVAL -1 DAY) AND status = 3 AND wid NOT IN(SELECT wid FROM pm.pm_work_score)
 	) AS t1 LEFT JOIN ` + config.Pm + `.pm_link AS t2 ON t1.lid = t2.lid ) AS t3 LEFT JOIN ` + config.Mg + `.mag_user AS t4 ON t3.uid = t4.uid) AS t5 LEFT JOIN ` + config.Pm + `.pm_mode AS t6 ON t5.mid = t6.mid`)
 	db.CheckErr(err)
@@ -56,7 +56,7 @@ func (this *Timer) ProcessScore() bool {
 	dataMap := make(map[uint64][]*ScoreNoticeSingle)
 	for rows.Next() {
 		single := &ScoreNoticeSingle{}
-		rows.Scan(&single.Wid, &single.Lid, &single.Date, &single.Uid, &single.Mid, &single.Lname, &single.Did, &single.Mname, &single.Ver)
+		rows.Scan(&single.Wid, &single.Lid, &single.Date, &single.Uid, &single.Mid, &single.Lname, &single.Did, &single.Mname, &single.Vid)
 		if muid, ok := didToUidMap[single.Did]; ok {
 			dataMap[muid] = append(dataMap[muid], single)
 		}

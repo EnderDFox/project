@@ -19,10 +19,13 @@ var ProcessFilterClass = /** @class */ (function () {
         this.Pack.BeginDate = Common.GetDate(-7);
         this.Pack.EndDate = Common.GetDate(31);
         this.Pack.ModeName = [];
+        this.Pack.ModeNameLower = [];
         this.Pack.Vid = [];
         this.Pack.ModeStatus = [0]; //默认0:进行中
         this.Pack.LinkName = [];
+        this.Pack.LinkNameLower = [];
         this.Pack.LinkUserName = [];
+        this.Pack.LinkUserNameLower = [];
         this.Pack.LinkStatus = [0]; //默认0:进行中
         this.Pack.LinkUserDid = [];
         this.Pack.WorkStatus = [];
@@ -59,9 +62,27 @@ var ProcessFilterClass = /** @class */ (function () {
         //
         this.Pack.Vid = this.GetCheckBoxValues(this.VueFilter.vid);
         this.Pack.ModeName = this.GetTextFieldValues(this.VueFilter.modeName);
+        this.Pack.ModeNameLower = [];
+        var len = this.Pack.ModeName.length;
+        for (var i = 0; i < len; i++) {
+            var modeName = this.Pack.ModeName[i];
+            this.Pack.ModeNameLower.push(modeName.toLowerCase());
+        }
         this.Pack.ModeStatus = this.GetCheckBoxValues(this.VueFilter.modeStatus);
         this.Pack.LinkName = this.GetTextFieldValues(this.VueFilter.linkName);
+        this.Pack.LinkNameLower = [];
+        var len = this.Pack.LinkName.length;
+        for (var i = 0; i < len; i++) {
+            var linkName = this.Pack.LinkName[i];
+            this.Pack.LinkNameLower.push(linkName.toLowerCase());
+        }
         this.Pack.LinkUserName = this.GetTextFieldValues(this.VueFilter.linkUserName);
+        this.Pack.LinkUserNameLower = [];
+        var len = this.Pack.LinkUserName.length;
+        for (var i = 0; i < len; i++) {
+            var linkUserName = this.Pack.LinkUserName[i];
+            this.Pack.LinkUserNameLower.push(linkUserName.toLowerCase());
+        }
         this.Pack.LinkStatus = this.GetCheckBoxValues(this.VueFilter.linkStatus);
         this.Pack.LinkUserDid = this.GetCheckBoxValues(this.VueFilter.linkUserDid);
         this.Pack.WorkStatus = this.GetCheckBoxValues(this.VueFilter.workStatus);
@@ -71,7 +92,7 @@ var ProcessFilterClass = /** @class */ (function () {
     ProcessFilterClass.prototype.PackToVueFilter = function () {
         this.VueFilter.beginDate = this.Pack.BeginDate;
         this.VueFilter.endDate = this.Pack.EndDate;
-        //vid必须每次都重新设置,因为完结可以编辑
+        //vid必须每次都重新设置,因为vid是可以编辑的
         this.VueFilter.vid.Inputs.splice(0, this.VueFilter.vid.Inputs.length);
         var len = ProcessData.VersionList.length;
         for (var i = 0; i < len; i++) {

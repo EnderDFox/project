@@ -69,7 +69,7 @@ class CollateFilterClass {
 		})
 	}
 	//显示面板
-	ShowFilter(o, e) {
+	ShowFilter(o:HTMLElement, e:JQuery.Event) {
 		var plan = $('#workFilter')
 		var top = $(o).offset().top + 50
 		var left = $(o).offset().left - plan.outerWidth()

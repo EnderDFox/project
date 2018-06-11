@@ -19,7 +19,7 @@ class LoaderClass {
     //需要加载的js文件列表  jquery必须提前加载
     //< script src = "js/Loader1.js?v=v1.3.59" > </script>
     JsList: ILoadGroup[] = [
-        { path: "", files: ['Define', 'JQueryExtend', 'Protocol', 'Config', 'WSConn', 'Commond', 'Common', 'DateTime',  'Templet', 'Data', 'Main'] },
+        { path: "", files: ['Define', 'JQueryExtend', 'Protocol', 'Config', 'WSConn', 'Commond', 'Common', 'DateTime', 'Templet', 'Data', 'Main'] },
         { path: "lib", files: ['vue', 'Echarts.min', 'Cookie', 'jquery.md5'] },
         { path: "common", files: ['PrototypeExtend'] },
         {
@@ -244,23 +244,74 @@ class LoaderClass {
             this.MsgCall()
         }
     }
+    IsVueTemplateLoaded: boolean = false
     /**vue模板缓存 */
-    VueTemplateLoaded: { [key: string]: string } = {}
+    VueTemplateLoadedDict: { [key: string]: string } = {}
     /**加载vue模板
-     * @tplName 模板路径名称, 对应``vue_template`目录下的html文件, e.g. `template\EditTplModeDetail`
+     * @tplName 模板路径名称, 对应``vue_template`目录下的html文件,  e.g. `process\FilterItemTextField`
      */
-    LoadVueTemplate(tplName: string, callback: (tpl: string, tplName: string) => void) {
-        if (this.VueTemplateLoaded[tplName]) {
-            callback(this.VueTemplateLoaded[tplName], tplName)
+    LoadVueTemplate(tplName: string, callback: (tpl: string, tplName: string) => void);
+    /**加载vue模板
+     * @tplHtml 模板文件夹路径名称,             e.g.    `process`
+     * @idName 模板文件夹内对应的html文件名      e.g.    `FilterItemTextField`
+     */
+    LoadVueTemplate(tplHtml: string, idName: string, callback: (tpl: string, tplName: string) => void);
+    LoadVueTemplate(...args) {
+        var tplHtml: string
+        var idName: string
+        var tplName: string
+        var callback: (tpl: string, tplName: string) => void
+        if (args.length == 3) {
+            tplHtml = args[0]
+            idName = args[1]
+            tplName = tplHtml + '/' + idName
+            callback = args[2]
+        } else {
+            tplName = args[0]
+            callback = args[1]
+        }
+        this.__LoadVueTemplate_PlanA(tplName, callback)
+    }
+    __LoadVueTemplate_PlanA(tplName: string, callback: (tpl: string, tplName: string) => void) {
+        if (this.VueTemplateLoadedDict[tplName]) {
+            callback(this.VueTemplateLoadedDict[tplName], tplName)
         } else {
             $.ajax({
                 url: `vue_template/${tplName}.html?v=${this.Ver}`, dataType: 'text', async: true, success: (tpl: string) => {
-                    this.VueTemplateLoaded[tplName] = tpl;
+                    this.VueTemplateLoadedDict[tplName] = tpl;
                     if (callback) {
                         callback(tpl, tplName)
                     }
                 }
             })
+        }
+    }
+    __LoadVueTemplate_PlanB(tplName: string, callback: (tpl: string, tplName: string) => void) {
+        tplName += '.html'
+        if (!this.IsVueTemplateLoaded) {
+            this.IsVueTemplateLoaded = true
+            $.ajax({
+                url: `vue_template.bundle.json?v=${this.Ver}`, dataType: 'text', async: true, success: (tpl: string) => {
+                    this.VueTemplateLoadedDict = JSON.parse(tpl)
+                    var tpl = this.VueTemplateLoadedDict[tplName]
+                    if (!tpl) {
+                        console.log("[error]", "tpl is null", tplName)
+                    } else {
+                        if (callback) {
+                            callback(tpl, tplName)
+                        }
+                    }
+                }
+            })
+        } else {
+            var tpl = this.VueTemplateLoadedDict[tplName]
+            if (!tpl) {
+                console.log("[error]", "tpl is null", tplName)
+            } else {
+                if (callback) {
+                    callback(tpl, tplName)
+                }
+            }
         }
     }
     /**批量加载vue模板 */

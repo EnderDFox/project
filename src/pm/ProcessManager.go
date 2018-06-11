@@ -1,8 +1,8 @@
 package main
 
 import (
-	"log"
 	"encoding/json"
+	"log"
 
 	"github.com/gorilla/websocket"
 )
@@ -32,42 +32,6 @@ func (this *ProcessManager) RegisterFunction() {
 	command.Register(C2L_PROCESS_MODE_STORE, &C2L_M_PROCESS_MODE_STORE{})
 	command.Register(C2L_PROCESS_LINK_COLOR, &C2L_M_PROCESS_LINK_COLOR{})
 	command.Register(C2L_PROCESS_LINK_STORE, &C2L_M_PROCESS_LINK_STORE{})
-	command.Register(C2L_PROCESS_PUBLISH_EDIT, &C2L_M_PROCESS_PUBLISH_EDIT{})
-	command.Register(C2L_PROCESS_PUBLISH_DELETE, &C2L_M_PROCESS_PUBLISH_DELETE{})
-}
-
-//版本更新
-type C2L_M_PROCESS_PUBLISH_EDIT struct{}
-
-func (this *C2L_M_PROCESS_PUBLISH_EDIT) execute(client *websocket.Conn, msg *Message) bool {
-	param := &C2L_ProcessEdit{}
-	err := json.Unmarshal([]byte(msg.Param), param)
-	if err != nil {
-		return false
-	}
-	user := session.GetUser(msg.Uid)
-	if user == nil {
-		return false
-	}
-	user.Process().PublishEdit(param.Genre, param.DateLine)
-	return true
-}
-
-//删版本
-type C2L_M_PROCESS_PUBLISH_DELETE struct{}
-
-func (this *C2L_M_PROCESS_PUBLISH_DELETE) execute(client *websocket.Conn, msg *Message) bool {
-	param := &C2L_ProcessDelete{}
-	err := json.Unmarshal([]byte(msg.Param), param)
-	if err != nil {
-		return false
-	}
-	user := session.GetUser(msg.Uid)
-	if user == nil {
-		return false
-	}
-	user.Process().PublishDelete(param.DateLine)
-	return true
 }
 
 //归档
@@ -83,7 +47,7 @@ func (this *C2L_M_PROCESS_LINK_STORE) execute(client *websocket.Conn, msg *Messa
 	if user == nil {
 		return false
 	}
-	user.Process().LinkStore(param.Lid)
+	user.Process().LinkStore(param.Lid, param.Status)
 	return true
 }
 
@@ -100,7 +64,7 @@ func (this *C2L_M_PROCESS_MODE_STORE) execute(client *websocket.Conn, msg *Messa
 	if user == nil {
 		return false
 	}
-	user.Process().ModeStore(param.Mid)
+	user.Process().ModeStore(param.Mid, param.Status)
 	return true
 }
 
@@ -213,12 +177,12 @@ func (this *C2L_M_PROCESS_MODE_EDIT) execute(client *websocket.Conn, msg *Messag
 	param := &C2L_ProcessModeEdit{}
 	err := json.Unmarshal([]byte(msg.Param), param)
 	if err != nil {
-		log.Println(`err unmarshal:`,err)
+		log.Println(`err unmarshal:`, err)
 		return false
 	}
 	user := session.GetUser(msg.Uid)
 	if user == nil {
-		log.Println(`err user:`,err)
+		log.Println(`err user:`, err)
 		return false
 	}
 	user.Process().ModeEdit(param.Mid, param.Name, param.Vid)

@@ -757,7 +757,7 @@ class ProfilePanelClass {
 			html += '<td><ol>'
 			$.each(ProfileData.DataMap[d], function (k, v: ProfileSingle) {
 				html += '<li>'
-				html += '<span class="check_' + v.Inspect + '">' + v.Ver + v.MName + '-' + v.LName + '</span>'
+				html += '<span class="check_' + v.Inspect + '">' + VersionManager.GetVersionVer(v.Vid) + v.MName + '-' + v.LName + '</span>'
 				html += '<span class="special">'
 				if (v.MinNum > 0 || v.MaxNum > 0) {
 					html += '（' + v.MinNum + '/' + v.MaxNum + '）'

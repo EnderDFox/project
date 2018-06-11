@@ -33,4 +33,15 @@ var WorkStatusField;
     WorkStatusField[WorkStatusField["REST"] = 4] = "REST";
     WorkStatusField[WorkStatusField["OPTIMIZE"] = 5] = "OPTIMIZE";
 })(WorkStatusField || (WorkStatusField = {}));
+//mode/link  0:正常  1:归档
+var ModeStatusField;
+(function (ModeStatusField) {
+    ModeStatusField[ModeStatusField["NORMAL"] = 0] = "NORMAL";
+    ModeStatusField[ModeStatusField["STORE"] = 1] = "STORE";
+})(ModeStatusField || (ModeStatusField = {}));
+var LinkStatusField;
+(function (LinkStatusField) {
+    LinkStatusField[LinkStatusField["NORMAL"] = 0] = "NORMAL";
+    LinkStatusField[LinkStatusField["STORE"] = 1] = "STORE";
+})(LinkStatusField || (LinkStatusField = {}));
 //# sourceMappingURL=Define.js.map

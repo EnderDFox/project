@@ -24,8 +24,6 @@ const (
 	L2C_PROCESS_MODE_STORE     = 50016
 	L2C_PROCESS_LINK_COLOR     = 50017
 	L2C_PROCESS_LINK_STORE     = 50018
-	L2C_PROCESS_PUBLISH_EDIT   = 50019
-	L2C_PROCESS_PUBLISH_DELETE = 50020
 	L2C_PROCESS_SCORE_NOTICE   = 51001
 	L2C_COLLATE_VIEW           = 60001
 	L2C_COLLATE_STEP_EDIT      = 60002
@@ -97,18 +95,17 @@ type L2C_ProcessView struct {
 	LinkList    []*LinkSingle
 	WorkList    []*WorkSingle
 	ScoreList   []*ScoreSingle
-	VerList     []*VerSingle
 	Project     *ProjectSingle
 	VersionList []*VersionSingle
 }
 
 type L2C_CollateView struct {
-	ModeList  []*ModeSingle
-	LinkList  []*LinkSingle
-	WorkList  []*WorkSingle
-	TagsList  []*TagSingle
-	ExtraList []*ExtraSingle
-	VerList   []*VerSingle
+	ModeList    []*ModeSingle
+	LinkList    []*LinkSingle
+	WorkList    []*WorkSingle
+	TagsList    []*TagSingle
+	ExtraList   []*ExtraSingle
+	VersionList []*VersionSingle
 }
 
 type L2C_ProfileView struct {
@@ -155,11 +152,13 @@ type L2C_ProcessModeMove struct {
 }
 
 type L2C_ProcessModeStore struct {
-	Mid uint64
+	Mid    uint64
+	Status uint8 //0:正常  1:归档
 }
 
 type L2C_ProcessLinkStore struct {
-	Lid uint64
+	Lid    uint64
+	Status uint8 //0:正常  1:归档
 }
 
 type L2C_ProcessPublishEdit struct {

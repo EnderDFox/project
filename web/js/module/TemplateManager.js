@@ -1,6 +1,6 @@
 var TemplateManagerClass = /** @class */ (function () {
     function TemplateManagerClass() {
-        this.AuePath = "template/"; //模板所在目录
+        this.AuePath = "template"; //模板所在 .html
     }
     //初始化
     TemplateManagerClass.prototype.Init = function () {
@@ -152,7 +152,7 @@ var TemplateManagerClass = /** @class */ (function () {
     };
     TemplateManagerClass.prototype.BindTplSelect = function (domId) {
         if (TemplateManager.vue_tplSelect == null) {
-            Loader.LoadVueTemplate(TemplateManager.AuePath + "TplModeSelect", function (txt) {
+            Loader.LoadVueTemplate(TemplateManager.AuePath, "TplModeSelect", function (txt) {
                 TemplateManager.vue_tplSelect = new Vue({
                     el: domId,
                     template: txt,
@@ -192,7 +192,7 @@ var TemplateManagerClass = /** @class */ (function () {
         };
         //判断是否需要初始化: 加载模板
         if (TemplateManager.vue_editTplModeList == null) {
-            Loader.LoadVueTemplate(TemplateManager.AuePath + "EditTplModeList", function (txt) {
+            Loader.LoadVueTemplate(TemplateManager.AuePath, "EditTplModeList", function (txt) {
                 TemplateManager.vue_editTplModeList = new Vue({
                     template: txt,
                     data: {
@@ -316,7 +316,7 @@ var TemplateManagerClass = /** @class */ (function () {
             // TemplateManager.vue_editTplModeDetail.mode = mode
         };
         //判断是否需要初始化: 加载模板
-        Loader.LoadVueTemplate(TemplateManager.AuePath + "EditTplModeDetail", function (txt) {
+        Loader.LoadVueTemplate(TemplateManager.AuePath, "EditTplModeDetail", function (txt) {
             //读取顶级部门保存为字典
             var departmentDict = {};
             var len = Data.DepartmentLoop.length;
@@ -455,7 +455,7 @@ var TemplateManagerClass = /** @class */ (function () {
         };
         //判断是否需要初始化: 加载模板
         if (TemplateManager.vue_menuDepartment == null) {
-            Loader.LoadVueTemplate(TemplateManager.AuePath + "MenuDepartment", function (txt) {
+            Loader.LoadVueTemplate(TemplateManager.AuePath, "MenuDepartment", function (txt) {
                 //读取部门保存为数组
                 var departments = [];
                 var len = Data.DepartmentLoop.length;

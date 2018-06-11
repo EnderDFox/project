@@ -28,6 +28,7 @@ func (this *Collate) GetStepList(BeginDate, EndDate string, lidMap map[uint64]ui
 	for rows.Next() {
 		single := &WorkSingle{}
 		rows.Scan(&single.Wid, &single.Lid, &single.Date, &single.Status, &single.MinNum, &single.MaxNum, &single.Tag, &single.Tips, &single.Inspect)
+		single.FileList = this.owner.Upload().GetFileList(FILE_JOIN_KIND_WORK, single.Wid)
 		workList = append(workList, single)
 		lidMap[single.Lid] = single.Lid
 	}
@@ -100,23 +101,6 @@ func (this *Collate) GetTagsList() []*TagSingle {
 	return tagsList
 }
 
-//版本内容
-func (this *Collate) GetVerList() []*VerSingle {
-	stmt, err := db.GetDb().Prepare(`SELECT genre,date_line FROM ` + config.Pm + `.pm_publish WHERE pid = ?`)
-	defer stmt.Close()
-	db.CheckErr(err)
-	rows, err := stmt.Query(1)
-	defer rows.Close()
-	db.CheckErr(err)
-	var verList []*VerSingle
-	for rows.Next() {
-		single := &VerSingle{}
-		rows.Scan(&single.Genre, &single.DateLine)
-		verList = append(verList, single)
-	}
-	return verList
-}
-
 //附加
 func (this *Collate) GetExtraList(BeginDate, EndDate string) []*ExtraSingle {
 	stmt, err := db.GetDb().Prepare(`SELECT eid,uid,name,date,inspect FROM ` + config.Pm + `.pm_extra WHERE date >= ? AND date <= ?`)
@@ -150,15 +134,13 @@ func (this *Collate) View(BeginDate, EndDate string) bool {
 	modeList := this.GetModeList(midMap)
 	//标签列表
 	tagsList := this.GetTagsList()
-	//版本
-	verList := this.GetVerList()
 	data := &L2C_CollateView{
-		ModeList:  modeList,
-		LinkList:  linkList,
-		WorkList:  workList,
-		TagsList:  tagsList,
-		ExtraList: extraList,
-		VerList:   verList,
+		ModeList:    modeList,
+		LinkList:    linkList,
+		WorkList:    workList,
+		TagsList:    tagsList,
+		ExtraList:   extraList,
+		VersionList: this.owner.Version().VersionList(),
 	}
 	this.owner.SendTo(L2C_COLLATE_VIEW, data)
 	return true

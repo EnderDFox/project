@@ -23,12 +23,13 @@ type User struct {
 	//文件描述
 	client *websocket.Conn
 	//初始化类
-	profilePtr *Profile
-	processPtr *Process
-	collatePtr *Collate
-	savePtr    *Save
-	versionPtr *Version
-	uploadPtr  *Upload
+	profilePtr  *Profile
+	processPtr  *Process
+	collatePtr  *Collate
+	savePtr     *Save
+	versionPtr  *Version
+	uploadPtr   *Upload
+	templatePtr *Template
 }
 
 func NewUser() *User {
@@ -73,6 +74,10 @@ func (this *User) Upload() *Upload {
 	return this.uploadPtr
 }
 
+func (this *User) Template() *Template {
+	return this.templatePtr
+}
+
 //模块初始化
 func (this *User) Init() {
 	//个人模块
@@ -86,6 +91,7 @@ func (this *User) Init() {
 	//
 	this.versionPtr = NewVersion(this)
 	this.uploadPtr = NewUpload(this)
+	this.templatePtr = NewTemplate(this)
 }
 
 //数据发送

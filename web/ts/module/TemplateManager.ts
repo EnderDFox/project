@@ -12,7 +12,7 @@ interface IDepartmentItem {
     Name: string
 }
 class TemplateManagerClass {
-    AuePath: string = "template/" //模板所在目录
+    AuePath: string = "template" //模板所在 .html
     DataModes: ITplModeSimple[]
     //初始化
     Init() {
@@ -165,7 +165,7 @@ class TemplateManagerClass {
     vue_tplSelect: CombinedVueInstance1<{ modes: ITplModeSimple[] }>
     BindTplSelect(domId: string) {
         if (TemplateManager.vue_tplSelect == null) {
-            Loader.LoadVueTemplate(TemplateManager.AuePath + "TplModeSelect", function (txt) {
+            Loader.LoadVueTemplate(TemplateManager.AuePath , "TplModeSelect", function (txt) {
                 TemplateManager.vue_tplSelect = new Vue({
                     el: domId,
                     template: txt,
@@ -207,7 +207,7 @@ class TemplateManagerClass {
         }
         //判断是否需要初始化: 加载模板
         if (TemplateManager.vue_editTplModeList == null) {
-            Loader.LoadVueTemplate(TemplateManager.AuePath + "EditTplModeList", function (txt) {
+            Loader.LoadVueTemplate(TemplateManager.AuePath , "EditTplModeList", function (txt) {
                 TemplateManager.vue_editTplModeList = new Vue({
                     template: txt,
                     data: {
@@ -327,7 +327,7 @@ class TemplateManagerClass {
             // TemplateManager.vue_editTplModeDetail.mode = mode
         }
         //判断是否需要初始化: 加载模板
-        Loader.LoadVueTemplate(TemplateManager.AuePath + "EditTplModeDetail", function (txt) {
+        Loader.LoadVueTemplate(TemplateManager.AuePath , "EditTplModeDetail", function (txt) {
             //读取顶级部门保存为字典
             var departmentDict = {};
             var len = Data.DepartmentLoop.length
@@ -466,7 +466,7 @@ class TemplateManagerClass {
         }
         //判断是否需要初始化: 加载模板
         if (TemplateManager.vue_menuDepartment == null) {
-            Loader.LoadVueTemplate(TemplateManager.AuePath + "MenuDepartment", function (txt) {
+            Loader.LoadVueTemplate(TemplateManager.AuePath , "MenuDepartment", function (txt) {
                 //读取部门保存为数组
                 var departments: IDepartmentItem[] = [];
                 var len = Data.DepartmentLoop.length

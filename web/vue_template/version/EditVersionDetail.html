@@ -13,17 +13,6 @@
             </div>
             <div :class="['name sk_color_'+(index+1)]" v-text="(index+1)+'.'+publishName(index+1)+'日期'"></div>
         </li>
-        <!-- <li class="body list-complete-item" v-for="(link,index) in mode.Links" :key="link.Tlid">
-            <input type=" text " class="ver " placeholder="空 " :value="link.Name " :id=" 'editTplModeDetail_'+link.Tlid+
-            '_name' " @blur="onEditName($event,link.Tlid) "
-                @keyup.enter="onEditName($event,link.Tlid) " />
-            <button class="confirm btnSmall2 " title="修改负责人所属的部门 " @click="onChangeDid($event,link.Tlid) ">{{link.Did|didName}}</button>
-            <button :class="{ 'confirm':true, 'btnSmall1':true, 'button-disabled':index==0} " title="排序上移 " @click="onSortUp($event,link.Tlid) "
-                :disabled="index==0 ">↑</button>
-            <button :class="{ 'confirm':true, 'btnSmall1':true, 'button-disabled':index>=(mode.Links.length-1)}" title="排序下移" @click="onSortDown($event,link.Tlid)" :disabled="index>=(mode.Links.length-1)">↓
-            </button>
-            <button :class="{'confirm':true,'btnSmall1':true}" title="删除" @click="onDel($event,link.Tlid)">X</button>
-        </li> -->
     </ul>
     <div class="foot" v-if="false">
         <div class="buttons">
@@ -31,8 +20,4 @@
             <button class="cancel">取消</button>
         </div>
     </div>
-    <!--     <div class="foot">
-        <button class="confirm" @click="onSubmit()">确定</button>
-        <button class="cancel" @click="onAdd()">取消</button>
-    </div> -->
 </div>

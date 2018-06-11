@@ -37,14 +37,14 @@ class CollatePanelClass {
 		var html = ''
 		html += '<tr class="title">'
 		html += '<td class="type_0">日期</td>'
-		$.each(Data.UserList, (k, v: UserSingle) => {
-			if (v.Did == 0) {
+		$.each(Data.UserList, (k, user: UserSingle) => {
+			if (user.Did == 0) {
 				return true
 			}
-			if (v.IsHide == 1) {
+			if (user.IsHide == 1) {
 				return true
 			}
-			html += '<td class="type_' + v.Did + '">' + v.Name + '</td>'
+			html += '<td class="type_' + user.Did + '">' + user.Name + '</td>'
 			return true
 		})
 		html += '</tr>'
@@ -55,58 +55,58 @@ class CollatePanelClass {
 		var today = Common.GetDate(0)
 		var day = Common.GetDay(today)
 		var html = ''
-		$.each(this.DateList, function (r, d) {
+		$.each(this.DateList, function (r, dateItem:IDateItem) {
 			var trClass = []
-			if (d.w >= 6) {
+			if (dateItem.w >= 6) {
 				trClass.push('weekend')
 			}
-			html += '<tr class="' + trClass.join(' ') + '" date="' + d.s + '">'
+			html += '<tr class="' + trClass.join(' ') + '" date="' + dateItem.s + '">'
 			var tdClass = ['frist']
-			if (d.s == today) {
+			if (dateItem.s == today) {
 				tdClass.push('today')
 			}
 			html += '<td class="' + tdClass.join(' ') + '">'
 			html += '<dl>'
-			if (ProcessData.HasVersionDateLineMap(d.s)) {
-				var p: PublishSingle = ProcessData.VersionDateLineMap[d.s][0]
-				var _genre = p.Genre
-				var version = ProcessData.VersionMap[p.Vid]
+			if (ProcessData.HasVersionDateLineMap(dateItem.s)) {
+				var publish: PublishSingle = ProcessData.VersionDateLineMap[dateItem.s][0]
+				var _genre = publish.Genre
+				var version = ProcessData.VersionMap[publish.Vid]
 				var publishName = '版本' + VersionManager.GetPublishName(_genre)
 				html += '<dd class="notice sk_' + _genre + '">' + version.Ver + ' ' + publishName + '</dd>'
 			} else {
-				var p: PublishSingle = VersionManager.GetNextNearestPublish(d.s, false)
-				if (p) {
-					var _genre = p.Genre
-					var version = ProcessData.VersionMap[p.Vid]
+				var publish: PublishSingle = VersionManager.GetNextNearestPublish(dateItem.s, false)
+				if (publish) {
+					var _genre = publish.Genre
+					var version = ProcessData.VersionMap[publish.Vid]
 					var publishName = '版本' + VersionManager.GetPublishName(_genre)
-					html += '<dd class="notice sk_' + _genre + '">' + Common.DateLineSpaceDay(p.DateLine, d.s) + '天后</dd>'
+					html += '<dd class="notice sk_' + _genre + '">' + Common.DateLineSpaceDay(publish.DateLine, dateItem.s) + '天后</dd>'
 					html += '<dd class="notice sk_' + _genre + '">' + version.Ver + ' ' + publishName + '</dd>'
 				}
 			}
-			html += '<dt>' + d.s + '</dt>'
-			html += '<dd>星期' + DateTime.WeekMap[d.w - 1] + '</dd>'
+			html += '<dt>' + dateItem.s + '</dt>'
+			html += '<dd>星期' + DateTime.WeekMap[dateItem.w - 1] + '</dd>'
 
 			html += '</dl>'
 			html += '</td>'
 			var cols = 1
-			$.each(Data.UserList, (k, v: UserSingle) => {
-				if (v.Did == 0) {
+			$.each(Data.UserList, (k, user: UserSingle) => {
+				if (user.Did == 0) {
 					return
 				}
-				if (v.IsHide == 1) {
+				if (user.IsHide == 1) {
 					return
 				}
-				html += '<td uid="' + v.Uid + '"><ol>'
+				html += '<td uid="' + user.Uid + '"><ol>'
 				//进度内容
-				if (CollateData.DateUserMap[d.s] && CollateData.DateUserMap[d.s][v.Uid]) {
-					$.each(CollateData.DateUserMap[d.s][v.Uid], function (k, w) {
-						html += CollatePanel.GetWorkInfo(w)
+				if (CollateData.DateUserMap[dateItem.s] && CollateData.DateUserMap[dateItem.s][user.Uid]) {
+					$.each(CollateData.DateUserMap[dateItem.s][user.Uid], function (k, work:WorkSingle) {
+						html += CollatePanel.GetWorkInfo(work)
 					})
 				}
 				//补充内容
-				if (CollateData.DateExtraMap[d.s] && CollateData.DateExtraMap[d.s][v.Uid]) {
-					$.each(CollateData.DateExtraMap[d.s][v.Uid], function (k, e) {
-						html += CollatePanel.GetWorkExtra(e)
+				if (CollateData.DateExtraMap[dateItem.s] && CollateData.DateExtraMap[dateItem.s][user.Uid]) {
+					$.each(CollateData.DateExtraMap[dateItem.s][user.Uid], function (k, extra:ExtraSingle) {
+						html += CollatePanel.GetWorkExtra(extra)
 					})
 				}
 				html += '</ol>'
@@ -117,46 +117,49 @@ class CollatePanelClass {
 				cols++
 			})
 			html += '</tr>'
-			if (d.w == 7) {
+			if (dateItem.w == 7) {
 				html += '<tr class="space"><td colspan="' + cols + '"></td></tr>'
 			}
 		})
 		return html
 	}
 	//工作补充
-	GetWorkExtra(e) {
+	GetWorkExtra(data:ExtraSingle) {
 		var html = ''
-		html += '<li eid="' + e.Eid + '">'
-		html += '<span class="check_' + e.Inspect + '">' + e.Name + '</span>'
-		html += '<span class="special">（' + CollateData.InspectList[e.Inspect] + '）</span>'
+		html += '<li eid="' + data.Eid + '">'
+		html += '<span class="check_' + data.Inspect + '">' + data.Name + '</span>'
+		html += '<span class="special">（' + CollateData.InspectList[data.Inspect] + '）</span>'
 		html += '<span class="edit">√</span>'
 		html += '</li>'
 		return html
 	}
 	//工作内容
-	GetWorkInfo(w) {
+	GetWorkInfo(work:WorkSingle) {
 		var html = ''
-		var link = CollateData.LinkMap[w.Lid]
-		html += '<li wid="' + w.Wid + '">'
-		html += '<span class="check_' + w.Inspect + '">' + VersionManager.GetVersionVer(CollateData.ModeMap[link.Mid].Vid) + CollateData.ModeMap[link.Mid].Name + '-' + link.Name + '</span>'
+		var link = CollateData.LinkMap[work.Lid]
+		html += '<li wid="' + work.Wid + '">'
+		html += '<span class="check_' + work.Inspect + '">' + VersionManager.GetVersionVer(CollateData.ModeMap[link.Mid].Vid) + CollateData.ModeMap[link.Mid].Name + '-' + link.Name + '</span>'
 		html += '<span class="special">'
-		if (w.MinNum > 0 || w.MaxNum > 0) {
-			html += '（' + w.MinNum + '/' + w.MaxNum + '）'
+		if (work.MinNum > 0 || work.MaxNum > 0) {
+			html += '（' + work.MinNum + '/' + work.MaxNum + '）'
 		}
-		if (w.Tips != '') {
-			html += '（' + w.Tips + '）'
+		if (work.Tips != '') {
+			html += '（' + work.Tips + '）'
 		}
-		if (w.Tag != '') {
-			var TagInfo = CollateData.TagsMap[w.Tag]
+		if (work.Tag != '') {
+			var TagInfo = CollateData.TagsMap[work.Tag]
 			if (TagInfo) {
 				html += '（' + TagInfo.Info + '）'
 			} else {
-				html += '（' + w.Tag + '）'
+				html += '（' + work.Tag + '）'
 			}
 		} else {
-			html += '（' + CollateData.StatusList[w.Status].Info + '）'
+			html += '（' + CollateData.StatusList[work.Status].Info + '）'
 		}
 		html += '</span>'
+		if(work.FileList && work.FileList.length>0){
+			html += `<span style="color:#3333CC;">(附件x${work.FileList.length})</span>`
+		}
 		html += '</li>'
 		return html
 	}
@@ -186,10 +189,10 @@ class CollatePanelClass {
 			if (!User.IsWrite) {
 				return
 			}
-			if ($(this).is('[wid]')) {
-				CollatePanel.ShowStepMenu(this, e)
+			if ($(e.currentTarget).is('[wid]')) {
+				CollatePanel.ShowStepMenu(e.currentTarget as HTMLElement, e)
 			} else {
-				CollatePanel.ShowExtraMenu(this, e)
+				CollatePanel.ShowExtraMenu(e.currentTarget as HTMLElement, e)
 			}
 		}).delegate('td', 'click', (e: JQuery.Event) => {
 			if (!User.IsWrite) {
@@ -207,7 +210,7 @@ class CollatePanelClass {
 		})
 	}
 	//显示菜单
-	ShowStepMenu(o, e) {
+	ShowStepMenu(o:HTMLElement, e:JQuery.Event) {
 		var wid = $(o).attr('wid')
 		var top = e.pageY + 1
 		var left = e.pageX + 1
@@ -226,7 +229,7 @@ class CollatePanelClass {
 		}).show().adjust(-5)
 	}
 	//显示补充
-	ShowExtraMenu(o, e) {
+	ShowExtraMenu(o:HTMLElement, e:JQuery.Event) {
 		var top = e.pageY + 1
 		var left = e.pageX + 1
 		$('#menuExtra').css({ left: left, top: top }).unbind().delegate('.row', 'click', function () {

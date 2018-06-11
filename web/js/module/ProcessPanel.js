@@ -1,17 +1,25 @@
 //进度类
 var ProcessPanelClass = /** @class */ (function () {
     function ProcessPanelClass() {
-        //时间跨度
+        /** 时间跨度
+         * key:dateLine	val:count
+         */
         this.DateList = { rows: {}, list: [] };
     }
-    //初始化
+    /**
+     * 初始化
+     */
     ProcessPanelClass.prototype.Init = function () {
     };
-    //入口协议
+    /**
+     * 入口协议
+     */
     ProcessPanelClass.prototype.Index = function () {
         WSConn.sendMsg(C2L.C2L_PROCESS_VIEW, ProcessFilter.GetSvrPack());
     };
-    //设置时间范围
+    /**
+     * 设置时间范围
+     */
     ProcessPanelClass.prototype.SetDateRange = function () {
         var rows = {};
         var list = [];
@@ -190,7 +198,7 @@ var ProcessPanelClass = /** @class */ (function () {
             return html;
         }
         html += '<tr lid="' + link.Lid + '"> \
-					<td class="link bg_' + link.Color + '" type="link">' + (link.Name == '' ? '空' : link.Name) + '</td> \
+					<td class="link bg_' + link.Color + '" type="link">' + (link.Name == '' ? '空' : link.Name) + ProcessPanel.GetModeLinkStatusName(link.Status) + '</td> \
 					<td class="duty" type="duty">' + Data.GetUser(link.Uid).Name + '</td>';
         //进度
         $.each(this.DateList.list, function (k, info) {
@@ -225,7 +233,7 @@ var ProcessPanelClass = /** @class */ (function () {
             return html;
         }
         html += '<tr> \
-					<td class="mode bg_' + mode.Color + '" mid="' + mode.Mid + '">' + VersionManager.GetVersionVer(mode.Vid) + (mode.Name == '' ? '空' : mode.Name) + '</td> \
+					<td class="mode bg_' + mode.Color + '" mid="' + mode.Mid + '">' + VersionManager.GetVersionVer(mode.Vid) + (mode.Name == '' ? '空' : mode.Name) + this.GetModeLinkStatusName(mode.Status) + '</td> \
 					<td colspan="' + (this.DateList.list.length + 2) + '">';
         //流程
         html += this.GetLinkListHtml(mode);
@@ -316,7 +324,9 @@ var ProcessPanelClass = /** @class */ (function () {
         var top = e.pageY + 1;
         var left = e.pageX + 1;
         var mode = ProcessData.ModeMap[mid];
-        $('#menuMode').css({ left: left, top: top }).unbind().delegate('.row[type!="color"]', 'click', function (e) {
+        var $menuMode = $('#menuMode');
+        $menuMode.find(".store_txt").text(mode.Status == ModeStatusField.NORMAL ? '归档' : '恢复归档');
+        $menuMode.css({ left: left, top: top }).unbind().delegate('.row[type!="color"]', 'click', function (e) {
             var type = $(e.currentTarget).attr('type');
             switch (type) {
                 case 'insert':
@@ -345,9 +355,14 @@ var ProcessPanelClass = /** @class */ (function () {
                     }
                     break;
                 case 'store':
-                    Common.Warning(o, e, function () {
-                        WSConn.sendMsg(C2L.C2L_PROCESS_MODE_STORE, { 'Mid': mode.Mid });
-                    }, '是否将已完成的功能进行归档？');
+                    if (mode.Status == ModeStatusField.NORMAL) {
+                        Common.Warning(o, e, function () {
+                            WSConn.sendMsg(C2L.C2L_PROCESS_MODE_STORE, { 'Mid': mode.Mid, 'Status': ModeStatusField.STORE });
+                        }, '是否将已完成的功能进行归档？');
+                    }
+                    else {
+                        WSConn.sendMsg(C2L.C2L_PROCESS_MODE_STORE, { 'Mid': mode.Mid, 'Status': ModeStatusField.NORMAL });
+                    }
                     break;
             }
             _this.HideMenu();
@@ -508,7 +523,6 @@ var ProcessPanelClass = /** @class */ (function () {
     //评价
     ProcessPanelClass.prototype.OnShowEditScore = function (o) {
         var wid = $(o).data('grid').wid;
-        var cur = $(o).parent();
         var left = $(o).position().left + $(o).outerWidth() - 2;
         var top = $(o).position().top - 2;
         this.ShowEditScore(wid, left, top);
@@ -541,7 +555,10 @@ var ProcessPanelClass = /** @class */ (function () {
         var cur = $(o).parent();
         var top = e.pageY + 1;
         var left = e.pageX + 1;
-        $('#menuLink').css({ left: left, top: top }).unbind().delegate('.row', 'click', function (e) {
+        var link = ProcessData.LinkMap[parseInt(cur.data('lid'))];
+        var $menuLink = $('#menuLink');
+        $menuLink.find(".store_txt").text(link.Status == LinkStatusField.NORMAL ? '归档' : '恢复归档');
+        $menuLink.css({ left: left, top: top }).unbind().delegate('.row', 'click', function (e) {
             var type = $(e.currentTarget).attr('type');
             switch (type) {
                 case 'forward':
@@ -563,9 +580,14 @@ var ProcessPanelClass = /** @class */ (function () {
                     _this.ShowEditLink(o, C2L.C2L_PROCESS_LINK_EDIT);
                     break;
                 case 'store':
-                    Common.Warning(o, e, function () {
-                        WSConn.sendMsg(C2L.C2L_PROCESS_LINK_STORE, { 'Lid': cur.data('lid') });
-                    }, '是否将已完成的流程进行归档？');
+                    if (link.Status == LinkStatusField.NORMAL) {
+                        Common.Warning(o, e, function () {
+                            WSConn.sendMsg(C2L.C2L_PROCESS_LINK_STORE, { 'Lid': cur.data('lid'), 'Status': LinkStatusField.STORE });
+                        }, '是否将已完成的流程进行归档？');
+                    }
+                    else {
+                        WSConn.sendMsg(C2L.C2L_PROCESS_LINK_STORE, { 'Lid': cur.data('lid'), 'Status': LinkStatusField.NORMAL });
+                    }
                     break;
                 case 'delete':
                     if (cur.parent().find('tr').length > 1) {
@@ -622,32 +644,12 @@ var ProcessPanelClass = /** @class */ (function () {
     };
     //发布菜单
     ProcessPanelClass.prototype.ShowMenuPub = function (o, e) {
-        var cur = $(o).parent();
         var top = e.pageY + 4;
         var left = e.pageX + 2;
         var index = $(o).index() - 3;
         var info = this.DateList.list[index];
         this.HideMenu();
         VersionManager.ShowTableHeaderMenu(info.s, left, top);
-        /* $('#pubMenu').css({ left: left, top: top }).unbind().delegate('.row', 'click', (e:JQuery.Event)=> {
-            var type = $(e.currentTarget).attr('type')
-            switch (type) {
-                case 'begin':
-                case 'end':
-                case 'seal':
-                case 'delay':
-                case 'pub':
-                case 'summary':
-                    VersionManager.ShowVersionByDateLine(info.s)
-                    // WSConn.sendMsg(C2L.C2L_PROCESS_PUBLISH_EDIT, { 'DateLine': info.s, 'Genre': $(e.currentTarget).index() + 1 })
-                    break
-                case 'del':
-                    // WSConn.sendMsg(C2L.C2L_PROCESS_PUBLISH_DELETE, { 'DateLine': info.s })
-                    break
-            }
-            //console.log($(e.currentTarget).index())
-            this.HideMenu()
-        }).show().adjust(-5) */
     };
     //选中迷你小匡
     ProcessPanelClass.prototype.ShowMiniBox = function (e) {
@@ -668,6 +670,13 @@ var ProcessPanelClass = /** @class */ (function () {
         });
         //clientHeight
         //offsetHeight
+    };
+    ProcessPanelClass.prototype.GetModeLinkStatusName = function (status) {
+        switch (status) {
+            case ModeStatusField.STORE:
+                return "<span class=\"status_store\">(\u5DF2\u5F52\u6863)<span>";
+        }
+        return '';
     };
     //关闭所有菜单
     ProcessPanelClass.prototype.HideMenu = function () {

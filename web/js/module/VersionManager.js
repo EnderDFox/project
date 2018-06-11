@@ -634,7 +634,18 @@ var VersionManagerClass = /** @class */ (function () {
         }
         return versionVer;
     };
-    VersionManagerClass.prototype.GetVersionFullname = function (version) {
+    VersionManagerClass.prototype.GetVersionFullname = function () {
+        var args = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            args[_i] = arguments[_i];
+        }
+        var version;
+        if (typeof args[0] == 'number') {
+            version = ProcessData.VersionMap[args[0]];
+        }
+        else {
+            version = args[0];
+        }
         return this.GetVersionVer(version.Vid) + (version.Name == '' ? '' : '-' + version.Name);
     };
     /**获取前面最近的version, 根据有begin来判断 */

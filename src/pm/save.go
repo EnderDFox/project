@@ -57,7 +57,7 @@ func (this *Save) GetDepartmentMap() map[uint64]*DepartmentSingle {
 
 //获取模块列表
 func (this *Save) GetModeMap() map[uint64]*ModeSingle {
-	stmt, err := db.GetDb().Prepare(`SELECT mid,ver,name FROM ` + config.Pm + `.pm_mode`)
+	stmt, err := db.GetDb().Prepare(`SELECT mid,vid,name FROM ` + config.Pm + `.pm_mode`)
 	defer stmt.Close()
 	db.CheckErr(err)
 	rows, err := stmt.Query()
@@ -66,7 +66,7 @@ func (this *Save) GetModeMap() map[uint64]*ModeSingle {
 	modeMap := make(map[uint64]*ModeSingle)
 	for rows.Next() {
 		single := &ModeSingle{}
-		rows.Scan(&single.Mid, &single.Ver, &single.Name)
+		rows.Scan(&single.Mid, &single.Vid, &single.Name)
 		modeMap[single.Mid] = single
 	}
 	return modeMap
@@ -161,6 +161,7 @@ func (this *Save) GetWorkMap(beginDate, endDate string, linkMap map[uint64]*Link
 }
 
 //晨会内容
+
 func (this *Save) Collate(beginDate, endDate string) bool {
 	//模块
 	modeMap := this.GetModeMap()

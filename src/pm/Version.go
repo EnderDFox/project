@@ -121,16 +121,31 @@ func (this *Version) VersionChangeName(vid uint64, name string) bool {
 }
 
 func (this *Version) VersionChangePublish(vid uint64, genre uint32, dateLine string) bool {
-	stmt, err := db.GetDb().Prepare(`REPLACE INTO ` + config.Pm + `.pm_publish (pid,genre,date_line, create_time,vid) VALUES (?,?,?,?,?)`)
-	defer stmt.Close()
-	db.CheckErr(err)
-	res, err := stmt.Exec(COMMON_PID, genre, dateLine, time.Now().Unix(), vid)
-	db.CheckErr(err)
-	num, err := res.RowsAffected()
-	db.CheckErr(err)
-	if num == 0 {
-		log.Println(`[ERROR][SQL]REPLACE INTO pm.pm_publish (pid,genre,date_line, create_time,vid) VALUES (?????) affected row : 0`, `[vid]:`, vid, `[genre]:`, genre, `[dateline]:`, dateLine)
-		return false
+	if dateLine == "" {
+		//删除
+		stmt, err := db.GetDb().Prepare(`DELETE FROM ` + config.Pm + `.pm_publish WHERE pid=? AND vid=? AND genre=?`)
+		defer stmt.Close()
+		db.CheckErr(err)
+		res, err := stmt.Exec(COMMON_PID, vid, genre)
+		db.CheckErr(err)
+		num, err := res.RowsAffected()
+		db.CheckErr(err)
+		if num == 0 {
+			log.Println(`[ERROR][SQL]VersionChangePublish DELETE ERROR affected row : 0`)
+			return false
+		}
+	} else {
+		stmt, err := db.GetDb().Prepare(`REPLACE INTO ` + config.Pm + `.pm_publish (pid, vid, genre, date_line, create_time) VALUES (?,?,?,?,?)`)
+		defer stmt.Close()
+		db.CheckErr(err)
+		res, err := stmt.Exec(COMMON_PID, vid, genre, dateLine, time.Now().Unix())
+		db.CheckErr(err)
+		num, err := res.RowsAffected()
+		db.CheckErr(err)
+		if num == 0 {
+			log.Println(`[ERROR][SQL]REPLACE INTO pm.pm_publish (pid,genre,date_line, create_time,vid) VALUES (?????) affected row : 0`, `[vid]:`, vid, `[genre]:`, genre, `[dateline]:`, dateLine)
+			return false
+		}
 	}
 	data := &L2C_VersionChangePublish{
 		Vid:      vid,

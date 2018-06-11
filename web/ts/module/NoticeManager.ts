@@ -11,7 +11,7 @@ class NoticeManagerClass {
         //NoticePanel.BindActions()
     }
     //评价完成
-    ScoreEdit(data: ScoreNoticeSingle) {
+    ScoreEdit(data: ScoreSingle) {
         if (!NoticeData.NoticeMap[data.Wid]) {
             return false
         }

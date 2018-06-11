@@ -16,6 +16,14 @@ import (
 	"github.com/disintegration/imaging"
 )
 
+const (
+	FILE_KIND_PNG = 1
+	FILE_KIND_JPG = 2
+	FILE_KIND_BMP = 3
+	//
+	FILE_JOIN_KIND_WORK = 1 // pm_file_join.kind: 类型 1:pm_work
+)
+
 type Upload struct {
 	owner            *User
 	FileMaxEveryWork uint32 //每个work附件上限
@@ -25,19 +33,16 @@ func NewUpload(user *User) *Upload {
 	instance := &Upload{}
 	instance.owner = user
 	instance.FileMaxEveryWork = 6
+	instance.InitFolderAll()
 	return instance
-}
-
-func (this *Upload) RegisterFunction() {
-	this.InitFolderAll()
 }
 
 //初始化 所有文件夹 避免上传时再初始化 会慢
 func (this *Upload) InitFolderAll() {
-	CreateDir(config.Upload)
+	common.CreateDir(config.Upload)
 	for i := 0; i < 256; i++ {
 		folder := fmt.Sprintf("%02X", i)
-		CreateDir(config.Upload + "/" + strings.ToLower(folder))
+		common.CreateDir(config.Upload + "/" + strings.ToLower(folder))
 	}
 }
 
@@ -58,7 +63,7 @@ func (this *Upload) CountFilePath(fileKind uint32, fid uint64, create_time uint3
 	fidStr := strconv.FormatUint(fid, 10) //string(fid)的结果是乱码,不能用
 	md5str := fmt.Sprintf("%x", md5.Sum([]byte(fidStr)))
 	tm := time.Unix(int64(create_time), 0)
-	return md5str[0:2], tm.Format("20060102_1504_") + fidStr + "." + GetExtByFileKind(fileKind)
+	return md5str[0:2], tm.Format("20060102_1504_") + fidStr + "." + this.GetExtByFileKind(fileKind)
 }
 
 //计算某个work下关联的file总数
@@ -167,16 +172,8 @@ func (this *Upload) UploadDelete(param *C2L_UpdateWorkDelete) bool {
 	return true
 }
 
-const (
-	FILE_KIND_PNG = 1
-	FILE_KIND_JPG = 2
-	FILE_KIND_BMP = 3
-	//
-	FILE_JOIN_KIND_WORK = 1 // pm_file_join.kind: 类型 1:pm_work
-)
-
 // 根据FileKind计算文件的后缀名
-func GetExtByFileKind(fileKind uint32) string {
+func (this *Upload) GetExtByFileKind(fileKind uint32) string {
 	switch {
 	case fileKind == FILE_KIND_PNG:
 		return "png"
@@ -186,16 +183,4 @@ func GetExtByFileKind(fileKind uint32) string {
 		return "bmp"
 	}
 	return "_"
-}
-
-func CreateDir(path string) {
-	// wd, _ := os.Getwd() //当前的目录
-	// log.Println("wd:", wd)
-	os.Mkdir(path, os.ModePerm)
-	/*err := os.Mkdir(path, os.ModePerm)
-	if err != nil {
-		fmt.Println("err:", err) //已存在的文件 也会报这个错误
-	} else {
-		fmt.Println("创建目录 cpl")
-	} */
 }

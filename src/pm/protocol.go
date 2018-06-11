@@ -39,13 +39,12 @@ type ScoreNoticeSingle struct {
 	Lname string
 	Did   uint64
 	Mname string
-	Ver   string
+	Vid   uint64
 }
 
 type ModeSingle struct {
 	Mid      uint64
 	Vid      uint64
-	Ver      string
 	Name     string
 	Color    uint64
 	LinkSort []string
@@ -90,18 +89,13 @@ type ProfileSingle struct {
 	MinNum  uint64
 	MaxNum  uint64
 	Tag     string
-	Ver     string
+	Vid     uint64
 }
 
 type ProjectSingle struct {
 	Pid      uint64
 	Name     string
 	ModeSort []string
-}
-
-type VerSingle struct {
-	Genre    uint64
-	DateLine string
 }
 
 type ExtraSingle struct {

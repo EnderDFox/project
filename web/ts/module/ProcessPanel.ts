@@ -1,22 +1,30 @@
 //进度类
 class ProcessPanelClass {
-	//时间跨度
-	DateList = { rows: {}, list: [] }
-	//初始化
-	Init () {
+	/** 时间跨度
+	 * key:dateLine	val:count
+	 */
+	DateList: { rows?: { [key: string]: number }, list?: IDateItem[] } = { rows: {}, list: [] }
+	/**
+	 * 初始化
+	 */
+	Init() {
 
 	}
-	//入口协议
-	Index () {
+	/**
+	 * 入口协议
+	 */
+	Index() {
 		WSConn.sendMsg(C2L.C2L_PROCESS_VIEW, ProcessFilter.GetSvrPack())
 	}
-	//设置时间范围
-	SetDateRange () {
-		var rows = {}
-		var list = []
+	/**
+	 * 设置时间范围
+	 */
+	SetDateRange() {
+		var rows: { [key: string]: number } = {};
+		var list: IDateItem[] = []
 		var date = new Date(ProcessFilter.Pack.BeginDate)
 		while (true) {
-			var info:IDateItem = {}
+			var info: IDateItem = {}
 			info.y = date.getFullYear()
 			var m = date.getMonth() + 1
 			var d = date.getDate()
@@ -39,9 +47,9 @@ class ProcessPanelClass {
 		this.DateList = { rows: rows, list: list }
 	}
 	//绑定事件
-	BindActions () {
+	BindActions() {
 		//功能区域绑定
-		Main.Content.unbind().delegate('.mode', 'mousedown',  (e:JQuery.Event):void|false =>{
+		Main.Content.unbind().delegate('.mode', 'mousedown', (e: JQuery.Event): void | false => {
 			e.stopPropagation()
 			this.HideMenu()
 			TemplateManager.Hide()
@@ -53,7 +61,7 @@ class ProcessPanelClass {
 				return false
 			}
 			this.ShowMenuMode(e.currentTarget as HTMLElement, e)
-		}).find('.linkMap').unbind().delegate('td', 'mousedown', (e:JQuery.Event):void|false => {
+		}).find('.linkMap').unbind().delegate('td', 'mousedown', (e: JQuery.Event): void | false => {
 			e.stopPropagation()
 			//流程区域绑定
 			this.HideMenu()
@@ -81,9 +89,9 @@ class ProcessPanelClass {
 					break
 			}
 			//console.log('鼠标右键点击',type,navigator.platform)
-		}).delegate('td', 'mouseenter', (e:JQuery.Event):void|false => {
+		}).delegate('td', 'mouseenter', (e: JQuery.Event): void | false => {
 			e.stopPropagation()
-			var grid = $(e.currentTarget).data('grid')
+			var grid: IWorkGrid = $(e.currentTarget).data('grid')
 			if (!grid || grid.wid == 0) {
 				return
 			}
@@ -107,7 +115,7 @@ class ProcessPanelClass {
 			e.stopPropagation()
 			$('#workTips').hide()
 		})
-		Main.Content.find('.title').unbind().delegate('td', 'mousedown', (e:JQuery.Event):void|false => {
+		Main.Content.find('.title').unbind().delegate('td', 'mousedown', (e: JQuery.Event): void | false => {
 			e.stopPropagation()
 			//流程区域绑定
 			this.HideMenu()
@@ -124,14 +132,14 @@ class ProcessPanelClass {
 			if (index < 3) {
 				return false
 			}
-			this.ShowMenuPub(e.currentTarget, e)
-		}).delegate('td', 'mouseenter', (e:JQuery.Event)=> {
+			this.ShowMenuPub(e.currentTarget as HTMLElement, e)
+		}).delegate('td', 'mouseenter', (e: JQuery.Event) => {
 			e.stopPropagation()
 			// if($(e.currentTarget).find('.stroke').length == 1){//判断仅有date_line的
 			var top = $(e.currentTarget).offset().top + $(e.currentTarget).height() + 2
 			var left = $(e.currentTarget).offset().left + $(e.currentTarget).width() + 2
 			var dateLine = $(e.currentTarget).attr('date_line')
-			if(dateLine){
+			if (dateLine) {
 				VersionManager.ShowTableHeaderTooltip(dateLine, left, top)
 			}
 			// }
@@ -141,13 +149,13 @@ class ProcessPanelClass {
 		})
 	}
 	//组合头部
-	GetTheadHtml () {
+	GetTheadHtml() {
 		var today = Common.GetDate(0)
 		var html = ''
 		html += '<thead>'
 		html += '<tr> \
 					<td colspan="3" class="tools">功能列表</td>'
-		$.each(this.DateList.rows, function (date:string, num:number) {
+		$.each(this.DateList.rows, function (date: string, num: number) {
 			var mt = date.substr(-2)
 			if (num > 1) {
 				html += '<td colspan="' + num + '" class="date_' + (parseInt(mt) % 2) + '">' + date + '</td>'
@@ -179,14 +187,14 @@ class ProcessPanelClass {
 		return html
 	}
 	//组合流程
-	GetLinkHtml (lid:number) {
+	GetLinkHtml(lid: number) {
 		var html = ''
 		var link = ProcessData.LinkMap[lid]
 		if (!link) {
 			return html
 		}
 		html += '<tr lid="' + link.Lid + '"> \
-					<td class="link bg_'+ link.Color + '" type="link">' + (link.Name == '' ? '空' : link.Name) + '</td> \
+					<td class="link bg_'+ link.Color + '" type="link">' + (link.Name == '' ? '空' : link.Name) + ProcessPanel.GetModeLinkStatusName(link.Status) + '</td> \
 					<td class="duty" type="duty">'+ Data.GetUser(link.Uid).Name + '</td>'
 		//进度
 		$.each(this.DateList.list, function (k, info) {
@@ -201,10 +209,10 @@ class ProcessPanelClass {
 		return html
 	}
 	//组合流程列表
-	GetLinkListHtml (mode:ModeSingle) {
+	GetLinkListHtml(mode: ModeSingle) {
 		var html = ''
 		html += '<table class="linkMap">'
-		$.each(mode.LinkSort, (k, lidStr:string) =>{
+		$.each(mode.LinkSort, (k, lidStr: string) => {
 			//流程与进度
 			html += this.GetLinkHtml(parseInt(lidStr))
 		})
@@ -212,14 +220,14 @@ class ProcessPanelClass {
 		return html
 	}
 	//组合功能
-	GetModeHtml (mid:number) {
+	GetModeHtml(mid: number) {
 		var html = ''
 		var mode = ProcessData.ModeMap[mid]
 		if (!mode) {
 			return html
 		}
 		html += '<tr> \
-					<td class="mode bg_'+ mode.Color + '" mid="' + mode.Mid + '">' + VersionManager.GetVersionVer(mode.Vid) + (mode.Name == '' ? '空' : mode.Name) + '</td> \
+					<td class="mode bg_'+ mode.Color + '" mid="' + mode.Mid + '">' + VersionManager.GetVersionVer(mode.Vid) + (mode.Name == '' ? '空' : mode.Name) + this.GetModeLinkStatusName(mode.Status) + '</td> \
 					<td colspan="'+ (this.DateList.list.length + 2) + '">'
 		//流程
 		html += this.GetLinkListHtml(mode)
@@ -229,18 +237,18 @@ class ProcessPanelClass {
 		return html
 	}
 	//组合tbody
-	GetTbodyHtml () {
+	GetTbodyHtml() {
 		var html = ''
 		html += '<tbody>'
 		//功能
-		$.each(ProcessData.Project.ModeSort, (k, mid:string) =>{
+		$.each(ProcessData.Project.ModeSort, (k, mid: string) => {
 			html += this.GetModeHtml(parseInt(mid))
 		})
 		html += '</tbody>'
 		return html
 	}
 	//建立内容
-	CreateProcess () {
+	CreateProcess() {
 		//组合thead
 		var html = '<div id="freezeTop" class="processLock"><div class="lockTop"><table class="process">'
 		html += this.GetTheadHtml()
@@ -250,18 +258,18 @@ class ProcessPanelClass {
 		html += this.GetTbodyHtml()
 		html += '</table></div>'
 		//流程数据
-		Main.Draw(html).find('.linkMap tr').each( (index:number,el:HTMLElement)=> {
+		Main.Draw(html).find('.linkMap tr').each((index: number, el: HTMLElement) => {
 			var lid = parseInt($(el).attr('lid'))
 			this.SetLinkData(lid, el)
 		})
 		$('#freezeTop').unbind().freezeTop()
 	}
 	//流程数据
-	SetLinkData (lid:number, dom:HTMLElement) {
+	SetLinkData(lid: number, dom: HTMLElement) {
 		var linkWork = ProcessData.LinkWorkMap[lid]
 		var dateList = this.DateList.list
-		$(dom).find('td:gt(1)').each( (k, el:HTMLElement) =>{
-			var grid = $.extend({}, dateList[k])
+		$(dom).find('td:gt(1)').each((k, el: HTMLElement) => {
+			var grid: IWorkGrid = $.extend({}, dateList[k])
 			grid.lid = lid
 			grid.wid = 0
 			//填充
@@ -277,7 +285,7 @@ class ProcessPanelClass {
 		$(dom).data('lid', lid)
 	}
 	//显示一个work格子内容
-	ShowWorkGrid (dom:HTMLElement, grid, work:WorkSingle) {
+	ShowWorkGrid(dom: HTMLElement, grid: IWorkGrid, work: WorkSingle) {
 		var info = work.Tag
 		if (info == '') {
 			info = CollateData.StatusList[work.Status].Tag
@@ -300,12 +308,14 @@ class ProcessPanelClass {
 		$(dom).attr({ 'class': 'ss_' + work.Status }).html(info)
 	}
 	//功能菜单
-	ShowMenuMode (o:HTMLElement, e:JQuery.Event) {
+	ShowMenuMode(o: HTMLElement, e: JQuery.Event) {
 		var mid = parseInt($(o).attr('mid'))
 		var top = e.pageY + 1
 		var left = e.pageX + 1
 		var mode = ProcessData.ModeMap[mid]
-		$('#menuMode').css({ left: left, top: top }).unbind().delegate('.row[type!="color"]', 'click',  (e:JQuery.Event)=> {
+		var $menuMode = $('#menuMode')
+		$menuMode.find(`.store_txt`).text(mode.Status == ModeStatusField.NORMAL ? '归档' : '恢复归档')
+		$menuMode.css({ left: left, top: top }).unbind().delegate('.row[type!="color"]', 'click', (e: JQuery.Event) => {
 			var type = $(e.currentTarget).attr('type')
 			switch (type) {
 				case 'insert':
@@ -334,23 +344,27 @@ class ProcessPanelClass {
 					}
 					break
 				case 'store':
-					Common.Warning(o, e, function () {
-						WSConn.sendMsg(C2L.C2L_PROCESS_MODE_STORE, { 'Mid': mode.Mid })
-					}, '是否将已完成的功能进行归档？')
+					if (mode.Status == ModeStatusField.NORMAL) {
+						Common.Warning(o, e, function () {
+							WSConn.sendMsg(C2L.C2L_PROCESS_MODE_STORE, { 'Mid': mode.Mid, 'Status': ModeStatusField.STORE })
+						}, '是否将已完成的功能进行归档？')
+					} else {
+						WSConn.sendMsg(C2L.C2L_PROCESS_MODE_STORE, { 'Mid': mode.Mid, 'Status': ModeStatusField.NORMAL })
+					}
 					break
 			}
 			this.HideMenu()
-		}).show().adjust(-5).find('.row[type="color"]').unbind().hover( (e:JQuery.Event)=> {
-			$(e.currentTarget).find('.pluginColor').show().unbind().delegate('div', 'click',  (e:JQuery.Event)=> {
+		}).show().adjust(-5).find('.row[type="color"]').unbind().hover((e: JQuery.Event) => {
+			$(e.currentTarget).find('.pluginColor').show().unbind().delegate('div', 'click', (e: JQuery.Event) => {
 				WSConn.sendMsg(C2L.C2L_PROCESS_MODE_COLOR, { 'Mid': mode.Mid, 'Color': $(e.currentTarget).index() })
 				this.HideMenu()
 			})
-		},  (e:JQuery.Event)=> {
+		}, (e: JQuery.Event) => {
 			$(e.currentTarget).find('.pluginColor').hide()
 		})
 	}
 	//编辑功能
-	ShowEditMode (o:HTMLElement, e:JQuery.Event, cid:number) {
+	ShowEditMode(o: HTMLElement, e: JQuery.Event, cid: number) {
 		ProcessFilter.HideFilter()
 		TemplateManager.Hide();
 		VersionManager.Hide()
@@ -405,10 +419,10 @@ class ProcessPanelClass {
 	}
 	//内容菜单
 	//IsWrite: true:管理员 false:非管理员
-	ShowMenuStep (o:HTMLElement, e:JQuery.Event, IsWrite:boolean) {
+	ShowMenuStep(o: HTMLElement, e: JQuery.Event, IsWrite: boolean) {
 		var top = e.pageY + 1
 		var left = e.pageX + 1
-		var grid = $(o).data('grid')
+		var grid: IWorkGrid = $(o).data('grid')
 		//没有work状态的不显示某些选项
 		if (grid.wid) {
 			$('#menuDay').find("[type=upload],[type=score],[type=clear]").find('.txt').removeClass('menu_disabled')
@@ -420,7 +434,7 @@ class ProcessPanelClass {
 			$('#menuDay .row[type!=upload]').hide()
 		}
 		//
-		$('#menuDay').css({ left: left, top: top }).unbind().delegate('.row[type!="status"]', 'click', (e:JQuery.Event)=>  {
+		$('#menuDay').css({ left: left, top: top }).unbind().delegate('.row[type!="status"]', 'click', (e: JQuery.Event) => {
 			var type = $(e.currentTarget).attr('type')
 			switch (type) {
 				case 'work':
@@ -455,7 +469,7 @@ class ProcessPanelClass {
 		}).show().adjust(-5)
 	}
 	//编辑工作补充
-	ShowEditStep (o:HTMLElement) {
+	ShowEditStep(o: HTMLElement) {
 		var cur = $(o).parent()
 		var top = $(o).position().top - 2
 		var left = $(o).position().left + $(o).outerWidth() - 2
@@ -464,9 +478,9 @@ class ProcessPanelClass {
 		var tag = plan.find('.tag').val('')
 		var minNum = plan.find('.min').val(0)
 		var maxNum = plan.find('.max').val(0)
-		var grid = $(o).data('grid')
-		var work = ProcessData.WorkMap[grid.wid]
-		var pack:C2L_ProcessWorkEdit = {}
+		var grid: IWorkGrid = $(o).data('grid')
+		var work: WorkSingle = ProcessData.WorkMap[grid.wid]
+		var pack: C2L_ProcessWorkEdit = {}
 		pack.Wid = 0
 		if (work) {
 			tips.val(work.Tips).select()
@@ -490,14 +504,13 @@ class ProcessPanelClass {
 		})
 	}
 	//评价
-	OnShowEditScore (o:HTMLElement) {
-		var wid = $(o).data('grid').wid
-		var cur = $(o).parent()
-		var left = $(o).position().left + $(o).outerWidth() - 2
-		var top = $(o).position().top - 2
+	OnShowEditScore(o: HTMLElement) {
+		var wid: number = ($(o).data('grid') as IWorkGrid).wid
+		var left: number = $(o).position().left + $(o).outerWidth() - 2
+		var top: number = $(o).position().top - 2
 		this.ShowEditScore(wid, left, top)
 	}
-	ShowEditScore (wid, left, top) {
+	ShowEditScore(wid: number, left: number, top: number) {
 		var plan = $('#editScore').css({ left: left, top: top }).show().adjust(-5)
 		var info = plan.find('textarea').val('').focus()
 		var qcos = plan.find('select:eq(0)').val('0')
@@ -520,11 +533,14 @@ class ProcessPanelClass {
 		})
 	}
 	//流程菜单
-	ShowMenuLink (o:HTMLElement, e:JQuery.Event) {
+	ShowMenuLink(o: HTMLElement, e: JQuery.Event) {
 		var cur = $(o).parent()
 		var top = e.pageY + 1
 		var left = e.pageX + 1
-		$('#menuLink').css({ left: left, top: top }).unbind().delegate('.row', 'click', (e:JQuery.Event)=>  {
+		var link: LinkSingle = ProcessData.LinkMap[parseInt(cur.data('lid'))]
+		var $menuLink = $('#menuLink')
+		$menuLink.find(`.store_txt`).text(link.Status == LinkStatusField.NORMAL ? '归档' : '恢复归档')
+		$menuLink.css({ left: left, top: top }).unbind().delegate('.row', 'click', (e: JQuery.Event) => {
 			var type = $(e.currentTarget).attr('type')
 			switch (type) {
 				case 'forward':
@@ -546,9 +562,13 @@ class ProcessPanelClass {
 					this.ShowEditLink(o, C2L.C2L_PROCESS_LINK_EDIT)
 					break
 				case 'store':
-					Common.Warning(o, e, function () {
-						WSConn.sendMsg(C2L.C2L_PROCESS_LINK_STORE, { 'Lid': cur.data('lid') })
-					}, '是否将已完成的流程进行归档？')
+					if (link.Status == LinkStatusField.NORMAL) {
+						Common.Warning(o, e, function () {
+							WSConn.sendMsg(C2L.C2L_PROCESS_LINK_STORE, { 'Lid': cur.data('lid'), 'Status': LinkStatusField.STORE })
+						}, '是否将已完成的流程进行归档？')
+					} else {
+						WSConn.sendMsg(C2L.C2L_PROCESS_LINK_STORE, { 'Lid': cur.data('lid'), 'Status': LinkStatusField.NORMAL })
+					}
 					break
 				case 'delete':
 					if (cur.parent().find('tr').length > 1) {
@@ -559,23 +579,23 @@ class ProcessPanelClass {
 					break
 			}
 			this.HideMenu()
-		}).show().adjust(-5).find('.row[type="color"]').unbind().hover( (e:JQuery.Event)=>  {
-			$(e.currentTarget).find('.pluginColor').show().unbind().delegate('div', 'click',  (e:JQuery.Event)=> {
+		}).show().adjust(-5).find('.row[type="color"]').unbind().hover((e: JQuery.Event) => {
+			$(e.currentTarget).find('.pluginColor').show().unbind().delegate('div', 'click', (e: JQuery.Event) => {
 				WSConn.sendMsg(C2L.C2L_PROCESS_LINK_COLOR, { 'Lid': cur.data('lid'), 'Color': $(e.currentTarget).index() })
 				this.HideMenu()
 			})
-		},  (e:JQuery.Event)=>  {
+		}, (e: JQuery.Event) => {
 			$(e.currentTarget).find('.pluginColor').hide()
 		})
 	}
 	//编辑流程名字
-	ShowEditLink (o, cid) {
+	ShowEditLink(o: HTMLElement, cid: number) {
 		var cur = $(o).parent()
-		var lid = cur.data('lid')
-		var top = $(o).position().top - 2
-		var left = $(o).position().left + $(o).outerWidth() - 2
-		var link = ProcessData.LinkMap[lid]
-		var plan = $('#editLink').css({ left: left, top: top }).show().adjust(-5)
+		var lid: number = cur.data('lid')
+		var top: number = $(o).position().top - 2
+		var left: number = $(o).position().left + $(o).outerWidth() - 2
+		var link: LinkSingle = ProcessData.LinkMap[lid]
+		var plan: JQuery = $('#editLink').css({ left: left, top: top }).show().adjust(-5)
 		var name = plan.find('textarea').val('').focus()
 		if (cid == C2L.C2L_PROCESS_LINK_EDIT) {
 			name.val(link.Name).select()
@@ -589,12 +609,12 @@ class ProcessPanelClass {
 		})
 	}
 	//人员菜单
-	ShowMenuUser (o:HTMLElement, e:JQuery.Event) {
+	ShowMenuUser(o: HTMLElement, e: JQuery.Event) {
 		var top = e.pageY + 1
 		var left = e.pageX + 1
 		var lid = $(o).parent().data('lid')
 		var plan = $('#menuUser')
-		plan.css({ left: left, top: top }).unbind().delegate('.spread .row', 'click', (e:JQuery.Event)=>  {
+		plan.css({ left: left, top: top }).unbind().delegate('.spread .row', 'click', (e: JQuery.Event) => {
 			var uid = $(e.currentTarget).attr('uid')
 			if (uid) {
 				WSConn.sendMsg(C2L.C2L_PROCESS_USER_CHANGE, { 'Lid': lid, 'Uid': parseInt(uid) })
@@ -603,39 +623,17 @@ class ProcessPanelClass {
 		}).show().adjust(-5)
 	}
 	//发布菜单
-	ShowMenuPub (o, e) {
-		var cur = $(o).parent()
+	ShowMenuPub(o: HTMLElement, e: JQuery.Event) {
 		var top = e.pageY + 4
 		var left = e.pageX + 2
 		var index = $(o).index() - 3
 		var info = this.DateList.list[index]
 		this.HideMenu()
 		VersionManager.ShowTableHeaderMenu(info.s, left, top)
-		/* $('#pubMenu').css({ left: left, top: top }).unbind().delegate('.row', 'click', (e:JQuery.Event)=> {
-			var type = $(e.currentTarget).attr('type')
-			switch (type) {
-				case 'begin':
-				case 'end':
-				case 'seal':
-				case 'delay':
-				case 'pub':
-				case 'summary':
-					VersionManager.ShowVersionByDateLine(info.s)
-					// WSConn.sendMsg(C2L.C2L_PROCESS_PUBLISH_EDIT, { 'DateLine': info.s, 'Genre': $(e.currentTarget).index() + 1 })
-					break
-				case 'del':
-					// WSConn.sendMsg(C2L.C2L_PROCESS_PUBLISH_DELETE, { 'DateLine': info.s })
-					break
-			}
-			//console.log($(e.currentTarget).index())
-			this.HideMenu()
-		}).show().adjust(-5) */
 	}
 	//选中迷你小匡
-	ShowMiniBox (e) {
-		console.log('鼠标左键点击', e.currentTarget.localName)
-
-
+	ShowMiniBox(e: JQuery.Event) {
+		console.log('鼠标左键点击', (e.currentTarget as HTMLElement).localName)
 		var offset = $(e.currentTarget).offset()
 		var top = offset.top
 		var left = offset.left
@@ -646,7 +644,7 @@ class ProcessPanelClass {
 
 
 
-		$('#commonMini').show().css({ 'top': top, 'left': left, 'height': height, 'width': width }).unbind().bind('mousedown', function (ev):void|false {
+		$('#commonMini').show().css({ 'top': top, 'left': left, 'height': height, 'width': width }).unbind().bind('mousedown', function (ev): void | false {
 			if (ev.button !== Main.MouseDir) {
 				return false
 			}
@@ -658,8 +656,15 @@ class ProcessPanelClass {
 		//clientHeight
 		//offsetHeight
 	}
+	GetModeLinkStatusName(status: ModeStatusField | LinkStatusField): string {
+		switch (status) {
+			case ModeStatusField.STORE:
+				return `<span class="status_store">(已归档)<span>`
+		}
+		return ''
+	}
 	//关闭所有菜单
-	HideMenu () {
+	HideMenu() {
 		$('#menuUser,#menuLink,#menuDay,#menuMode,#pubMenu,#workTips,#dateTime,#menuStep,#menuExtra,#menuDepartment').hide()
 		Common.HidePullDownMenu()
 	}

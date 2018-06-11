@@ -35,8 +35,9 @@ var LoaderClass = /** @class */ (function () {
         this.LoadFileSum = 0;
         //加载状态
         this.IsComplete = false;
+        this.IsVueTemplateLoaded = false;
         /**vue模板缓存 */
-        this.VueTemplateLoaded = {};
+        this.VueTemplateLoadedDict = {};
     }
     //初始化
     LoaderClass.prototype.Init = function (ver) {
@@ -251,23 +252,73 @@ var LoaderClass = /** @class */ (function () {
             this.MsgCall();
         }
     };
-    /**加载vue模板
-     * @tplName 模板路径名称, 对应``vue_template`目录下的html文件, e.g. `template\EditTplModeDetail`
-     */
-    LoaderClass.prototype.LoadVueTemplate = function (tplName, callback) {
+    LoaderClass.prototype.LoadVueTemplate = function () {
+        var args = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            args[_i] = arguments[_i];
+        }
+        var tplHtml;
+        var idName;
+        var tplName;
+        var callback;
+        if (args.length == 3) {
+            tplHtml = args[0];
+            idName = args[1];
+            tplName = tplHtml + '/' + idName;
+            callback = args[2];
+        }
+        else {
+            tplName = args[0];
+            callback = args[1];
+        }
+        this.__LoadVueTemplate_PlanA(tplName, callback);
+    };
+    LoaderClass.prototype.__LoadVueTemplate_PlanA = function (tplName, callback) {
         var _this = this;
-        if (this.VueTemplateLoaded[tplName]) {
-            callback(this.VueTemplateLoaded[tplName], tplName);
+        if (this.VueTemplateLoadedDict[tplName]) {
+            callback(this.VueTemplateLoadedDict[tplName], tplName);
         }
         else {
             $.ajax({
                 url: "vue_template/" + tplName + ".html?v=" + this.Ver, dataType: 'text', async: true, success: function (tpl) {
-                    _this.VueTemplateLoaded[tplName] = tpl;
+                    _this.VueTemplateLoadedDict[tplName] = tpl;
                     if (callback) {
                         callback(tpl, tplName);
                     }
                 }
             });
+        }
+    };
+    LoaderClass.prototype.__LoadVueTemplate_PlanB = function (tplName, callback) {
+        var _this = this;
+        tplName += '.html';
+        if (!this.IsVueTemplateLoaded) {
+            this.IsVueTemplateLoaded = true;
+            $.ajax({
+                url: "vue_template.bundle.json?v=" + this.Ver, dataType: 'text', async: true, success: function (tpl) {
+                    _this.VueTemplateLoadedDict = JSON.parse(tpl);
+                    var tpl = _this.VueTemplateLoadedDict[tplName];
+                    if (!tpl) {
+                        console.log("[error]", "tpl is null", tplName);
+                    }
+                    else {
+                        if (callback) {
+                            callback(tpl, tplName);
+                        }
+                    }
+                }
+            });
+        }
+        else {
+            var tpl = this.VueTemplateLoadedDict[tplName];
+            if (!tpl) {
+                console.log("[error]", "tpl is null", tplName);
+            }
+            else {
+                if (callback) {
+                    callback(tpl, tplName);
+                }
+            }
         }
     };
     /**批量加载vue模板 */

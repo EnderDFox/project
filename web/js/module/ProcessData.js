@@ -37,11 +37,11 @@ var ProcessDataClass = /** @class */ (function () {
         //环节过滤  通过判断的 会将link.Mid放入checkMode 没通过的则用`return true`跳过
         $.each(data.LinkList, function (k, link) {
             //流程名查询
-            if (_this.CheckStringArray(link.Name, ProcessFilter.Pack.LinkName) == false) {
+            if (_this.CheckStringArray(link.Name.toLowerCase(), ProcessFilter.Pack.LinkNameLower) == false) {
                 return true;
             }
             //流程负责人查询
-            if (_this.CheckStringArray(Data.GetUser(link.Uid).Name, ProcessFilter.Pack.LinkUserName) == false) {
+            if (_this.CheckStringArray(Data.GetUser(link.Uid).Name.toString(), ProcessFilter.Pack.LinkUserNameLower) == false) {
                 return true;
             }
             //流程是否归档
@@ -117,7 +117,7 @@ var ProcessDataClass = /** @class */ (function () {
                 return true;
             }
             //功能名查询
-            if (_this.CheckStringArray(mode.Name, ProcessFilter.Pack.ModeName) == false) {
+            if (_this.CheckStringArray(mode.Name.toLowerCase(), ProcessFilter.Pack.ModeNameLower) == false) {
                 return true;
             }
             //是否归档

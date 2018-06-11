@@ -16,25 +16,25 @@ class CollateManagerClass {
 		CollatePanel.BindActions()
 	}
 	//编辑
-	StepEdit(data) {
+	StepEdit(data: WorkSingle) {
 		//数据变化
 		CollateData.WorkMap[data.Wid] = data
 		$('#content tr[date="' + data.Date + '"] li[wid="' + data.Wid + '"] span:first').attr('class', 'check_' + data.Inspect)
 	}
 	//新增
-	ExtraAdd(data) {
+	ExtraAdd(data: ExtraSingle) {
 		//数据变化
 		CollateData.ExtraMap[data.Eid] = data
 		$('#content tr[date="' + data.Date + '"] td[uid="' + data.Uid + '"] ol').append(CollatePanel.GetWorkExtra(data))
 	}
 	//编辑
-	ExtraEdit(data) {
+	ExtraEdit(data: ExtraSingle) {
 		//数据变化
 		CollateData.ExtraMap[data.Eid] = data
 		$('#content tr[date="' + data.Date + '"] td[uid="' + data.Uid + '"] li[eid="' + data.Eid + '"]').after(CollatePanel.GetWorkExtra(data)).remove()
 	}
 	//删除
-	ExtraDelete(data) {
+	ExtraDelete(data: L2C_CollateExtraDelete) {
 		var extra = CollateData.ExtraMap[data.Eid]
 		$('#content tr[date="' + extra.Date + '"] td[uid="' + extra.Uid + '"] li[eid="' + extra.Eid + '"]').remove()
 		//数据变化

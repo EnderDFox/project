@@ -28,6 +28,7 @@ var (
 	config    = NewConfig()
 	timer     = NewTimer()
 	db        = NewDb()
+	common    = NewCommon()
 )
 
 func main() {

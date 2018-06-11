@@ -67,11 +67,11 @@ class ProjectNavClass {
             switch (this.NavMenu) {
                 case 1:
                     ProcessPanel.HideMenu()
-                    ProcessFilter.ShowFilter(e.currentTarget, e)
+                    ProcessFilter.ShowFilter(e.currentTarget as HTMLElement, e)
                     break
                 case 2:
                     CollatePanel.HideMenu()
-                    CollateFilter.ShowFilter(e.currentTarget, e)
+                    CollateFilter.ShowFilter(e.currentTarget as HTMLElement, e)
                     break
             }
         })

@@ -21,8 +21,6 @@ const (
 	C2L_PROCESS_MODE_STORE     = 50016
 	C2L_PROCESS_LINK_COLOR     = 50017
 	C2L_PROCESS_LINK_STORE     = 50018
-	C2L_PROCESS_PUBLISH_EDIT   = 50019
-	C2L_PROCESS_PUBLISH_DELETE = 50020
 	C2L_COLLATE_VIEW           = 60001
 	C2L_COLLATE_STEP_EDIT      = 60002
 	C2L_COLLATE_STEP_ADD       = 60003
@@ -56,7 +54,6 @@ type C2L_SessionLogin struct {
 type C2L_ProcessView struct {
 	BeginDate string
 	EndDate   string
-	Ver       string
 	LinkUid   uint64
 	ModeName  string
 	LinkName  string
@@ -152,11 +149,13 @@ type C2L_ProcessModeMove struct {
 }
 
 type C2L_ProcessModeStore struct {
-	Mid uint64
+	Mid    uint64
+	Status uint8 //0:正常  1:归档
 }
 
 type C2L_ProcessLinkStore struct {
-	Lid uint64
+	Lid    uint64
+	Status uint8 //0:正常  1:归档
 }
 
 type C2L_ProcessEdit struct {

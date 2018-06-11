@@ -6,7 +6,7 @@ class PopManagerClass {
             var len = this.mouseOutList.length
             for (var i = 0; i < len; i++) {
                 var item = this.mouseOutList[i];
-                if ($(e.currentTarget).closest(item.selector).length == 0) {
+                if ($(e.target).closest(item.selector).length == 0) {
                     item.callback()
                 }
             }

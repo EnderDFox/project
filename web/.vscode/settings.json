@@ -3,7 +3,7 @@
     "search.exclude": {  
         "**/bootstrap-4.0.0": true,
         "**/file": true,
-        "**/.js.map": true,
+        "**/*.map": true,
         "upload":true,
         // "hello_fox/pdfjs/src_web":true
     },  

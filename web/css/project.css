@@ -3,6 +3,11 @@
 .menu_disabled{
   color: #BBBBBB;
 }
+
+.status_store{
+  color: #ff0000;
+  font-size: 80%;
+}
 /*工作内容*/
 .process{border-collapse:collapse;border-color:#6c6c6c;background:#fff;/*box-shadow:0px 0px 5px #333333;*/}
 .process table{border-collapse:collapse;border-width:0px;border-style:hidden;width:100%;height:100%;}
@@ -10,7 +15,9 @@
 .process tr{border:1px solid #6c6c6c;}
 .process td{height:40px;min-width:40px;width:40px;text-align:center;cursor:pointer;padding:0px;border:1px solid #6c6c6c;}
 .process .info{height:40px;line-height:40px;width:40px;position:absoute;}
-.process .mode{min-width:135px;max-width:135px;width:135px;font-weight:bold;font-size:16px;padding:0px 10px 0px 10px;}
+.process .mode{min-width:135px;max-width:135px;width:135px;font-weight:bold;font-size:16px;padding:0px 10px 0px 10px;
+  word-break: break-all;
+}
 .process .title{font-weight:bold;}
 .process .func{min-width:135px;max-width:135px;width:135px;font-weight:normal;padding:0px 10px 0px 10px;}
 .process .link{min-width:200px;max-width:200px;width:200px;font-weight:normal;}
@@ -213,7 +220,7 @@
 /*编辑日程*/
 .editInfo .text{text-align:center;}
 .editInfo .text textarea{height:80px;width:85%;padding:5px;margin:12px 0px 5px 0px;}
-.editInfo .min,.editInfo .max,.editInfo .tag{width:40px;height:20px;margin-left:10px;margin-right:10px;text-align:center;font-size:14px;}
+.editInfo .min,.editInfo .max,.editInfo .tag{width:40px;height:20px;margin-left:8px;margin-right:8px;text-align:center;font-size:14px;}
 .editInfo .num{margin-left:15px;font-size:14px;}
 
 /*编辑评分*/

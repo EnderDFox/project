@@ -40,6 +40,15 @@ enum WorkStatusField {
     REST = 4,
     OPTIMIZE = 5,
 }
+//mode/link  0:正常  1:归档
+enum ModeStatusField {
+    NORMAL = 0,
+    STORE = 1,
+}
+enum LinkStatusField {
+    NORMAL = 0,
+    STORE = 1,
+}
 
 
 
@@ -78,12 +87,11 @@ interface ProjectSingle {
 interface ModeSingle {
     Mid?: number
     Vid?: number
-    Ver?: string[]
     Name?: string
     Color?: uint32
     LinkSort?: string[]
     Did?: DidField
-    Status?: number
+    Status?: ModeStatusField
 }
 
 interface LinkSingle {
@@ -92,7 +100,7 @@ interface LinkSingle {
     Uid?: number
     Name?: string
     Color?: number
-    Status?: number
+    Status?: LinkStatusField
 }
 
 interface WorkSingle {
@@ -116,11 +124,6 @@ interface ScoreSingle {
     Quality?: number
     Efficiency?: number
     Manner?: number
-}
-
-interface VerSingle {
-    Genre?: number
-    DateLine?: string
 }
 
 interface FileSingle {
@@ -157,7 +160,6 @@ interface ProcessFilterPack {
     EndDate: string
     ModeName: string
     Vid: number
-    // Ver:string
     ModeStatus: number
     LinkStatus: number
     LinkName: string
@@ -173,7 +175,7 @@ interface ScoreNoticeSingle {
     Lname: string
     Did: number
     Mname: string
-    Ver: string
+    Vid: number
 }
 
 interface L2C_ProfileView {
@@ -190,7 +192,7 @@ interface ProfileSingle {
     MinNum: number
     MaxNum: number
     Tag: string
-    Ver: string
+    Vid: number
 }
 interface TagSingle {
     Tag: string
@@ -199,25 +201,29 @@ interface TagSingle {
 
 
 interface L2C_CollateView {
-    ModeList: ModeSingle[]
-    LinkList: LinkSingle[]
-    WorkList: WorkSingle[]
-    TagsList: TagSingle[]
-    ExtraList: ExtraSingle[]
-    VerList: VerSingle[]
+    ModeList?: ModeSingle[]
+    LinkList?: LinkSingle[]
+    WorkList?: WorkSingle[]
+    TagsList?: TagSingle[]
+    ExtraList?: ExtraSingle[]
+    VersionList?: VersionSingle[]
+}
+
+interface L2C_CollateExtraDelete {
+    Eid?: number
 }
 
 interface ExtraSingle {
-    Eid: number
-    Uid: number
-    Date: string
-    Name: string
-    Inspect: number
+    Eid?: number
+    Uid?: number
+    Date?: string
+    Name?: string
+    Inspect?: number
 }
 
 interface IDateBeginAndEnd {
-    BeginDate: string
-    EndDate: string
+    BeginDate?: string
+    EndDate?: string
 }
 
 interface IDateItem {
@@ -227,13 +233,16 @@ interface IDateItem {
     y?: number
     w?: number
 }
+interface IWorkGrid extends IDateItem {
+    lid?: number
+    wid?: number
+}
 
 interface L2C_ProcessView {
     ModeList: ModeSingle[]
     LinkList: LinkSingle[]
     WorkList: WorkSingle[]
     ScoreList: ScoreSingle[]
-    VerList: VerSingle[]
     Project: ProjectSingle
     VersionList: VersionSingle[]
 }
@@ -247,4 +256,61 @@ interface C2L_ProcessWorkEdit {
     MinNum?: number
     MaxNum?: number
     Tag?: string
+}
+
+interface L2C_ProcessLinkDelete {
+    Lid?: uint64
+    ModeSingle?: ModeSingle
+}
+
+interface L2C_ProcessGridAdd {
+    Lid?: uint64
+    LinkSingle?: LinkSingle
+    ModeSingle?: ModeSingle
+}
+
+interface L2C_ProcessGridSwap {
+    Swap?: uint64[]
+    Dir?: string
+    ModeSingle?: ModeSingle
+}
+
+interface L2C_ProcessGridClear {
+    Wid?: uint64
+}
+
+
+interface L2C_ProcessModeAdd {
+    Mid?: uint64
+    ModeSingle?: ModeSingle
+    LinkList?: LinkSingle[]
+}
+
+interface L2C_ProcessModeDelete {
+    Mid?: uint64
+    ProjectSingle?: ProjectSingle
+}
+
+
+interface L2C_ProcessModeMove {
+    Swap?: uint64[]
+    Dir?: string
+    ProjectSingle?: ProjectSingle
+}
+
+interface L2C_ProcessModeStore {
+    Mid?: uint64
+    Status?:ModeStatusField
+}
+interface L2C_ProcessLinkStore {
+    Lid?: uint64
+    Status?:LinkStatusField
+}
+interface L2C_ProcessPublishEdit {
+    Genre?: uint64
+    DateLine?: string
+}
+
+interface L2C_ProcessPublishDelete {
+    DateLine?: string
 }

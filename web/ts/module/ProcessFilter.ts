@@ -10,9 +10,12 @@ interface IProcessFilterPack {
     EndDate?: string
     Vid?: number[]
     ModeName?: string[]
+    ModeNameLower?: string[]    //小写缓存  因为搜索要忽略大小写
     ModeStatus?: number[]
     LinkName?: string[]
+    LinkNameLower?: string[]    //小写缓存  因为搜索要忽略大小写
     LinkUserName?: string[]
+    LinkUserNameLower?: string[]
     LinkStatus?: number[]
     LinkUserDid?: number[]
     WorkStatus?: number[]
@@ -62,10 +65,13 @@ class ProcessFilterClass {
         this.Pack.BeginDate = Common.GetDate(-7)
         this.Pack.EndDate = Common.GetDate(31)
         this.Pack.ModeName = []
+        this.Pack.ModeNameLower = []
         this.Pack.Vid = []
         this.Pack.ModeStatus = [0]  //默认0:进行中
         this.Pack.LinkName = []
+        this.Pack.LinkNameLower = []
         this.Pack.LinkUserName = []
+        this.Pack.LinkUserNameLower = []
         this.Pack.LinkStatus = [0]  //默认0:进行中
         this.Pack.LinkUserDid = []
         this.Pack.WorkStatus = []
@@ -101,9 +107,27 @@ class ProcessFilterClass {
         //
         this.Pack.Vid = this.GetCheckBoxValues(this.VueFilter.vid)
         this.Pack.ModeName = this.GetTextFieldValues(this.VueFilter.modeName)
+        this.Pack.ModeNameLower = []
+        var len = this.Pack.ModeName.length
+        for (var i = 0; i < len; i++) {
+            var modeName: string = this.Pack.ModeName[i]
+            this.Pack.ModeNameLower.push(modeName.toLowerCase())
+        }
         this.Pack.ModeStatus = this.GetCheckBoxValues(this.VueFilter.modeStatus)
         this.Pack.LinkName = this.GetTextFieldValues(this.VueFilter.linkName)
+        this.Pack.LinkNameLower = []
+        var len = this.Pack.LinkName.length
+        for (var i = 0; i < len; i++) {
+            var linkName: string = this.Pack.LinkName[i]
+            this.Pack.LinkNameLower.push(linkName.toLowerCase())
+        }
         this.Pack.LinkUserName = this.GetTextFieldValues(this.VueFilter.linkUserName)
+        this.Pack.LinkUserNameLower = []
+        var len = this.Pack.LinkUserName.length
+        for (var i = 0; i < len; i++) {
+            var linkUserName: string = this.Pack.LinkUserName[i]
+            this.Pack.LinkUserNameLower.push(linkUserName.toLowerCase())
+        }
         this.Pack.LinkStatus = this.GetCheckBoxValues(this.VueFilter.linkStatus)
         this.Pack.LinkUserDid = this.GetCheckBoxValues(this.VueFilter.linkUserDid)
         this.Pack.WorkStatus = this.GetCheckBoxValues(this.VueFilter.workStatus)
@@ -113,7 +137,7 @@ class ProcessFilterClass {
     PackToVueFilter() {
         this.VueFilter.beginDate = this.Pack.BeginDate
         this.VueFilter.endDate = this.Pack.EndDate
-        //vid必须每次都重新设置,因为完结可以编辑
+        //vid必须每次都重新设置,因为vid是可以编辑的
         this.VueFilter.vid.Inputs.splice(0, this.VueFilter.vid.Inputs.length)
         var len = ProcessData.VersionList.length
         for (var i = 0; i < len; i++) {
@@ -143,7 +167,7 @@ class ProcessFilterClass {
         var self = this
         var plan = $(this.VueFilter.$el)
         //关闭日期
-        plan.unbind().mousedown(function (e:JQuery.Event) {
+        plan.unbind().mousedown(function (e: JQuery.Event) {
             if ($(e.currentTarget).attr('class') != 'date') {
                 DateTime.HideDate()
             }
@@ -351,14 +375,14 @@ class ProcessFilterClass {
         })
     }
     //显示面板
-    ShowFilter(o, e) {
+    ShowFilter(o: HTMLElement, e: JQuery.Event) {
         this.PackToVueFilter()
         var plan = $(this.VueFilter.$el)
         var top = $(o).offset().top + 50
         var left = $(o).offset().left - plan.outerWidth()
         plan.css({ top: top, left: left }).show()
     }
-    HideFilter(fade=true) {
+    HideFilter(fade = true) {
         if (this.VueFilter) {
             if (fade) {
                 $(this.VueFilter.$el).fadeOut(Config.FadeTime)
