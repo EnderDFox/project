@@ -86,6 +86,23 @@
         {
             "type": "node",
             "request": "launch",
+            "name": "Launch CombineFile",
+            "program": "${workspaceFolder}/ts/CombineFile.ts",
+            // "cwd": "${workspaceFolder}",
+            "args": [
+                "--input","D:/AmazingGame/tool_svn/web/vue_template",
+                "--output","D:/AmazingGame/tool_svn/web/vue_template.bundle.json",
+                // "--ext_need","mp4 rm rmvb mkv wmv avi",
+                "--ext_ignore","txt",
+                "--watch",
+            ],
+            "outFiles": [
+                "${workspaceFolder}/bin/js/*.js"
+            ]
+        },
+        {
+            "type": "node",
+            "request": "launch",
             "name": "Launch ImgToMap",
             "program": "${workspaceFolder}/ts/ImgToMap.ts",
             "cwd": "${workspaceFolder}",

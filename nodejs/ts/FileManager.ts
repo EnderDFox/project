@@ -5,6 +5,7 @@ import * as child_process from "child_process";
 import * as express from "express";
 import { MathUtil } from "./lib1/MathUtil";
 import { ExpressServer } from "./lib1/ExpressServer";
+import { FileUtil } from "./lib1/FileUtil";
 
 class FileManager {
 
@@ -16,7 +17,7 @@ class FileManager {
     initServer() {
         this.server = new ExpressServer()
         //random_ext_xxx: e.g. ['mp4', 'rm', 'rmvb', 'mkv', 'wmv', 'avi']
-        this.server.init({ "folder": 'f', 'random_ext_need': 'r', 'random_ext_ignore': 'i' }, this.initGetPostAll.bind(this))
+        this.server.init({ "folder": 'f', 'random_ext_need': 'n', 'random_ext_ignore': 'g' }, this.initGetPostAll.bind(this))
         console.log("[info]",this.server.args.folder,":[this.folder]")
         console.log("[info]",this.server.args.random_ext_need,":[this.extNeed]")
         console.log("[info]",this.server.args.random_ext_ignore,":[this.extIgnore]")
@@ -81,7 +82,7 @@ class FileManager {
     //---递归得到文件夹里的所有文件 为了随机用的
     /**得到目录下所有文件 (递归) 中随机的几个 */
     getRandomFiles(dir: string): IChildFile[] {
-        var filesAll = this.getFileAll(dir);
+        var filesAll = FileUtil.getFileAll(dir,this.extNeed,this.extIgnore);
         if (filesAll.length) {
             var rs: IChildFile[] = [];
             var i = 10;
@@ -102,47 +103,6 @@ class FileManager {
      * e.g. ['mp4', 'rm', 'rmvb', 'mkv', 'wmv', 'avi']
     */
     extNeed: string[]
-    /**得到目录下所有文件 (递归) */
-    getFileAll(dir: string): IRandomFile[] {
-        var fileAll: IRandomFile[] = []
-        if (dir == null || dir.trim() == "") {
-            return [];
-        }
-        if (dir.indexOf("/") == -1) {
-            dir += "/";
-        }
-        var files = fs.readdirSync(dir);
-        for (var i = 0; i < files.length; i++) {
-            var file = files[i];
-            var fullname = path.resolve(dir, file);
-            // console.log("parseDir item:", fullname, file);
-            try {
-                var stat = fs.lstatSync(fullname);
-                if (file.indexOf(".") == 0) {
-                    // console.info("[info]", "过滤掉以 . 开头的File",fullname);
-                    continue;
-                }
-                var ext = path.extname(fullname).toLowerCase();
-                ext = ext.replace(/\./g,'') //去掉 `.`
-                if (this.extIgnore.indexOf(ext) > -1) continue;
-                if (this.extNeed.length > 0 && this.extNeed.indexOf(ext) == -1) continue;
-                if (stat.isDirectory()) {
-                    fileAll = fileAll.concat(this.getFileAll(fullname));//recursive children folders
-                } else {
-                    fileAll.push(
-                        {
-                            uuid: fileAll.length,
-                            name: path.parse(fullname).base,
-                            parent: path.parse(fullname).dir,
-                        }
-                    );
-                }
-            } catch (error) {
-                console.log("[debug] catch error:", error)
-            }
-        }
-        return fileAll
-    }
     cs_openFolder(req: express.Request, res: express.Response): void {
         var fullpath: string = req.query.folder
         fullpath = fullpath.replace(/\//g, '\\')

@@ -5,11 +5,11 @@ interface IVueData {
     showChildren?: boolean
     currPath?: string
     canBackCurrPath?: boolean
-    randomItems?: IRandomFile[]
+    randomItems?: FileItem[]
     childrenSelectedAll?: boolean
     childItems?: IChildFile[]
 }
-interface IRandomFile {
+interface FileItem {
     uuid?: number
     name?: string
     parent?: string
