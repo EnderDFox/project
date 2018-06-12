@@ -128,14 +128,13 @@ type PublishSingle struct {
 	DateLine string
 }
 
-type TPLModeSingle struct {
-	Tmid     uint64
-	Name     string
-	LinkSort []string
-	Links    []*TPLLinkSingle
+type TplModeSingle struct {
+	Tmid  uint64
+	Name  string
+	Links []*TplLinkSingle
 }
 
-type TPLLinkSingle struct {
+type TplLinkSingle struct {
 	Tlid uint64
 	Tmid uint64
 	Name string

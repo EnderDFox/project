@@ -53,7 +53,7 @@ func (this *Version) PublishList(vid uint64) []*PublishSingle {
 func (this *Version) VersionAdd(ver string, name string) bool {
 	stmt, err := db.GetDb().Prepare(`INSERT INTO ` + config.Pm + `.pm_version (pid,ver,name,add_uid,create_time,sort) VALUES (?,?,?,?,?,(
 		(SELECT IFNULL(
-			(SELECT ms FROM(SELECT max(sort)+1 AS ms FROM ` + config.Pm + `.pm_version) b)
+			(SELECT ms FROM(SELECT max(sort)+1 AS ms FROM ` + config.Pm + `.pm_version) m)
 		,1))
 		))`)
 	defer stmt.Close()
@@ -156,9 +156,10 @@ func (this *Version) VersionChangePublish(vid uint64, genre uint32, dateLine str
 	return true
 }
 
+//交换两个version的sort
 func (this *Version) VersionChangeSort(vid1 uint64, vid2 uint64) bool {
+	/*// # Plan A 传统方式
 	//拿旧值
-	/* # 传统方式
 	stmt, err := db.GetDb().Prepare(`SELECT vid,sort FROM ` + config.Pm + `.pm_version WHERE vid in(?,?) and is_del=0`)
 	defer stmt.Close()
 	db.CheckErr(err)
@@ -190,11 +191,16 @@ func (this *Version) VersionChangeSort(vid1 uint64, vid2 uint64) bool {
 	db.CheckErr(err)
 	_, err = stmt.Exec(sort2, vid1)
 	db.CheckErr(err) */
-	//# 使用一条sql处理
-	stmt, err := db.GetDb().Prepare(`UPDATE ` + config.Pm + `.pm_version a,` + config.Pm + `.pm_version b,
-		(SELECT @a:=` + config.Pm + `.pm_version.sort va FROM ` + config.Pm + `.pm_version WHERE ` + config.Pm + `.pm_version.vid=?) tas,
-		(SELECT @b:=` + config.Pm + `.pm_version.sort vb FROM ` + config.Pm + `.pm_version WHERE ` + config.Pm + `.pm_version.vid=?) tbs 
-	SET a.sort = @b,b.sort=@a where a.vid=? and b.vid=?`)
+	//# Plan B 使用一条sql处理
+	stmt, err := db.GetDb().Prepare(`
+		UPDATE ` + config.Pm + `.pm_version a,` + config.Pm + `.pm_version b,
+		(SELECT @a:=` + config.Pm + `.pm_version.sort va 
+			FROM ` + config.Pm + `.pm_version 
+			WHERE ` + config.Pm + `.pm_version.vid=?) tas,
+		(SELECT @b:=` + config.Pm + `.pm_version.sort vb 
+			FROM ` + config.Pm + `.pm_version 
+			WHERE ` + config.Pm + `.pm_version.vid=?) tbs 
+		SET a.sort = @b,b.sort=@a WHERE a.vid=? and b.vid=?`)
 	defer stmt.Close()
 	db.CheckErr(err)
 	_, err = stmt.Exec(vid1, vid2, vid1, vid2)

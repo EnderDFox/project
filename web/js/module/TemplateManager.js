@@ -8,15 +8,15 @@ var TemplateManagerClass = /** @class */ (function () {
     };
     //注册函数
     TemplateManagerClass.prototype.RegisterFunc = function () {
-        Commond.Register(L2C.L2C_TPL_MODE_VIEW, this.L2C_ModeView);
-        Commond.Register(L2C.L2C_TPL_MODE_ADD, this.L2C_ModeAdd);
-        Commond.Register(L2C.L2C_TPL_MODE_EDIT_NAME, this.L2C_ModeEditName);
-        Commond.Register(L2C.L2C_TPL_MODE_DELETE, this.L2C_ModeDelete);
-        Commond.Register(L2C.L2C_TPL_LINK_ADD, this.L2C_LinkAdd);
-        Commond.Register(L2C.L2C_TPL_LINK_EDIT_NAME, this.L2C_LinkEditName);
-        Commond.Register(L2C.L2C_TPL_LINK_EDIT_DID, this.L2C_LinkEditDid);
-        Commond.Register(L2C.L2C_TPL_LINK_EDIT_SORT, this.L2C_LinkEditSort);
-        Commond.Register(L2C.L2C_TPL_LINK_DELETE, this.L2C_LinkDelete);
+        Commond.Register(L2C.L2C_TPL_MODE_VIEW, this.L2C_ModeView.bind(this));
+        Commond.Register(L2C.L2C_TPL_MODE_ADD, this.L2C_ModeAdd.bind(this));
+        Commond.Register(L2C.L2C_TPL_MODE_EDIT_NAME, this.L2C_ModeEditName.bind(this));
+        Commond.Register(L2C.L2C_TPL_MODE_DELETE, this.L2C_ModeDelete.bind(this));
+        Commond.Register(L2C.L2C_TPL_LINK_ADD, this.L2C_LinkAdd.bind(this));
+        Commond.Register(L2C.L2C_TPL_LINK_EDIT_NAME, this.L2C_LinkEditName.bind(this));
+        Commond.Register(L2C.L2C_TPL_LINK_EDIT_DID, this.L2C_LinkEditDid.bind(this));
+        Commond.Register(L2C.L2C_TPL_LINK_EDIT_SORT, this.L2C_LinkEditSort.bind(this));
+        Commond.Register(L2C.L2C_TPL_LINK_DELETE, this.L2C_LinkDelete.bind(this));
     };
     TemplateManagerClass.prototype.L2C_ModeView = function (data) {
         if (!data.Modes) {
@@ -28,10 +28,6 @@ var TemplateManagerClass = /** @class */ (function () {
             if (!mode.Links) {
                 mode.Links = [];
             }
-            else {
-                mode.Links = TemplateManager.SortLink(mode.LinkSort, mode.Links);
-            }
-            delete mode.LinkSort;
         }
         TemplateManager.DataModes = data.Modes;
     };
@@ -40,7 +36,7 @@ var TemplateManagerClass = /** @class */ (function () {
         modes.push({
             Tmid: data.Tmid,
             Name: data.Name,
-            Links: []
+            Links: [],
         });
     };
     TemplateManagerClass.prototype.L2C_ModeEditName = function (data) {
@@ -102,14 +98,38 @@ var TemplateManagerClass = /** @class */ (function () {
             }
         }
     };
-    //link排序变化   // data.Tlid,data.Kind:操作方式 1: 上移   0:下移动
+    /**link排序变化  */
     TemplateManagerClass.prototype.L2C_LinkEditSort = function (data) {
-        var modes = TemplateManager.DataModes;
+        var _a;
+        var modes = this.DataModes;
+        var mode;
         var index = ArrayUtil.IndexOfAttr(modes, "Tmid", data.Tmid);
         if (index > -1) {
-            var mode = modes[index];
-            mode.Links = TemplateManager.SortLink(data.LinkSort, mode.Links);
+            mode = modes[index];
         }
+        if (!mode) {
+            return;
+        }
+        var i1, i2;
+        var l1, l2;
+        var len = mode.Links.length;
+        for (var i = 0; i < len; i++) {
+            var link = mode.Links[i];
+            if (link.Tlid == data.Tlid1) {
+                l1 = link;
+                i1 = i;
+            }
+            else if (link.Tlid == data.Tlid2) {
+                l2 = link;
+                i2 = i;
+            }
+        }
+        //
+        var sort = l1.Sort;
+        l1.Sort = l2.Sort;
+        l2.Sort = sort;
+        //
+        (_a = mode.Links).splice.apply(_a, [i1, 1].concat(mode.Links.splice(i2, 1, mode.Links[i1])));
     };
     TemplateManagerClass.prototype.L2C_LinkDelete = function (data) {
         var modes = TemplateManager.DataModes;
@@ -121,21 +141,6 @@ var TemplateManagerClass = /** @class */ (function () {
                 mode.Links.splice(index, 1);
             }
         }
-    };
-    //根据mode.LinkSort 排序 Links
-    TemplateManagerClass.prototype.SortLink = function (LinkSort, Links) {
-        var LinksNew = [];
-        var len = LinkSort.length;
-        for (var i = 0; i < len; i++) {
-            var tlid = LinkSort[i];
-            if (tlid) {
-                var index = ArrayUtil.IndexOfAttr(Links, 'Tlid', tlid);
-                if (index > -1) {
-                    LinksNew.push(Links[index]);
-                }
-            }
-        }
-        return LinksNew;
     };
     //通过Tlid获得对应的 tpl mode
     TemplateManagerClass.prototype.GetModeByTlid = function (tlid) {
@@ -267,6 +272,7 @@ var TemplateManagerClass = /** @class */ (function () {
     };
     //显示编辑模版-功能-流程列表
     TemplateManagerClass.prototype.ShowEditTplModeDetail = function (e, showTmid) {
+        var _this = this;
         TemplateManager.RemoveEditTplModeDetail();
         ProcessPanel.HideMenu();
         var modes = TemplateManager.vue_editTplModeList.modes;
@@ -325,26 +331,27 @@ var TemplateManagerClass = /** @class */ (function () {
                 departmentDict[dinfo.Did] = dinfo;
             }
             //
-            TemplateManager.vue_editTplModeDetail = new Vue({
+            _this.vue_editTplModeDetail = new Vue({
                 template: txt,
+                data: {
+                    newName: "",
+                    newDid: User.Did,
+                    mode: mode
+                },
                 methods: {
                     onAdd: function (e) {
-                        var newName = this.newName.toString().trim();
-                        /* if (newName == "") {
-                            Common.AlertFloatMsg("名称不能为空", e)
-                            return;
-                        } */
+                        var newName = _this.vue_editTplModeDetail.newName.toString().trim();
                         WSConn.sendMsg(C2L.C2L_TPL_LINK_ADD, {
-                            Tmid: TemplateManager.vue_editTplModeDetail.mode.Tmid,
+                            Tmid: _this.vue_editTplModeDetail.mode.Tmid,
                             Name: newName,
-                            Did: parseInt(this.newDid.toString())
+                            Did: parseInt(_this.vue_editTplModeDetail.newDid.toString())
                         });
-                        this.newName = "";
+                        _this.vue_editTplModeDetail.newName = "";
                     },
                     onEditName: function (e, Tlid) {
-                        var index = ArrayUtil.IndexOfAttr(this.mode.Links, "Tlid", Tlid);
+                        var index = ArrayUtil.IndexOfAttr(_this.vue_editTplModeDetail.mode.Links, "Tlid", Tlid);
                         if (index > -1) {
-                            var link = this.mode.Links[index];
+                            var link = _this.vue_editTplModeDetail.mode.Links[index];
                             var newName = $('#editTplModeDetail_' + Tlid + '_name').val().trim();
                             if (newName == '' || newName == link.Name.toString()) {
                                 //input恢复成旧名称
@@ -363,53 +370,39 @@ var TemplateManagerClass = /** @class */ (function () {
                             return;
                         }
                     },
-                    onChangeDid: function (e, Tlid) {
-                        TemplateManager.ShowMenuDepartment(e, function (newDid) {
-                            if (Tlid == -1) { //这是新建 里的部门选择
-                                TemplateManager.vue_editTplModeDetail.newDid = newDid;
+                    onChangeDid: function (e, tlid) {
+                        _this.ShowMenuDepartment(e, function (newDid) {
+                            if (tlid == -1) { //这是新建 里的部门选择
+                                _this.vue_editTplModeDetail.newDid = newDid;
                             }
                             else {
-                                var index = ArrayUtil.IndexOfAttr(TemplateManager.vue_editTplModeDetail.mode.Links, "Tlid", Tlid);
+                                var index = ArrayUtil.IndexOfAttr(_this.vue_editTplModeDetail.mode.Links, "Tlid", tlid);
                                 if (index > -1) { //第一个不需要上移了
-                                    TemplateManager.vue_editTplModeDetail.mode.Links[index].Did = newDid;
+                                    _this.vue_editTplModeDetail.mode.Links[index].Did = newDid;
                                     WSConn.sendMsg(C2L.C2L_TPL_LINK_EDIT_DID, {
-                                        Tlid: TemplateManager.vue_editTplModeDetail.mode.Links[index].Tlid,
+                                        Tlid: _this.vue_editTplModeDetail.mode.Links[index].Tlid,
                                         Did: newDid,
                                     });
                                 }
                             }
                         });
                     },
-                    onSortUp: function (e, Tlid) {
-                        var index = ArrayUtil.IndexOfAttr(this.mode.Links, "Tlid", Tlid);
-                        /*  if (index == 0) { //第一个挪到最下面
-                             this.mode.Links.push(this.mode.Links.shift())
-                         } else if (index > 0) {
-                             var linkUp = this.mode.Links[index - 1]
-                             var linkDown = this.mode.Links[index]
-                             this.mode.Links.splice(index - 1, 2, linkDown, linkUp)
-                         } */
+                    onSortUp: function (e, tplLink, index) {
                         WSConn.sendMsg(C2L.C2L_TPL_LINK_EDIT_SORT, {
-                            Tlid: TemplateManager.vue_editTplModeDetail.mode.Links[index].Tlid,
-                            Kind: 1,
+                            Tmid: _this.vue_editTplModeDetail.mode.Tmid,
+                            Tlid1: _this.vue_editTplModeDetail.mode.Links[index - 1].Tlid,
+                            Tlid2: tplLink.Tlid,
                         });
                     },
-                    onSortDown: function (e, Tlid) {
-                        var index = ArrayUtil.IndexOfAttr(this.mode.Links, "Tlid", Tlid);
-                        /* if (index == this.mode.Links.length - 1) { //最后一个就挪到最上面
-                            this.mode.Links.unshift(this.mode.Links.pop())
-                        } else if (index > -1 && index < this.mode.Links.length - 1) {
-                            var linkUp = this.mode.Links[index]
-                            var linkDown = this.mode.Links[index + 1]
-                            this.mode.Links.splice(index, 2, linkDown, linkUp)
-                        } */
+                    onSortDown: function (e, tplLink, index) {
                         WSConn.sendMsg(C2L.C2L_TPL_LINK_EDIT_SORT, {
-                            Tlid: TemplateManager.vue_editTplModeDetail.mode.Links[index].Tlid,
-                            Kind: 0,
+                            Tmid: _this.vue_editTplModeDetail.mode.Tmid,
+                            Tlid1: tplLink.Tlid,
+                            Tlid2: _this.vue_editTplModeDetail.mode.Links[index + 1].Tlid,
                         });
                     },
                     onDel: function (e, Tlid) {
-                        Common.Warning(this.$el, e, function () {
+                        Common.Warning(_this.vue_editTplModeDetail.$el, e, function () {
                             WSConn.sendMsg(C2L.C2L_TPL_LINK_DELETE, {
                                 Tlid: Tlid
                             });
@@ -427,13 +420,8 @@ var TemplateManagerClass = /** @class */ (function () {
                         return (departmentDict[Did] || departmentDict[1]).Name; //管理员Did=0 不属于任何部门，先用策划的
                     }
                 },
-                data: {
-                    newName: "",
-                    newDid: User.Did,
-                    mode: mode
-                }
             }).$mount();
-            $('#dynamicDom').before(TemplateManager.vue_editTplModeDetail.$el);
+            $('#dynamicDom').before(_this.vue_editTplModeDetail.$el);
             show();
         });
     };

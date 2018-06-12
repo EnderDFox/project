@@ -232,34 +232,37 @@ type C2L_VersionChangeSort struct {
 	Vid2 uint64
 }
 
-type C2L_TPLModeAdd struct {
+type C2L_TplModeAdd struct {
 	Name string
 }
-type C2L_TPLModeEditName struct {
+type C2L_TplModeEditName struct {
 	Tmid uint64
 	Name string
 }
-type C2L_TPLModeDelete struct {
+type C2L_TplModeDelete struct {
 	Tmid uint64
 }
-type C2L_TPLLinkAdd struct {
+type C2L_TplLinkAdd struct {
 	Tmid uint64
 	Name string
 	Did  uint64
 }
-type C2L_TPLLinkEditName struct {
+type C2L_TplLinkEditName struct {
 	Tlid uint64
 	Name string
 }
-type C2L_TPLLinkEditDid struct {
+type C2L_TplLinkEditDid struct {
 	Tlid uint64
 	Did  uint64
 }
-type C2L_TPLLinkEditSort struct {
-	Tlid uint64
-	Kind uint8 //操作方式 1: 上移   0:下移动
+
+type C2L_TplLinkEditSort struct {
+	Tmid  uint64
+	Tlid1 uint64
+	Tlid2 uint64
 }
-type C2L_TPLLinkDelete struct {
+
+type C2L_TplLinkDelete struct {
 	Tlid uint64
 }
 

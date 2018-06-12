@@ -237,7 +237,7 @@ class ProcessFilterClass {
                 Inputs: []
             }
             //读取部门保存为数组
-            var departments: IDepartmentItem[] = [];
+            var departments: DepartmentItem[] = [];
             var len = Data.DepartmentLoop.length
             for (var i = 0; i < len; i++) {
                 var dinfo = Data.DepartmentLoop[i].info;

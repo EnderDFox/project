@@ -4,15 +4,15 @@
         <div class="title">编辑模板-{{mode.Name}}</div>
         <div class="close">x</div>
     </div>
-    <transition-group name="list-complete" tag="ul"  :class="[mode.Links.length<=10?'scroll_y_hidden':'scroll_y_auto']">
+    <transition-group name="list-complete" tag="ul" :class="[mode.Links.length<=10?'scroll_y_hidden':'scroll_y_auto']">
         <li class="body list-complete-item" v-for="(link,index) in mode.Links" :key="link.Tlid">
-            <input type=" text " class="ver " placeholder="空 " :value="link.Name " :id=" 'editTplModeDetail_'+link.Tlid+
-            '_name' " @blur="onEditName($event,link.Tlid) "
+            <input type=" text " class="ver " placeholder="空 " :value="link.Name " :id=" 'editTplModeDetail_'+link.Tlid+'_name' " @blur="onEditName($event,link.Tlid) "
                 @keyup.enter="onEditName($event,link.Tlid) " />
             <button class="confirm btnSmall2 " title="修改负责人所属的部门 " @click="onChangeDid($event,link.Tlid) ">{{link.Did|didName}}</button>
-            <button :class="{ 'confirm':true, 'btnSmall1':true, 'button-disabled':index==0} " title="排序上移 " @click="onSortUp($event,link.Tlid) "
+            <button :class="{ 'confirm':true, 'btnSmall1':true, 'button-disabled':index==0} " title="排序上移 " @click="onSortUp($event,link,index) "
                 :disabled="index==0 ">↑</button>
-            <button :class="{ 'confirm':true, 'btnSmall1':true, 'button-disabled':index>=(mode.Links.length-1)}" title="排序下移" @click="onSortDown($event,link.Tlid)" :disabled="index>=(mode.Links.length-1)">↓</button>
+            <button :class="{ 'confirm':true, 'btnSmall1':true, 'button-disabled':index>=(mode.Links.length-1)}" title="排序下移" @click="onSortDown($event,link,index)"
+                :disabled="index>=(mode.Links.length-1)">↓</button>
             <button :class="{'confirm':true,'btnSmall1':true}" title="删除" @click="onDel($event,link.Tlid)">X</button>
         </li>
     </transition-group>

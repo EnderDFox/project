@@ -194,8 +194,8 @@ type L2C_VersionChangePublish struct {
 	DateLine string
 }
 
-type L2C_TPLModeView struct {
-	Modes []*TPLModeSingle
+type L2C_TplModeView struct {
+	Modes []*TplModeSingle
 }
 
 type L2C_TplModeAdd struct {
@@ -203,36 +203,37 @@ type L2C_TplModeAdd struct {
 	Name string
 }
 
-type L2C_TPLModeEditName struct {
+type L2C_TplModeEditName struct {
 	Tmid uint64
 	Name string
 }
 
-type L2C_TPLModeDelete struct {
+type L2C_TplModeDelete struct {
 	Tmid uint64
 }
 
-type L2C_TPLLinkAdd struct {
+type L2C_TplLinkAdd struct {
 	Tlid uint64
 	Tmid uint64
 	Name string
 	Did  uint64
 }
 
-type L2C_TPLLinkEditName struct {
+type L2C_TplLinkEditName struct {
 	Tlid uint64
 	Name string
 }
 
-type L2C_TPLLinkEditDid struct {
+type L2C_TplLinkEditDid struct {
 	Tlid uint64
 	Did  uint64
 }
-type L2C_TPLLinkEditSort struct {
-	Tmid     uint64
-	LinkSort []string
+type L2C_TplLinkEditSort struct {
+	Tmid  uint64
+	Tlid1 uint64
+	Tlid2 uint64
 }
-type L2C_TPLLinkDelete struct {
+type L2C_TplLinkDelete struct {
 	Tlid uint64
 }
 

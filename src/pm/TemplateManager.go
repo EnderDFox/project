@@ -53,7 +53,7 @@ func (this *C2L_M_TPL_MODE_VIEW) execute(client *websocket.Conn, msg *Message) b
 type C2L_M_TPL_MODE_ADD struct{}
 
 func (this *C2L_M_TPL_MODE_ADD) execute(client *websocket.Conn, msg *Message) bool {
-	param := &C2L_TPLModeAdd{}
+	param := &C2L_TplModeAdd{}
 	err := json.Unmarshal([]byte(msg.Param), param)
 	if err != nil {
 		return false
@@ -70,7 +70,7 @@ func (this *C2L_M_TPL_MODE_ADD) execute(client *websocket.Conn, msg *Message) bo
 type C2L_M_TPL_MODE_EDIT_NAME struct{}
 
 func (this *C2L_M_TPL_MODE_EDIT_NAME) execute(client *websocket.Conn, msg *Message) bool {
-	param := &C2L_TPLModeEditName{}
+	param := &C2L_TplModeEditName{}
 	err := json.Unmarshal([]byte(msg.Param), param)
 	if err != nil {
 		return false
@@ -88,7 +88,7 @@ type C2L_M_TPL_MODE_DELETE struct {
 }
 
 func (this *C2L_M_TPL_MODE_DELETE) execute(client *websocket.Conn, msg *Message) bool {
-	param := &C2L_TPLModeDelete{}
+	param := &C2L_TplModeDelete{}
 	err := json.Unmarshal([]byte(msg.Param), param)
 	if err != nil {
 		return false
@@ -105,7 +105,7 @@ func (this *C2L_M_TPL_MODE_DELETE) execute(client *websocket.Conn, msg *Message)
 type C2L_M_TPL_LINK_ADD struct{}
 
 func (this *C2L_M_TPL_LINK_ADD) execute(client *websocket.Conn, msg *Message) bool {
-	param := &C2L_TPLLinkAdd{}
+	param := &C2L_TplLinkAdd{}
 	err := json.Unmarshal([]byte(msg.Param), param)
 	if err != nil {
 		return false
@@ -122,7 +122,7 @@ func (this *C2L_M_TPL_LINK_ADD) execute(client *websocket.Conn, msg *Message) bo
 type C2L_M_TPL_LINK_EDIT_NAME struct{}
 
 func (this *C2L_M_TPL_LINK_EDIT_NAME) execute(client *websocket.Conn, msg *Message) bool {
-	param := &C2L_TPLLinkEditName{}
+	param := &C2L_TplLinkEditName{}
 	err := json.Unmarshal([]byte(msg.Param), param)
 	if err != nil {
 		return false
@@ -139,7 +139,7 @@ func (this *C2L_M_TPL_LINK_EDIT_NAME) execute(client *websocket.Conn, msg *Messa
 type C2L_M_TPL_LINK_EDIT_DID struct{}
 
 func (this *C2L_M_TPL_LINK_EDIT_DID) execute(client *websocket.Conn, msg *Message) bool {
-	param := &C2L_TPLLinkEditDid{}
+	param := &C2L_TplLinkEditDid{}
 	err := json.Unmarshal([]byte(msg.Param), param)
 	if err != nil {
 		return false
@@ -156,7 +156,7 @@ func (this *C2L_M_TPL_LINK_EDIT_DID) execute(client *websocket.Conn, msg *Messag
 type C2L_M_TPL_LINK_EDIT_SORT struct{}
 
 func (this *C2L_M_TPL_LINK_EDIT_SORT) execute(client *websocket.Conn, msg *Message) bool {
-	param := &C2L_TPLLinkEditSort{}
+	param := &C2L_TplLinkEditSort{}
 	err := json.Unmarshal([]byte(msg.Param), param)
 	if err != nil {
 		return false
@@ -165,7 +165,7 @@ func (this *C2L_M_TPL_LINK_EDIT_SORT) execute(client *websocket.Conn, msg *Messa
 	if user == nil {
 		return false
 	}
-	user.Template().TemplateLinkEditSort(param)
+	user.Template().TemplateLinkEditSort(param.Tmid, param.Tlid1, param.Tlid2)
 	return true
 }
 
@@ -174,7 +174,7 @@ type C2L_M_TPL_LINK_DELETE struct {
 }
 
 func (this *C2L_M_TPL_LINK_DELETE) execute(client *websocket.Conn, msg *Message) bool {
-	param := &C2L_TPLLinkDelete{}
+	param := &C2L_TplLinkDelete{}
 	err := json.Unmarshal([]byte(msg.Param), param)
 	if err != nil {
 		return false

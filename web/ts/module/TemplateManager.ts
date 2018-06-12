@@ -1,36 +1,48 @@
 /**编辑模板功能   例如 模板-功能   模板-流程 */
-interface ITplModeSimple {
+interface L2C_TPLModeView {
+    Modes: TplModeSingle[]
+}
+interface TplModeSingle {
     Tmid: number
     Name: string
-    Links: ITplLinkSimple[]
+    Links: TplLinkSingle[]
 }
-interface ITplLinkSimple {
-    Tlid: number; Tmid: number; Did: number; Name: String
+interface TplLinkSingle {
+    Tlid: number;
+    Tmid: number;
+    Did: number;
+    Name: String
+    Sort: number;
 }
-interface IDepartmentItem {
+interface L2C_TplLinkEditSort {
+    Tmid: number;
+    Tlid1: number;
+    Tlid2: number;
+}
+interface DepartmentItem {
     Did: number
     Name: string
 }
 class TemplateManagerClass {
     AuePath: string = "template" //模板所在 .html
-    DataModes: ITplModeSimple[]
+    DataModes: TplModeSingle[]
     //初始化
     Init() {
         WSConn.sendMsg(C2L.C2L_TPL_MODE_VIEW, {})
     }
     //注册函数
     RegisterFunc() {
-        Commond.Register(L2C.L2C_TPL_MODE_VIEW, this.L2C_ModeView)
-        Commond.Register(L2C.L2C_TPL_MODE_ADD, this.L2C_ModeAdd)
-        Commond.Register(L2C.L2C_TPL_MODE_EDIT_NAME, this.L2C_ModeEditName)
-        Commond.Register(L2C.L2C_TPL_MODE_DELETE, this.L2C_ModeDelete)
-        Commond.Register(L2C.L2C_TPL_LINK_ADD, this.L2C_LinkAdd)
-        Commond.Register(L2C.L2C_TPL_LINK_EDIT_NAME, this.L2C_LinkEditName)
-        Commond.Register(L2C.L2C_TPL_LINK_EDIT_DID, this.L2C_LinkEditDid)
-        Commond.Register(L2C.L2C_TPL_LINK_EDIT_SORT, this.L2C_LinkEditSort)
-        Commond.Register(L2C.L2C_TPL_LINK_DELETE, this.L2C_LinkDelete)
+        Commond.Register(L2C.L2C_TPL_MODE_VIEW, this.L2C_ModeView.bind(this))
+        Commond.Register(L2C.L2C_TPL_MODE_ADD, this.L2C_ModeAdd.bind(this))
+        Commond.Register(L2C.L2C_TPL_MODE_EDIT_NAME, this.L2C_ModeEditName.bind(this))
+        Commond.Register(L2C.L2C_TPL_MODE_DELETE, this.L2C_ModeDelete.bind(this))
+        Commond.Register(L2C.L2C_TPL_LINK_ADD, this.L2C_LinkAdd.bind(this))
+        Commond.Register(L2C.L2C_TPL_LINK_EDIT_NAME, this.L2C_LinkEditName.bind(this))
+        Commond.Register(L2C.L2C_TPL_LINK_EDIT_DID, this.L2C_LinkEditDid.bind(this))
+        Commond.Register(L2C.L2C_TPL_LINK_EDIT_SORT, this.L2C_LinkEditSort.bind(this))
+        Commond.Register(L2C.L2C_TPL_LINK_DELETE, this.L2C_LinkDelete.bind(this))
     }
-    L2C_ModeView(data) {
+    L2C_ModeView(data: L2C_TPLModeView) {
         if (!data.Modes) {
             data.Modes = [];
         }
@@ -39,10 +51,7 @@ class TemplateManagerClass {
             var mode = data.Modes[i];
             if (!mode.Links) {
                 mode.Links = []
-            } else {
-                mode.Links = TemplateManager.SortLink(mode.LinkSort, mode.Links)
             }
-            delete mode.LinkSort;
         }
         TemplateManager.DataModes = data.Modes;
     }
@@ -51,7 +60,7 @@ class TemplateManagerClass {
         modes.push({
             Tmid: data.Tmid,
             Name: data.Name,
-            Links: []
+            Links: [],
         })
     }
     L2C_ModeEditName(data) {
@@ -73,7 +82,7 @@ class TemplateManagerClass {
             modes.splice(index, 1)
         }
     }
-    L2C_LinkAdd(data) {
+    L2C_LinkAdd(data: TplLinkSingle) {
         var modes = TemplateManager.DataModes;
         var index = ArrayUtil.IndexOfAttr(modes, "Tmid", data.Tmid);
         if (index > -1) {
@@ -113,14 +122,36 @@ class TemplateManagerClass {
             }
         }
     }
-    //link排序变化   // data.Tlid,data.Kind:操作方式 1: 上移   0:下移动
-    L2C_LinkEditSort(data) {
-        var modes = TemplateManager.DataModes;
+    /**link排序变化  */
+    L2C_LinkEditSort(data: L2C_TplLinkEditSort) {
+        var modes = this.DataModes;
+        var mode: TplModeSingle
         var index = ArrayUtil.IndexOfAttr(modes, "Tmid", data.Tmid);
         if (index > -1) {
-            var mode = modes[index];
-            mode.Links = TemplateManager.SortLink(data.LinkSort, mode.Links)
+            mode = modes[index];
         }
+        if (!mode) {
+            return
+        }
+        var i1: number, i2: number
+        var l1: TplLinkSingle, l2: TplLinkSingle
+        var len = mode.Links.length
+        for (var i = 0; i < len; i++) {
+            var link = mode.Links[i]
+            if (link.Tlid == data.Tlid1) {
+                l1 = link
+                i1 = i
+            } else if (link.Tlid == data.Tlid2) {
+                l2 = link
+                i2 = i
+            }
+        }
+        //
+        var sort = l1.Sort
+        l1.Sort = l2.Sort
+        l2.Sort = sort
+        //
+        mode.Links.splice(i1, 1, ...mode.Links.splice(i2, 1, mode.Links[i1]))
     }
     L2C_LinkDelete(data) {
         var modes = TemplateManager.DataModes
@@ -132,21 +163,6 @@ class TemplateManagerClass {
                 mode.Links.splice(index, 1)
             }
         }
-    }
-    //根据mode.LinkSort 排序 Links
-    SortLink(LinkSort, Links) {
-        var LinksNew = []
-        var len = LinkSort.length
-        for (var i = 0; i < len; i++) {
-            var tlid = LinkSort[i];
-            if (tlid) {
-                var index = ArrayUtil.IndexOfAttr(Links, 'Tlid', tlid)
-                if (index > -1) {
-                    LinksNew.push(Links[index])
-                }
-            }
-        }
-        return LinksNew
     }
     //通过Tlid获得对应的 tpl mode
     GetModeByTlid(tlid) {
@@ -162,10 +178,10 @@ class TemplateManagerClass {
         return null;
     }
     //绑定到select选择器
-    vue_tplSelect: CombinedVueInstance1<{ modes: ITplModeSimple[] }>
+    vue_tplSelect: CombinedVueInstance1<{ modes: TplModeSingle[] }>
     BindTplSelect(domId: string) {
         if (TemplateManager.vue_tplSelect == null) {
-            Loader.LoadVueTemplate(TemplateManager.AuePath , "TplModeSelect", function (txt) {
+            Loader.LoadVueTemplate(TemplateManager.AuePath, "TplModeSelect", function (txt) {
                 TemplateManager.vue_tplSelect = new Vue({
                     el: domId,
                     template: txt,
@@ -177,7 +193,7 @@ class TemplateManagerClass {
         }
     }
     //编辑 模板-功能列表
-    vue_editTplModeList: CombinedVueInstance1<{ modes: ITplModeSimple[], showTmid: number }>
+    vue_editTplModeList: CombinedVueInstance1<{ modes: TplModeSingle[], showTmid: number }>
     ShowEditTplModeList(e) {
         ProcessPanel.HideMenu()
         //真正执行显示面板的函数
@@ -207,7 +223,7 @@ class TemplateManagerClass {
         }
         //判断是否需要初始化: 加载模板
         if (TemplateManager.vue_editTplModeList == null) {
-            Loader.LoadVueTemplate(TemplateManager.AuePath , "EditTplModeList", function (txt) {
+            Loader.LoadVueTemplate(TemplateManager.AuePath, "EditTplModeList", function (txt) {
                 TemplateManager.vue_editTplModeList = new Vue({
                     template: txt,
                     data: {
@@ -268,7 +284,7 @@ class TemplateManagerClass {
         }
     }
     //===编辑 模板-功能中的流程
-    vue_editTplModeDetail: CombinedVueInstance1<{ mode: ITplModeSimple, newName: string, newDid: number }>
+    vue_editTplModeDetail: CombinedVueInstance1<{ mode: TplModeSingle, newName: string, newDid: number }>
     RemoveEditTplModeDetail() {
         if (this.vue_editTplModeList) {
             this.vue_editTplModeList.showTmid = 0
@@ -327,7 +343,7 @@ class TemplateManagerClass {
             // TemplateManager.vue_editTplModeDetail.mode = mode
         }
         //判断是否需要初始化: 加载模板
-        Loader.LoadVueTemplate(TemplateManager.AuePath , "EditTplModeDetail", function (txt) {
+        Loader.LoadVueTemplate(TemplateManager.AuePath, "EditTplModeDetail", (txt) => {
             //读取顶级部门保存为字典
             var departmentDict = {};
             var len = Data.DepartmentLoop.length
@@ -336,26 +352,27 @@ class TemplateManagerClass {
                 departmentDict[dinfo.Did] = dinfo
             }
             //
-            TemplateManager.vue_editTplModeDetail = new Vue({
+            this.vue_editTplModeDetail = new Vue({
                 template: txt,
+                data: {
+                    newName: "",
+                    newDid: User.Did,
+                    mode: mode
+                },
                 methods: {
-                    onAdd(e) {
-                        var newName = this.newName.toString().trim()
-                        /* if (newName == "") {
-                            Common.AlertFloatMsg("名称不能为空", e)
-                            return;
-                        } */
+                    onAdd: (e) => {
+                        var newName = this.vue_editTplModeDetail.newName.toString().trim()
                         WSConn.sendMsg(C2L.C2L_TPL_LINK_ADD, {
-                            Tmid: TemplateManager.vue_editTplModeDetail.mode.Tmid,
+                            Tmid: this.vue_editTplModeDetail.mode.Tmid,
                             Name: newName,
-                            Did: parseInt(this.newDid.toString())
+                            Did: parseInt(this.vue_editTplModeDetail.newDid.toString())
                         });
-                        this.newName = ""
+                        this.vue_editTplModeDetail.newName = ""
                     },
-                    onEditName(e, Tlid) {
-                        var index = ArrayUtil.IndexOfAttr(this.mode.Links, "Tlid", Tlid)
+                    onEditName: (e, Tlid) => {
+                        var index = ArrayUtil.IndexOfAttr(this.vue_editTplModeDetail.mode.Links, "Tlid", Tlid)
                         if (index > -1) {
-                            var link = this.mode.Links[index]
+                            var link = this.vue_editTplModeDetail.mode.Links[index]
                             var newName = ($('#editTplModeDetail_' + Tlid + '_name').val() as string).trim();
                             if (newName == '' || newName == link.Name.toString()) {
                                 //input恢复成旧名称
@@ -372,52 +389,38 @@ class TemplateManagerClass {
                             return;
                         }
                     },
-                    onChangeDid(e, Tlid) {
-                        TemplateManager.ShowMenuDepartment(e, function (newDid) {
-                            if (Tlid == -1) {//这是新建 里的部门选择
-                                TemplateManager.vue_editTplModeDetail.newDid = newDid
+                    onChangeDid: (e, tlid: number) => {
+                        this.ShowMenuDepartment(e, (newDid: DidField) => {
+                            if (tlid == -1) {//这是新建 里的部门选择
+                                this.vue_editTplModeDetail.newDid = newDid
                             } else {
-                                var index = ArrayUtil.IndexOfAttr(TemplateManager.vue_editTplModeDetail.mode.Links, "Tlid", Tlid)
+                                var index = ArrayUtil.IndexOfAttr(this.vue_editTplModeDetail.mode.Links, "Tlid", tlid)
                                 if (index > -1) { //第一个不需要上移了
-                                    TemplateManager.vue_editTplModeDetail.mode.Links[index].Did = newDid
+                                    this.vue_editTplModeDetail.mode.Links[index].Did = newDid
                                     WSConn.sendMsg(C2L.C2L_TPL_LINK_EDIT_DID, {
-                                        Tlid: TemplateManager.vue_editTplModeDetail.mode.Links[index].Tlid,
+                                        Tlid: this.vue_editTplModeDetail.mode.Links[index].Tlid,
                                         Did: newDid,
                                     });
                                 }
                             }
                         });
                     },
-                    onSortUp(e, Tlid) {
-                        var index = ArrayUtil.IndexOfAttr(this.mode.Links, "Tlid", Tlid)
-                        /*  if (index == 0) { //第一个挪到最下面
-                             this.mode.Links.push(this.mode.Links.shift())
-                         } else if (index > 0) {
-                             var linkUp = this.mode.Links[index - 1]
-                             var linkDown = this.mode.Links[index]
-                             this.mode.Links.splice(index - 1, 2, linkDown, linkUp)
-                         } */
+                    onSortUp: (e, tplLink: TplLinkSingle, index: number) => {
                         WSConn.sendMsg(C2L.C2L_TPL_LINK_EDIT_SORT, {
-                            Tlid: TemplateManager.vue_editTplModeDetail.mode.Links[index].Tlid,
-                            Kind: 1,
+                            Tmid: this.vue_editTplModeDetail.mode.Tmid,
+                            Tlid1: this.vue_editTplModeDetail.mode.Links[index - 1].Tlid,
+                            Tlid2: tplLink.Tlid,
                         });
                     },
-                    onSortDown(e, Tlid) {
-                        var index = ArrayUtil.IndexOfAttr(this.mode.Links, "Tlid", Tlid)
-                        /* if (index == this.mode.Links.length - 1) { //最后一个就挪到最上面
-                            this.mode.Links.unshift(this.mode.Links.pop())
-                        } else if (index > -1 && index < this.mode.Links.length - 1) {
-                            var linkUp = this.mode.Links[index]
-                            var linkDown = this.mode.Links[index + 1]
-                            this.mode.Links.splice(index, 2, linkDown, linkUp)
-                        } */
+                    onSortDown: (e, tplLink: TplLinkSingle, index: number) => {
                         WSConn.sendMsg(C2L.C2L_TPL_LINK_EDIT_SORT, {
-                            Tlid: TemplateManager.vue_editTplModeDetail.mode.Links[index].Tlid,
-                            Kind: 0,
+                            Tmid: this.vue_editTplModeDetail.mode.Tmid,
+                            Tlid1: tplLink.Tlid,
+                            Tlid2: this.vue_editTplModeDetail.mode.Links[index + 1].Tlid,
                         });
                     },
-                    onDel(e, Tlid) {
-                        Common.Warning(this.$el, e, function () {
+                    onDel: (e, Tlid) => {
+                        Common.Warning(this.vue_editTplModeDetail.$el, e, function () {
                             WSConn.sendMsg(C2L.C2L_TPL_LINK_DELETE, {
                                 Tlid: Tlid
                             });
@@ -435,18 +438,14 @@ class TemplateManagerClass {
                         return (departmentDict[Did] || departmentDict[1]).Name  //管理员Did=0 不属于任何部门，先用策划的
                     }
                 },
-                data: {
-                    newName: "",
-                    newDid: User.Did,
-                    mode: mode
-                }
+
             }).$mount()
-            $('#dynamicDom').before(TemplateManager.vue_editTplModeDetail.$el)
+            $('#dynamicDom').before(this.vue_editTplModeDetail.$el)
             show()
         })
     }
     //选择部门的菜单
-    vue_menuDepartment: CombinedVueInstance1<{ departments: IDepartmentItem[] }>
+    vue_menuDepartment: CombinedVueInstance1<{ departments: DepartmentItem[] }>
     ShowMenuDepartment_callback: Function
     ShowMenuDepartment(e, callback) {
         ProcessPanel.HideMenu()
@@ -466,9 +465,9 @@ class TemplateManagerClass {
         }
         //判断是否需要初始化: 加载模板
         if (TemplateManager.vue_menuDepartment == null) {
-            Loader.LoadVueTemplate(TemplateManager.AuePath , "MenuDepartment", function (txt) {
+            Loader.LoadVueTemplate(TemplateManager.AuePath, "MenuDepartment", function (txt) {
                 //读取部门保存为数组
-                var departments: IDepartmentItem[] = [];
+                var departments: DepartmentItem[] = [];
                 var len = Data.DepartmentLoop.length
                 for (var i = 0; i < len; i++) {
                     var dinfo = Data.DepartmentLoop[i].info;

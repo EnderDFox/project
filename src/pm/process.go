@@ -247,16 +247,16 @@ func (this *Process) ModeAdd(mid uint64, name string, vid uint64, did uint64, tm
 		//
 	} else {
 		//按照模板中插入环节
-		var tplMode = this.owner.Template().GetTplModeByTmid(tmid)
-		if len(tplMode.LinkSort) == 0 {
+		var tplLinkList = this.owner.Template().GetLinkList(tmid)
+		this.owner.Template().GetLinkList(tmid)
+		if len(tplLinkList) == 0 {
 			//模板里没有流程 插入一个空环节
 			linkSingle := this.LinkAddOne(uint64(newMid))
 			link_sort_link = append(link_sort_link, strconv.Itoa(int(linkSingle.Lid)))
 			linkList = append(linkList, linkSingle)
 		} else {
 			didToUidMap := *timer.getDidToUidMap()
-			for _, tlid := range tplMode.LinkSort {
-				var tplLink = this.owner.Template().GetTplLinkByTlid_string(tlid)
+			for _, tplLink := range tplLinkList {
 				//stmt, err = db.GetDb().Prepare(`INSERT INTO ` + config.Pm + `.pm_link (mid,uid,add_uid,create_time,name) SELECT ?,?,?,?,name FROM pm.pm_template_link WHERE tlid = ?`)
 				//res, err = stmt.Exec(newMid, this.owner.GetUid(), this.owner.GetUid(), time.Now().Unix(),tlid)
 				stmt, err = db.GetDb().Prepare(`INSERT INTO ` + config.Pm + `.pm_link (mid,uid,add_uid,create_time,name) VALUES (?,?,?,?,?)`)

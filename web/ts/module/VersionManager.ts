@@ -164,17 +164,17 @@ class VersionManagerClass {
         }
     }
     onL2C_VersionChangeSort(data: C2L_VersionChangeSort) {
-        var x: number, y: number
+        var i1: number, i2: number
         var v1: VersionSingle, v2: VersionSingle
         var len = this.VersionList.length
         for (var i = 0; i < len; i++) {
             var version = this.VersionList[i]
             if (version.Vid == data.Vid1) {
                 v1 = version
-                x = i
+                i1 = i
             } else if (version.Vid == data.Vid2) {
                 v2 = version
-                y = i
+                i2 = i
             }
         }
         //
@@ -182,7 +182,7 @@ class VersionManagerClass {
         v1.Sort = v2.Sort
         v2.Sort = sort
         //
-        this.VueVersionList.versions.splice(x, 1, ...this.VueVersionList.versions.splice(y, 1, this.VueVersionList.versions[x]))
+        this.VueVersionList.versions.splice(i1, 1, ...this.VueVersionList.versions.splice(i2, 1, this.VueVersionList.versions[i1]))
     }
     //## EditMode 选择器
     VueSelect: CombinedVueInstance1<{ versions: VersionSingle[], ListShowMax: number, CurrVid: number }>

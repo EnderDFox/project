@@ -113,18 +113,18 @@ var VersionManagerClass = /** @class */ (function () {
     };
     VersionManagerClass.prototype.onL2C_VersionChangeSort = function (data) {
         var _a;
-        var x, y;
+        var i1, i2;
         var v1, v2;
         var len = this.VersionList.length;
         for (var i = 0; i < len; i++) {
             var version = this.VersionList[i];
             if (version.Vid == data.Vid1) {
                 v1 = version;
-                x = i;
+                i1 = i;
             }
             else if (version.Vid == data.Vid2) {
                 v2 = version;
-                y = i;
+                i2 = i;
             }
         }
         //
@@ -132,7 +132,7 @@ var VersionManagerClass = /** @class */ (function () {
         v1.Sort = v2.Sort;
         v2.Sort = sort;
         //
-        (_a = this.VueVersionList.versions).splice.apply(_a, [x, 1].concat(this.VueVersionList.versions.splice(y, 1, this.VueVersionList.versions[x])));
+        (_a = this.VueVersionList.versions).splice.apply(_a, [i1, 1].concat(this.VueVersionList.versions.splice(i2, 1, this.VueVersionList.versions[i1])));
     };
     /**
      *
