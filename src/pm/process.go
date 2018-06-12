@@ -85,12 +85,12 @@ func (this *Process) LinkStore(lid uint64, status uint8) bool {
 
 //移动
 func (this *Process) ModeMove(swap []uint64, dir string) bool {
-	stmt, err := db.GetDb().Prepare(`SELECT pid,name,mode_sort FROM ` + config.Pm + `.pm_project WHERE pid = 1`)
+	stmt, err := db.GetDb().Prepare(`SELECT pid,name,mode_sort FROM ` + config.Pm + `.pm_project WHERE pid = ?`)
 	defer stmt.Close()
 	db.CheckErr(err)
 	projectSingle := &ProjectSingle{}
 	var modeSort string
-	stmt.QueryRow().Scan(&projectSingle.Pid, &projectSingle.Name, &modeSort)
+	stmt.QueryRow(COMMON_PID).Scan(&projectSingle.Pid, &projectSingle.Name, &modeSort)
 	sortMap := make(map[string]int)
 	for _, v := range swap {
 		sortMap[strconv.Itoa(int(v))] = 0
@@ -108,10 +108,10 @@ func (this *Process) ModeMove(swap []uint64, dir string) bool {
 		sortList[sortMap[strconv.Itoa(int(v))]] = strconv.Itoa(int(swap[s]))
 	}
 	//更新到主表
-	stmt, err = db.GetDb().Prepare(`UPDATE ` + config.Pm + `.pm_project SET mode_sort = ? WHERE pid = 1`)
+	stmt, err = db.GetDb().Prepare(`UPDATE ` + config.Pm + `.pm_project SET mode_sort = ? WHERE pid = ?`)
 	db.CheckErr(err)
 	projectSingle.ModeSort = sortList
-	res, err := stmt.Exec(strings.Join(sortList, ","))
+	res, err := stmt.Exec(strings.Join(sortList, ","), COMMON_PID)
 	db.CheckErr(err)
 	res.RowsAffected()
 	data := &L2C_ProcessModeMove{
@@ -181,11 +181,11 @@ func (this *Process) ModeDelete(mid uint64) bool {
 	_, err = stmt.Exec(mid)
 	db.CheckErr(err)
 	//更新项目
-	stmt, err = db.GetDb().Prepare(`SELECT pid,name,mode_sort FROM ` + config.Pm + `.pm_project WHERE pid = 1`)
+	stmt, err = db.GetDb().Prepare(`SELECT pid,name,mode_sort FROM ` + config.Pm + `.pm_project WHERE pid = ?`)
 	db.CheckErr(err)
 	projectSingle := &ProjectSingle{}
 	var sortStr string
-	stmt.QueryRow().Scan(&projectSingle.Pid, &projectSingle.Name, &sortStr)
+	stmt.QueryRow(COMMON_PID).Scan(&projectSingle.Pid, &projectSingle.Name, &sortStr)
 	for _, v := range strings.Split(sortStr, ",") {
 		if v == strconv.Itoa(int(mid)) {
 			continue
@@ -193,9 +193,9 @@ func (this *Process) ModeDelete(mid uint64) bool {
 		projectSingle.ModeSort = append(projectSingle.ModeSort, v)
 	}
 	//更新到
-	stmt, err = db.GetDb().Prepare(`UPDATE ` + config.Pm + `.pm_project SET mode_sort = ? WHERE pid = 1`)
+	stmt, err = db.GetDb().Prepare(`UPDATE ` + config.Pm + `.pm_project SET mode_sort = ? WHERE pid = ?`)
 	db.CheckErr(err)
-	_, err = stmt.Exec(strings.Join(projectSingle.ModeSort, ","))
+	_, err = stmt.Exec(strings.Join(projectSingle.ModeSort, ","), COMMON_PID)
 	db.CheckErr(err)
 	data := &L2C_ProcessModeDelete{
 		Mid:           mid,
@@ -232,7 +232,7 @@ func (this *Process) ModeAdd(mid uint64, name string, vid uint64, did uint64, tm
 	stmt, err := db.GetDb().Prepare(`INSERT INTO ` + config.Pm + `.pm_mode (pid,name,add_uid,vid,did,create_time) VALUES (?,?,?,?,?,?)`)
 	defer stmt.Close()
 	db.CheckErr(err)
-	pid := 1
+	pid := COMMON_PID
 	res, err := stmt.Exec(pid, name, this.owner.GetUid(), vid, did, time.Now().Unix())
 	db.CheckErr(err)
 	newMid, err := res.LastInsertId()
@@ -293,7 +293,7 @@ func (this *Process) ModeAdd(mid uint64, name string, vid uint64, did uint64, tm
 	//更新到modeSort
 	stmt, err = db.GetDb().Prepare(`UPDATE ` + config.Pm + `.pm_project SET mode_sort = ? WHERE pid = ?`)
 	db.CheckErr(err)
-	_, err = stmt.Exec(strings.Join(newMdeSort, ","), 1)
+	_, err = stmt.Exec(strings.Join(newMdeSort, ","), COMMON_PID)
 	db.CheckErr(err)
 	modeSingle := &ModeSingle{}
 	modeSingle.Mid = uint64(newMid)
@@ -666,7 +666,7 @@ func (this *Process) GetProject() *ProjectSingle {
 	stmt, err := db.GetDb().Prepare(`SELECT pid,name,mode_sort FROM ` + config.Pm + `.pm_project WHERE pid = ?`)
 	defer stmt.Close()
 	db.CheckErr(err)
-	row := stmt.QueryRow(1)
+	row := stmt.QueryRow(COMMON_PID)
 	project := &ProjectSingle{}
 	var modeSort string
 	row.Scan(&project.Pid, &project.Name, &modeSort)

@@ -81,7 +81,8 @@ func (this *Upload) CountFileCount(kind uint32, obid uint64) uint32 {
 //获取某个work下关联的file
 func (this *Upload) GetFileList(kind uint32, obid uint64) []*FileSingle {
 	//计算文件数量是否已经达到上限
-	stmt, err := db.GetDb().Prepare(`SELECT t2.fid,t2.kind,t2.name,t2.create_time FROM ` + config.Pm + `.pm_file_join AS t1 INNER JOIN ` + config.Pm + `.pm_file as t2 ON t1.fid=t2.fid AND t1.kind=? AND t1.obid = ? AND t1.is_del=0 `)
+	// stmt, err := db.GetDb().Prepare(`SELECT t2.fid,t2.kind,t2.name,t2.create_time FROM ` + config.Pm + `.pm_file_join AS t1 INNER JOIN ` + config.Pm + `.pm_file as t2 ON t1.fid=t2.fid AND t1.kind=? AND t1.obid = ? AND t1.is_del=0 `)
+	stmt, err := db.GetDb().Prepare(`SELECT  t2.fid,t2.kind,t2.name,t2.create_time FROM (SELECT fid FROM pm.pm_file_join WHERE kind=? AND obid = ? AND is_del=0) AS t1 LEFT JOIN pm.pm_file as t2 ON t1.fid=t2.fid`)
 	defer stmt.Close()
 	db.CheckErr(err)
 	rows, err := stmt.Query(kind, obid)
