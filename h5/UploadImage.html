@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Demo</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <style>
+        html {
+            font-size: 18px;
+        }
+
+        a {
+            display: block;
+            margin-bottom: 10px;
+        }
+    </style>
+    <script type="text/javascript" src="js/lib3/jquery-3.2.1.min.js"></script>
+    <script type="text/javascript" src="js/UploadImage.js"></script>
+</head>
+
+<body>
+    <div>
+        可以 `选择文件`, `拖动`, `粘贴` 图片 到预览框
+        <br/>
+        <span style="font-size: 12px;color:#FF3300;">
+            `粘贴` 不能直接粘贴图片文件, 只可以粘贴截图或从聊天软件中复制的图片
+        </span>
+    </div>
+    <div>
+        <input type="file" id="btnUpload" name="file" onchange="onUploadFile(event)" multiple="multiple">
+        <!-- <input type="file" id="btnUpload" name="file" onchange ="uploadFile(event)" accept="image/png,image/jpg,image/jpeg,image/bmp" multiple="multiple"> -->
+    </div>
+    <div>
+        预览:  <input type="button" id="btnClear" name="clear" onclick="onClear(event)" multiple="multiple" value="clear">
+    </div>
+    <div id="box" style="width: 99%; height: 210px; border: 1px solid; overflow: hidden;" contenteditable="false" onkeyup="preventDel(event)" onkeypress="preventDel(event)"
+        onkeydown="preventDel(event)">
+    </div>
+    <!-- <div id="box" style="width: 800px; height: 400px; border: 1px solid;" contenteditable="true"></div> -->
+    <div>
+        base64:
+    </div>
+    <div>
+        <textarea id="txt_base64_data" style="width: 99%;height: 100px; border: 1px solid;"></textarea>
+    </div>
+    <div>
+        base64 in Markdown:
+    </div>
+    <div>
+        <textarea id="txt_base64_markdown" style="width: 99%;height: 100px; border: 1px solid;"></textarea>
+    </div>
+    <div>
+        base64 in Html:
+    </div>
+    <div>
+        <textarea id="txt_base64_html" style="width: 99%;height: 100px; border: 1px solid;"></textarea>
+    </div>
+</body>
+<script type="text/javascript">
+    new UploadImage("box", "UploadHandler.ashx").init(function (xhr, data) {//上传完成后的回调 var img = new Image(); img.src = xhr.responseText;
+        var img = new Image();
+        img.width = '200'
+        img.height = '200'
+        img.title = 'title in here'
+        img.alt = 'alt in here'
+        img.src = data;
+        document.getElementById('box').appendChild(img)
+        document.getElementById('txt_base64_data').innerText = data
+        document.getElementById('txt_base64_markdown').innerText = '![img][img1]\n\n[img1]:' + data
+        document.getElementById('txt_base64_html').innerText = '<img src="' + data + '"></img>'
+    });
+</script>
+
+<!--
+    点击按钮上传
+         /*批量导入*/
+    /*#load:为按钮,点击后生成一个隐藏的input file标签*/
+    $('#load').after('<input type="file" id="load_xls" name="file" style="display:none" onchange ="uploadFile()">');
+    $('#load').click(function(){
+        document.getElementById("load_xls").click();
+    });
+    function uploadFile() {
+        var myform = new FormData();
+        myform.append('file',$('#load_xls')[0].files[0]);
+        $.ajax({
+            url: "admin.php?r=org/orguser/addusers",
+            type: "POST",
+            data: myform,
+            contentType: false,
+            processData: false,
+            success: function (data) {
+                console.log(data);
+            },
+            error:function(data){
+                console.log(data)
+            }
+        });
+    }
+ -->
