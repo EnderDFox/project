@@ -158,53 +158,7 @@ func (this *Version) VersionChangePublish(vid uint64, genre uint32, dateLine str
 
 //交换两个version的sort
 func (this *Version) VersionChangeSort(vid1 uint64, vid2 uint64) bool {
-	/*// # Plan A 传统方式
-	//拿旧值
-	stmt, err := db.GetDb().Prepare(`SELECT vid,sort FROM ` + config.Pm + `.pm_version WHERE vid in(?,?) and is_del=0`)
-	defer stmt.Close()
-	db.CheckErr(err)
-	rows, err := stmt.Query(vid1, vid2)
-	defer rows.Close()
-	db.CheckErr(err)
-	var sort1 uint32
-	var sort2 uint32
-	for rows.Next() {
-		var t_vid uint64
-		var t_sort uint32
-		rows.Scan(&t_vid, &t_sort)
-		if vid1 == t_vid {
-			sort1 = t_sort
-		} else {
-			sort2 = t_sort
-		}
-	}
-	log.Println("s1v2s2v1", sort1, vid2, sort2, vid1)
-	//更新v1
-	stmt, err = db.GetDb().Prepare(`UPDATE ` + config.Pm + `.pm_version SET sort=? WHERE vid=?`)
-	defer stmt.Close()
-	db.CheckErr(err)
-	_, err = stmt.Exec(sort1, vid2)
-	db.CheckErr(err)
-	//更新v2
-	stmt, err = db.GetDb().Prepare(`UPDATE ` + config.Pm + `.pm_version SET sort=? WHERE vid=?`)
-	defer stmt.Close()
-	db.CheckErr(err)
-	_, err = stmt.Exec(sort2, vid1)
-	db.CheckErr(err) */
-	//# Plan B 使用一条sql处理
-	stmt, err := db.GetDb().Prepare(`
-		UPDATE ` + config.Pm + `.pm_version a,` + config.Pm + `.pm_version b,
-		(SELECT @a:=` + config.Pm + `.pm_version.sort va 
-			FROM ` + config.Pm + `.pm_version 
-			WHERE ` + config.Pm + `.pm_version.vid=?) tas,
-		(SELECT @b:=` + config.Pm + `.pm_version.sort vb 
-			FROM ` + config.Pm + `.pm_version 
-			WHERE ` + config.Pm + `.pm_version.vid=?) tbs 
-		SET a.sort = @b,b.sort=@a WHERE a.vid=? and b.vid=?`)
-	defer stmt.Close()
-	db.CheckErr(err)
-	_, err = stmt.Exec(vid1, vid2, vid1, vid2)
-	db.CheckErr(err)
+	db.SwapSort(`pm_version`, `vid`, vid1, vid2)
 	//发送给所有人
 	data := &C2L_VersionChangeSort{
 		Vid1: vid1,

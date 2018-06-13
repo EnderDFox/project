@@ -84,12 +84,12 @@ func (this *Template) TemplateLinkAdd(param *C2L_TplLinkAdd) bool {
 	//插入一个模板-模块
 	stmt, err := db.GetDb().Prepare(`INSERT INTO ` + config.Pm + `.pm_template_link (tmid,name,did,add_uid,create_time,sort) VALUES (?,?,?,?,?,(
 		(SELECT IFNULL(
-			(SELECT ms FROM(SELECT max(sort)+1 AS ms FROM ` + config.Pm + `.pm_template_link) m)
+			(SELECT ms FROM(SELECT max(sort)+1 AS ms FROM ` + config.Pm + `.pm_template_link WHERE tmid=?) m)
 		,1))
 		))`)
 	defer stmt.Close()
 	db.CheckErr(err)
-	res, err := stmt.Exec(param.Tmid, param.Name, param.Did, this.owner.Uid, time.Now().Unix())
+	res, err := stmt.Exec(param.Tmid, param.Name, param.Did, this.owner.Uid, time.Now().Unix(), param.Tmid)
 	db.CheckErr(err)
 	newTlid, err := res.LastInsertId()
 	db.CheckErr(err)
@@ -133,19 +133,7 @@ func (this *Template) TemplateLinkEditDid(param *C2L_TplLinkEditDid) bool {
 }
 
 func (this *Template) TemplateLinkEditSort(tmid uint64, tlid1 uint64, tlid2 uint64) bool {
-	stmt, err := db.GetDb().Prepare(`
-		UPDATE ` + config.Pm + `.pm_template_link a,` + config.Pm + `.pm_template_link b,
-		(SELECT @a:=` + config.Pm + `.pm_template_link.sort va 
-			FROM ` + config.Pm + `.pm_template_link 
-			WHERE ` + config.Pm + `.pm_template_link.tlid=?) tas,
-		(SELECT @b:=` + config.Pm + `.pm_template_link.sort vb 
-			FROM ` + config.Pm + `.pm_template_link 
-			WHERE ` + config.Pm + `.pm_template_link.tlid=?) tbs 
-		SET a.sort = @b,b.sort=@a WHERE a.tlid=? and b.tlid=?`)
-	defer stmt.Close()
-	db.CheckErr(err)
-	_, err = stmt.Exec(tlid1, tlid2, tlid1, tlid2)
-	db.CheckErr(err)
+	db.SwapSort(`pm_template_link`, `tlid`, tlid1, tlid2)
 	//
 	data := &L2C_TplLinkEditSort{
 		Tmid:  tmid,
@@ -216,23 +204,6 @@ func (this *Template) GetLinkList(tmid uint64) []*TplLinkSingle {
 	return modeList
 }
 
-//获取流程列表 TODO:结果并没有根据 sortStr排序 ,需要修改
-/* func (this *Template) GetLinkListBySort(tmid uint64, sortStr string) []*TplLinkSingle {
-	stmt, err := db.GetDb().Prepare(`SELECT tlid,tmid,name,did FROM ` + config.Pm + `.pm_template_link WHERE tlid in (?) and is_del=0`)
-	defer stmt.Close()
-	db.CheckErr(err)
-	rows, err := stmt.Query(sortStr)
-	db.CheckErr(err)
-	defer rows.Close()
-	var modeList []*TplLinkSingle
-	for rows.Next() {
-		single := &TplLinkSingle{}
-		rows.Scan(&single.Tlid, &single.Tmid, &single.Name, &single.Did)
-		modeList = append(modeList, single)
-	}
-	return modeList
-} */
-
 //获取功能模板, 通过 功能模板id
 func (this *Template) GetTplModeByTmid(tmid uint64) *TplModeSingle {
 	stmt, err := db.GetDb().Prepare(`SELECT tmid,name FROM ` + config.Pm + `.pm_template_mode WHERE tmid=? and is_del=0`)
@@ -242,15 +213,4 @@ func (this *Template) GetTplModeByTmid(tmid uint64) *TplModeSingle {
 	stmt.QueryRow(tmid).Scan(&mode.Tmid, &mode.Name)
 	db.CheckErr(err)
 	return mode
-}
-
-//获取流程 通过 模板流程id
-func (this *Template) GetTplLinkByTlid_string(tlid string) *TplLinkSingle {
-	stmt, err := db.GetDb().Prepare(`SELECT tlid,tmid,name,did FROM ` + config.Pm + `.pm_template_link WHERE tlid=? and is_del=0`)
-	defer stmt.Close()
-	db.CheckErr(err)
-	var link = &TplLinkSingle{}
-	stmt.QueryRow(tlid).Scan(&link.Tlid, &link.Tmid, &link.Name, &link.Did)
-	db.CheckErr(err)
-	return link
 }

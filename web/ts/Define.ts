@@ -50,6 +50,12 @@ enum LinkStatusField {
     STORE = 1,
 }
 
+//# const
+
+class FieldName{
+    static Mid = "Mid"
+    static Lid = "Lid"
+}
 
 
 //===data struck
@@ -81,7 +87,8 @@ interface DepartmentInfo {
 interface ProjectSingle {
     Pid?: number
     Name?: string
-    ModeSort?: string[]
+    //client cache data
+    ModeSort?: number[]
 }
 
 interface ModeSingle {
@@ -89,9 +96,10 @@ interface ModeSingle {
     Vid?: number
     Name?: string
     Color?: uint32
-    LinkSort?: string[]
     Did?: DidField
     Status?: ModeStatusField
+    //client temp data
+    LinkList?:LinkSingle[]
 }
 
 interface LinkSingle {
@@ -101,6 +109,7 @@ interface LinkSingle {
     Name?: string
     Color?: number
     Status?: LinkStatusField
+    Sort?:number
 }
 
 interface WorkSingle {
@@ -260,19 +269,15 @@ interface C2L_ProcessWorkEdit {
 
 interface L2C_ProcessLinkDelete {
     Lid?: uint64
-    ModeSingle?: ModeSingle
 }
 
 interface L2C_ProcessGridAdd {
-    Lid?: uint64
+    PrevLid?: uint64
     LinkSingle?: LinkSingle
-    ModeSingle?: ModeSingle
 }
 
 interface L2C_ProcessGridSwap {
     Swap?: uint64[]
-    Dir?: string
-    ModeSingle?: ModeSingle
 }
 
 interface L2C_ProcessGridClear {

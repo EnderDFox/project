@@ -107,6 +107,24 @@ func (this *Db) FetchAll(ptr interface{}, sql string, args ...interface{}) []int
 	return list
 }
 
+//交换排序
+func (this *Db) SwapSort(tableName string, fieldName string, id1 uint64, id2 uint64) {
+	tableName = config.Pm + "." + tableName
+	stmt, err := db.GetDb().Prepare(`
+		UPDATE ` + tableName + ` a,` + tableName + ` b,
+		(SELECT @a:=` + tableName + `.sort va 
+			FROM ` + tableName + ` 
+			WHERE ` + tableName + `.` + fieldName + `=?) tas,
+		(SELECT @b:=` + tableName + `.sort vb 
+			FROM ` + tableName + ` 
+			WHERE ` + tableName + `.` + fieldName + `=?) tbs 
+		SET a.sort = @b,b.sort=@a WHERE a.` + fieldName + `=? and b.` + fieldName + `=?`)
+	defer stmt.Close()
+	db.CheckErr(err)
+	_, err = stmt.Exec(id1, id2, id1, id2)
+	db.CheckErr(err)
+}
+
 /*
 type TestUser struct {
 	Uid  uint64

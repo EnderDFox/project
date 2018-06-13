@@ -156,11 +156,18 @@ var ArrayUtil = /** @class */ (function () {
     ArrayUtil.IndexOfAttr = function (arr, key, value) {
         var len = arr.length;
         for (var i = 0; i < len; i++) {
-            if (arr[i][key] == value) {
+            if ((key == null && arr[key] == value) || arr[i][key] == value) {
                 return i;
             }
         }
         return -1;
+    };
+    ArrayUtil.RemoveByAttr = function (arr, key, value) {
+        var index = ArrayUtil.IndexOfAttr(arr, key, value);
+        if (index > -1) {
+            arr.splice(index, 1);
+        }
+        return index;
     };
     return ArrayUtil;
 }());

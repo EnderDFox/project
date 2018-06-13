@@ -115,7 +115,7 @@ func (this *C2L_M_PROCESS_LINK_COLOR) execute(client *websocket.Conn, msg *Messa
 	if user == nil {
 		return false
 	}
-	user.Process().LinklColor(param.Lid, param.Color)
+	user.Process().LinkColor(param.Lid, param.Color)
 	return true
 }
 
@@ -270,7 +270,7 @@ func (this *C2L_M_PROCESS_GRID_SWAP) execute(client *websocket.Conn, msg *Messag
 	if user == nil {
 		return false
 	}
-	user.Process().GridSwap(param.Swap, param.Dir)
+	user.Process().GridSwap(param.Swap)
 	return true
 }
 

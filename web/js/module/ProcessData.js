@@ -7,6 +7,12 @@ var ProcessDataClass = /** @class */ (function () {
         var _this = this;
         //初始化
         this.Project = data.Project;
+        this.Project.ModeSort = [];
+        var len = data.ModeList.length;
+        for (var i = 0; i < len; i++) {
+            var mode = data.ModeList[i];
+            this.Project.ModeSort.push(mode.Mid);
+        }
         this.WorkMap = {};
         this.LinkMap = {};
         this.ModeMap = {};
@@ -89,7 +95,7 @@ var ProcessDataClass = /** @class */ (function () {
                 }
             }
             //过滤无效Link
-            if (isFilterWork) { //没过滤work时就不要checkLink了, 因为checkLink仅报错了有work的link, 没有work的link会被弃掉
+            if (isFilterWork) { //没过滤work时就不要checkLink了, 因为checkLink仅包括了有work的link, 没有work的link会被弃掉
                 if (!checkLink[link.Lid]) {
                     return true;
                 }
@@ -128,8 +134,26 @@ var ProcessDataClass = /** @class */ (function () {
             if (!checkMode[mode.Mid]) {
                 return true;
             }
+            mode.LinkList = [];
             _this.ModeMap[mode.Mid] = mode;
             return true;
+        });
+        //把link都放入mode.LinkList
+        $.each(this.LinkMap, function (k, link) {
+            var mode = _this.ModeMap[link.Mid];
+            if (mode) {
+                mode.LinkList.push(link);
+            }
+        });
+        //排序LinkList
+        $.each(this.ModeMap, function (k, mode) {
+            mode.LinkList.sort(function (a, b) {
+                if (a.Sort < b.Sort)
+                    return -1;
+                if (a.Sort > b.Sort)
+                    return 1;
+                return 0;
+            });
         });
         //可用进度
         $.each(data.WorkList, function (k, work) {

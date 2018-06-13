@@ -124,7 +124,7 @@ func (this *Process) ModeMove(swap []uint64, dir string) bool {
 }
 
 //颜色
-func (this *Process) LinklColor(lid, color uint64) bool {
+func (this *Process) LinkColor(lid, color uint64) bool {
 	//查询
 	stmt, err := db.GetDb().Prepare(`SELECT lid,uid,mid,name,status FROM ` + config.Pm + `.pm_link WHERE lid = ?`)
 	defer stmt.Close()
@@ -142,22 +142,12 @@ func (this *Process) LinklColor(lid, color uint64) bool {
 
 //颜色
 func (this *Process) ModeColor(mid, color uint64) bool {
-	//查询
-	stmt, err := db.GetDb().Prepare(`SELECT mid,vid,name,link_sort,did FROM ` + config.Pm + `.pm_mode WHERE mid = ?`)
-	defer stmt.Close()
-	db.CheckErr(err)
-	var sortStr string
-	modeSingle := &ModeSingle{}
-	stmt.QueryRow(mid).Scan(&modeSingle.Mid, &modeSingle.Vid, &modeSingle.Name, &sortStr, &modeSingle.Did)
-	if modeSingle.Mid == 0 {
-		return false
-	}
-	modeSingle.Color = color
-	modeSingle.LinkSort = strings.Split(sortStr, ",")
-	//更新
-	stmt, err = db.GetDb().Prepare(`UPDATE ` + config.Pm + `.pm_mode SET color = ? WHERE mid = ?`)
+	stmt, err := db.GetDb().Prepare(`UPDATE ` + config.Pm + `.pm_mode SET color = ? WHERE mid = ?`)
 	db.CheckErr(err)
 	stmt.Exec(color, mid)
+	modeSingle := &ModeSingle{}
+	modeSingle.Mid = mid
+	modeSingle.Color = color
 	this.owner.SendToAll(L2C_PROCESS_MODE_COLOR, modeSingle)
 	return true
 }
@@ -206,28 +196,23 @@ func (this *Process) ModeDelete(mid uint64) bool {
 }
 
 //插入一个空流程
-func (this *Process) LinkAddOne(newMid uint64) *LinkSingle {
-	stmt, err := db.GetDb().Prepare(`INSERT INTO ` + config.Pm + `.pm_link (mid,uid,add_uid,create_time) VALUES (?,?,?,?)`)
-	res, err := stmt.Exec(newMid, this.owner.GetUid(), this.owner.GetUid(), time.Now().Unix())
+func (this *Process) LinkAddOne(mid uint64) *LinkSingle {
+	stmt, err := db.GetDb().Prepare(`INSERT INTO ` + config.Pm + `.pm_link (mid,uid,add_uid,create_time,sort) VALUES (?,?,?,?,1)`)
+	res, err := stmt.Exec(mid, this.owner.GetUid(), this.owner.GetUid(), time.Now().Unix())
 	db.CheckErr(err)
 	lid, err := res.LastInsertId()
-	db.CheckErr(err)
-	//更新到modeSort
-	stmt, err = db.GetDb().Prepare(`UPDATE ` + config.Pm + `.pm_mode SET link_sort = ? WHERE mid = ?`)
-	db.CheckErr(err)
-	_, err = stmt.Exec(lid, newMid)
 	db.CheckErr(err)
 	//
 	linkSingle := &LinkSingle{}
 	linkSingle.Lid = uint64(lid)
-	linkSingle.Mid = uint64(newMid)
+	linkSingle.Mid = uint64(mid)
 	linkSingle.Uid = this.owner.GetUid()
 	linkSingle.Name = ""
 	return linkSingle
 }
 
 //插入
-func (this *Process) ModeAdd(mid uint64, name string, vid uint64, did uint64, tmid uint64) bool {
+func (this *Process) ModeAdd(prevMid uint64, name string, vid uint64, did uint64, tmid uint64) bool {
 	//插入一个模块
 	stmt, err := db.GetDb().Prepare(`INSERT INTO ` + config.Pm + `.pm_mode (pid,name,add_uid,vid,did,create_time) VALUES (?,?,?,?,?,?)`)
 	defer stmt.Close()
@@ -237,12 +222,10 @@ func (this *Process) ModeAdd(mid uint64, name string, vid uint64, did uint64, tm
 	db.CheckErr(err)
 	newMid, err := res.LastInsertId()
 	db.CheckErr(err)
-	var link_sort_link []string
 	var linkList []*LinkSingle
 	if tmid <= 0 {
 		//没用模板  插入一个环节
 		linkSingle := this.LinkAddOne(uint64(newMid))
-		link_sort_link = append(link_sort_link, strconv.Itoa(int(linkSingle.Lid)))
 		linkList = append(linkList, linkSingle)
 		//
 	} else {
@@ -252,19 +235,17 @@ func (this *Process) ModeAdd(mid uint64, name string, vid uint64, did uint64, tm
 		if len(tplLinkList) == 0 {
 			//模板里没有流程 插入一个空环节
 			linkSingle := this.LinkAddOne(uint64(newMid))
-			link_sort_link = append(link_sort_link, strconv.Itoa(int(linkSingle.Lid)))
 			linkList = append(linkList, linkSingle)
 		} else {
 			didToUidMap := *timer.getDidToUidMap()
-			for _, tplLink := range tplLinkList {
+			for i, tplLink := range tplLinkList {
 				//stmt, err = db.GetDb().Prepare(`INSERT INTO ` + config.Pm + `.pm_link (mid,uid,add_uid,create_time,name) SELECT ?,?,?,?,name FROM pm.pm_template_link WHERE tlid = ?`)
 				//res, err = stmt.Exec(newMid, this.owner.GetUid(), this.owner.GetUid(), time.Now().Unix(),tlid)
-				stmt, err = db.GetDb().Prepare(`INSERT INTO ` + config.Pm + `.pm_link (mid,uid,add_uid,create_time,name) VALUES (?,?,?,?,?)`)
+				stmt, err = db.GetDb().Prepare(`INSERT INTO ` + config.Pm + `.pm_link (mid,uid,add_uid,create_time,name,sort) VALUES (?,?,?,?,?,?)`)
 				//uid 要使用模板的did所对应的部门老大uid
-				res, err = stmt.Exec(newMid, didToUidMap[tplLink.Did], this.owner.GetUid(), time.Now().Unix(), tplLink.Name)
+				res, err = stmt.Exec(newMid, didToUidMap[tplLink.Did], this.owner.GetUid(), time.Now().Unix(), tplLink.Name, i+1)
 				db.CheckErr(err)
 				lid, err := res.LastInsertId()
-				link_sort_link = append(link_sort_link, strconv.Itoa(int(lid)))
 				db.CheckErr(err)
 				//
 				linkSingle := &LinkSingle{}
@@ -272,13 +253,9 @@ func (this *Process) ModeAdd(mid uint64, name string, vid uint64, did uint64, tm
 				linkSingle.Mid = uint64(newMid)
 				linkSingle.Uid = didToUidMap[tplLink.Did]
 				linkSingle.Name = tplLink.Name
+				linkSingle.Sort = uint32(i) + 1
 				linkList = append(linkList, linkSingle)
 			}
-			//更新到modeSort
-			stmt, err = db.GetDb().Prepare(`UPDATE ` + config.Pm + `.pm_mode SET link_sort = ? WHERE mid = ?`)
-			db.CheckErr(err)
-			_, err = stmt.Exec(strings.Join(link_sort_link, ","), newMid)
-			db.CheckErr(err)
 		}
 	}
 	//查询项目
@@ -286,26 +263,19 @@ func (this *Process) ModeAdd(mid uint64, name string, vid uint64, did uint64, tm
 	var newMdeSort []string
 	for _, v := range project.ModeSort {
 		newMdeSort = append(newMdeSort, v)
-		if v == strconv.Itoa(int(mid)) {
+		if v == strconv.Itoa(int(prevMid)) {
 			newMdeSort = append(newMdeSort, strconv.Itoa(int(newMid)))
 		}
 	}
-	//更新到modeSort
-	stmt, err = db.GetDb().Prepare(`UPDATE ` + config.Pm + `.pm_project SET mode_sort = ? WHERE pid = ?`)
-	db.CheckErr(err)
-	_, err = stmt.Exec(strings.Join(newMdeSort, ","), COMMON_PID)
-	db.CheckErr(err)
 	modeSingle := &ModeSingle{}
 	modeSingle.Mid = uint64(newMid)
 	modeSingle.Vid = vid
 	modeSingle.Color = 0
 	modeSingle.Name = name
 	modeSingle.Did = 0
-	//modeSingle.LinkSort = append(modeSingle.LinkSort, strconv.Itoa(int(lid)))
-	modeSingle.LinkSort = link_sort_link
 	//
 	data := &L2C_ProcessModeAdd{
-		Mid:        mid,
+		Mid:        prevMid,
 		ModeSingle: modeSingle,
 		LinkList:   linkList,
 	}
@@ -383,6 +353,7 @@ func (this *Process) LinkEdit(lid uint64, name string) bool {
 	linkSingle := &LinkSingle{}
 	stmt.QueryRow(lid).Scan(&linkSingle.Uid, &linkSingle.Mid, &linkSingle.Color, &linkSingle.Status)
 	stmt, err = db.GetDb().Prepare(`UPDATE ` + config.Pm + `.pm_link SET name = ? WHERE lid = ?`)
+	defer stmt.Close()
 	db.CheckErr(err)
 	_, err = stmt.Exec(name, lid)
 	db.CheckErr(err)
@@ -394,25 +365,8 @@ func (this *Process) LinkEdit(lid uint64, name string) bool {
 
 //删除
 func (this *Process) LinkDelete(lid uint64) bool {
-	stmt, err := db.GetDb().Prepare(`SELECT mid,vid,name,link_sort,color,did FROM ` + config.Pm + `.pm_mode WHERE mid in (SELECT mid FROM ` + config.Pm + `.pm_link WHERE lid = ?)`)
-	defer stmt.Close()
-	db.CheckErr(err)
-	modeSingle := &ModeSingle{}
-	var linkSort string
-	stmt.QueryRow(lid).Scan(&modeSingle.Mid, &modeSingle.Vid, &modeSingle.Name, &linkSort, &modeSingle.Color, &modeSingle.Did)
-	for _, v := range strings.Split(linkSort, ",") {
-		if v == strconv.Itoa(int(lid)) {
-			continue
-		}
-		modeSingle.LinkSort = append(modeSingle.LinkSort, v)
-	}
-	//更新到主表
-	stmt, err = db.GetDb().Prepare(`UPDATE ` + config.Pm + `.pm_mode SET link_sort = ? WHERE mid = ?`)
-	db.CheckErr(err)
-	_, err = stmt.Exec(strings.Join(modeSingle.LinkSort, ","), modeSingle.Mid)
-	db.CheckErr(err)
 	//删除环节
-	stmt, err = db.GetDb().Prepare(`DELETE FROM ` + config.Pm + `.pm_link WHERE lid = ?`)
+	stmt, err := db.GetDb().Prepare(`DELETE FROM ` + config.Pm + `.pm_link WHERE lid = ?`)
 	db.CheckErr(err)
 	_, err = stmt.Exec(lid)
 	db.CheckErr(err)
@@ -422,93 +376,63 @@ func (this *Process) LinkDelete(lid uint64) bool {
 	_, err = stmt.Exec(lid)
 	db.CheckErr(err)
 	data := &L2C_ProcessLinkDelete{
-		Lid:        lid,
-		ModeSingle: modeSingle,
+		Lid: lid,
 	}
 	this.owner.SendToAll(L2C_PROCESS_LINK_DELETE, data)
 	return true
 }
 
-//插入
-func (this *Process) GridAdd(lid uint64, name string) bool {
-	stmt, err := db.GetDb().Prepare(`SELECT mid,vid,name,link_sort,color,did FROM ` + config.Pm + `.pm_mode WHERE mid in (SELECT mid FROM ` + config.Pm + `.pm_link WHERE lid = ?)`)
+//插入新 link
+func (this *Process) GridAdd(prevLid uint64, name string) bool {
+	//获得当前 mode
+	stmt, err := db.GetDb().Prepare(`SELECT mid,sort FROM ` + config.Pm + `.pm_link WHERE lid = ?`)
 	defer stmt.Close()
 	db.CheckErr(err)
-	modeSingle := &ModeSingle{}
-	var linkSort string
-	stmt.QueryRow(lid).Scan(&modeSingle.Mid, &modeSingle.Vid, &modeSingle.Name, &linkSort, &modeSingle.Color, &modeSingle.Did)
+	var mid uint64
+	var sort uint32
+	stmt.QueryRow(prevLid).Scan(&mid, &sort)
 	//插入新的行
-	stmt, err = db.GetDb().Prepare(`INSERT INTO ` + config.Pm + `.pm_link (mid,uid,add_uid,name,create_time) VALUES (?,?,?,?,?)`)
+	stmt, err = db.GetDb().Prepare(`INSERT INTO ` + config.Pm + `.pm_link (mid,uid,add_uid,name,create_time,sort) VALUES (?,?,?,?,?,?)`)
 	db.CheckErr(err)
 	uid := this.owner.GetUid()
 	addUid := this.owner.GetUid()
-	res, err := stmt.Exec(modeSingle.Mid, uid, addUid, name, time.Now().Unix())
+	res, err := stmt.Exec(mid, uid, addUid, name, time.Now().Unix(), sort+1)
 	db.CheckErr(err)
 	newLid, err := res.LastInsertId()
 	db.CheckErr(err)
-	var sortList []string
-	for _, v := range strings.Split(linkSort, ",") {
-		sortList = append(sortList, v)
-		if strconv.Itoa(int(lid)) == v {
-			sortList = append(sortList, strconv.Itoa(int(newLid)))
-		}
-	}
-	//更新到主表
-	stmt, err = db.GetDb().Prepare(`UPDATE ` + config.Pm + `.pm_mode SET link_sort = ? WHERE mid = ?`)
+	//目标后的link的sort+1
+	stmt, err = db.GetDb().Prepare(`UPDATE ` + config.Pm + `.pm_link SET sort=sort+1 WHERE lid<>? AND lid IN (
+		SELECT lid FROM
+		(
+			SELECT lid FROM ` + config.Pm + `.pm_link AS v1 
+			WHERE v1.sort > 
+				(SELECT sort FROM ` + config.Pm + `.pm_link WHERE lid = ?)
+		) as v2
+	)`)
+	defer stmt.Close()
 	db.CheckErr(err)
-	modeSingle.LinkSort = sortList
-	res, err = stmt.Exec(strings.Join(sortList, ","), modeSingle.Mid)
+	_, err = stmt.Exec(newLid, prevLid)
 	db.CheckErr(err)
+	//send
 	linkSingle := &LinkSingle{
 		Lid:  uint64(newLid),
-		Mid:  modeSingle.Mid,
+		Mid:  mid,
 		Uid:  uid,
 		Name: name,
 	}
 	data := &L2C_ProcessGridAdd{
-		Lid:        lid,
+		PrevLid:    prevLid,
 		LinkSingle: linkSingle,
-		ModeSingle: modeSingle,
 	}
 	this.owner.SendToAll(L2C_PROCESS_GRID_ADD, data)
 	return true
 }
 
-//环节交换
-func (this *Process) GridSwap(swap []uint64, dir string) bool {
-	stmt, err := db.GetDb().Prepare(`SELECT mid,vid,name,link_sort,color,did FROM ` + config.Pm + `.pm_mode WHERE mid in (SELECT mid FROM ` + config.Pm + `.pm_link WHERE lid = ?)`)
-	defer stmt.Close()
-	db.CheckErr(err)
-	modeSingle := &ModeSingle{}
-	var linkSort string
-	stmt.QueryRow(swap[0]).Scan(&modeSingle.Mid, &modeSingle.Vid, &modeSingle.Name, &linkSort, &modeSingle.Color, &modeSingle.Did)
-	sortMap := make(map[string]int)
-	for _, v := range swap {
-		sortMap[strconv.Itoa(int(v))] = 0
-	}
-	sortList := strings.Split(linkSort, ",")
-	for k, v := range sortList {
-		if _, ok := sortMap[v]; !ok {
-			continue
-		}
-		sortMap[v] = k
-	}
-	//开始交换
-	for k, v := range swap {
-		s := ((k - 1) ^ (k-1)>>31) - (k-1)>>31
-		sortList[sortMap[strconv.Itoa(int(v))]] = strconv.Itoa(int(swap[s]))
-	}
-	//更新到主表
-	stmt, err = db.GetDb().Prepare(`UPDATE ` + config.Pm + `.pm_mode SET link_sort = ? WHERE mid = ?`)
-	db.CheckErr(err)
-	modeSingle.LinkSort = sortList
-	res, err := stmt.Exec(strings.Join(sortList, ","), modeSingle.Mid)
-	db.CheckErr(err)
-	res.RowsAffected()
+//link交换  link 交换位置
+func (this *Process) GridSwap(swap []uint64) bool {
+	db.SwapSort(`pm_link`, `lid`, swap[0], swap[1])
 	data := &L2C_ProcessGridSwap{
-		Swap:       swap,
-		Dir:        dir,
-		ModeSingle: modeSingle,
+		Swap: swap,
 	}
 	this.owner.SendToAll(L2C_PROCESS_GRID_SWAP, data)
 	return true
@@ -609,7 +533,7 @@ func (this *Process) GridClear(lid uint64, date string) bool {
 
 //获取模块列表
 func (this *Process) GetModeList() []*ModeSingle {
-	stmt, err := db.GetDb().Prepare(`SELECT mid,vid,name,link_sort,color,did,status FROM ` + config.Pm + `.pm_mode`)
+	stmt, err := db.GetDb().Prepare(`SELECT mid,vid,name,link_sort,color,did,status,sort FROM ` + config.Pm + `.pm_mode ORDER BY sort`)
 	defer stmt.Close()
 	db.CheckErr(err)
 	rows, err := stmt.Query()
@@ -619,7 +543,7 @@ func (this *Process) GetModeList() []*ModeSingle {
 	for rows.Next() {
 		single := &ModeSingle{}
 		var sortStr string
-		rows.Scan(&single.Mid, &single.Vid, &single.Name, &sortStr, &single.Color, &single.Did, &single.Status)
+		rows.Scan(&single.Mid, &single.Vid, &single.Name, &sortStr, &single.Color, &single.Did, &single.Status, &single.Sort)
 		single.LinkSort = strings.Split(sortStr, ",")
 		modeList = append(modeList, single)
 	}
@@ -628,7 +552,7 @@ func (this *Process) GetModeList() []*ModeSingle {
 
 //获取环节列表
 func (this *Process) GetLinkList() []*LinkSingle {
-	stmt, err := db.GetDb().Prepare(`SELECT lid,mid,name,uid,color,status FROM ` + config.Pm + `.pm_link`)
+	stmt, err := db.GetDb().Prepare(`SELECT lid,mid,name,uid,color,status,sort FROM ` + config.Pm + `.pm_link ORDER BY sort`)
 	defer stmt.Close()
 	db.CheckErr(err)
 	rows, err := stmt.Query()
@@ -637,7 +561,7 @@ func (this *Process) GetLinkList() []*LinkSingle {
 	var linkList []*LinkSingle
 	for rows.Next() {
 		single := &LinkSingle{}
-		rows.Scan(&single.Lid, &single.Mid, &single.Name, &single.Uid, &single.Color, &single.Status)
+		rows.Scan(&single.Lid, &single.Mid, &single.Name, &single.Uid, &single.Color, &single.Status, &single.Sort)
 		linkList = append(linkList, single)
 	}
 	return linkList

@@ -1,10 +1,16 @@
+var NavMenuValue;
+(function (NavMenuValue) {
+    NavMenuValue[NavMenuValue["PROFILE"] = 0] = "PROFILE";
+    NavMenuValue[NavMenuValue["PROCESS"] = 1] = "PROCESS";
+    NavMenuValue[NavMenuValue["COLLATE"] = 2] = "COLLATE";
+})(NavMenuValue || (NavMenuValue = {}));
 //项目导航
 var ProjectNavClass = /** @class */ (function () {
     function ProjectNavClass() {
         //过滤器
-        this.FilterDid = 0;
+        this.FilterDid = DidField.VERSION;
         //菜单选择
-        this.NavMenu = 1;
+        this.NavMenu = NavMenuValue.PROCESS;
     }
     //初始化
     ProjectNavClass.prototype.Init = function () {
@@ -67,11 +73,11 @@ var ProjectNavClass = /** @class */ (function () {
         //筛选
         $('#projectSer').click(function (e) {
             switch (_this.NavMenu) {
-                case 1:
+                case NavMenuValue.PROCESS:
                     ProcessPanel.HideMenu();
                     ProcessFilter.ShowFilter(e.currentTarget, e);
                     break;
-                case 2:
+                case NavMenuValue.COLLATE:
                     CollatePanel.HideMenu();
                     CollateFilter.ShowFilter(e.currentTarget, e);
                     break;
@@ -80,11 +86,11 @@ var ProjectNavClass = /** @class */ (function () {
         //保存
         $('#saveFile').click(function (e) {
             switch (_this.NavMenu) {
-                case 0:
+                case NavMenuValue.PROFILE:
                     break;
-                case 1:
+                case NavMenuValue.PROCESS:
                     break;
-                case 2:
+                case NavMenuValue.COLLATE:
                     Main.Over(function () {
                         WSConn.sendMsg(C2L.C2L_SAVE_COLLATE, CollateFilter.Pack);
                     });
@@ -105,7 +111,7 @@ var ProjectNavClass = /** @class */ (function () {
         });
         $('#saveFile,#projectSer').hide();
         plan.find(".tpl_edit").hide();
-        this.NavMenu = 0;
+        this.NavMenu = NavMenuValue.PROFILE;
     };
     //进度面板
     ProjectNavClass.prototype.ProcessPanelShow = function () {
@@ -119,9 +125,10 @@ var ProjectNavClass = /** @class */ (function () {
         $('#saveFile').hide();
         // plan.find(".tpl_edit").show()//暂时不需要这个入口
         plan.find(".tpl_edit").hide();
-        this.NavMenu = 1;
+        this.NavMenu = NavMenuValue.PROCESS;
         if (Loader.isDebug) {
             plan.find('.test_fox').show().on('click', function (e) {
+                WSConn.sendMsg(C2L.C2L_TEST_1, {});
                 // UploadManager.ShowUploadWork(e.currentTarget,101)
             });
         }
@@ -135,7 +142,7 @@ var ProjectNavClass = /** @class */ (function () {
         plan.find('.menu').hide();
         $('#saveFile,#projectSer').show();
         plan.find(".tpl_edit").hide();
-        this.NavMenu = 2;
+        this.NavMenu = NavMenuValue.COLLATE;
     };
     //关闭菜单
     ProjectNavClass.prototype.HideMenu = function () {

@@ -47,6 +47,7 @@ var C2L = /** @class */ (function () {
     C2L.C2L_VERSION_CHANGE_NAME = 80104;
     C2L.C2L_VERSION_CHANGE_PUBLISH = 80105;
     C2L.C2L_VERSION_CHANGE_SORT = 80106;
+    C2L.C2L_TEST_1 = 90101;
     return C2L;
 }());
 //======================L2C协议=======================

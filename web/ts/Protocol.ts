@@ -48,6 +48,8 @@ class C2L {
     static C2L_VERSION_CHANGE_NAME = 80104
     static C2L_VERSION_CHANGE_PUBLISH = 80105
     static C2L_VERSION_CHANGE_SORT = 80106
+
+    static C2L_TEST_1 = 90101
 }
 
 //======================L2C协议=======================

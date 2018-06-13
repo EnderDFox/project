@@ -9,6 +9,7 @@ var (
 	save_manager     = NewSaveManager()
 	upload_manager   = NewUploadManager()
 	version_manager  = NewVersionManager()
+	test_manager     = NewTestManager()
 )
 
 type Dispather struct {
@@ -36,4 +37,6 @@ func (this *Dispather) Retister() {
 	upload_manager.RegisterFunction()
 	//版本控制
 	version_manager.RegisterFunction()
+	//test
+	test_manager.RegisterFunction()
 }

@@ -41,7 +41,7 @@ class CommonClass {
 	 * timestamp(单位毫秒) 转 yyyy-MM-dd 
 	 * @param dateLine 
 	 */
-	TimeStamp2DateStr(time: number):string  {
+	TimeStamp2DateStr(time: number): string {
 		var date = new Date()
 		date.setTime(time)
 		return this.FmtDate(date)
@@ -50,8 +50,8 @@ class CommonClass {
 	DateLineSpaceDay(dateLine1: string, dateLine2: string): number {
 		var ts1 = this.DateStr2TimeStamp(dateLine1)
 		var ts2 = this.DateStr2TimeStamp(dateLine2)
-		var ts = Math.abs(ts1-ts2)
-		return Math.floor(ts/1000/3600/24)
+		var ts = Math.abs(ts1 - ts2)
+		return Math.floor(ts / 1000 / 3600 / 24)
 	}
 	/**终端判定*/
 	IsPC(): boolean {
@@ -77,7 +77,7 @@ class CommonClass {
 		return false
 	}
 	/**警告提示*/
-	Warning(o: HTMLElement, e: JQuery.Event|MouseEvent, func: Function, txt: string): void {
+	Warning(o: HTMLElement, e: JQuery.Event | MouseEvent, func: Function, txt: string): void {
 		var plan = $('#warning').css({ left: e.pageX, top: e.pageY }).show().adjust(-5)
 		plan.find('.tips').html(txt)
 		plan.find('.cancel,.close').unbind().click(function (e) {
@@ -156,10 +156,17 @@ class ArrayUtil {
 	static IndexOfAttr(arr: any[], key: string, value: any): number {
 		var len = arr.length
 		for (var i = 0; i < len; i++) {
-			if (arr[i][key] == value) {
+			if ((key == null && arr[key] == value) || arr[i][key] == value) {
 				return i;
 			}
 		}
 		return -1;
+	}
+	static RemoveByAttr(arr: any[], key: string, value: any): number {
+		var index = ArrayUtil.IndexOfAttr(arr, key, value)
+		if(index>-1){
+			arr.splice(index,1)
+		}
+		return index
 	}
 }

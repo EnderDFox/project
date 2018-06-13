@@ -187,17 +187,14 @@ class ProcessPanelClass {
 		return html
 	}
 	//组合流程
-	GetLinkHtml(lid: number) {
+	GetLinkHtml(link: LinkSingle) {
 		var html = ''
-		var link = ProcessData.LinkMap[lid]
 		if (!link) {
 			return html
 		}
-		html += '<tr lid="' + link.Lid + '"> \
-					<td class="link bg_'+ link.Color + '" type="link">' + (link.Name == '' ? '空' : link.Name) + ProcessPanel.GetModeLinkStatusName(link.Status) + '</td> \
-					<td class="duty" type="duty">'+ Data.GetUser(link.Uid).Name + '</td>'
+		html += `<tr lid="${link.Lid}"> \ <td class="link bg_${link.Color}" type="link">${(link.Name == '' ? '空' : link.Name) + ProcessPanel.GetModeLinkStatusName(link.Status)}</td> \ <td class="duty" type="duty">${Data.GetUser(link.Uid).Name}</td>`
 		//进度
-		$.each(this.DateList.list, function (k, info) {
+		$.each(this.DateList.list, (k, info: IDateItem) => {
 			//填充
 			if (info.w < 6) {
 				html += '<td type="step"></td>'
@@ -212,9 +209,9 @@ class ProcessPanelClass {
 	GetLinkListHtml(mode: ModeSingle) {
 		var html = ''
 		html += '<table class="linkMap">'
-		$.each(mode.LinkSort, (k, lidStr: string) => {
+		$.each(mode.LinkList, (k, link: LinkSingle) => {
 			//流程与进度
-			html += this.GetLinkHtml(parseInt(lidStr))
+			html += this.GetLinkHtml(link)
 		})
 		html += '</table>'
 		return html
@@ -241,8 +238,8 @@ class ProcessPanelClass {
 		var html = ''
 		html += '<tbody>'
 		//功能
-		$.each(ProcessData.Project.ModeSort, (k, mid: string) => {
-			html += this.GetModeHtml(parseInt(mid))
+		$.each(ProcessData.Project.ModeSort, (k, mid: number) => {
+			html += this.GetModeHtml(mid)
 		})
 		html += '</tbody>'
 		return html
@@ -546,13 +543,13 @@ class ProcessPanelClass {
 				case 'forward':
 					var prev = cur.prev()
 					if (prev.length > 0) {
-						WSConn.sendMsg(C2L.C2L_PROCESS_GRID_SWAP, { 'Swap': [prev.data('lid'), cur.data('lid')], 'Dir': 'before' })
+						WSConn.sendMsg(C2L.C2L_PROCESS_GRID_SWAP, { 'Swap': [prev.data('lid'), cur.data('lid')]})
 					}
 					break
 				case 'backward':
 					var next = cur.next()
 					if (next.length > 0) {
-						WSConn.sendMsg(C2L.C2L_PROCESS_GRID_SWAP, { 'Swap': [next.data('lid'), cur.data('lid')], 'Dir': 'after' })
+						WSConn.sendMsg(C2L.C2L_PROCESS_GRID_SWAP, { 'Swap': [cur.data('lid'), next.data('lid')] })
 					}
 					break
 				case 'insert':

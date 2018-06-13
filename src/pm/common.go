@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"os"
 	"strconv"
 	"strings"
@@ -121,6 +122,86 @@ func (this *Common) SortStringUtil_sortDown(sortStrOri string, val string) strin
 		}
 	}
 	return strings.Join(sortList, ",")
+}
+
+//pm_project.mode_sort转存到sort
+func (this *Common) ProjectModeSort2Sort() {
+	stmt, err := db.GetDb().Prepare(`SELECT mode_sort FROM ` + config.Pm + `.pm_project`)
+	defer stmt.Close()
+	db.CheckErr(err)
+	rows, err := stmt.Query()
+	defer rows.Close()
+	db.CheckErr(err)
+	for rows.Next() {
+		var modeSort string
+		rows.Scan(&modeSort)
+		modeSortStrArr := strings.Split(modeSort, ",")
+		for i, midStr := range modeSortStrArr {
+			log.Println(midStr, ":[lidStr] ProjectModeSort2Sort")
+			stmt, err := db.GetDb().Prepare(`UPDATE ` + config.Pm + `.pm_mode SET sort = ? WHERE mid = ?`)
+			defer stmt.Close()
+			db.CheckErr(err)
+			_, err = stmt.Exec(i+1, midStr)
+			db.CheckErr(err)
+		}
+	}
+}
+
+//pm_mode.link_sort转存到sort
+func (this *Common) ModeLinkSort2Sort() {
+	stmt, err := db.GetDb().Prepare(`SELECT mid,link_sort FROM ` + config.Pm + `.pm_mode`)
+	defer stmt.Close()
+	db.CheckErr(err)
+	rows, err := stmt.Query()
+	defer rows.Close()
+	db.CheckErr(err)
+	for rows.Next() {
+		var mid uint64
+		var linkSort string
+		rows.Scan(&mid, &linkSort)
+		linkSortStrArr := strings.Split(linkSort, ",")
+		for i, lidStr := range linkSortStrArr {
+			log.Println(lidStr, ":[lidStr] ModeLinkSort2Sort")
+			stmt, err := db.GetDb().Prepare(`UPDATE ` + config.Pm + `.pm_link SET sort = ? WHERE lid = ?`)
+			defer stmt.Close()
+			db.CheckErr(err)
+			_, err = stmt.Exec(i+1, lidStr)
+			db.CheckErr(err)
+		}
+	}
+}
+
+//pm_template_mode.link_sort转存到sort
+func (this *Common) TplLinkSort2Sort() {
+	stmt, err := db.GetDb().Prepare(`SELECT tmid,link_sort FROM ` + config.Pm + `.pm_template_mode`)
+	defer stmt.Close()
+	db.CheckErr(err)
+	rows, err := stmt.Query()
+	defer rows.Close()
+	db.CheckErr(err)
+	for rows.Next() {
+		var tmid uint64
+		var linkSort string
+		rows.Scan(&tmid, &linkSort)
+		linkSortStrArr := strings.Split(linkSort, ",")
+		for i, tlidStr := range linkSortStrArr {
+			// log.Println(tlidStr, ":[tlidStr]")
+			stmt, err := db.GetDb().Prepare(`UPDATE ` + config.Pm + `.pm_template_link SET sort = ? WHERE tlid = ?`)
+			defer stmt.Close()
+			db.CheckErr(err)
+			_, err = stmt.Exec(i+1, tlidStr)
+			db.CheckErr(err)
+		}
+	}
+}
+
+/*这个会报错*/
+func (this *Common) TplUpdateSort2(tmid uint64) {
+	stmt, err := db.GetDb().Prepare(`UPDATE ` + config.Pm + `.pm_template_link AS ta,(SELECT  (@i:=@i+1) AS i,t1.sort,t1.tlid FROM ` + config.Pm + `.pm_template_link AS t1 ,(SELECT @i:=0) AS t2 WHERE t1.tmid=1 ORDER BY t1.sort) AS tb SET ta.sort = tb.i WHERE ta.tlid = tb.tlid`)
+	defer stmt.Close()
+	db.CheckErr(err)
+	_, err = stmt.Exec()
+	db.CheckErr(err)
 }
 
 //===

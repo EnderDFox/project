@@ -47,9 +47,10 @@ type ModeSingle struct {
 	Vid      uint64
 	Name     string
 	Color    uint64
-	LinkSort []string
 	Did      uint64
 	Status   uint64
+	Sort     uint32
+	LinkSort []string
 }
 
 type TagSingle struct {
@@ -64,6 +65,7 @@ type LinkSingle struct {
 	Name   string
 	Color  uint64
 	Status uint64
+	Sort   uint32
 }
 
 type WorkSingle struct {

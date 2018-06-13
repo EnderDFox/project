@@ -44,7 +44,7 @@ func (this *Collate) GetLinkList(lidMap, midMap map[uint64]uint64) []*LinkSingle
 	for _, lid := range lidMap {
 		lidList = append(lidList, strconv.Itoa(int(lid)))
 	}
-	stmt, err := db.GetDb().Prepare(`SELECT lid,mid,name,uid FROM ` + config.Pm + `.pm_link WHERE lid IN (` + strings.Join(lidList, ",") + `)`)
+	stmt, err := db.GetDb().Prepare(`SELECT lid,mid,name,uid,sort FROM ` + config.Pm + `.pm_link WHERE lid IN (` + strings.Join(lidList, ",") + `)`)
 	defer stmt.Close()
 	db.CheckErr(err)
 	rows, err := stmt.Query()
@@ -53,7 +53,7 @@ func (this *Collate) GetLinkList(lidMap, midMap map[uint64]uint64) []*LinkSingle
 	var linkList []*LinkSingle
 	for rows.Next() {
 		single := &LinkSingle{}
-		rows.Scan(&single.Lid, &single.Mid, &single.Name, &single.Uid)
+		rows.Scan(&single.Lid, &single.Mid, &single.Name, &single.Uid, &single.Sort)
 		linkList = append(linkList, single)
 		midMap[single.Mid] = single.Mid
 	}

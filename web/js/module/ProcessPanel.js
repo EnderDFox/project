@@ -191,15 +191,12 @@ var ProcessPanelClass = /** @class */ (function () {
         return html;
     };
     //组合流程
-    ProcessPanelClass.prototype.GetLinkHtml = function (lid) {
+    ProcessPanelClass.prototype.GetLinkHtml = function (link) {
         var html = '';
-        var link = ProcessData.LinkMap[lid];
         if (!link) {
             return html;
         }
-        html += '<tr lid="' + link.Lid + '"> \
-					<td class="link bg_' + link.Color + '" type="link">' + (link.Name == '' ? '空' : link.Name) + ProcessPanel.GetModeLinkStatusName(link.Status) + '</td> \
-					<td class="duty" type="duty">' + Data.GetUser(link.Uid).Name + '</td>';
+        html += "<tr lid=\"" + link.Lid + "\">  <td class=\"link bg_" + link.Color + "\" type=\"link\">" + ((link.Name == '' ? '空' : link.Name) + ProcessPanel.GetModeLinkStatusName(link.Status)) + "</td>  <td class=\"duty\" type=\"duty\">" + Data.GetUser(link.Uid).Name + "</td>";
         //进度
         $.each(this.DateList.list, function (k, info) {
             //填充
@@ -218,9 +215,9 @@ var ProcessPanelClass = /** @class */ (function () {
         var _this = this;
         var html = '';
         html += '<table class="linkMap">';
-        $.each(mode.LinkSort, function (k, lidStr) {
+        $.each(mode.LinkList, function (k, link) {
             //流程与进度
-            html += _this.GetLinkHtml(parseInt(lidStr));
+            html += _this.GetLinkHtml(link);
         });
         html += '</table>';
         return html;
@@ -249,7 +246,7 @@ var ProcessPanelClass = /** @class */ (function () {
         html += '<tbody>';
         //功能
         $.each(ProcessData.Project.ModeSort, function (k, mid) {
-            html += _this.GetModeHtml(parseInt(mid));
+            html += _this.GetModeHtml(mid);
         });
         html += '</tbody>';
         return html;
@@ -564,13 +561,13 @@ var ProcessPanelClass = /** @class */ (function () {
                 case 'forward':
                     var prev = cur.prev();
                     if (prev.length > 0) {
-                        WSConn.sendMsg(C2L.C2L_PROCESS_GRID_SWAP, { 'Swap': [prev.data('lid'), cur.data('lid')], 'Dir': 'before' });
+                        WSConn.sendMsg(C2L.C2L_PROCESS_GRID_SWAP, { 'Swap': [prev.data('lid'), cur.data('lid')] });
                     }
                     break;
                 case 'backward':
                     var next = cur.next();
                     if (next.length > 0) {
-                        WSConn.sendMsg(C2L.C2L_PROCESS_GRID_SWAP, { 'Swap': [next.data('lid'), cur.data('lid')], 'Dir': 'after' });
+                        WSConn.sendMsg(C2L.C2L_PROCESS_GRID_SWAP, { 'Swap': [cur.data('lid'), next.data('lid')] });
                     }
                     break;
                 case 'insert':

@@ -44,4 +44,12 @@ var LinkStatusField;
     LinkStatusField[LinkStatusField["NORMAL"] = 0] = "NORMAL";
     LinkStatusField[LinkStatusField["STORE"] = 1] = "STORE";
 })(LinkStatusField || (LinkStatusField = {}));
+//# const
+var FieldName = /** @class */ (function () {
+    function FieldName() {
+    }
+    FieldName.Mid = "Mid";
+    FieldName.Lid = "Lid";
+    return FieldName;
+}());
 //# sourceMappingURL=Define.js.map

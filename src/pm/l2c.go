@@ -118,20 +118,16 @@ type L2C_ProcessGridClear struct {
 }
 
 type L2C_ProcessGridSwap struct {
-	Swap       []uint64
-	Dir        string
-	ModeSingle *ModeSingle
+	Swap []uint64
 }
 
 type L2C_ProcessGridAdd struct {
-	Lid        uint64
+	PrevLid    uint64
 	LinkSingle *LinkSingle
-	ModeSingle *ModeSingle
 }
 
 type L2C_ProcessLinkDelete struct {
-	Lid        uint64
-	ModeSingle *ModeSingle
+	Lid uint64
 }
 
 type L2C_ProcessModeAdd struct {
