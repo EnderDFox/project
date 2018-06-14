@@ -1,4 +1,5 @@
 "use strict";
+
 function IsIE() {
     var userAgentInfo = navigator.userAgent
     var keys = ['MSIE', 'rv:11'] // MSIE是IE<=10   rv:11是IE==11
@@ -135,6 +136,7 @@ function preventDel(e) {
     }
 
     UploadImage.prototype.init = function (callback, formData) {
+        document.getElementById('box').contentEditable = IsIE()
         this.drag(callback, formData);
         this.paste(callback, formData);
         this.updateBtn(callback);
@@ -172,3 +174,19 @@ function preventDel(e) {
     }
     return UploadImage;
 });
+
+
+function bodyOnLoad(){
+    new UploadImage("box", "UploadHandler.ashx").init(function (xhr, data) {//上传完成后的回调 var img = new Image(); img.src = xhr.responseText;
+        var img = new Image();
+        img.width = '200'
+        img.height = '200'
+        img.title = 'title in here'
+        img.alt = 'alt in here'
+        img.src = data;
+        document.getElementById('box').appendChild(img)
+        document.getElementById('txt_base64_data').innerText = data
+        document.getElementById('txt_base64_markdown').innerText = '![img][img1]\n\n[img1]:' + data
+        document.getElementById('txt_base64_html').innerText = '<img src="' + data + '"></img>'
+    });
+}

@@ -18,7 +18,7 @@
     <script type="text/javascript" src="js/UploadImage.js"></script>
 </head>
 
-<body>
+<body onload="bodyOnLoad()">
     <div>
         可以 `选择文件`, `拖动`, `粘贴` 图片 到预览框
         <br/>
@@ -56,20 +56,6 @@
         <textarea id="txt_base64_html" style="width: 99%;height: 100px; border: 1px solid;"></textarea>
     </div>
 </body>
-<script type="text/javascript">
-    new UploadImage("box", "UploadHandler.ashx").init(function (xhr, data) {//上传完成后的回调 var img = new Image(); img.src = xhr.responseText;
-        var img = new Image();
-        img.width = '200'
-        img.height = '200'
-        img.title = 'title in here'
-        img.alt = 'alt in here'
-        img.src = data;
-        document.getElementById('box').appendChild(img)
-        document.getElementById('txt_base64_data').innerText = data
-        document.getElementById('txt_base64_markdown').innerText = '![img][img1]\n\n[img1]:' + data
-        document.getElementById('txt_base64_html').innerText = '<img src="' + data + '"></img>'
-    });
-</script>
 
 <!--
     点击按钮上传
