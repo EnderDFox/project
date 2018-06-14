@@ -245,8 +245,8 @@ var ProcessPanelClass = /** @class */ (function () {
         var html = '';
         html += '<tbody>';
         //功能
-        $.each(ProcessData.Project.ModeSort, function (k, mid) {
-            html += _this.GetModeHtml(mid);
+        $.each(ProcessData.Project.ModeList, function (k, mode) {
+            html += _this.GetModeHtml(mode.Mid);
         });
         html += '</tbody>';
         return html;
@@ -341,14 +341,14 @@ var ProcessPanelClass = /** @class */ (function () {
                     var prev = $(o).parent().prev().prev();
                     if (prev.length > 0) {
                         var beMid = prev.find('.mode').attr('mid');
-                        WSConn.sendMsg(C2L.C2L_PROCESS_MODE_MOVE, { 'Swap': [parseInt(beMid), mode.Mid], 'Dir': 'before' });
+                        WSConn.sendMsg(C2L.C2L_PROCESS_MODE_MOVE, { 'Swap': [parseInt(beMid), mode.Mid] });
                     }
                     break;
                 case 'backward':
                     var next = $(o).parent().next().next();
                     if (next.length > 0) {
                         var beMid = next.find('.mode').attr('mid');
-                        WSConn.sendMsg(C2L.C2L_PROCESS_MODE_MOVE, { 'Swap': [parseInt(beMid), mode.Mid], 'Dir': 'after' });
+                        WSConn.sendMsg(C2L.C2L_PROCESS_MODE_MOVE, { 'Swap': [mode.Mid, parseInt(beMid)] });
                     }
                     break;
                 case 'store':
@@ -414,9 +414,13 @@ var ProcessPanelClass = /** @class */ (function () {
         });
         //确定 取消
         plan.find('.confirm').unbind().click(function () {
-            var data = { 'Mid': mode.Mid, 'Did': Math.abs(ProjectNav.FilterDid), 'Name': $.trim(name.val()), 'Vid': parseInt(plan.find("#versionSelect").val()) };
+            var data = { 'Did': Math.abs(ProjectNav.FilterDid), 'Name': $.trim(name.val()), 'Vid': parseInt(plan.find("#versionSelect").val()) };
             if (cid == C2L.C2L_PROCESS_MODE_ADD) {
+                data["PrevMid"] = mode.Mid;
                 data["Tmid"] = parseInt(plan.find("#tplModeSelect").val());
+            }
+            else {
+                data["Mid"] = mode.Mid;
             }
             WSConn.sendMsg(cid, data);
             plan.hide();
@@ -659,7 +663,7 @@ var ProcessPanelClass = /** @class */ (function () {
         //$(o).append($('#commonMini').show().css({'height':height,'width':width}))
         $('#commonMini').show().css({ 'top': top, 'left': left, 'height': height, 'width': width }).unbind().bind('mousedown', function (ev) {
             if (ev.button !== Main.MouseDir) {
-                return false;
+                // return false
             }
             //下层的元素
             //$(o).mousedown()

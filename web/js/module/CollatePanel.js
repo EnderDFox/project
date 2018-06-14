@@ -139,7 +139,7 @@ var CollatePanelClass = /** @class */ (function () {
         var html = '';
         var link = CollateData.LinkMap[work.Lid];
         html += '<li wid="' + work.Wid + '">';
-        html += '<span class="check_' + work.Inspect + '">' + VersionManager.GetVersionVer(CollateData.ModeMap[link.Mid].Vid) + CollateData.ModeMap[link.Mid].Name + '-' + link.Name + '</span>';
+        html += '<span wid="' + work.Wid + '" class="check_' + work.Inspect + '">' + VersionManager.GetVersionVer(CollateData.ModeMap[link.Mid].Vid) + CollateData.ModeMap[link.Mid].Name + '-' + link.Name + '</span>';
         html += '<span class="special">';
         if (work.MinNum > 0 || work.MaxNum > 0) {
             html += '（' + work.MinNum + '/' + work.MaxNum + '）';
@@ -181,51 +181,66 @@ var CollatePanelClass = /** @class */ (function () {
     };
     //事件绑定
     CollatePanelClass.prototype.BindActions = function () {
+        var _this = this;
         //功能区域绑定
-        Main.Content.unbind().delegate('li', 'click', function (e) {
-            CollatePanel.HideMenu();
-            /*
-            if(e.button !== Main.MouseDir) {
-                return false
-            }
-            */
+        Main.Content.unbind().delegate('td', 'click', function (e) {
             if (!User.IsWrite) {
                 return;
             }
-            if ($(e.currentTarget).is('[wid]')) {
-                CollatePanel.ShowStepMenu(e.currentTarget, e);
-            }
-            else {
-                CollatePanel.ShowExtraMenu(e.currentTarget, e);
-            }
-        }).delegate('td', 'click', function (e) {
-            if (!User.IsWrite) {
-                return;
-            }
-            switch (e.currentTarget.localName) {
-                case 'td':
-                    CollatePanel.HideMenu();
-                    break;
-                case 'div':
-                    CollatePanel.HideMenu();
-                    CollatePanel.ShowExtraEdit(e.currentTarget, e);
-                    break;
+            _this.HideMenu();
+            var el = e.target;
+            var wid = parseInt($(el).attr('wid'));
+            if (wid) {
+                _this.ShowStepMenu(el, e);
             }
         });
+        /*
+        .delegate('li', 'click', (e: JQuery.Event) => {
+            CollatePanel.HideMenu()
+            // if(e.button !== Main.MouseDir) {
+            // 	return false
+            // }
+            if (!User.IsWrite) {
+                return
+            }
+            if ($(e.currentTarget).is('[wid]')) {
+                CollatePanel.ShowStepMenu(e.currentTarget as HTMLElement, e)
+            } else {
+                CollatePanel.ShowExtraMenu(e.currentTarget as HTMLElement, e)
+            }
+        }).delegate('td', 'click', (e: JQuery.Event) => {
+            console.log("[info]",e.currentTarget,e.target)
+            //界面结构是 td里面有li,  所以点击li显示ShowStepMenu后 在这里会触发CollatePanel.HideMenu, 从而关闭StepMenu, 反正ExtraEdit暂时用不到,所以先注释掉
+            if (!User.IsWrite) {
+                return
+            }
+            switch ((e.currentTarget  as HTMLElement).localName) {
+                case 'td':
+                    CollatePanel.HideMenu()
+                    break
+                case 'div'://不可能走到这里吧?
+                    CollatePanel.HideMenu()
+                    CollatePanel.ShowExtraEdit(e.currentTarget as HTMLElement, e)
+                    break
+            }
+        }) */
     };
     //显示菜单
-    CollatePanelClass.prototype.ShowStepMenu = function (o, e) {
-        var wid = $(o).attr('wid');
+    CollatePanelClass.prototype.ShowStepMenu = function (el, e) {
+        var wid = $(el).attr('wid');
+        if (!wid) {
+            return;
+        }
         var top = e.pageY + 1;
         var left = e.pageX + 1;
-        $('#menuStep').css({ left: left, top: top }).unbind().delegate('.row', 'click', function () {
-            var type = $(this).attr('type');
+        $('#menuStep').css({ left: left, top: top }).unbind().delegate('.row', 'click', function (e) {
+            var type = $(e.currentTarget).attr('type');
             switch (type) {
                 case 'cancel':
                 case 'finish':
                 case 'last':
                 case 'defer':
-                    var inspect = $(this).attr('inspect');
+                    var inspect = $(e.currentTarget).attr('inspect');
                     WSConn.sendMsg(C2L.C2L_COLLATE_STEP_EDIT, { 'Wid': parseInt(wid), 'Inspect': parseInt(inspect) });
                     break;
             }

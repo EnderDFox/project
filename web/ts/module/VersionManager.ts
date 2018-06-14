@@ -550,7 +550,17 @@ class VersionManagerClass {
             } else {
                 //通过vid查询
                 var vid = args[0]
-                items.push({ version: ProcessData.VersionMap[vid], publish: null })
+                var version: VersionSingle = ProcessData.VersionMap[vid]
+                items.push({ version: version, publish: null })
+                if (version.PublishList) {
+                    var len = version.PublishList.length
+                    for (var i = 0; i < len; i++) {
+                        var p: PublishSingle = version.PublishList[i]
+                        if (p) {
+                            p.SubDayCount = 0
+                        }
+                    }
+                }
             }
             //
             this.VueTableHeaderTooltip.currDateLine = dateLine
@@ -665,13 +675,13 @@ class VersionManagerClass {
         }
         return versionVer
     }
-    GetVersionFullname(vid: number): string ;
-    GetVersionFullname(version: VersionSingle): string ;
+    GetVersionFullname(vid: number): string;
+    GetVersionFullname(version: VersionSingle): string;
     GetVersionFullname(...args): string {
-        var version:VersionSingle
-        if(typeof args[0] == 'number'){
+        var version: VersionSingle
+        if (typeof args[0] == 'number') {
             version = ProcessData.VersionMap[args[0]]
-        }else{
+        } else {
             version = args[0]
         }
         return this.GetVersionVer(version.Vid) + (version.Name == '' ? '' : '-' + version.Name);

@@ -238,8 +238,8 @@ class ProcessPanelClass {
 		var html = ''
 		html += '<tbody>'
 		//功能
-		$.each(ProcessData.Project.ModeSort, (k, mid: number) => {
-			html += this.GetModeHtml(mid)
+		$.each(ProcessData.Project.ModeList, (k, mode: ModeSingle) => {
+			html += this.GetModeHtml(mode.Mid)
 		})
 		html += '</tbody>'
 		return html
@@ -330,14 +330,14 @@ class ProcessPanelClass {
 					var prev = $(o).parent().prev().prev()
 					if (prev.length > 0) {
 						var beMid = prev.find('.mode').attr('mid')
-						WSConn.sendMsg(C2L.C2L_PROCESS_MODE_MOVE, { 'Swap': [parseInt(beMid), mode.Mid], 'Dir': 'before' })
+						WSConn.sendMsg(C2L.C2L_PROCESS_MODE_MOVE, { 'Swap': [parseInt(beMid), mode.Mid] })
 					}
 					break
 				case 'backward':
 					var next = $(o).parent().next().next()
 					if (next.length > 0) {
 						var beMid = next.find('.mode').attr('mid')
-						WSConn.sendMsg(C2L.C2L_PROCESS_MODE_MOVE, { 'Swap': [parseInt(beMid), mode.Mid], 'Dir': 'after' })
+						WSConn.sendMsg(C2L.C2L_PROCESS_MODE_MOVE, { 'Swap': [mode.Mid, parseInt(beMid)] })
 					}
 					break
 				case 'store':
@@ -399,9 +399,12 @@ class ProcessPanelClass {
 		})
 		//确定 取消
 		plan.find('.confirm').unbind().click(function () {
-			var data = { 'Mid': mode.Mid, 'Did': Math.abs(ProjectNav.FilterDid), 'Name': $.trim(name.val() as string), 'Vid': parseInt(plan.find("#versionSelect").val() as string) };
+			var data = { 'Did': Math.abs(ProjectNav.FilterDid), 'Name': $.trim(name.val() as string), 'Vid': parseInt(plan.find("#versionSelect").val() as string) };
 			if (cid == C2L.C2L_PROCESS_MODE_ADD) {
+				data["PrevMid"] = mode.Mid
 				data["Tmid"] = parseInt(plan.find("#tplModeSelect").val() as string)
+			} else {
+				data["Mid"] = mode.Mid
 			}
 			WSConn.sendMsg(cid, data)
 			plan.hide()
@@ -543,7 +546,7 @@ class ProcessPanelClass {
 				case 'forward':
 					var prev = cur.prev()
 					if (prev.length > 0) {
-						WSConn.sendMsg(C2L.C2L_PROCESS_GRID_SWAP, { 'Swap': [prev.data('lid'), cur.data('lid')]})
+						WSConn.sendMsg(C2L.C2L_PROCESS_GRID_SWAP, { 'Swap': [prev.data('lid'), cur.data('lid')] })
 					}
 					break
 				case 'backward':
@@ -643,7 +646,7 @@ class ProcessPanelClass {
 
 		$('#commonMini').show().css({ 'top': top, 'left': left, 'height': height, 'width': width }).unbind().bind('mousedown', function (ev): void | false {
 			if (ev.button !== Main.MouseDir) {
-				return false
+				// return false
 			}
 			//下层的元素
 			//$(o).mousedown()

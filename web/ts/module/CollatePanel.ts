@@ -55,7 +55,7 @@ class CollatePanelClass {
 		var today = Common.GetDate(0)
 		var day = Common.GetDay(today)
 		var html = ''
-		$.each(this.DateList, function (r, dateItem:IDateItem) {
+		$.each(this.DateList, function (r, dateItem: IDateItem) {
 			var trClass = []
 			if (dateItem.w >= 6) {
 				trClass.push('weekend')
@@ -99,13 +99,13 @@ class CollatePanelClass {
 				html += '<td uid="' + user.Uid + '"><ol>'
 				//进度内容
 				if (CollateData.DateUserMap[dateItem.s] && CollateData.DateUserMap[dateItem.s][user.Uid]) {
-					$.each(CollateData.DateUserMap[dateItem.s][user.Uid], function (k, work:WorkSingle) {
+					$.each(CollateData.DateUserMap[dateItem.s][user.Uid], function (k, work: WorkSingle) {
 						html += CollatePanel.GetWorkInfo(work)
 					})
 				}
 				//补充内容
 				if (CollateData.DateExtraMap[dateItem.s] && CollateData.DateExtraMap[dateItem.s][user.Uid]) {
-					$.each(CollateData.DateExtraMap[dateItem.s][user.Uid], function (k, extra:ExtraSingle) {
+					$.each(CollateData.DateExtraMap[dateItem.s][user.Uid], function (k, extra: ExtraSingle) {
 						html += CollatePanel.GetWorkExtra(extra)
 					})
 				}
@@ -124,7 +124,7 @@ class CollatePanelClass {
 		return html
 	}
 	//工作补充
-	GetWorkExtra(data:ExtraSingle) {
+	GetWorkExtra(data: ExtraSingle) {
 		var html = ''
 		html += '<li eid="' + data.Eid + '">'
 		html += '<span class="check_' + data.Inspect + '">' + data.Name + '</span>'
@@ -134,11 +134,11 @@ class CollatePanelClass {
 		return html
 	}
 	//工作内容
-	GetWorkInfo(work:WorkSingle) {
+	GetWorkInfo(work: WorkSingle) {
 		var html = ''
 		var link = CollateData.LinkMap[work.Lid]
 		html += '<li wid="' + work.Wid + '">'
-		html += '<span class="check_' + work.Inspect + '">' + VersionManager.GetVersionVer(CollateData.ModeMap[link.Mid].Vid) + CollateData.ModeMap[link.Mid].Name + '-' + link.Name + '</span>'
+		html += '<span wid="' + work.Wid + '" class="check_' + work.Inspect + '">' + VersionManager.GetVersionVer(CollateData.ModeMap[link.Mid].Vid) + CollateData.ModeMap[link.Mid].Name + '-' + link.Name + '</span>'
 		html += '<span class="special">'
 		if (work.MinNum > 0 || work.MaxNum > 0) {
 			html += '（' + work.MinNum + '/' + work.MaxNum + '）'
@@ -157,7 +157,7 @@ class CollatePanelClass {
 			html += '（' + CollateData.StatusList[work.Status].Info + '）'
 		}
 		html += '</span>'
-		if(work.FileList && work.FileList.length>0){
+		if (work.FileList && work.FileList.length > 0) {
 			html += `<span style="color:#3333CC;">(附件x${work.FileList.length})</span>`
 		}
 		html += '</li>'
@@ -179,13 +179,23 @@ class CollatePanelClass {
 	//事件绑定
 	BindActions() {
 		//功能区域绑定
-		Main.Content.unbind().delegate('li', 'click', (e: JQuery.Event) => {
-			CollatePanel.HideMenu()
-			/*
-			if(e.button !== Main.MouseDir) {
-				return false
+		Main.Content.unbind().delegate('td', 'click', (e: JQuery.Event) => {
+			if (!User.IsWrite) {
+				return
 			}
-			*/
+			this.HideMenu()
+			var el: HTMLElement = e.target as HTMLElement
+			var wid = parseInt($(el).attr('wid'))
+			if (wid) {
+				this.ShowStepMenu(el, e)
+			}
+		})
+		/* 
+		.delegate('li', 'click', (e: JQuery.Event) => {
+			CollatePanel.HideMenu()
+			// if(e.button !== Main.MouseDir) {
+			// 	return false
+			// }
 			if (!User.IsWrite) {
 				return
 			}
@@ -195,6 +205,8 @@ class CollatePanelClass {
 				CollatePanel.ShowExtraMenu(e.currentTarget as HTMLElement, e)
 			}
 		}).delegate('td', 'click', (e: JQuery.Event) => {
+			console.log("[info]",e.currentTarget,e.target)
+			//界面结构是 td里面有li,  所以点击li显示ShowStepMenu后 在这里会触发CollatePanel.HideMenu, 从而关闭StepMenu, 反正ExtraEdit暂时用不到,所以先注释掉
 			if (!User.IsWrite) {
 				return
 			}
@@ -202,26 +214,29 @@ class CollatePanelClass {
 				case 'td':
 					CollatePanel.HideMenu()
 					break
-				case 'div':
+				case 'div'://不可能走到这里吧?
 					CollatePanel.HideMenu()
 					CollatePanel.ShowExtraEdit(e.currentTarget as HTMLElement, e)
 					break
 			}
-		})
+		}) */
 	}
 	//显示菜单
-	ShowStepMenu(o:HTMLElement, e:JQuery.Event) {
-		var wid = $(o).attr('wid')
+	ShowStepMenu(el: HTMLElement, e: JQuery.Event) {
+		var wid = $(el).attr('wid')
+		if (!wid) {
+			return
+		}
 		var top = e.pageY + 1
 		var left = e.pageX + 1
-		$('#menuStep').css({ left: left, top: top }).unbind().delegate('.row', 'click', function () {
-			var type = $(this).attr('type')
+		$('#menuStep').css({ left: left, top: top }).unbind().delegate('.row', 'click', (e: JQuery.Event) => {
+			var type = $(e.currentTarget).attr('type')
 			switch (type) {
 				case 'cancel':
 				case 'finish':
 				case 'last':
 				case 'defer':
-					var inspect = $(this).attr('inspect')
+					var inspect = $(e.currentTarget).attr('inspect')
 					WSConn.sendMsg(C2L.C2L_COLLATE_STEP_EDIT, { 'Wid': parseInt(wid), 'Inspect': parseInt(inspect) })
 					break
 			}
@@ -229,7 +244,7 @@ class CollatePanelClass {
 		}).show().adjust(-5)
 	}
 	//显示补充
-	ShowExtraMenu(o:HTMLElement, e:JQuery.Event) {
+	ShowExtraMenu(o: HTMLElement, e: JQuery.Event) {
 		var top = e.pageY + 1
 		var left = e.pageX + 1
 		$('#menuExtra').css({ left: left, top: top }).unbind().delegate('.row', 'click', function () {
@@ -247,13 +262,13 @@ class CollatePanelClass {
 		}).show().adjust(-5)
 	}
 	//编辑面板
-	ShowExtraEdit(o:HTMLElement, e:JQuery.Event) {
+	ShowExtraEdit(o: HTMLElement, e: JQuery.Event) {
 		var top = e.pageY + 1
 		var left = e.pageX + 1
 		var plan = $('#addStep').css({ left: left, top: top }).unbind().show().adjust(-5)
 		var name = plan.find('textarea').val('').focus()
 		var eid = parseInt($(o).attr('eid')) | 0
-		var param:{Eid?:number,Inspect?:number} = {}
+		var param: { Eid?: number, Inspect?: number } = {}
 		param.Eid = eid
 		param.Inspect = 1
 		if (param.Eid > 0) {

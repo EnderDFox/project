@@ -20,7 +20,7 @@ echo 3.进程开启
 rm *.go -rf
 echo 清理完成
 echo 全部进程:
-ps aux | grep pm
+ps aux | grep pm_bate
 echo pm_beta进程id:
 ps aux | grep '\.\/pm_beta' | awk '{print $2}'
 echo pm_beta.log:

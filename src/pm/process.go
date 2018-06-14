@@ -2,8 +2,6 @@ package main
 
 import (
 	"log"
-	"strconv"
-	"strings"
 	"time"
 )
 
@@ -84,40 +82,10 @@ func (this *Process) LinkStore(lid uint64, status uint8) bool {
 }
 
 //移动
-func (this *Process) ModeMove(swap []uint64, dir string) bool {
-	stmt, err := db.GetDb().Prepare(`SELECT pid,name,mode_sort FROM ` + config.Pm + `.pm_project WHERE pid = ?`)
-	defer stmt.Close()
-	db.CheckErr(err)
-	projectSingle := &ProjectSingle{}
-	var modeSort string
-	stmt.QueryRow(COMMON_PID).Scan(&projectSingle.Pid, &projectSingle.Name, &modeSort)
-	sortMap := make(map[string]int)
-	for _, v := range swap {
-		sortMap[strconv.Itoa(int(v))] = 0
-	}
-	sortList := strings.Split(modeSort, ",")
-	for k, v := range sortList {
-		if _, ok := sortMap[v]; !ok {
-			continue
-		}
-		sortMap[v] = k
-	}
-	//开始交换
-	for k, v := range swap {
-		s := ((k - 1) ^ (k-1)>>31) - (k-1)>>31
-		sortList[sortMap[strconv.Itoa(int(v))]] = strconv.Itoa(int(swap[s]))
-	}
-	//更新到主表
-	stmt, err = db.GetDb().Prepare(`UPDATE ` + config.Pm + `.pm_project SET mode_sort = ? WHERE pid = ?`)
-	db.CheckErr(err)
-	projectSingle.ModeSort = sortList
-	res, err := stmt.Exec(strings.Join(sortList, ","), COMMON_PID)
-	db.CheckErr(err)
-	res.RowsAffected()
+func (this *Process) ModeMove(swap []uint64) bool {
+	db.SwapSort(`pm_mode`, `mid`, swap[0], swap[1])
 	data := &L2C_ProcessModeMove{
-		Swap:          swap,
-		Dir:           dir,
-		ProjectSingle: projectSingle,
+		Swap: swap,
 	}
 	this.owner.SendToAll(L2C_PROCESS_MODE_MOVE, data)
 	return true
@@ -170,26 +138,8 @@ func (this *Process) ModeDelete(mid uint64) bool {
 	db.CheckErr(err)
 	_, err = stmt.Exec(mid)
 	db.CheckErr(err)
-	//更新项目
-	stmt, err = db.GetDb().Prepare(`SELECT pid,name,mode_sort FROM ` + config.Pm + `.pm_project WHERE pid = ?`)
-	db.CheckErr(err)
-	projectSingle := &ProjectSingle{}
-	var sortStr string
-	stmt.QueryRow(COMMON_PID).Scan(&projectSingle.Pid, &projectSingle.Name, &sortStr)
-	for _, v := range strings.Split(sortStr, ",") {
-		if v == strconv.Itoa(int(mid)) {
-			continue
-		}
-		projectSingle.ModeSort = append(projectSingle.ModeSort, v)
-	}
-	//更新到
-	stmt, err = db.GetDb().Prepare(`UPDATE ` + config.Pm + `.pm_project SET mode_sort = ? WHERE pid = ?`)
-	db.CheckErr(err)
-	_, err = stmt.Exec(strings.Join(projectSingle.ModeSort, ","), COMMON_PID)
-	db.CheckErr(err)
 	data := &L2C_ProcessModeDelete{
-		Mid:           mid,
-		ProjectSingle: projectSingle,
+		Mid: mid,
 	}
 	this.owner.SendToAll(L2C_PROCESS_MODE_DELETE, data)
 	return true
@@ -213,15 +163,32 @@ func (this *Process) LinkAddOne(mid uint64) *LinkSingle {
 
 //插入
 func (this *Process) ModeAdd(prevMid uint64, name string, vid uint64, did uint64, tmid uint64) bool {
-	//插入一个模块
-	stmt, err := db.GetDb().Prepare(`INSERT INTO ` + config.Pm + `.pm_mode (pid,name,add_uid,vid,did,create_time) VALUES (?,?,?,?,?,?)`)
+	//获取 prev mode 的 pid 和sort
+	stmt, err := db.GetDb().Prepare(`SELECT pid,sort FROM ` + config.Pm + `.pm_mode WHERE mid = ?`)
 	defer stmt.Close()
 	db.CheckErr(err)
-	pid := COMMON_PID
-	res, err := stmt.Exec(pid, name, this.owner.GetUid(), vid, did, time.Now().Unix())
+	var pid uint64
+	var sort uint32
+	stmt.QueryRow(prevMid).Scan(&pid, &sort)
+	if pid == 0 {
+		log.Println(`Can not find pid, when prevMid=`, prevMid)
+		return false
+	}
+	//目标后的link的sort+1
+	stmt, err = db.GetDb().Prepare(`UPDATE ` + config.Pm + `.pm_mode SET sort=sort+1 WHERE is_del=0 AND pid=? AND sort >?`)
+	defer stmt.Close()
+	db.CheckErr(err)
+	_, err = stmt.Exec(pid, sort)
+	db.CheckErr(err)
+	//插入一个模块
+	stmt, err = db.GetDb().Prepare(`INSERT INTO ` + config.Pm + `.pm_mode (pid,name,add_uid,vid,did,create_time,sort) VALUES (?,?,?,?,?,?,?)`)
+	defer stmt.Close()
+	db.CheckErr(err)
+	res, err := stmt.Exec(pid, name, this.owner.GetUid(), vid, did, time.Now().Unix(), sort+1)
 	db.CheckErr(err)
 	newMid, err := res.LastInsertId()
 	db.CheckErr(err)
+	//## 新建 link list
 	var linkList []*LinkSingle
 	if tmid <= 0 {
 		//没用模板  插入一个环节
@@ -258,26 +225,18 @@ func (this *Process) ModeAdd(prevMid uint64, name string, vid uint64, did uint64
 			}
 		}
 	}
-	//查询项目
-	project := this.GetProject()
-	var newMdeSort []string
-	for _, v := range project.ModeSort {
-		newMdeSort = append(newMdeSort, v)
-		if v == strconv.Itoa(int(prevMid)) {
-			newMdeSort = append(newMdeSort, strconv.Itoa(int(newMid)))
-		}
-	}
-	modeSingle := &ModeSingle{}
-	modeSingle.Mid = uint64(newMid)
-	modeSingle.Vid = vid
-	modeSingle.Color = 0
-	modeSingle.Name = name
-	modeSingle.Did = 0
-	//
+	//send
 	data := &L2C_ProcessModeAdd{
-		Mid:        prevMid,
-		ModeSingle: modeSingle,
-		LinkList:   linkList,
+		PrevMid: prevMid,
+		ModeSingle: &ModeSingle{
+			Mid:   uint64(newMid),
+			Vid:   vid,
+			Color: 0,
+			Name:  name,
+			Did:   0,
+			Sort:  sort + 1,
+		},
+		LinkList: linkList,
 	}
 	this.owner.SendToAll(L2C_PROCESS_MODE_ADD, data)
 	return true
@@ -286,12 +245,11 @@ func (this *Process) ModeAdd(prevMid uint64, name string, vid uint64, did uint64
 //编辑
 func (this *Process) ModeEdit(mid uint64, name string, vid uint64) bool {
 	//查询
-	stmt, err := db.GetDb().Prepare(`SELECT mid,link_sort,color,did FROM ` + config.Pm + `.pm_mode WHERE mid = ?`)
+	stmt, err := db.GetDb().Prepare(`SELECT mid,color,did FROM ` + config.Pm + `.pm_mode WHERE mid = ?`)
 	defer stmt.Close()
 	db.CheckErr(err)
-	var sortStr string
 	modeSingle := &ModeSingle{}
-	stmt.QueryRow(mid).Scan(&modeSingle.Mid, &sortStr, &modeSingle.Color, &modeSingle.Did)
+	stmt.QueryRow(mid).Scan(&modeSingle.Mid, &modeSingle.Color, &modeSingle.Did)
 	if modeSingle.Mid == 0 {
 		log.Println(`modeSingle.Mid:`, modeSingle.Mid)
 		return false
@@ -302,7 +260,6 @@ func (this *Process) ModeEdit(mid uint64, name string, vid uint64) bool {
 	db.CheckErr(err)
 	modeSingle.Name = name
 	modeSingle.Vid = vid
-	modeSingle.LinkSort = strings.Split(sortStr, ",")
 	this.owner.SendToAll(L2C_PROCESS_MODE_EDIT, modeSingle)
 	return true
 }
@@ -384,34 +341,30 @@ func (this *Process) LinkDelete(lid uint64) bool {
 
 //插入新 link
 func (this *Process) GridAdd(prevLid uint64, name string) bool {
-	//获得当前 mode
+	//获得prev link的mid和sort
 	stmt, err := db.GetDb().Prepare(`SELECT mid,sort FROM ` + config.Pm + `.pm_link WHERE lid = ?`)
 	defer stmt.Close()
 	db.CheckErr(err)
 	var mid uint64
 	var sort uint32
 	stmt.QueryRow(prevLid).Scan(&mid, &sort)
+	if mid == 0 {
+		log.Println(`Can not find mid, when prevLid=`, prevLid)
+		return false
+	}
+	//目标后的link的sort+1
+	stmt, err = db.GetDb().Prepare(`UPDATE ` + config.Pm + `.pm_link SET sort=sort+1 WHERE is_del=0 AND mid=? AND sort >?`)
+	defer stmt.Close()
+	db.CheckErr(err)
+	_, err = stmt.Exec(mid, sort)
+	db.CheckErr(err)
 	//插入新的行
 	stmt, err = db.GetDb().Prepare(`INSERT INTO ` + config.Pm + `.pm_link (mid,uid,add_uid,name,create_time,sort) VALUES (?,?,?,?,?,?)`)
 	db.CheckErr(err)
 	uid := this.owner.GetUid()
-	addUid := this.owner.GetUid()
-	res, err := stmt.Exec(mid, uid, addUid, name, time.Now().Unix(), sort+1)
+	res, err := stmt.Exec(mid, uid, uid, name, time.Now().Unix(), sort+1)
 	db.CheckErr(err)
 	newLid, err := res.LastInsertId()
-	db.CheckErr(err)
-	//目标后的link的sort+1
-	stmt, err = db.GetDb().Prepare(`UPDATE ` + config.Pm + `.pm_link SET sort=sort+1 WHERE lid<>? AND lid IN (
-		SELECT lid FROM
-		(
-			SELECT lid FROM ` + config.Pm + `.pm_link AS v1 
-			WHERE v1.sort > 
-				(SELECT sort FROM ` + config.Pm + `.pm_link WHERE lid = ?)
-		) as v2
-	)`)
-	defer stmt.Close()
-	db.CheckErr(err)
-	_, err = stmt.Exec(newLid, prevLid)
 	db.CheckErr(err)
 	//send
 	linkSingle := &LinkSingle{
@@ -419,6 +372,7 @@ func (this *Process) GridAdd(prevLid uint64, name string) bool {
 		Mid:  mid,
 		Uid:  uid,
 		Name: name,
+		Sort: sort + 1,
 	}
 	data := &L2C_ProcessGridAdd{
 		PrevLid:    prevLid,
@@ -533,7 +487,7 @@ func (this *Process) GridClear(lid uint64, date string) bool {
 
 //获取模块列表
 func (this *Process) GetModeList() []*ModeSingle {
-	stmt, err := db.GetDb().Prepare(`SELECT mid,vid,name,link_sort,color,did,status,sort FROM ` + config.Pm + `.pm_mode ORDER BY sort`)
+	stmt, err := db.GetDb().Prepare(`SELECT mid,vid,name,color,did,status,sort FROM ` + config.Pm + `.pm_mode WHERE is_del=0 ORDER BY sort`)
 	defer stmt.Close()
 	db.CheckErr(err)
 	rows, err := stmt.Query()
@@ -542,9 +496,7 @@ func (this *Process) GetModeList() []*ModeSingle {
 	var modeList []*ModeSingle
 	for rows.Next() {
 		single := &ModeSingle{}
-		var sortStr string
-		rows.Scan(&single.Mid, &single.Vid, &single.Name, &sortStr, &single.Color, &single.Did, &single.Status, &single.Sort)
-		single.LinkSort = strings.Split(sortStr, ",")
+		rows.Scan(&single.Mid, &single.Vid, &single.Name, &single.Color, &single.Did, &single.Status, &single.Sort)
 		modeList = append(modeList, single)
 	}
 	return modeList
@@ -552,7 +504,7 @@ func (this *Process) GetModeList() []*ModeSingle {
 
 //获取环节列表
 func (this *Process) GetLinkList() []*LinkSingle {
-	stmt, err := db.GetDb().Prepare(`SELECT lid,mid,name,uid,color,status,sort FROM ` + config.Pm + `.pm_link ORDER BY sort`)
+	stmt, err := db.GetDb().Prepare(`SELECT lid,mid,name,uid,color,status,sort FROM ` + config.Pm + `.pm_link WHERE is_del=0 ORDER BY sort`)
 	defer stmt.Close()
 	db.CheckErr(err)
 	rows, err := stmt.Query()
@@ -592,9 +544,7 @@ func (this *Process) GetProject() *ProjectSingle {
 	db.CheckErr(err)
 	row := stmt.QueryRow(COMMON_PID)
 	project := &ProjectSingle{}
-	var modeSort string
-	row.Scan(&project.Pid, &project.Name, &modeSort)
-	project.ModeSort = strings.Split(modeSort, ",")
+	row.Scan(&project.Pid, &project.Name)
 	return project
 }
 

@@ -81,7 +81,7 @@ func (this *C2L_M_PROCESS_MODE_MOVE) execute(client *websocket.Conn, msg *Messag
 	if user == nil {
 		return false
 	}
-	user.Process().ModeMove(param.Swap, param.Dir)
+	user.Process().ModeMove(param.Swap)
 	return true
 }
 
@@ -166,7 +166,7 @@ func (this *C2L_M_PROCESS_MODE_ADD) execute(client *websocket.Conn, msg *Message
 	if user == nil {
 		return false
 	}
-	user.Process().ModeAdd(param.Mid, param.Name, param.Vid, param.Did, param.Tmid)
+	user.Process().ModeAdd(param.PrevMid, param.Name, param.Vid, param.Did, param.Tmid)
 	return true
 }
 

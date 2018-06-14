@@ -88,7 +88,7 @@ interface ProjectSingle {
     Pid?: number
     Name?: string
     //client cache data
-    ModeSort?: number[]
+    ModeList?: ModeSingle[]
 }
 
 interface ModeSingle {
@@ -286,21 +286,18 @@ interface L2C_ProcessGridClear {
 
 
 interface L2C_ProcessModeAdd {
-    Mid?: uint64
+    PrevMid?: uint64
     ModeSingle?: ModeSingle
     LinkList?: LinkSingle[]
 }
 
 interface L2C_ProcessModeDelete {
     Mid?: uint64
-    ProjectSingle?: ProjectSingle
 }
 
 
 interface L2C_ProcessModeMove {
     Swap?: uint64[]
-    Dir?: string
-    ProjectSingle?: ProjectSingle
 }
 
 interface L2C_ProcessModeStore {

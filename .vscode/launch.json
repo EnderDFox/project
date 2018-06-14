@@ -12,9 +12,9 @@
             // "program": "${fileDirname}",
             "program": "${workspaceFolder}/src/pm/Main.go",
             "env": {
-                // "GOPATH":"D:/AmazingGame/tool_svn"
+                "GOPATH":"D:/AmazingGame/tool_svn"
             },
-            // "cwd": "${workspaceFolder}",
+            // "cwd": "${workspaceFolder}/src/pm",
             "args": [],
             "showLog": true
         },
@@ -29,7 +29,7 @@
             // "program": "${fileDirname}",
             "program": "${workspaceFolder}/src/hello/Hello.go",
             "env": {
-                // "GOPATH":"D:/AmazingGame/tool_svn"
+                "GOPATH":"D:/AmazingGame/tool_svn"
             },
             // "cwd": "${workspaceFolder}",
             "args": [],

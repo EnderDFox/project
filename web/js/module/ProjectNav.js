@@ -8,11 +8,11 @@ var NavMenuValue;
 var ProjectNavClass = /** @class */ (function () {
     function ProjectNavClass() {
         //过滤器
-        this.FilterDid = DidField.VERSION;
+        this.FilterDid = 0; // 使用 DidField.VERSION 在IE会报错
         //菜单选择
         this.NavMenu = NavMenuValue.PROCESS;
     }
-    //初始化
+    //初始化di 
     ProjectNavClass.prototype.Init = function () {
         //筛选器
         ProcessFilter.Init();

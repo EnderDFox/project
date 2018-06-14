@@ -6,7 +6,7 @@ class ProcessManagerClass {
 		Commond.Register(L2C.L2C_PROCESS_GRID_CHANGE, this.GridChange.bind(this))
 		Commond.Register(L2C.L2C_PROCESS_GRID_CLEAR, this.GridClear.bind(this))
 		Commond.Register(L2C.L2C_PROCESS_USER_CHANGE, this.UserChange.bind(this))
-		Commond.Register(L2C.L2C_PROCESS_GRID_SWAP, this.GridSwap.bind(this))
+		Commond.Register(L2C.L2C_PROCESS_GRID_SWAP, this.LinkSwapSort.bind(this))
 		Commond.Register(L2C.L2C_PROCESS_GRID_ADD, this.GridAdd.bind(this))
 		Commond.Register(L2C.L2C_PROCESS_LINK_DELETE, this.LinkDelete.bind(this))
 		Commond.Register(L2C.L2C_PROCESS_LINK_EDIT, this.LinkEdit.bind(this))
@@ -60,7 +60,7 @@ class ProcessManagerClass {
 		$('#content tr[lid="' + data.Lid + '"] td:eq(1)').html(Data.GetUser(data.Uid).Name)
 	}
 	//交换流程
-	GridSwap(data: L2C_ProcessGridSwap) {
+	LinkSwapSort(data: L2C_ProcessGridSwap) {
 		//数据变化
 		var link0 = ProcessData.LinkMap[data.Swap[0]]
 		var link1 = ProcessData.LinkMap[data.Swap[1]]
@@ -100,16 +100,23 @@ class ProcessManagerClass {
 		if (link) {
 			var mode: ModeSingle = ProcessData.ModeMap[link.Mid]
 			ArrayUtil.RemoveByAttr(mode.LinkList, FieldName.Lid, data.Lid)
+			//删除工作
+			$.each(ProcessData.WorkMap, (k, v: WorkSingle) => {
+				if (v.Lid != link.Lid) {
+					return
+				}
+				delete ProcessData.WorkMap[v.Wid]
+			})
 			delete ProcessData.LinkMap[data.Lid]
 			$('#content tr[lid="' + data.Lid + '"]').remove()
 		}
 	}
 	//流程名字
-	LinkEdit(link: LinkSingle) {
+	LinkEdit(data: LinkSingle) {
 		//数据变化
-		var link: LinkSingle = ProcessData.LinkMap[link.Lid]
+		var link: LinkSingle = ProcessData.LinkMap[data.Lid]
 		if (link) {
-			ProcessData.LinkMap[link.Lid].Name = link.Name
+			ProcessData.LinkMap[link.Lid].Name = data.Name
 			$('#content tr[lid="' + link.Lid + '"] .link').attr('class', 'link bg_' + link.Color).html(link.Name == '' ? '空' : link.Name + ProcessPanel.GetModeLinkStatusName(link.Status))
 		}
 	}
@@ -131,14 +138,22 @@ class ProcessManagerClass {
 		})
 	}
 	//编辑功能
-	ModeEdit(mode: ModeSingle) {
+	ModeEdit(data: ModeSingle) {
 		//数据变化
-		ProcessData.ModeMap[mode.Mid] = mode
-		$('#content .mode[mid="' + mode.Mid + '"]').html(VersionManager.GetVersionVer(mode.Vid) + (mode.Name == '' ? '空' : mode.Name) + ProcessPanel.GetModeLinkStatusName(mode.Status))
+		var mode: ModeSingle = ProcessData.ModeMap[data.Mid]
+		if (mode) {
+			mode.Name = data.Name
+			mode.Vid = data.Vid
+			$('#content .mode[mid="' + mode.Mid + '"]').html(VersionManager.GetVersionVer(mode.Vid) + (mode.Name == '' ? '空' : mode.Name) + ProcessPanel.GetModeLinkStatusName(mode.Status))
+		}
 	}
 	//添加功能
 	ModeAdd(data: L2C_ProcessModeAdd) {
-		//数据变化
+		//
+		var prevIndex = ArrayUtil.IndexOfAttr(ProcessData.Project.ModeList, FieldName.Mid, data.PrevMid)
+		if (prevIndex > -1) {
+			ProcessData.Project.ModeList.splice(prevIndex, 1, data.ModeSingle)
+		}
 		ProcessData.ModeMap[data.ModeSingle.Mid] = data.ModeSingle
 		data.ModeSingle.LinkList = data.LinkList
 		// ProcessData.LinkMap[data.LinkSingle.Lid] = data.LinkSingle
@@ -147,8 +162,9 @@ class ProcessManagerClass {
 			var link = data.LinkList[i];
 			ProcessData.LinkMap[link.Lid] = link
 		}
+		//add mode
 		var add = $(ProcessPanel.GetModeHtml(data.ModeSingle.Mid))
-		$('#content .mode[mid="' + data.Mid + '"]').parent().next().after(add)
+		$('#content .mode[mid="' + data.PrevMid + '"]').parent().next().after(add)
 		//绑定流程数据
 		add.find('.linkMap tr').each(function () {
 			var lid = parseInt($(this).attr('lid'))
@@ -158,28 +174,25 @@ class ProcessManagerClass {
 	}
 	//删除功能
 	ModeDelete(data: L2C_ProcessModeDelete) {
-		//数据变化
-		ProcessData.Project = data.ProjectSingle
-		var mode = ProcessData.ModeMap[data.Mid]
-		if (!mode) {
-			return
-		}
-		$.each(mode.LinkList, (k, link: LinkSingle) => {
-			//删除工作
-			$.each(ProcessData.WorkMap, (k, v: WorkSingle) => {
-				if (v.Lid != link.Lid) {
-					return
-				}
-				delete ProcessData.WorkMap[v.Wid]
+		var mode: ModeSingle = ProcessData.ModeMap[data.Mid]
+		if (mode) {
+			ArrayUtil.RemoveByAttr(ProcessData.Project.ModeList, FieldName.Mid, data.Mid)
+			delete ProcessData.ModeMap[data.Mid]
+			$.each(mode.LinkList, (k, link: LinkSingle) => {
+				//删除工作
+				$.each(ProcessData.WorkMap, (k, v: WorkSingle) => {
+					if (v.Lid != link.Lid) {
+						return
+					}
+					delete ProcessData.WorkMap[v.Wid]
+				})
+				//删除流程
+				delete ProcessData.LinkMap[link.Lid]
 			})
-			//删除流程
-			delete ProcessData.LinkMap[link.Lid]
-		})
-		//删除功能
-		delete ProcessData.ModeMap[data.Mid]
-		var del = $('#content .mode[mid="' + data.Mid + '"]').parent()
-		del.next().remove()
-		del.remove()
+			var del = $('#content .mode[mid="' + data.Mid + '"]').parent()
+			del.next().remove()
+			del.remove()
+		}
 	}
 	//功能颜色
 	ModeColor(data: ModeSingle) {
@@ -209,27 +222,25 @@ class ProcessManagerClass {
 		NoticeManager.ScoreEdit(data)
 	}
 	//功能交换
-	ModeMove(data: L2C_ProcessModeMove): boolean {
+	ModeMove(data: L2C_ProcessModeMove): void {
 		//数据变化
-		ProcessData.Project = data.ProjectSingle
-		var A = $('#content .mode[mid="' + data.Swap[0] + '"]').parent()
-		if (A.length == 0) {
-			return false
-		}
-		var AN = A.next()
-		var B = $('#content .mode[mid="' + data.Swap[1] + '"]').parent()
-		if (B.length == 0) {
-			return false
-		}
-		var BN = B.next()
-		if (data.Dir == 'before') {
+		var mode0:ModeSingle = ProcessData.ModeMap[data.Swap[0]]
+		var mode1:ModeSingle = ProcessData.ModeMap[data.Swap[1]]
+		if (!mode0 || !mode1) {
+		} else {
+			var project:ProjectSingle = ProcessData.Project
+			var index0 = ArrayUtil.IndexOfAttr(project.ModeList, FieldName.Mid, mode0.Mid)
+			var index1 = ArrayUtil.IndexOfAttr(project.ModeList, FieldName.Mid, mode1.Mid)
+			if (index0 > -1 && index0 > -1) {
+				project.ModeList.splice(index0, 1, ...project.ModeList.splice(index1, 1, mode0))
+			}
+			var A = $('#content .mode[mid="' + data.Swap[0] + '"]').parent()
+			var AN = A.next()
+			var B = $('#content .mode[mid="' + data.Swap[1] + '"]').parent()
+			var BN = B.next()
 			A.before(B)
 			A.before(AN)
-		} else {
-			A.after(B)
-			B.before(BN)
 		}
-		return true
 	}
 	//归档处理
 	ModeStore(data: L2C_ProcessModeStore) {

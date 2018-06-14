@@ -114,11 +114,11 @@ type C2L_ProcessModeEdit struct {
 }
 
 type C2L_ProcessModeAdd struct {
-	Mid  uint64
-	Name string
-	Vid  uint64
-	Did  uint64
-	Tmid uint64
+	PrevMid uint64
+	Name    string
+	Vid     uint64
+	Did     uint64
+	Tmid    uint64
 }
 
 type C2L_ProcessModeDelete struct {
@@ -145,7 +145,6 @@ type C2L_ProcessScoreEdit struct {
 
 type C2L_ProcessModeMove struct {
 	Swap []uint64
-	Dir  string
 }
 
 type C2L_ProcessModeStore struct {

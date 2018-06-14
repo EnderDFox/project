@@ -20,11 +20,11 @@ class ProcessDataClass {
 	Init(data: L2C_ProcessView) {
 		//初始化
 		this.Project = data.Project
-		this.Project.ModeSort = []
+		this.Project.ModeList = []
 		var len = data.ModeList.length
 		for (var i = 0; i < len; i++) {
 			var mode = data.ModeList[i]
-			this.Project.ModeSort.push(mode.Mid)
+			this.Project.ModeList.push(mode)
 		}
 		this.WorkMap = {}
 		this.LinkMap = {}

@@ -131,20 +131,17 @@ type L2C_ProcessLinkDelete struct {
 }
 
 type L2C_ProcessModeAdd struct {
-	Mid        uint64
+	PrevMid    uint64
 	ModeSingle *ModeSingle
 	LinkList   []*LinkSingle
 }
 
 type L2C_ProcessModeDelete struct {
-	Mid           uint64
-	ProjectSingle *ProjectSingle
+	Mid uint64
 }
 
 type L2C_ProcessModeMove struct {
-	Swap          []uint64
-	Dir           string
-	ProjectSingle *ProjectSingle
+	Swap []uint64
 }
 
 type L2C_ProcessModeStore struct {

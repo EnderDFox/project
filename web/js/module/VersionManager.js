@@ -515,7 +515,17 @@ var VersionManagerClass = /** @class */ (function () {
             else {
                 //通过vid查询
                 var vid = args[0];
-                items.push({ version: ProcessData.VersionMap[vid], publish: null });
+                var version = ProcessData.VersionMap[vid];
+                items.push({ version: version, publish: null });
+                if (version.PublishList) {
+                    var len = version.PublishList.length;
+                    for (var i = 0; i < len; i++) {
+                        var p = version.PublishList[i];
+                        if (p) {
+                            p.SubDayCount = 0;
+                        }
+                    }
+                }
             }
             //
             _this.VueTableHeaderTooltip.currDateLine = dateLine;

@@ -61,5 +61,9 @@ func (this *Test) Show() {
 //调试一下
 func (this *Test) Debug() {
 	this.LoadData()
-	this.Show()
+	//this.Show()
+	dbSave := NewDbSave()
+	go dbSave.ReadChan()
+	dbSave.WriteChan()
+	//this.Show()
 }

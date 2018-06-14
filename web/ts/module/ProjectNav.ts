@@ -6,10 +6,10 @@ enum NavMenuValue{
 //项目导航
 class ProjectNavClass {
     //过滤器
-    FilterDid: DidField = DidField.VERSION
+    FilterDid: DidField = 0     // 使用 DidField.VERSION 在IE会报错
     //菜单选择
     NavMenu = NavMenuValue.PROCESS
-    //初始化
+    //初始化di 
     Init() {
         //筛选器
         ProcessFilter.Init()

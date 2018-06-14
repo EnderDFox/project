@@ -43,14 +43,13 @@ type ScoreNoticeSingle struct {
 }
 
 type ModeSingle struct {
-	Mid      uint64
-	Vid      uint64
-	Name     string
-	Color    uint64
-	Did      uint64
-	Status   uint64
-	Sort     uint32
-	LinkSort []string
+	Mid    uint64
+	Vid    uint64
+	Name   string
+	Color  uint64
+	Did    uint64
+	Status uint64
+	Sort   uint32
 }
 
 type TagSingle struct {
@@ -95,9 +94,8 @@ type ProfileSingle struct {
 }
 
 type ProjectSingle struct {
-	Pid      uint64
-	Name     string
-	ModeSort []string
+	Pid  uint64
+	Name string
 }
 
 type ExtraSingle struct {

@@ -84,7 +84,7 @@ var LoaderClass = /** @class */ (function () {
             this.isDebug = false;
         }
         else {
-            var hostMap = { '192.168.50.191:8080': 1, 'localhost:8080': 1, '192.168.118.224:8080': 1, '192.168.120.236:8080': 1 };
+            var hostMap = { '192.168.118.132:8080': 1, '192.168.50.191:8080': 1, 'localhost:8080': 1, '192.168.118.224:8080': 1, '192.168.120.236:8080': 1 };
             if (hostMap[location.host]) {
                 this.isDebug = true;
             }
