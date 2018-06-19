@@ -80,8 +80,9 @@ $.fn.extend({
                 'top': 0
             });
         };
-        win.unbind().scroll(function (e) {
+        win.scroll(function (e) {
             var currScrollX = win.scrollLeft();
+            // console.log("[info]",currScrollX,":[currScrollX]",prevScrollX,":[prevScrollX]")
             if (currScrollX != prevScrollX) {
                 $dom.css({
                     'position': 'absolute',
@@ -99,48 +100,49 @@ $.fn.extend({
                     timeoutId = -1;
                     resetFixed();
                 }
+                prevScrollX = currScrollX;
             }
-            prevScrollX = currScrollX;
         }).resize(function () {
             $dom.css({ 'left': -$(this).scrollLeft() });
         });
-        //------
-        ///*方案二 IE下拖动时反映不及时,感觉很不舒服,所以IE最好仍然用mousedown来做,判断IE比较麻烦,先不改了
-        /*var timeoutId = -1
-        $(window).unbind().scroll(function (e) {
-            if (timeoutId > 0) {
-                clearTimeout(timeoutId)
+    },
+    freezeLeft: function () {
+        var $dom = this;
+        var win = $(window);
+        //
+        var timeoutId = -1;
+        var prevScrollY = win.scrollTop();
+        var resetFixed = function () {
+            $dom.css({
+                position: 'fixed',
+                'left': 0,
+                'top': -win.scrollTop()
+            });
+        };
+        win.scroll(function (e) {
+            var currScrollY = win.scrollTop();
+            if (currScrollY != prevScrollY) {
+                $dom.css({
+                    'position': 'absolute',
+                    'left': win.scrollLeft(),
+                    'top': 0
+                });
+                if (timeoutId >= 0) {
+                    clearTimeout(timeoutId);
+                }
+                timeoutId = setTimeout(resetFixed, 1000);
             }
-            var timeoutId = setTimeout(function () {
-                //window窗口滚动
-                var left = -$(this).scrollLeft()
-                // console.log("left:",left)
-                $dom.css({'left': -$(this).scrollLeft()})
-            }, 25)
-        })*/
-        //方案一
-        /*$(window).unbind().mousedown(function(e){
-            //检查
-            if(e.target != document && e.target.localName != 'html'){
-                return true
+            else {
+                if (timeoutId >= 0) {
+                    clearTimeout(timeoutId);
+                    timeoutId = -1;
+                    resetFixed();
+                }
+                prevScrollY = currScrollY;
             }
-            //上下滑块
-            if(e.clientX > $(this).innerWidth()){
-
-            }
-            //左右滑块
-            if(e.clientY + 10 > $(this).innerHeight()){
-                $dom.css({'position':'absolute','left':0,'top':$(this).scrollTop()})
-                $(this).mouseup(function(){
-                    $dom.css({'position':'fixed','left':-$(this).scrollLeft(),'top':0})
-                    $(this).unbind('mouseup')
-                })
-            }
-
-        })*/
-        /*  $(window).resize(function(){
-             $dom.css({'left':-$(this).scrollLeft()})
-         }) */
-    }
+        }).resize(function () {
+            $dom.css({ 'top': -$(this).scrollTop() });
+        });
+    },
 });
 //# sourceMappingURL=JQueryExtend.js.map

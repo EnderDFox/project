@@ -525,13 +525,45 @@
 .collateLock{position:fixed;margin-top:45px;padding-top:10px;top:0px;background:#fff;z-index:1;-webkit-transform:translateZ(0);-moz-transform:translateZ(0);-ms-transform:translateZ(0);-o-transform:translateZ(0);transform:translateZ(0);}
 .collateLock > .lockTop{box-shadow:0px 0px 3px #333333;-webkit-transform:translateZ(0);-moz-transform:translateZ(0);-ms-transform:translateZ(0);-o-transform:translateZ(0);transform:translateZ(0);position: fixed;left: 0px;top: 0px;}
 
-.tableTitleLeft{margin-left: 10px;z-index: 4;}
-.tableTitleRight{margin-left: 172px;z-index: 3;}
 
 .collateLockBody{padding-top:0px;margin-top:85px;margin-left:10px;margin-right:10px;box-shadow:0px 0px 3px #333333;-webkit-transform:translateZ(0);-moz-transform:translateZ(0);-ms-transform:translateZ(0);-o-transform:translateZ(0);transform:translateZ(0);}
 
-.tableBodyLeft{margin-left: 10px;margin-top: 110px; z-index: 1;position: absolute;left: 0px;top: 0px;}
-.tableBodyRight{margin-left: 172px;margin-top: 110px;position: absolute;left: 0px;top: 0px;}
+.freeze{
+  position: fixed; left:0px;top: 0px; 
+}
+
+#freezeTitleLeft{
+  z-index: 4;
+}
+#freezeTitleRight{
+  z-index: 3;
+}
+#freezeBodyLeft{
+  z-index: 2;
+}
+
+.tableTitleLeft{margin-left: 10px;margin-top: 40px; }
+.tableTitleRight{margin-left: 172px;margin-top: 40px; }
+.tableBodyLeft{margin-left: 10px;margin-top: 81px; }
+.tableBodyRight{margin-left: 172px;margin-top: 81px;}
+
+.tableCover{
+  position: fixed;
+  z-index:6;
+  background-color: #ffffff;
+}
+.tableCoverTop{
+  width: 100%; 
+  height: 10px;
+  left:0px;
+  top:30px;
+}
+.tableCoverLeft{
+  width: 10px;
+  height: 100%;
+  left:0px;
+  top: 0px; 
+}
 /*==========================================================个人==========================================================*/
 
 .profile{border-collapse:collapse;border-color:#6c6c6c;background:#fff;}
@@ -596,7 +628,7 @@ transition: all 0s;
 
 /*大图片展示框*/
 .image_showcase{
-  position: fixed;z-index: 999; background-color: rgba(0, 0, 0, 0.6);
+  position: fixed;z-index: 2999; background-color: rgba(0, 0, 0, 0.6);
   left: 0px;
   top: 0px;
   width: 100%;

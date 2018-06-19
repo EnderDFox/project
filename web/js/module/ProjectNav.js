@@ -10,9 +10,9 @@ var ProjectNavClass = /** @class */ (function () {
         //过滤器
         this.FilterDid = 0; // 使用 DidField.VERSION 在IE会报错
         //菜单选择
-        // NavMenu = NavMenuValue.PROCESS
-        this.NavMenu = NavMenuValue.COLLATE;
+        this.NavMenu = NavMenuValue.PROCESS;
     }
+    // NavMenu = NavMenuValue.COLLATE
     //初始化di 
     ProjectNavClass.prototype.Init = function () {
         //筛选器

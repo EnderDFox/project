@@ -28,6 +28,7 @@ interface JQuery<TElement extends Node = HTMLElement> extends Iterable<TElement>
     isShow(): boolean
     adjust(offsetY: number): this
     freezeTop()
+    freezeLeft()
 }
 
 //======完善其他 d.ts 或为其增加扩展方法  

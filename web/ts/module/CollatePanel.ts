@@ -206,25 +206,41 @@ class CollatePanelClass {
 			$('#tableTitleRight').html(this.GetTheadHtmlRight())
 			$('#tableBodyLeft').html(this.GetTbodyHtmlLeft())
 			$('#tableBodyRight').html(this.GetTbodyHtmlRight())
-			$('#freezeTop').unbind().freezeTop()
-			setTimeout(() => {
+			var resetSize = () => {
 				var $trLeftList = $('#tableBodyLeft').find('tr')
 				var $trRightList = $('#tableBodyRight').find('tr')
 				var len = $trLeftList.length
 				for (var i = 0; i < len; i++) {
 					var trLeft = $trLeftList[i]
 					var trRight = $trRightList[i]
-					var hL = $(trLeft).height()
-					var hR = $(trRight).height()
-					var hMax = Math.max(hL,hR)
-					console.log("[info]",i,hL,":[hL]",hR,":[hR]",hMax,":[hMax]")
-					if(hL<hMax){
-						$(trLeft).height(hMax+2)
-					}else if(hR<hMax){
-						$(trRight).height(hMax+2)
+					// var hL = $(trLeft).height()
+					// var hR = $(trRight).height()
+					var hL  = trLeft.clientHeight
+					var hR  = trRight.clientHeight
+					console.log("[debug]",i,":[i]------")
+					console.log("[info]",$(trRight).get(0).clientHeight,":[$(trLeft).get(0).clientHeight]",hR)
+					// continue;
+					console.log("[info]", i,":[i]", hL, ":[hL]", hR, ":[hR]", hMax, ":[hMax]")
+					if (hL == hR && hR == 40) {
+						//还没刷新, 等下一次
+						requestAnimationFrame(resetSize);
+						break;
+					}
+					var _offset = 2//不明白为什么必须+2 双方高度才能对齐,可能是因为border?
+					if(Common.IsIE()){
+						_offset = 0
+					}
+					var hMax = Math.max(hL, hR)
+					if (hL < hMax) {
+						$(trLeft).height(hMax + _offset)
+					} else if (hR < hMax) {
+						$(trRight).height(hMax + _offset)
 					}
 				}
-			}, 1000);
+			}
+			requestAnimationFrame(resetSize);
+			$('#freezeTitleRight').unbind().freezeTop()
+			$('#freezeBodyLeft').unbind().freezeLeft()
 		})
 		/* //组合thead
 		var html = '<div id="freezeTop" class="collateLock"><div class="lockTop"><table class="collate" id="rowLock">'

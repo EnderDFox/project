@@ -8,8 +8,8 @@ class ProjectNavClass {
     //过滤器
     FilterDid: DidField = 0     // 使用 DidField.VERSION 在IE会报错
     //菜单选择
-    // NavMenu = NavMenuValue.PROCESS
-    NavMenu = NavMenuValue.COLLATE
+    NavMenu = NavMenuValue.PROCESS
+    // NavMenu = NavMenuValue.COLLATE
     //初始化di 
     Init() {
         //筛选器
