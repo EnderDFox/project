@@ -530,40 +530,26 @@
 
 .freeze{
   position: fixed; left:0px;top: 0px; 
+  background-color: #FFFFFF;
 }
 
 #freezeTitleLeft{
+  margin-left: 0px;margin-top: 35px; padding-top:10px;padding-left: 10px;
   z-index: 4;
 }
 #freezeTitleRight{
+  margin-left: 172px;margin-top: 35px; padding-top:10px;
   z-index: 3;
 }
 #freezeBodyLeft{
+  margin-left: 0px;margin-top: 81px; padding-left: 10px;
   z-index: 2;
 }
 
-.tableTitleLeft{margin-left: 10px;margin-top: 40px; }
-.tableTitleRight{margin-left: 172px;margin-top: 40px; }
-.tableBodyLeft{margin-left: 10px;margin-top: 81px; }
-.tableBodyRight{margin-left: 172px;margin-top: 81px;}
+#freezeBodyRight{
+  margin-left: 172px;margin-top: 81px;
+}
 
-.tableCover{
-  position: fixed;
-  z-index:6;
-  background-color: #ffffff;
-}
-.tableCoverTop{
-  width: 100%; 
-  height: 10px;
-  left:0px;
-  top:30px;
-}
-.tableCoverLeft{
-  width: 10px;
-  height: 100%;
-  left:0px;
-  top: 0px; 
-}
 /*==========================================================个人==========================================================*/
 
 .profile{border-collapse:collapse;border-color:#6c6c6c;background:#fff;}

@@ -1,5 +1,6 @@
 //晨会面板
 class CollatePanelClass {
+	VuePath: string = 'collate/'
 	//日期数据
 	DateList: IDateItem[] = []
 	//初始化
@@ -197,10 +198,9 @@ class CollatePanelClass {
 		html += '</li>'
 		return html
 	}
-	VuePath: string = 'collate/'
 	//建立内容
 	CreateCollate() {
-		Loader.LoadVueTemplate(this.VuePath + `Frame`, (tpl: string) => {
+		Loader.LoadVueTemplate(this.VuePath + `PanelFrame`, (tpl: string) => {
 			Main.Draw(tpl)
 			$('#tableTitleLeft').html(this.GetTheadHtmlLeft())
 			$('#tableTitleRight').html(this.GetTheadHtmlRight())
@@ -239,8 +239,8 @@ class CollatePanelClass {
 				}
 			}
 			requestAnimationFrame(resetSize);
-			$('#freezeTitleRight').unbind().freezeTop()
-			$('#freezeBodyLeft').unbind().freezeLeft()
+			$('#freezeTitleRight').unbind().freezeTop(true)
+			$('#freezeBodyLeft').unbind().freezeLeft(false)
 		})
 		/* //组合thead
 		var html = '<div id="freezeTop" class="collateLock"><div class="lockTop"><table class="collate" id="rowLock">'

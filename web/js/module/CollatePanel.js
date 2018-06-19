@@ -1,9 +1,9 @@
 //晨会面板
 var CollatePanelClass = /** @class */ (function () {
     function CollatePanelClass() {
+        this.VuePath = 'collate/';
         //日期数据
         this.DateList = [];
-        this.VuePath = 'collate/';
     }
     //初始化
     CollatePanelClass.prototype.Init = function () {
@@ -206,7 +206,7 @@ var CollatePanelClass = /** @class */ (function () {
     //建立内容
     CollatePanelClass.prototype.CreateCollate = function () {
         var _this = this;
-        Loader.LoadVueTemplate(this.VuePath + "Frame", function (tpl) {
+        Loader.LoadVueTemplate(this.VuePath + "PanelFrame", function (tpl) {
             Main.Draw(tpl);
             $('#tableTitleLeft').html(_this.GetTheadHtmlLeft());
             $('#tableTitleRight').html(_this.GetTheadHtmlRight());
@@ -246,8 +246,8 @@ var CollatePanelClass = /** @class */ (function () {
                 }
             };
             requestAnimationFrame(resetSize);
-            $('#freezeTitleRight').unbind().freezeTop();
-            $('#freezeBodyLeft').unbind().freezeLeft();
+            $('#freezeTitleRight').unbind().freezeTop(true);
+            $('#freezeBodyLeft').unbind().freezeLeft(false);
         });
         /* //组合thead
         var html = '<div id="freezeTop" class="collateLock"><div class="lockTop"><table class="collate" id="rowLock">'

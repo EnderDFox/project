@@ -246,20 +246,18 @@ class ProcessPanelClass {
 	}
 	//建立内容
 	CreateProcess() {
-		//组合thead
-		var html = '<div id="freezeTop" class="processLock"><div class="lockTop"><table class="process">'
-		html += this.GetTheadHtml()
-		html += '</table></div></div>'
-		html += '<div class="processLockBody"><table class="process">'
-		//组合tbody
-		html += this.GetTbodyHtml()
-		html += '</table></div>'
-		//流程数据
-		Main.Draw(html).find('.linkMap tr').each((index: number, el: HTMLElement) => {
-			var lid = parseInt($(el).attr('lid'))
-			this.SetLinkData(lid, el)
+		Loader.LoadVueTemplate(ProcessFilter.VuePath + `PanelFrame`, (tpl: string) => {
+			var $main = Main.Draw(tpl)
+			//组合thead
+			$('#tableTitleLeft').html(this.GetTheadHtml())
+			$('#tableBodyLeft').html(this.GetTbodyHtml())
+			//流程数据
+			$main.find('.linkMap tr').each((index: number, el: HTMLElement) => {
+				var lid = parseInt($(el).attr('lid'))
+				this.SetLinkData(lid, el)
+			})
+			$('#freezeTop').unbind().freezeTop(true)
 		})
-		$('#freezeTop').unbind().freezeTop()
 	}
 	//流程数据
 	SetLinkData(lid: number, dom: HTMLElement) {

@@ -63,7 +63,7 @@ $.fn.extend({
         return this;
     },
     //冻结窗口
-    freezeTop: function () {
+    freezeTop: function (winUnbind) {
         //Fixed issue #按住shift滚动鼠标,会横向滚动表格,但标题(freezeTop)没有跟着滚动
         //注意:shift+鼠标滚动  仅chrome内核是横向滚动 ,其它浏览器都是翻页,
         //scroll事件太频繁,导致IE浏览器下很卡,chrome本身性能高,不卡但也有性能隐患, 所以需要 setTimeout 来处理
@@ -80,6 +80,9 @@ $.fn.extend({
                 'top': 0
             });
         };
+        if (winUnbind) {
+            win.unbind();
+        }
         win.scroll(function (e) {
             var currScrollX = win.scrollLeft();
             // console.log("[info]",currScrollX,":[currScrollX]",prevScrollX,":[prevScrollX]")
@@ -106,7 +109,7 @@ $.fn.extend({
             $dom.css({ 'left': -$(this).scrollLeft() });
         });
     },
-    freezeLeft: function () {
+    freezeLeft: function (winUnbind) {
         var $dom = this;
         var win = $(window);
         //
@@ -119,6 +122,9 @@ $.fn.extend({
                 'top': -win.scrollTop()
             });
         };
+        if (winUnbind) {
+            win.unbind();
+        }
         win.scroll(function (e) {
             var currScrollY = win.scrollTop();
             if (currScrollY != prevScrollY) {

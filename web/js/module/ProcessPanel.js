@@ -254,20 +254,18 @@ var ProcessPanelClass = /** @class */ (function () {
     //建立内容
     ProcessPanelClass.prototype.CreateProcess = function () {
         var _this = this;
-        //组合thead
-        var html = '<div id="freezeTop" class="processLock"><div class="lockTop"><table class="process">';
-        html += this.GetTheadHtml();
-        html += '</table></div></div>';
-        html += '<div class="processLockBody"><table class="process">';
-        //组合tbody
-        html += this.GetTbodyHtml();
-        html += '</table></div>';
-        //流程数据
-        Main.Draw(html).find('.linkMap tr').each(function (index, el) {
-            var lid = parseInt($(el).attr('lid'));
-            _this.SetLinkData(lid, el);
+        Loader.LoadVueTemplate(ProcessFilter.VuePath + "PanelFrame", function (tpl) {
+            var $main = Main.Draw(tpl);
+            //组合thead
+            $('#tableTitleLeft').html(_this.GetTheadHtml());
+            $('#tableBodyLeft').html(_this.GetTbodyHtml());
+            //流程数据
+            $main.find('.linkMap tr').each(function (index, el) {
+                var lid = parseInt($(el).attr('lid'));
+                _this.SetLinkData(lid, el);
+            });
+            $('#freezeTop').unbind().freezeTop(true);
         });
-        $('#freezeTop').unbind().freezeTop();
     };
     //流程数据
     ProcessPanelClass.prototype.SetLinkData = function (lid, dom) {
