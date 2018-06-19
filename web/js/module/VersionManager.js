@@ -189,9 +189,11 @@ var VersionManagerClass = /** @class */ (function () {
                 pageX = 160 + $(window).scrollLeft();
                 pageY = 150 + $(window).scrollTop();
             }
-            var plan = $(_this.VueVersionList.$el).xy(pageX, pageY).show().adjust(-5);
+            var plan = $(_this.VueVersionList.$el).xy(pageX, pageY).fadeIn(Config.FadeTime).adjust(-5);
             if (showVid) {
-                _this.ShowVersionDetail(showVid, showGenre);
+                setTimeout(function () {
+                    _this.ShowVersionDetail(showVid, showGenre);
+                }, 500);
             }
         };
         Loader.LoadVueTemplate(this.VuePath + "EditVersionList", function (txt) {
@@ -328,7 +330,7 @@ var VersionManagerClass = /** @class */ (function () {
                 pageX = 160 + $(window).scrollLeft();
                 pageY = 150 + $(window).scrollTop();
             }
-            var plan = $(_this.VueVersionDetail.$el).xy(pageX, pageY).show().adjust(-5);
+            var plan = $(_this.VueVersionDetail.$el).xy(pageX, pageY).fadeIn(Config.FadeTime).adjust(-5);
             //关闭日期
             plan.unbind().mousedown(function (e) {
                 if ($(e.target).attr('class') != 'date') {

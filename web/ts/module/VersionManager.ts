@@ -237,9 +237,11 @@ class VersionManagerClass {
                 pageX = 160 + $(window).scrollLeft()
                 pageY = 150 + $(window).scrollTop()
             }
-            var plan = $(this.VueVersionList.$el).xy(pageX, pageY).show().adjust(-5)
+            var plan = $(this.VueVersionList.$el).xy(pageX, pageY).fadeIn(Config.FadeTime).adjust(-5)
             if (showVid) {
-                this.ShowVersionDetail(showVid, showGenre)
+                setTimeout(() => {//延迟一段时间再显示
+                    this.ShowVersionDetail(showVid, showGenre)
+                }, 500);
             }
         }
         Loader.LoadVueTemplate(this.VuePath + "EditVersionList", (txt: string) => {
@@ -371,7 +373,7 @@ class VersionManagerClass {
                 pageX = 160 + $(window).scrollLeft()
                 pageY = 150 + $(window).scrollTop()
             }
-            var plan = $(this.VueVersionDetail.$el).xy(pageX, pageY).show().adjust(-5)
+            var plan = $(this.VueVersionDetail.$el).xy(pageX, pageY).fadeIn(Config.FadeTime).adjust(-5)
             //关闭日期
             plan.unbind().mousedown((e) => {
                 if ($(e.target).attr('class') != 'date') {
