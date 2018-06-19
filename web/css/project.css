@@ -468,7 +468,7 @@
 .collate dd{margin:0px;padding:0px;text-align:center;}
 .collate .special{color:#ed7d31;}
 .collate .title{text-align:center;font-weight:bold;color:#fff;}
-.collate .frist{text-align:center;min-width:150px;width:150px;padding:5px;}
+.collate .frist{text-align:center;min-width:150px;width:150px;max-width:150px;padding:5px;}
 .collate .edit{font-weight:bold;margin-left:3px;color:#333f4f;}
 .collate .today{background:#ffff00;font-weight:bold;}
 .collate .notice{font-weight:bold;color:#fff;height:25px;line-height:25px;font-size:16px;}
@@ -522,10 +522,16 @@
 .addStep .check_3{background:#ff0000;}		/*3未完成*/
 
 /*内容锁定*/
-.collateLock{position:fixed;margin-top:35px;padding-top:10px;top:0px;background:#fff;z-index:1;-webkit-transform:translateZ(0);-moz-transform:translateZ(0);-ms-transform:translateZ(0);-o-transform:translateZ(0);transform:translateZ(0);}
-.collateLock > .lockTop{box-shadow:0px 0px 3px #333333;margin-left:10px;margin-right:10px;-webkit-transform:translateZ(0);-moz-transform:translateZ(0);-ms-transform:translateZ(0);-o-transform:translateZ(0);transform:translateZ(0);}
+.collateLock{position:fixed;margin-top:45px;padding-top:10px;top:0px;background:#fff;z-index:1;-webkit-transform:translateZ(0);-moz-transform:translateZ(0);-ms-transform:translateZ(0);-o-transform:translateZ(0);transform:translateZ(0);}
+.collateLock > .lockTop{box-shadow:0px 0px 3px #333333;-webkit-transform:translateZ(0);-moz-transform:translateZ(0);-ms-transform:translateZ(0);-o-transform:translateZ(0);transform:translateZ(0);position: fixed;left: 0px;top: 0px;}
+
+.tableTitleLeft{margin-left: 10px;z-index: 4;}
+.tableTitleRight{margin-left: 172px;z-index: 3;}
+
 .collateLockBody{padding-top:0px;margin-top:85px;margin-left:10px;margin-right:10px;box-shadow:0px 0px 3px #333333;-webkit-transform:translateZ(0);-moz-transform:translateZ(0);-ms-transform:translateZ(0);-o-transform:translateZ(0);transform:translateZ(0);}
 
+.tableBodyLeft{margin-left: 10px;margin-top: 110px; z-index: 1;position: absolute;left: 0px;top: 0px;}
+.tableBodyRight{margin-left: 172px;margin-top: 110px;position: absolute;left: 0px;top: 0px;}
 /*==========================================================个人==========================================================*/
 
 .profile{border-collapse:collapse;border-color:#6c6c6c;background:#fff;}

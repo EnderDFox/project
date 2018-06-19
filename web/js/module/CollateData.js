@@ -36,6 +36,8 @@ var CollateDataClass = /** @class */ (function () {
         this.ExtraMap = {};
         this.DateUserMap = {};
         this.DateExtraMap = {};
+        //
+        ProcessData.ParseVersionData(data.VersionList);
         //功能内容
         $.each(data.ModeList, function (k, v) {
             _this.ModeMap[v.Mid] = v;

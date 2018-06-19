@@ -3,6 +3,7 @@ var CollatePanelClass = /** @class */ (function () {
     function CollatePanelClass() {
         //日期数据
         this.DateList = [];
+        this.VuePath = 'collate/';
     }
     //初始化
     CollatePanelClass.prototype.Init = function () {
@@ -34,10 +35,16 @@ var CollatePanelClass = /** @class */ (function () {
         CollatePanel.DateList = list;
     };
     //组合头部
-    CollatePanelClass.prototype.GetTheadHtml = function () {
+    CollatePanelClass.prototype.GetTheadHtmlLeft = function () {
         var html = '';
         html += '<tr class="title">';
         html += '<td class="type_0">日期</td>';
+        html += '</tr>';
+        return html;
+    };
+    CollatePanelClass.prototype.GetTheadHtmlRight = function () {
+        var html = '';
+        html += '<tr class="title">';
         $.each(Data.UserList, function (k, user) {
             if (user.Did == 0) {
                 return true;
@@ -52,11 +59,63 @@ var CollatePanelClass = /** @class */ (function () {
         return html;
     };
     //组合tbody
-    CollatePanelClass.prototype.GetTbodyHtml = function () {
+    CollatePanelClass.prototype.GetTbodyHtmlLeft = function () {
+        var _this = this;
+        var today = Common.GetDate(0);
+        var day = Common.GetDay(today);
+        var html = '';
+        $.each(this.DateList, function (k, dateItem) {
+            html += _this.GetTbodyFirstTd(today, dateItem);
+            html += '</tr>';
+            if (dateItem.w == 7) {
+                html += '<tr class="space"><td style="width:150px;min-width:150px;"></td></tr>';
+            }
+        });
+        return html;
+    };
+    /**组合第一列 */
+    CollatePanelClass.prototype.GetTbodyFirstTd = function (today, dateItem) {
+        var html = '';
+        var trClass = [];
+        if (dateItem.w >= 6) {
+            trClass.push('weekend');
+        }
+        html += '<tr class="' + trClass.join(' ') + '" date="' + dateItem.s + '">';
+        var tdClass = ['frist'];
+        if (dateItem.s == today) {
+            tdClass.push('today');
+        }
+        html += '<td class="' + tdClass.join(' ') + '">';
+        html += '<dl>';
+        if (ProcessData.HasVersionDateLineMap(dateItem.s)) {
+            var publish = ProcessData.VersionDateLineMap[dateItem.s][0];
+            var _genre = publish.Genre;
+            var version = ProcessData.VersionMap[publish.Vid];
+            var publishName = '版本' + VersionManager.GetPublishName(_genre);
+            html += '<dd class="notice sk_' + _genre + '">' + version.Ver + ' ' + publishName + '</dd>';
+        }
+        else {
+            var publish = VersionManager.GetNextNearestPublish(dateItem.s, false);
+            if (publish) {
+                var _genre = publish.Genre;
+                var version = ProcessData.VersionMap[publish.Vid];
+                var publishName = '版本' + VersionManager.GetPublishName(_genre);
+                html += '<dd class="notice sk_' + _genre + '">' + Common.DateLineSpaceDay(publish.DateLine, dateItem.s) + '天后</dd>';
+                html += '<dd class="notice sk_' + _genre + '">' + version.Ver + ' ' + publishName + '</dd>';
+            }
+        }
+        html += '<dt>' + dateItem.s + '</dt>';
+        html += '<dd>星期' + DateTime.WeekMap[dateItem.w - 1] + '</dd>';
+        html += '</dl>';
+        html += '</td>';
+        return html;
+    };
+    CollatePanelClass.prototype.GetTbodyHtmlRight = function () {
         var today = Common.GetDate(0);
         var day = Common.GetDay(today);
         var html = '';
         $.each(this.DateList, function (r, dateItem) {
+            //
             var trClass = [];
             if (dateItem.w >= 6) {
                 trClass.push('weekend');
@@ -66,29 +125,7 @@ var CollatePanelClass = /** @class */ (function () {
             if (dateItem.s == today) {
                 tdClass.push('today');
             }
-            html += '<td class="' + tdClass.join(' ') + '">';
-            html += '<dl>';
-            if (ProcessData.HasVersionDateLineMap(dateItem.s)) {
-                var publish = ProcessData.VersionDateLineMap[dateItem.s][0];
-                var _genre = publish.Genre;
-                var version = ProcessData.VersionMap[publish.Vid];
-                var publishName = '版本' + VersionManager.GetPublishName(_genre);
-                html += '<dd class="notice sk_' + _genre + '">' + version.Ver + ' ' + publishName + '</dd>';
-            }
-            else {
-                var publish = VersionManager.GetNextNearestPublish(dateItem.s, false);
-                if (publish) {
-                    var _genre = publish.Genre;
-                    var version = ProcessData.VersionMap[publish.Vid];
-                    var publishName = '版本' + VersionManager.GetPublishName(_genre);
-                    html += '<dd class="notice sk_' + _genre + '">' + Common.DateLineSpaceDay(publish.DateLine, dateItem.s) + '天后</dd>';
-                    html += '<dd class="notice sk_' + _genre + '">' + version.Ver + ' ' + publishName + '</dd>';
-                }
-            }
-            html += '<dt>' + dateItem.s + '</dt>';
-            html += '<dd>星期' + DateTime.WeekMap[dateItem.w - 1] + '</dd>';
-            html += '</dl>';
-            html += '</td>';
+            //
             var cols = 1;
             $.each(Data.UserList, function (k, user) {
                 if (user.Did == 0) {
@@ -168,16 +205,42 @@ var CollatePanelClass = /** @class */ (function () {
     };
     //建立内容
     CollatePanelClass.prototype.CreateCollate = function () {
-        //组合thead
-        var html = '<div id="freezeTop" class="collateLock"><div class="lockTop"><table class="collate" id="rowLock">';
-        html += CollatePanel.GetTheadHtml();
-        html += '</table></div></div>';
-        html += '<div class="collateLockBody"><table class="collate">';
+        var _this = this;
+        Loader.LoadVueTemplate(this.VuePath + "Frame", function (tpl) {
+            Main.Draw(tpl);
+            $('#tableTitleLeft').html(_this.GetTheadHtmlLeft());
+            $('#tableTitleRight').html(_this.GetTheadHtmlRight());
+            $('#tableBodyLeft').html(_this.GetTbodyHtmlLeft());
+            $('#tableBodyRight').html(_this.GetTbodyHtmlRight());
+            $('#freezeTop').unbind().freezeTop();
+            setTimeout(function () {
+                var $trLeftList = $('#tableBodyLeft').find('tr');
+                var $trRightList = $('#tableBodyRight').find('tr');
+                var len = $trLeftList.length;
+                for (var i = 0; i < len; i++) {
+                    var trLeft = $trLeftList[i];
+                    var trRight = $trRightList[i];
+                    var hL = $(trLeft).height();
+                    var hR = $(trRight).height();
+                    var hMax = Math.max(hL, hR);
+                    console.log("[info]", i, hL, ":[hL]", hR, ":[hR]", hMax, ":[hMax]");
+                    if (hL < hMax) {
+                        $(trLeft).height(hMax + 2);
+                    }
+                    else if (hR < hMax) {
+                        $(trRight).height(hMax + 2);
+                    }
+                }
+            }, 1000);
+        });
+        /* //组合thead
+        var html = '<div id="freezeTop" class="collateLock"><div class="lockTop"><table class="collate" id="rowLock">'
+        html += CollatePanel.GetTheadHtmlRight()
+        html += '</table></div></div>'
+        html += '<div class="collateLockBody"><table class="collate">'
         //组合tbody
-        html += CollatePanel.GetTbodyHtml();
-        html += '</table></div>';
-        Main.Draw(html);
-        $('#freezeTop').unbind().freezeTop();
+        html += CollatePanel.GetTbodyHtml()
+        html += '</table></div>'*/
     };
     //事件绑定
     CollatePanelClass.prototype.BindActions = function () {
@@ -194,36 +257,38 @@ var CollatePanelClass = /** @class */ (function () {
                 _this.ShowStepMenu(el, e);
             }
         });
-        /*
-        .delegate('li', 'click', (e: JQuery.Event) => {
-            CollatePanel.HideMenu()
-            // if(e.button !== Main.MouseDir) {
-            // 	return false
-            // }
-            if (!User.IsWrite) {
-                return
-            }
-            if ($(e.currentTarget).is('[wid]')) {
-                CollatePanel.ShowStepMenu(e.currentTarget as HTMLElement, e)
-            } else {
-                CollatePanel.ShowExtraMenu(e.currentTarget as HTMLElement, e)
-            }
-        }).delegate('td', 'click', (e: JQuery.Event) => {
-            console.log("[info]",e.currentTarget,e.target)
-            //界面结构是 td里面有li,  所以点击li显示ShowStepMenu后 在这里会触发CollatePanel.HideMenu, 从而关闭StepMenu, 反正ExtraEdit暂时用不到,所以先注释掉
-            if (!User.IsWrite) {
-                return
-            }
-            switch ((e.currentTarget  as HTMLElement).localName) {
-                case 'td':
-                    CollatePanel.HideMenu()
-                    break
-                case 'div'://不可能走到这里吧?
-                    CollatePanel.HideMenu()
-                    CollatePanel.ShowExtraEdit(e.currentTarget as HTMLElement, e)
-                    break
-            }
-        }) */
+        {
+            /*
+            .delegate('li', 'click', (e: JQuery.Event) => {
+                CollatePanel.HideMenu()
+                // if(e.button !== Main.MouseDir) {
+                    // 	return false
+                    // }
+                    if (!User.IsWrite) {
+                        return
+                    }
+                    if ($(e.currentTarget).is('[wid]')) {
+                        CollatePanel.ShowStepMenu(e.currentTarget as HTMLElement, e)
+                    } else {
+                        CollatePanel.ShowExtraMenu(e.currentTarget as HTMLElement, e)
+                    }
+                }).delegate('td', 'click', (e: JQuery.Event) => {
+                    console.log("[info]",e.currentTarget,e.target)
+                    //界面结构是 td里面有li,  所以点击li显示ShowStepMenu后 在这里会触发CollatePanel.HideMenu, 从而关闭StepMenu, 反正ExtraEdit暂时用不到,所以先注释掉
+                    if (!User.IsWrite) {
+                        return
+                    }
+                    switch ((e.currentTarget  as HTMLElement).localName) {
+                        case 'td':
+                        CollatePanel.HideMenu()
+                        break
+                        case 'div'://不可能走到这里吧?
+                        CollatePanel.HideMenu()
+                        CollatePanel.ShowExtraEdit(e.currentTarget as HTMLElement, e)
+                        break
+                    }
+                }) */
+        }
     };
     //显示菜单
     CollatePanelClass.prototype.ShowStepMenu = function (el, e) {

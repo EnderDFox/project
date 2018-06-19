@@ -33,10 +33,16 @@ class CollatePanelClass {
 		CollatePanel.DateList = list
 	}
 	//组合头部
-	GetTheadHtml() {
+	GetTheadHtmlLeft() {
 		var html = ''
 		html += '<tr class="title">'
 		html += '<td class="type_0">日期</td>'
+		html += '</tr>'
+		return html
+	}
+	GetTheadHtmlRight() {
+		var html = ''
+		html += '<tr class="title">'
 		$.each(Data.UserList, (k, user: UserSingle) => {
 			if (user.Did == 0) {
 				return true
@@ -51,11 +57,61 @@ class CollatePanelClass {
 		return html
 	}
 	//组合tbody
-	GetTbodyHtml() {
+	GetTbodyHtmlLeft() {
 		var today = Common.GetDate(0)
 		var day = Common.GetDay(today)
 		var html = ''
-		$.each(this.DateList, function (r, dateItem: IDateItem) {
+		$.each(this.DateList, (k, dateItem: IDateItem) => {
+			html += this.GetTbodyFirstTd(today, dateItem)
+			html += '</tr>'
+			if (dateItem.w == 7) {
+				html += '<tr class="space"><td style="width:150px;min-width:150px;"></td></tr>'
+			}
+		})
+		return html
+	}
+	/**组合第一列 */
+	GetTbodyFirstTd(today: string, dateItem: IDateItem): string {
+		var html: string = ''
+		var trClass = []
+		if (dateItem.w >= 6) {
+			trClass.push('weekend')
+		}
+		html += '<tr class="' + trClass.join(' ') + '" date="' + dateItem.s + '">'
+		var tdClass = ['frist']
+		if (dateItem.s == today) {
+			tdClass.push('today')
+		}
+		html += '<td class="' + tdClass.join(' ') + '">'
+		html += '<dl>'
+		if (ProcessData.HasVersionDateLineMap(dateItem.s)) {
+			var publish: PublishSingle = ProcessData.VersionDateLineMap[dateItem.s][0]
+			var _genre = publish.Genre
+			var version = ProcessData.VersionMap[publish.Vid]
+			var publishName = '版本' + VersionManager.GetPublishName(_genre)
+			html += '<dd class="notice sk_' + _genre + '">' + version.Ver + ' ' + publishName + '</dd>'
+		} else {
+			var publish: PublishSingle = VersionManager.GetNextNearestPublish(dateItem.s, false)
+			if (publish) {
+				var _genre = publish.Genre
+				var version = ProcessData.VersionMap[publish.Vid]
+				var publishName = '版本' + VersionManager.GetPublishName(_genre)
+				html += '<dd class="notice sk_' + _genre + '">' + Common.DateLineSpaceDay(publish.DateLine, dateItem.s) + '天后</dd>'
+				html += '<dd class="notice sk_' + _genre + '">' + version.Ver + ' ' + publishName + '</dd>'
+			}
+		}
+		html += '<dt>' + dateItem.s + '</dt>'
+		html += '<dd>星期' + DateTime.WeekMap[dateItem.w - 1] + '</dd>'
+		html += '</dl>'
+		html += '</td>'
+		return html;
+	}
+	GetTbodyHtmlRight() {
+		var today = Common.GetDate(0)
+		var day = Common.GetDay(today)
+		var html = ''
+		$.each(this.DateList, (r, dateItem: IDateItem) => {
+			//
 			var trClass = []
 			if (dateItem.w >= 6) {
 				trClass.push('weekend')
@@ -65,29 +121,7 @@ class CollatePanelClass {
 			if (dateItem.s == today) {
 				tdClass.push('today')
 			}
-			html += '<td class="' + tdClass.join(' ') + '">'
-			html += '<dl>'
-			if (ProcessData.HasVersionDateLineMap(dateItem.s)) {
-				var publish: PublishSingle = ProcessData.VersionDateLineMap[dateItem.s][0]
-				var _genre = publish.Genre
-				var version = ProcessData.VersionMap[publish.Vid]
-				var publishName = '版本' + VersionManager.GetPublishName(_genre)
-				html += '<dd class="notice sk_' + _genre + '">' + version.Ver + ' ' + publishName + '</dd>'
-			} else {
-				var publish: PublishSingle = VersionManager.GetNextNearestPublish(dateItem.s, false)
-				if (publish) {
-					var _genre = publish.Genre
-					var version = ProcessData.VersionMap[publish.Vid]
-					var publishName = '版本' + VersionManager.GetPublishName(_genre)
-					html += '<dd class="notice sk_' + _genre + '">' + Common.DateLineSpaceDay(publish.DateLine, dateItem.s) + '天后</dd>'
-					html += '<dd class="notice sk_' + _genre + '">' + version.Ver + ' ' + publishName + '</dd>'
-				}
-			}
-			html += '<dt>' + dateItem.s + '</dt>'
-			html += '<dd>星期' + DateTime.WeekMap[dateItem.w - 1] + '</dd>'
-
-			html += '</dl>'
-			html += '</td>'
+			//
 			var cols = 1
 			$.each(Data.UserList, (k, user: UserSingle) => {
 				if (user.Did == 0) {
@@ -163,18 +197,43 @@ class CollatePanelClass {
 		html += '</li>'
 		return html
 	}
+	VuePath: string = 'collate/'
 	//建立内容
 	CreateCollate() {
-		//组合thead
+		Loader.LoadVueTemplate(this.VuePath + `Frame`, (tpl: string) => {
+			Main.Draw(tpl)
+			$('#tableTitleLeft').html(this.GetTheadHtmlLeft())
+			$('#tableTitleRight').html(this.GetTheadHtmlRight())
+			$('#tableBodyLeft').html(this.GetTbodyHtmlLeft())
+			$('#tableBodyRight').html(this.GetTbodyHtmlRight())
+			$('#freezeTop').unbind().freezeTop()
+			setTimeout(() => {
+				var $trLeftList = $('#tableBodyLeft').find('tr')
+				var $trRightList = $('#tableBodyRight').find('tr')
+				var len = $trLeftList.length
+				for (var i = 0; i < len; i++) {
+					var trLeft = $trLeftList[i]
+					var trRight = $trRightList[i]
+					var hL = $(trLeft).height()
+					var hR = $(trRight).height()
+					var hMax = Math.max(hL,hR)
+					console.log("[info]",i,hL,":[hL]",hR,":[hR]",hMax,":[hMax]")
+					if(hL<hMax){
+						$(trLeft).height(hMax+2)
+					}else if(hR<hMax){
+						$(trRight).height(hMax+2)
+					}
+				}
+			}, 1000);
+		})
+		/* //组合thead
 		var html = '<div id="freezeTop" class="collateLock"><div class="lockTop"><table class="collate" id="rowLock">'
-		html += CollatePanel.GetTheadHtml()
+		html += CollatePanel.GetTheadHtmlRight()
 		html += '</table></div></div>'
 		html += '<div class="collateLockBody"><table class="collate">'
 		//组合tbody
 		html += CollatePanel.GetTbodyHtml()
-		html += '</table></div>'
-		Main.Draw(html)
-		$('#freezeTop').unbind().freezeTop()
+		html += '</table></div>'*/
 	}
 	//事件绑定
 	BindActions() {
@@ -190,36 +249,38 @@ class CollatePanelClass {
 				this.ShowStepMenu(el, e)
 			}
 		})
-		/* 
-		.delegate('li', 'click', (e: JQuery.Event) => {
-			CollatePanel.HideMenu()
-			// if(e.button !== Main.MouseDir) {
-			// 	return false
-			// }
-			if (!User.IsWrite) {
-				return
-			}
-			if ($(e.currentTarget).is('[wid]')) {
-				CollatePanel.ShowStepMenu(e.currentTarget as HTMLElement, e)
-			} else {
-				CollatePanel.ShowExtraMenu(e.currentTarget as HTMLElement, e)
-			}
-		}).delegate('td', 'click', (e: JQuery.Event) => {
-			console.log("[info]",e.currentTarget,e.target)
-			//界面结构是 td里面有li,  所以点击li显示ShowStepMenu后 在这里会触发CollatePanel.HideMenu, 从而关闭StepMenu, 反正ExtraEdit暂时用不到,所以先注释掉
-			if (!User.IsWrite) {
-				return
-			}
-			switch ((e.currentTarget  as HTMLElement).localName) {
-				case 'td':
-					CollatePanel.HideMenu()
-					break
-				case 'div'://不可能走到这里吧?
-					CollatePanel.HideMenu()
-					CollatePanel.ShowExtraEdit(e.currentTarget as HTMLElement, e)
-					break
-			}
-		}) */
+		{
+			/* 
+			.delegate('li', 'click', (e: JQuery.Event) => {
+				CollatePanel.HideMenu()
+				// if(e.button !== Main.MouseDir) {
+					// 	return false
+					// }
+					if (!User.IsWrite) {
+						return
+					}
+					if ($(e.currentTarget).is('[wid]')) {
+						CollatePanel.ShowStepMenu(e.currentTarget as HTMLElement, e)
+					} else {
+						CollatePanel.ShowExtraMenu(e.currentTarget as HTMLElement, e)
+					}
+				}).delegate('td', 'click', (e: JQuery.Event) => {
+					console.log("[info]",e.currentTarget,e.target)
+					//界面结构是 td里面有li,  所以点击li显示ShowStepMenu后 在这里会触发CollatePanel.HideMenu, 从而关闭StepMenu, 反正ExtraEdit暂时用不到,所以先注释掉
+					if (!User.IsWrite) {
+						return
+					}
+					switch ((e.currentTarget  as HTMLElement).localName) {
+						case 'td':
+						CollatePanel.HideMenu()
+						break
+						case 'div'://不可能走到这里吧?
+						CollatePanel.HideMenu()
+						CollatePanel.ShowExtraEdit(e.currentTarget as HTMLElement, e)
+						break
+					}
+				}) */
+		}
 	}
 	//显示菜单
 	ShowStepMenu(el: HTMLElement, e: JQuery.Event) {

@@ -33,6 +33,8 @@ class CollateDataClass {
 		this.ExtraMap = {}
 		this.DateUserMap = {}
 		this.DateExtraMap = {}
+		//
+		ProcessData.ParseVersionData(data.VersionList)
 		//功能内容
 		$.each(data.ModeList, (k, v) => {
 			this.ModeMap[v.Mid] = v
