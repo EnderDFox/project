@@ -28,7 +28,6 @@ var ProcessManagerClass = /** @class */ (function () {
         ProcessData.Init(data);
         ProcessPanel.SetDateRange();
         ProcessPanel.CreateProcess();
-        ProcessPanel.BindActions();
     };
     //改变工作
     ProcessManagerClass.prototype.GridChange = function (data) {
@@ -167,7 +166,7 @@ var ProcessManagerClass = /** @class */ (function () {
             ProcessData.LinkMap[link.Lid] = link;
         }
         //add mode
-        var add = $(ProcessPanel.GetModeHtml(data.ModeSingle.Mid));
+        var add = $(ProcessPanel.GetModeHtmlLeft(data.ModeSingle.Mid));
         $('#content .mode[mid="' + data.PrevMid + '"]').parent().next().after(add);
         //绑定流程数据
         add.find('.linkMap tr').each(function () {

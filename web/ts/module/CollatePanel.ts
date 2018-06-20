@@ -241,6 +241,8 @@ class CollatePanelClass {
 			requestAnimationFrame(resetSize);
 			$('#freezeTitleRight').unbind().freezeTop(true)
 			$('#freezeBodyLeft').unbind().freezeLeft(false)
+			//
+			this.BindActions()
 		})
 		/* //组合thead
 		var html = '<div id="freezeTop" class="collateLock"><div class="lockTop"><table class="collate" id="rowLock">'

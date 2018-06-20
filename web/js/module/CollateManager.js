@@ -15,7 +15,6 @@ var CollateManagerClass = /** @class */ (function () {
         CollateData.Init(data);
         CollatePanel.SetDateRange();
         CollatePanel.CreateCollate();
-        CollatePanel.BindActions();
     };
     //编辑
     CollateManagerClass.prototype.StepEdit = function (data) {

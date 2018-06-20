@@ -130,10 +130,6 @@ var ProcessPanelClass = /** @class */ (function () {
             if (!User.IsWrite) {
                 return false;
             }
-            var index = $(e.currentTarget).index();
-            if (index < 3) {
-                return false;
-            }
             _this.ShowMenuPub(e.currentTarget, e);
         }).delegate('td', 'mouseenter', function (e) {
             e.stopPropagation();
@@ -151,53 +147,88 @@ var ProcessPanelClass = /** @class */ (function () {
         });
     };
     //组合头部
-    ProcessPanelClass.prototype.GetTheadHtml = function () {
+    ProcessPanelClass.prototype.GetTheadHtmlLeft = function () {
         var today = Common.GetDate(0);
-        var html = '';
-        html += '<thead>';
-        html += '<tr> \
-					<td colspan="3" class="tools">功能列表</td>';
+        var html = "";
+        html += "<thead>\n\t\t\t\t<tr> \n\t\t\t\t\t<td colspan=\"3\" class=\"tools\">\u529F\u80FD\u5217\u8868</td>\n\t\t\t\t</tr> \n\t\t\t\t<tr> \n\t\t\t\t\t<td class=\"func\">\u529F\u80FD</td> \n\t\t\t\t\t<td class=\"link\">\u6D41\u7A0B</td> \n\t\t\t\t\t<td class=\"duty\">\u8D1F\u8D23\u4EBA</td>\n\t\t\t\t</tr>\n\t\t\t\t</thead>";
+        return html;
+    };
+    ProcessPanelClass.prototype.GetTheadHtmlRight = function () {
+        var today = Common.GetDate(0);
+        var html = "";
+        html += "<thead>";
+        html += "<tr> ";
         $.each(this.DateList.rows, function (date, num) {
             var mt = date.substr(-2);
             if (num > 1) {
-                html += '<td colspan="' + num + '" class="date_' + (parseInt(mt) % 2) + '">' + date + '</td>';
+                html += "<td colspan=\"" + num + "\" class=\"date_" + (parseInt(mt) % 2) + "\">" + date + "</td>";
             }
             else {
-                html += '<td class="date_' + (parseInt(mt) % 2) + '">' + mt + '</td>';
+                html += "<td class=\"date_" + (parseInt(mt) % 2) + "\">" + mt + "</td>";
             }
         });
-        html += '</tr> \
-				<tr class="title"> \
-					<td class="func">功能</td> \
-					<td class="link">流程</td> \
-					<td class="duty">负责人</td>';
+        html += "</tr>";
+        html += "<tr class=\"title\"> ";
         $.each(this.DateList.list, function (k, info) {
             if (info.s == today) {
-                html += '<td class="today"';
+                html += "<td class=\"today\"";
             }
             else {
-                html += '<td';
+                html += "<td";
             }
-            html += ' date_line="' + info.s + '">';
-            html += '<div class="info">' + info.d + '</div>';
+            html += " date_line=\"" + info.s + "\">";
+            html += " <div class=\"info\" > " + info.d + " </div>";
             if (ProcessData.HasVersionDateLineMap(info.s)) {
                 var _genre = ProcessData.VersionDateLineMap[info.s][0].Genre;
-                html += '<div class="stroke sk_' + _genre + '" date_line="' + info.s + '"></div>';
+                html += "<div class=\"stroke sk_" + _genre + "\" date_line=\"" + info.s + "\"></div>";
             }
-            html += '</td>';
+            html += "</td>";
         });
-        html += '</tr>';
-        html += '</thead>';
+        html += "</tr>";
+        html += "</thead>";
         return html;
     };
-    //组合流程
+    //组合流程 单个link
     ProcessPanelClass.prototype.GetLinkHtml = function (link) {
         var html = '';
         if (!link) {
             return html;
         }
-        html += "<tr lid=\"" + link.Lid + "\">  <td class=\"link bg_" + link.Color + "\" type=\"link\">" + ((link.Name == '' ? '空' : link.Name) + ProcessPanel.GetModeLinkStatusName(link.Status)) + "</td>  <td class=\"duty\" type=\"duty\">" + Data.GetUser(link.Uid).Name + "</td>";
-        //进度
+        html += "<tr lid=\"" + link.Lid + "\">";
+        html += "\t<td class=\"link bg_" + link.Color + "\" type=\"link\">" + (link.Name == '' ? '空' : link.Name) + ProcessPanel.GetModeLinkStatusName(link.Status) + "</td>\n\t\t\t\t\t<td class=\"duty\" type=\"duty\">" + Data.GetUser(link.Uid).Name + "</td>";
+        html += '</tr>';
+        return html;
+    };
+    //组合流程列表 一个mode下的多个link
+    ProcessPanelClass.prototype.GetLinkListHtml = function (mode) {
+        var _this = this;
+        var html = '';
+        html += '<table class="linkMap">';
+        $.each(mode.LinkList, function (k, link) {
+            //流程与进度
+            html += _this.GetLinkHtml(link);
+        });
+        html += '</table>';
+        return html;
+    };
+    //组合work列表 一个mode下的多个link中的每个work
+    ProcessPanelClass.prototype.GetWorkListHtml = function (mode) {
+        var _this = this;
+        var html = '';
+        html += '<table class="linkMap">';
+        $.each(mode.LinkList, function (k, link) {
+            //流程与进度
+            html += _this.GetWorkHtml(link);
+        });
+        html += '</table>';
+        return html;
+    };
+    ProcessPanelClass.prototype.GetWorkHtml = function (link) {
+        var html = '';
+        if (!link) {
+            return html;
+        }
+        html += "<tr lid=\"" + link.Lid + "\">";
         $.each(this.DateList.list, function (k, info) {
             //填充
             if (info.w < 6) {
@@ -210,43 +241,48 @@ var ProcessPanelClass = /** @class */ (function () {
         html += '</tr>';
         return html;
     };
-    //组合流程列表
-    ProcessPanelClass.prototype.GetLinkListHtml = function (mode) {
-        var _this = this;
-        var html = '';
-        html += '<table class="linkMap">';
-        $.each(mode.LinkList, function (k, link) {
-            //流程与进度
-            html += _this.GetLinkHtml(link);
-        });
-        html += '</table>';
-        return html;
-    };
     //组合功能
-    ProcessPanelClass.prototype.GetModeHtml = function (mid) {
+    ProcessPanelClass.prototype.GetModeHtmlLeft = function (mid) {
         var html = '';
         var mode = ProcessData.ModeMap[mid];
         if (!mode) {
             return html;
         }
-        html += '<tr> \
-					<td class="mode bg_' + mode.Color + '" mid="' + mode.Mid + '">' + VersionManager.GetVersionVer(mode.Vid) + (mode.Name == '' ? '空' : mode.Name) + this.GetModeLinkStatusName(mode.Status) + '</td> \
-					<td colspan="' + (this.DateList.list.length + 2) + '">';
-        //流程
-        html += this.GetLinkListHtml(mode);
-        html += '</td> \
-				</tr> \
-				<tr class="space"><td colspan="' + (this.DateList.list.length + 3) + '"></td></tr>';
+        html += "<tr>\n\t\t\t\t\t<td class=\"mode bg_" + mode.Color + "\" mid=\"" + mode.Mid + "\">" + VersionManager.GetVersionVer(mode.Vid) + (mode.Name == '' ? '空' : mode.Name) + this.GetModeLinkStatusName(mode.Status) + "</td> \n\t\t\t\t\t<td colspan=\"2\">\n\t\t\t\t\t" + this.GetLinkListHtml(mode) + "\n\t\t\t\t\t</td> \n\t\t\t\t</tr> ";
+        html += "<tr class=\"space\"><td colspan=\"3\"></td></tr>";
+        // html += `<tr class="space"><td colspan="${(this.DateList.list.length + 3)}"></td></tr>`
+        return html;
+    };
+    ProcessPanelClass.prototype.GetModeHtmlRight = function (mid) {
+        var html = '';
+        var mode = ProcessData.ModeMap[mid];
+        if (!mode) {
+            return html;
+        }
+        html += "<tr>\n\t\t\t\t\t<td colspan=\"" + (this.DateList.list.length) + "\">\n\t\t\t\t\t" + this.GetWorkListHtml(mode) + "\n\t\t\t\t\t</td> \n\t\t\t\t</tr> ";
+        html += "<tr class=\"space\"><td colspan=\"" + (this.DateList.list.length) + "\"></td></tr>";
         return html;
     };
     //组合tbody
-    ProcessPanelClass.prototype.GetTbodyHtml = function () {
+    ProcessPanelClass.prototype.GetTbodyHtmlLeft = function () {
         var _this = this;
         var html = '';
         html += '<tbody>';
         //功能
         $.each(ProcessData.Project.ModeList, function (k, mode) {
-            html += _this.GetModeHtml(mode.Mid);
+            html += _this.GetModeHtmlLeft(mode.Mid);
+        });
+        html += '</tbody>';
+        return html;
+    };
+    //组合tbody
+    ProcessPanelClass.prototype.GetTbodyHtmlRight = function () {
+        var _this = this;
+        var html = '';
+        html += '<tbody>';
+        //功能
+        $.each(ProcessData.Project.ModeList, function (k, mode) {
+            html += _this.GetModeHtmlRight(mode.Mid);
         });
         html += '</tbody>';
         return html;
@@ -257,14 +293,18 @@ var ProcessPanelClass = /** @class */ (function () {
         Loader.LoadVueTemplate(ProcessFilter.VuePath + "PanelFrame", function (tpl) {
             var $main = Main.Draw(tpl);
             //组合thead
-            $('#tableTitleLeft').html(_this.GetTheadHtml());
-            $('#tableBodyLeft').html(_this.GetTbodyHtml());
+            $('#tableTitleLeft').html(_this.GetTheadHtmlLeft());
+            $('#tableTitleRight').html(_this.GetTheadHtmlRight());
+            $('#tableBodyLeft').html(_this.GetTbodyHtmlLeft());
+            $('#tableBodyRight').html(_this.GetTbodyHtmlRight());
             //流程数据
             $main.find('.linkMap tr').each(function (index, el) {
                 var lid = parseInt($(el).attr('lid'));
                 _this.SetLinkData(lid, el);
             });
-            $('#freezeTop').unbind().freezeTop(true);
+            $('#freezeTitleRight').unbind().freezeTop(true);
+            $('#freezeBodyLeft').unbind().freezeLeft(false);
+            _this.BindActions();
         });
     };
     //流程数据
@@ -645,10 +685,12 @@ var ProcessPanelClass = /** @class */ (function () {
     ProcessPanelClass.prototype.ShowMenuPub = function (o, e) {
         var top = e.pageY + 4;
         var left = e.pageX + 2;
-        var index = $(o).index() - 3;
+        var index = $(o).index();
         var info = this.DateList.list[index];
         this.HideMenu();
-        VersionManager.ShowTableHeaderMenu(info.s, left, top);
+        if (info) {
+            VersionManager.ShowTableHeaderMenu(info.s, left, top);
+        }
     };
     //选中迷你小匡
     ProcessPanelClass.prototype.ShowMiniBox = function (e) {

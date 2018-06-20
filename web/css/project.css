@@ -446,7 +446,9 @@
 /*内容锁定*/
 .processLock{position:fixed;margin-top:35px;padding-top:10px;top:0px;background:#fff;z-index:1;-webkit-transform:translateZ(0);-moz-transform:translateZ(0);-ms-transform:translateZ(0);-o-transform:translateZ(0);transform:translateZ(0);}
 .processLock > .lockTop{box-shadow:0px 0px 3px #333333;margin-left:10px;margin-right:10px;-webkit-transform:translateZ(0);-moz-transform:translateZ(0);-ms-transform:translateZ(0);-o-transform:translateZ(0);transform:translateZ(0);}
-.processLockBody{/*position:relative;top:0px;*/padding-top:0px;margin-top:126px;margin-left:10px;margin-right:10px;box-shadow:0px 0px 3px #333333;-webkit-transform:translateZ(0);-moz-transform:translateZ(0);-ms-transform:translateZ(0);-o-transform:translateZ(0);transform:translateZ(0);}
+.processLockBody{/*position:relative;top:0px;*/padding-top:0px;margin-top:126px;margin-left:10px;margin-right:10px;
+  /* box-shadow:0px 0px 3px #333333; */
+  -webkit-transform:translateZ(0);-moz-transform:translateZ(0);-ms-transform:translateZ(0);-o-transform:translateZ(0);transform:translateZ(0);}
 
 /*
 
@@ -526,7 +528,9 @@
 .collateLock > .lockTop{box-shadow:0px 0px 3px #333333;-webkit-transform:translateZ(0);-moz-transform:translateZ(0);-ms-transform:translateZ(0);-o-transform:translateZ(0);transform:translateZ(0);position: fixed;left: 0px;top: 0px;}
 
 
-.collateLockBody{padding-top:0px;margin-top:85px;margin-left:10px;margin-right:10px;box-shadow:0px 0px 3px #333333;-webkit-transform:translateZ(0);-moz-transform:translateZ(0);-ms-transform:translateZ(0);-o-transform:translateZ(0);transform:translateZ(0);}
+.collateLockBody{padding-top:0px;margin-top:85px;margin-left:10px;margin-right:10px;
+  /* box-shadow:0px 0px 3px #333333; */
+  -webkit-transform:translateZ(0);-moz-transform:translateZ(0);-ms-transform:translateZ(0);-o-transform:translateZ(0);transform:translateZ(0);}
 
 .freeze{
   position: fixed; left:0px;top: 0px; 
@@ -538,7 +542,7 @@
   z-index: 4;
 }
 #freezeTitleRight{
-  margin-left: 172px;margin-top: 35px; padding-top:10px;
+  margin-top: 35px; padding-top:10px;
   z-index: 3;
 }
 #freezeBodyLeft{
@@ -547,7 +551,7 @@
 }
 
 #freezeBodyRight{
-  margin-left: 172px;margin-top: 81px;
+  margin-top: 81px;
 }
 
 /*==========================================================个人==========================================================*/

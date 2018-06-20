@@ -13,7 +13,6 @@ class CollateManagerClass {
 		CollateData.Init(data)
 		CollatePanel.SetDateRange()
 		CollatePanel.CreateCollate()
-		CollatePanel.BindActions()
 	}
 	//编辑
 	StepEdit(data: WorkSingle) {
