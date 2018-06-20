@@ -57,6 +57,33 @@ class ProcessManagerClass {
 		ProcessData.LinkMap[data.Lid] = data
 		$('#content .trLink[lid="' + data.Lid + '"] td:eq(1)').html(Data.GetUser(data.Uid).Name)
 	}
+	//新增流程
+	LinkAdd(data: L2C_ProcessGridAdd) {
+		//数据变化
+		ProcessData.LinkMap[data.LinkSingle.Lid] = data.LinkSingle
+		var mode: ModeSingle = ProcessData.ModeMap[data.LinkSingle.Mid]
+		if (mode) {
+			var prevIndex = ArrayUtil.IndexOfAttr(mode.LinkList, FieldName.Lid, data.PrevLid)
+			if (prevIndex > -1) {
+				mode.LinkList.splice(prevIndex, 1, data.LinkSingle)
+			}
+			var add = $(ProcessPanel.GetLinkHtml(data.LinkSingle))
+			$('#content .trLink[lid="' + data.PrevLid + '"]').after(add)
+			ProcessPanel.SetLinkData(data.LinkSingle.Lid, add.get(0))
+			add = $(ProcessPanel.GetWorkHtml(data.LinkSingle))
+			$('#content .trWork[lid="' + data.PrevLid + '"]').after(add)
+			ProcessPanel.SetWorkData(data.LinkSingle.Lid, add.get(0))
+		}
+	}
+	//流程名字
+	LinkEdit(data: LinkSingle) {
+		//数据变化
+		var link: LinkSingle = ProcessData.LinkMap[data.Lid]
+		if (link) {
+			ProcessData.LinkMap[link.Lid].Name = data.Name
+			$('#content .trLink[lid="' + link.Lid + '"] .link').attr('class', 'link bg_' + link.Color).html(link.Name == '' ? '空' : link.Name + ProcessPanel.GetModeLinkStatusName(link.Status))
+		}
+	}
 	//交换流程
 	LinkSwapSort(data: L2C_ProcessGridSwap) {
 		//数据变化
@@ -70,25 +97,37 @@ class ProcessManagerClass {
 			if (index0 > -1 && index0 > -1) {
 				mode.LinkList.splice(index0, 1, ...mode.LinkList.splice(index1, 1, link0))
 			}
+			//
 			var A = $('#content .trLink[lid="' + link0.Lid + '"]')
 			var B = $('#content .trLink[lid="' + link1.Lid + '"]')
 			A.before(B)
+			//
+			var A = $('#content .trWork[lid="' + link0.Lid + '"]')
+			var B = $('#content .trWork[lid="' + link1.Lid + '"]')
+			A.before(B)
 		}
 	}
-	//新增流程
-	LinkAdd(data: L2C_ProcessGridAdd) {
-		//数据变化
-		ProcessData.LinkMap[data.LinkSingle.Lid] = data.LinkSingle
-		var mode: ModeSingle = ProcessData.ModeMap[data.LinkSingle.Mid]
-		if (mode) {
-			var prevIndex = ArrayUtil.IndexOfAttr(mode.LinkList, FieldName.Lid, data.PrevLid)
-			if (prevIndex > -1) {
-				mode.LinkList.splice(prevIndex, 1, data.LinkSingle)
+	//归档处理
+	LinkStore(data: L2C_ProcessLinkStore) {
+		//在进行状态中
+		if (data.Status == LinkStatusField.STORE) {
+			var link = ProcessData.LinkMap[data.Lid]
+			if (link) {
+				if (ProcessData.CheckNumberArray(LinkStatusField.STORE, ProcessFilter.Pack.LinkStatus) == false) {
+					//归档
+					this.DoLinkDelete(link)
+				}
+				else {
+					link.Status = data.Status
+					this.LinkEdit(link)
+				}
 			}
-			var add = $(ProcessPanel.GetLinkHtml(data.LinkSingle))
-			$('#content .trLink[lid="' + data.PrevLid + '"]').after(add)
-			//绑定数据
-			ProcessPanel.SetWorkData(data.LinkSingle.Lid, add.get(0))
+		} else {
+			var link = ProcessData.LinkMap[data.Lid]
+			if (link) {
+				link.Status = data.Status
+				this.LinkEdit(link)
+			}
 		}
 	}
 	//删除流程
@@ -96,27 +135,22 @@ class ProcessManagerClass {
 		//数据变化
 		var link: LinkSingle = ProcessData.LinkMap[data.Lid]
 		if (link) {
-			var mode: ModeSingle = ProcessData.ModeMap[link.Mid]
-			ArrayUtil.RemoveByAttr(mode.LinkList, FieldName.Lid, data.Lid)
-			//删除工作
-			$.each(ProcessData.WorkMap, (k, v: WorkSingle) => {
-				if (v.Lid != link.Lid) {
-					return
-				}
-				delete ProcessData.WorkMap[v.Wid]
-			})
-			delete ProcessData.LinkMap[data.Lid]
-			$('#content .trLink[lid="' + data.Lid + '"]').remove()
+			this.DoLinkDelete(link)
 		}
 	}
-	//流程名字
-	LinkEdit(data: LinkSingle) {
-		//数据变化
-		var link: LinkSingle = ProcessData.LinkMap[data.Lid]
-		if (link) {
-			ProcessData.LinkMap[link.Lid].Name = data.Name
-			$('#content .trLink[lid="' + link.Lid + '"] .link').attr('class', 'link bg_' + link.Color).html(link.Name == '' ? '空' : link.Name + ProcessPanel.GetModeLinkStatusName(link.Status))
-		}
+	DoLinkDelete(link:LinkSingle){
+		var mode: ModeSingle = ProcessData.ModeMap[link.Mid]
+		ArrayUtil.RemoveByAttr(mode.LinkList, FieldName.Lid, link.Lid)
+		//删除工作
+		$.each(ProcessData.WorkMap, (k, v: WorkSingle) => {
+			if (v.Lid != link.Lid) {
+				return
+			}
+			delete ProcessData.WorkMap[v.Wid]
+		})
+		delete ProcessData.LinkMap[link.Lid]
+		$('#content .trLink[lid="' + link.Lid + '"]').remove()
+		$('#content .trWork[lid="' + link.Lid + '"]').remove()
 	}
 	/**改变工作 状态 :工作 完成 延期 等待 优化 请假*/
 	WorkChangeStatus(data: WorkSingle) {
@@ -284,30 +318,6 @@ class ProcessManagerClass {
 		var work = ProcessData.WorkMap[data.Wid]
 		this.WorkEdit(work)
 		NoticeManager.ScoreEdit(data)
-	}
-	//归档处理
-	LinkStore(data: L2C_ProcessLinkStore) {
-		//在进行状态中
-		if (data.Status == LinkStatusField.STORE) {
-			var link = ProcessData.LinkMap[data.Lid]
-			if (link) {
-				if (ProcessData.CheckNumberArray(LinkStatusField.STORE, ProcessFilter.Pack.LinkStatus) == false) {
-					//归档
-					delete ProcessData.LinkMap[data.Lid]
-					$('#content .trLink[lid="' + data.Lid + '"]').remove()
-				}
-				else {
-					link.Status = data.Status
-					this.LinkEdit(link)
-				}
-			}
-		} else {
-			var link = ProcessData.LinkMap[data.Lid]
-			if (link) {
-				link.Status = data.Status
-				this.LinkEdit(link)
-			}
-		}
 	}
 	/**
 	 * @data PublishSingle 
