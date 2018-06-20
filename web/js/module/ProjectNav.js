@@ -101,8 +101,6 @@ var ProjectNavClass = /** @class */ (function () {
         plan.find(".tpl_edit").click(function (e) {
             TemplateManager.ShowEditTplModeList(e);
         });
-        //信息提示
-        NoticePanel.BindActions();
     };
     //个人主页
     ProjectNavClass.prototype.ProfilePanelShow = function () {

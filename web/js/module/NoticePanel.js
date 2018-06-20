@@ -60,6 +60,7 @@ var NoticePanelClass = /** @class */ (function () {
         NoticePanel.CreateList();
         //创建标志
         NoticePanel.CreateSign();
+        NoticePanel.BindActions();
     };
     //事件绑定
     NoticePanelClass.prototype.BindActions = function () {

@@ -1,5 +1,6 @@
 //进度数据
 class ProcessDataClass {
+	IsInit:boolean = false
 	//项目信息
 	Project: ProjectSingle
 	//工作内容
@@ -18,6 +19,7 @@ class ProcessDataClass {
 	LinkWorkMap: { [key: number]: { [key: string]: WorkSingle } }
 	//数据初始化
 	Init(data: L2C_ProcessView) {
+		this.IsInit = true
 		//初始化
 		this.Project = data.Project
 		this.Project.ModeList = []

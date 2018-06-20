@@ -98,8 +98,6 @@ class ProjectNavClass {
         plan.find(".tpl_edit").click((e: JQuery.Event) => {
             TemplateManager.ShowEditTplModeList(e)
         })
-        //信息提示
-        NoticePanel.BindActions()
     }
     //个人主页
     ProfilePanelShow() {

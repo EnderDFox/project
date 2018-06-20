@@ -193,18 +193,6 @@ class ProcessPanelClass {
 		html += `</thead>`
 		return html
 	}
-	//组合流程 单个link
-	GetLinkHtml(link: LinkSingle) {
-		var html = ''
-		if (!link) {
-			return html
-		}
-		html += `<tr lid="${link.Lid}">`
-		html += `	<td class="link bg_${link.Color}" type="link">${(link.Name == '' ? '空' : link.Name)}${ProcessPanel.GetModeLinkStatusName(link.Status)}</td>
-					<td class="duty" type="duty">${Data.GetUser(link.Uid).Name}</td>`
-		html += '</tr>'
-		return html
-	}
 	//组合流程列表 一个mode下的多个link
 	GetLinkListHtml(mode: ModeSingle) {
 		var html = ''
@@ -214,6 +202,18 @@ class ProcessPanelClass {
 			html += this.GetLinkHtml(link)
 		})
 		html += '</table>'
+		return html
+	}
+	//组合流程 单个link
+	GetLinkHtml(link: LinkSingle) {
+		var html = ''
+		if (!link) {
+			return html
+		}
+		html += `<tr class="trLink" lid="${link.Lid}">`
+		html += `	<td class="link bg_${link.Color}" type="link">${(link.Name == '' ? '空' : link.Name)}${ProcessPanel.GetModeLinkStatusName(link.Status)}</td>
+					<td class="duty" type="duty">${Data.GetUser(link.Uid).Name}</td>`
+		html += '</tr>'
 		return html
 	}
 	//组合work列表 一个mode下的多个link中的每个work
@@ -232,7 +232,7 @@ class ProcessPanelClass {
 		if (!link) {
 			return html
 		}
-		html += `<tr lid="${link.Lid}">`
+		html += `<tr class="trWork" lid="${link.Lid}">`
 		$.each(this.DateList.list, (k, info: IDateItem) => {
 			//填充
 			if (info.w < 6) {
@@ -251,7 +251,7 @@ class ProcessPanelClass {
 		if (!mode) {
 			return html
 		}
-		html += `<tr>
+		html += `<tr class="trModeLeft" mid="${mode.Mid}">
 					<td class="mode bg_${mode.Color}" mid="${mode.Mid}">${VersionManager.GetVersionVer(mode.Vid) }${ (mode.Name == '' ? '空' : mode.Name) }${ this.GetModeLinkStatusName(mode.Status) }</td> 
 					<td colspan="2">
 					${this.GetLinkListHtml(mode)}
@@ -267,7 +267,7 @@ class ProcessPanelClass {
 		if (!mode) {
 			return html
 		}
-		html += `<tr>
+		html += `<tr class="trModeRight" mid="${mode.Mid}">
 					<td colspan="${(this.DateList.list.length)}">
 					${this.GetWorkListHtml(mode)}
 					</td> 
@@ -307,20 +307,28 @@ class ProcessPanelClass {
 			$('#tableBodyLeft').html(this.GetTbodyHtmlLeft())
 			$('#tableBodyRight').html(this.GetTbodyHtmlRight())
 			//流程数据
-			$main.find('.linkMap tr').each((index: number, el: HTMLElement) => {
+			$main.find('.trLink').each((index: number, el: HTMLElement) => {
 				var lid = parseInt($(el).attr('lid'))
 				this.SetLinkData(lid, el)
+			})
+			$main.find('.trWork').each((index: number, el: HTMLElement) => {
+				var lid = parseInt($(el).attr('lid'))
+				this.SetWorkData(lid, el)
 			})
 			$('#freezeTitleRight').unbind().freezeTop(true)
 			$('#freezeBodyLeft').unbind().freezeLeft(false)
 			this.BindActions()
 		})
 	}
-	//流程数据
-	SetLinkData(lid: number, dom: HTMLElement) {
+	SetLinkData(lid:number, dom: HTMLElement) {
+		//绑定lid
+		$(dom).data('lid', lid)
+	}
+	//work数据
+	SetWorkData(lid: number, dom: HTMLElement) {
 		var linkWork = ProcessData.LinkWorkMap[lid]
 		var dateList = this.DateList.list
-		$(dom).find('td:gt(1)').each((k, el: HTMLElement) => {
+		$(dom).find('td').each((k, el: HTMLElement) => {
 			var grid: IWorkGrid = $.extend({}, dateList[k])
 			grid.lid = lid
 			grid.wid = 0
@@ -330,11 +338,9 @@ class ProcessPanelClass {
 				var work = ProcessData.WorkMap[grid.wid]
 				this.ShowWorkGrid(el, grid, work)
 			}
-			//绑定grid
+			//绑定work的data grid
 			$.data(el, 'grid', grid)
 		})
-		//绑定lid
-		$(dom).data('lid', lid)
 	}
 	//显示一个work格子内容
 	ShowWorkGrid(dom: HTMLElement, grid: IWorkGrid, work: WorkSingle) {

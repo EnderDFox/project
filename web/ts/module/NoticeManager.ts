@@ -7,8 +7,18 @@ class NoticeManagerClass {
     //点评提示
     ScoreNotice(data: { List: ScoreNoticeSingle[] }) {
         NoticeData.Init(data)
-        NoticePanel.CreateNotice()
-        //NoticePanel.BindActions()
+        //此时 process中数据还没过来呢, 所以要等
+        var checkInit = ()=>{
+            if(ProcessData.IsInit){
+                NoticePanel.CreateNotice()
+                NoticePanel.BindActions()
+            }else{
+                setTimeout(() => {
+                    checkInit()
+                }, 1000);
+            }
+        }
+        checkInit()
     }
     //评价完成
     ScoreEdit(data: ScoreSingle) {

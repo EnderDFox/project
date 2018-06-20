@@ -5,23 +5,26 @@ var ProcessManagerClass = /** @class */ (function () {
     //注册函数
     ProcessManagerClass.prototype.RegisterFunc = function () {
         Commond.Register(L2C.L2C_PROCESS_VIEW, this.View.bind(this));
-        Commond.Register(L2C.L2C_PROCESS_GRID_CHANGE, this.GridChange.bind(this));
-        Commond.Register(L2C.L2C_PROCESS_GRID_CLEAR, this.GridClear.bind(this));
-        Commond.Register(L2C.L2C_PROCESS_USER_CHANGE, this.UserChange.bind(this));
-        Commond.Register(L2C.L2C_PROCESS_GRID_SWAP, this.LinkSwapSort.bind(this));
-        Commond.Register(L2C.L2C_PROCESS_GRID_ADD, this.GridAdd.bind(this));
-        Commond.Register(L2C.L2C_PROCESS_LINK_DELETE, this.LinkDelete.bind(this));
-        Commond.Register(L2C.L2C_PROCESS_LINK_EDIT, this.LinkEdit.bind(this));
-        Commond.Register(L2C.L2C_PROCESS_WORK_EDIT, this.WorkEdit.bind(this));
-        Commond.Register(L2C.L2C_PROCESS_MODE_EDIT, this.ModeEdit.bind(this));
+        //mode
         Commond.Register(L2C.L2C_PROCESS_MODE_ADD, this.ModeAdd.bind(this));
-        Commond.Register(L2C.L2C_PROCESS_MODE_DELETE, this.ModeDelete.bind(this));
+        Commond.Register(L2C.L2C_PROCESS_MODE_EDIT, this.ModeEdit.bind(this));
         Commond.Register(L2C.L2C_PROCESS_MODE_COLOR, this.ModeColor.bind(this));
-        Commond.Register(L2C.L2C_PROCESS_LINK_COLOR, this.LinkColor.bind(this));
-        Commond.Register(L2C.L2C_PROCESS_SCORE_EDIT, this.ScoreEdit.bind(this));
-        Commond.Register(L2C.L2C_PROCESS_MODE_MOVE, this.ModeMove.bind(this));
+        Commond.Register(L2C.L2C_PROCESS_MODE_MOVE, this.ModeSwapSort.bind(this));
         Commond.Register(L2C.L2C_PROCESS_MODE_STORE, this.ModeStore.bind(this));
+        Commond.Register(L2C.L2C_PROCESS_MODE_DELETE, this.ModeDelete.bind(this));
+        //link
+        Commond.Register(L2C.L2C_PROCESS_GRID_ADD, this.LinkAdd.bind(this));
+        Commond.Register(L2C.L2C_PROCESS_LINK_EDIT, this.LinkEdit.bind(this));
+        Commond.Register(L2C.L2C_PROCESS_LINK_COLOR, this.LinkColor.bind(this));
+        Commond.Register(L2C.L2C_PROCESS_GRID_SWAP, this.LinkSwapSort.bind(this));
+        Commond.Register(L2C.L2C_PROCESS_USER_CHANGE, this.LinkUserChange.bind(this));
         Commond.Register(L2C.L2C_PROCESS_LINK_STORE, this.LinkStore.bind(this));
+        Commond.Register(L2C.L2C_PROCESS_LINK_DELETE, this.LinkDelete.bind(this));
+        //work
+        Commond.Register(L2C.L2C_PROCESS_WORK_EDIT, this.WorkEdit.bind(this)); //工作编辑
+        Commond.Register(L2C.L2C_PROCESS_GRID_CHANGE, this.WorkChangeStatus.bind(this)); //改变工作状态
+        Commond.Register(L2C.L2C_PROCESS_SCORE_EDIT, this.WorkScoreEdit.bind(this));
+        Commond.Register(L2C.L2C_PROCESS_GRID_CLEAR, this.WorkClear.bind(this));
     };
     //预览
     ProcessManagerClass.prototype.View = function (data) {
@@ -29,14 +32,10 @@ var ProcessManagerClass = /** @class */ (function () {
         ProcessPanel.SetDateRange();
         ProcessPanel.CreateProcess();
     };
-    //改变工作
-    ProcessManagerClass.prototype.GridChange = function (data) {
-        this.WorkEdit(data);
-    };
     //清空工作
-    ProcessManagerClass.prototype.GridClear = function (data) {
+    ProcessManagerClass.prototype.WorkClear = function (data) {
         var work = ProcessData.WorkMap[data.Wid];
-        $('#content tr[lid="' + work.Lid + '"] td').each(function (index, el) {
+        $('#content .trWork[lid="' + work.Lid + '"] td').each(function (index, el) {
             var grid = $(el).data('grid');
             if (!grid) {
                 return;
@@ -55,10 +54,10 @@ var ProcessManagerClass = /** @class */ (function () {
         delete ProcessData.WorkMap[data.Wid];
     };
     //改变责任
-    ProcessManagerClass.prototype.UserChange = function (data) {
+    ProcessManagerClass.prototype.LinkUserChange = function (data) {
         //数据变化
         ProcessData.LinkMap[data.Lid] = data;
-        $('#content tr[lid="' + data.Lid + '"] td:eq(1)').html(Data.GetUser(data.Uid).Name);
+        $('#content .trLink[lid="' + data.Lid + '"] td:eq(1)').html(Data.GetUser(data.Uid).Name);
     };
     //交换流程
     ProcessManagerClass.prototype.LinkSwapSort = function (data) {
@@ -75,13 +74,13 @@ var ProcessManagerClass = /** @class */ (function () {
             if (index0 > -1 && index0 > -1) {
                 (_a = mode.LinkList).splice.apply(_a, [index0, 1].concat(mode.LinkList.splice(index1, 1, link0)));
             }
-            var A = $('#content tr[lid="' + link0.Lid + '"]');
-            var B = $('#content tr[lid="' + link1.Lid + '"]');
+            var A = $('#content .trLink[lid="' + link0.Lid + '"]');
+            var B = $('#content .trLink[lid="' + link1.Lid + '"]');
             A.before(B);
         }
     };
     //新增流程
-    ProcessManagerClass.prototype.GridAdd = function (data) {
+    ProcessManagerClass.prototype.LinkAdd = function (data) {
         //数据变化
         ProcessData.LinkMap[data.LinkSingle.Lid] = data.LinkSingle;
         var mode = ProcessData.ModeMap[data.LinkSingle.Mid];
@@ -91,9 +90,9 @@ var ProcessManagerClass = /** @class */ (function () {
                 mode.LinkList.splice(prevIndex, 1, data.LinkSingle);
             }
             var add = $(ProcessPanel.GetLinkHtml(data.LinkSingle));
-            $('#content tr[lid="' + data.PrevLid + '"]').after(add);
+            $('#content .trLink[lid="' + data.PrevLid + '"]').after(add);
             //绑定数据
-            ProcessPanel.SetLinkData(data.LinkSingle.Lid, add.get(0));
+            ProcessPanel.SetWorkData(data.LinkSingle.Lid, add.get(0));
         }
     };
     //删除流程
@@ -111,7 +110,7 @@ var ProcessManagerClass = /** @class */ (function () {
                 delete ProcessData.WorkMap[v.Wid];
             });
             delete ProcessData.LinkMap[data.Lid];
-            $('#content tr[lid="' + data.Lid + '"]').remove();
+            $('#content .trLink[lid="' + data.Lid + '"]').remove();
         }
     };
     //流程名字
@@ -120,14 +119,18 @@ var ProcessManagerClass = /** @class */ (function () {
         var link = ProcessData.LinkMap[data.Lid];
         if (link) {
             ProcessData.LinkMap[link.Lid].Name = data.Name;
-            $('#content tr[lid="' + link.Lid + '"] .link').attr('class', 'link bg_' + link.Color).html(link.Name == '' ? '空' : link.Name + ProcessPanel.GetModeLinkStatusName(link.Status));
+            $('#content .trLink[lid="' + link.Lid + '"] .link').attr('class', 'link bg_' + link.Color).html(link.Name == '' ? '空' : link.Name + ProcessPanel.GetModeLinkStatusName(link.Status));
         }
     };
-    //工作补充
+    /**改变工作 状态 :工作 完成 延期 等待 优化 请假*/
+    ProcessManagerClass.prototype.WorkChangeStatus = function (data) {
+        this.WorkEdit(data);
+    };
+    /**工作编辑 */
     ProcessManagerClass.prototype.WorkEdit = function (data) {
         //数据变化
         ProcessData.WorkMap[data.Wid] = data;
-        $('#content tr[lid="' + data.Lid + '"] td').each(function (index, el) {
+        $('#content .trWork[lid="' + data.Lid + '"] td').each(function (index, el) {
             var grid = $(el).data('grid');
             if (!grid) {
                 return;
@@ -167,35 +170,18 @@ var ProcessManagerClass = /** @class */ (function () {
         }
         //add mode
         var add = $(ProcessPanel.GetModeHtmlLeft(data.ModeSingle.Mid));
-        $('#content .mode[mid="' + data.PrevMid + '"]').parent().next().after(add);
-        //绑定流程数据
-        add.find('.linkMap tr').each(function () {
+        $('#content .trModeLeft[mid="' + data.PrevMid + '"]').next().after(add);
+        add.find('.trLink').each(function () {
             var lid = parseInt($(this).attr('lid'));
-            ProcessPanel.SetLinkData(lid, this);
+            ProcessPanel.SetWorkData(lid, this);
+        });
+        add = $(ProcessPanel.GetModeHtmlRight(data.ModeSingle.Mid));
+        $('#content .trModeRight[mid="' + data.PrevMid + '"]').next().after(add);
+        add.find('.trWork').each(function () {
+            var lid = parseInt($(this).attr('lid'));
+            ProcessPanel.SetWorkData(lid, this);
         });
         ProcessPanel.BindActions();
-    };
-    //删除功能
-    ProcessManagerClass.prototype.ModeDelete = function (data) {
-        var mode = ProcessData.ModeMap[data.Mid];
-        if (mode) {
-            ArrayUtil.RemoveByAttr(ProcessData.Project.ModeList, FieldName.Mid, data.Mid);
-            delete ProcessData.ModeMap[data.Mid];
-            $.each(mode.LinkList, function (k, link) {
-                //删除工作
-                $.each(ProcessData.WorkMap, function (k, v) {
-                    if (v.Lid != link.Lid) {
-                        return;
-                    }
-                    delete ProcessData.WorkMap[v.Wid];
-                });
-                //删除流程
-                delete ProcessData.LinkMap[link.Lid];
-            });
-            var del = $('#content .mode[mid="' + data.Mid + '"]').parent();
-            del.next().remove();
-            del.remove();
-        }
     };
     //功能颜色
     ProcessManagerClass.prototype.ModeColor = function (data) {
@@ -203,29 +189,8 @@ var ProcessManagerClass = /** @class */ (function () {
         ProcessData.ModeMap[data.Mid].Color = data.Color;
         $('#content .mode[mid="' + data.Mid + '"]').removeClass().addClass('mode bg_' + data.Color);
     };
-    //流程颜色
-    ProcessManagerClass.prototype.LinkColor = function (data) {
-        //数据变化
-        var link = ProcessData.LinkMap[data.Lid];
-        if (link) {
-            link.Color = data.Color;
-            $('#content tr[lid="' + data.Lid + '"] .link').attr('class', 'link bg_' + data.Color).html(data.Name == '' ? '空' : data.Name);
-        }
-    };
-    //设置评分
-    ProcessManagerClass.prototype.ScoreEdit = function (data) {
-        //数据变化
-        // if (data.Score == 0) {
-        // delete ProcessData.ScoreMap[data.Wid]
-        // } else {
-        ProcessData.ScoreMap[data.Wid] = data;
-        // }
-        var work = ProcessData.WorkMap[data.Wid];
-        this.WorkEdit(work);
-        NoticeManager.ScoreEdit(data);
-    };
     //功能交换
-    ProcessManagerClass.prototype.ModeMove = function (data) {
+    ProcessManagerClass.prototype.ModeSwapSort = function (data) {
         var _a;
         //数据变化
         var mode0 = ProcessData.ModeMap[data.Swap[0]];
@@ -239,9 +204,17 @@ var ProcessManagerClass = /** @class */ (function () {
             if (index0 > -1 && index0 > -1) {
                 (_a = project.ModeList).splice.apply(_a, [index0, 1].concat(project.ModeList.splice(index1, 1, mode0)));
             }
+            //
             var A = $('#content .mode[mid="' + data.Swap[0] + '"]').parent();
             var AN = A.next();
             var B = $('#content .mode[mid="' + data.Swap[1] + '"]').parent();
+            var BN = B.next();
+            A.before(B);
+            A.before(AN);
+            //
+            var A = $('#content .trModeRight[mid="' + data.Swap[0] + '"]');
+            var AN = A.next();
+            var B = $('#content .trModeRight[mid="' + data.Swap[1] + '"]');
             var BN = B.next();
             A.before(B);
             A.before(AN);
@@ -249,26 +222,12 @@ var ProcessManagerClass = /** @class */ (function () {
     };
     //归档处理
     ProcessManagerClass.prototype.ModeStore = function (data) {
-        if (data.Status == ModeStatusField.STORE) {
-            //在进行状态中
+        if (data.Status == ModeStatusField.STORE) { //归档 => 进行中
             var mode = ProcessData.ModeMap[data.Mid];
             if (mode) {
                 if (ProcessData.CheckNumberArray(ModeStatusField.STORE, ProcessFilter.Pack.ModeStatus) == false) {
-                    $.each(mode.LinkList, function (k, link) {
-                        //删除工作
-                        $.each(ProcessData.WorkMap, function (k, v) {
-                            if (v.Lid != link.Lid) {
-                                return;
-                            }
-                            delete ProcessData.WorkMap[v.Wid];
-                        });
-                        //删除流程
-                        delete ProcessData.LinkMap[link.Lid];
-                    });
-                    delete ProcessData.ModeMap[data.Mid];
-                    var del = $('#content .mode[mid="' + data.Mid + '"]').parent();
-                    del.next().remove();
-                    del.remove();
+                    //仅显示`进行中`, 则删除
+                    this.DoModeDelete(mode);
                 }
                 else { //设置为归档效果
                     mode.Status = data.Status;
@@ -276,13 +235,63 @@ var ProcessManagerClass = /** @class */ (function () {
                 }
             }
         }
-        else {
+        else { //归档 => 进行中
             var mode = ProcessData.ModeMap[data.Mid];
             if (mode) {
                 mode.Status = data.Status;
                 this.ModeEdit(mode);
             }
         }
+    };
+    //删除功能
+    ProcessManagerClass.prototype.ModeDelete = function (data) {
+        var mode = ProcessData.ModeMap[data.Mid];
+        if (mode) {
+            this.DoModeDelete(mode);
+        }
+    };
+    ProcessManagerClass.prototype.DoModeDelete = function (mode) {
+        ArrayUtil.RemoveByAttr(ProcessData.Project.ModeList, FieldName.Mid, mode.Mid);
+        delete ProcessData.ModeMap[mode.Mid];
+        $.each(mode.LinkList, function (k, link) {
+            //删除工作
+            $.each(ProcessData.WorkMap, function (k, v) {
+                if (v.Lid != link.Lid) {
+                    return;
+                }
+                delete ProcessData.WorkMap[v.Wid];
+            });
+            //删除流程
+            delete ProcessData.LinkMap[link.Lid];
+        });
+        //
+        var del = $('#content .mode[mid="' + mode.Mid + '"]').parent();
+        del.next().remove();
+        del.remove();
+        del = $('#content .trModeRight[mid="' + mode.Mid + '"]');
+        del.next().remove();
+        del.remove();
+    };
+    //流程颜色
+    ProcessManagerClass.prototype.LinkColor = function (data) {
+        //数据变化
+        var link = ProcessData.LinkMap[data.Lid];
+        if (link) {
+            link.Color = data.Color;
+            $('#content .trLink[lid="' + data.Lid + '"] .link').attr('class', 'link bg_' + data.Color).html(data.Name == '' ? '空' : data.Name);
+        }
+    };
+    //设置评分
+    ProcessManagerClass.prototype.WorkScoreEdit = function (data) {
+        //数据变化
+        // if (data.Score == 0) {
+        // delete ProcessData.ScoreMap[data.Wid]
+        // } else {
+        ProcessData.ScoreMap[data.Wid] = data;
+        // }
+        var work = ProcessData.WorkMap[data.Wid];
+        this.WorkEdit(work);
+        NoticeManager.ScoreEdit(data);
     };
     //归档处理
     ProcessManagerClass.prototype.LinkStore = function (data) {
@@ -293,7 +302,7 @@ var ProcessManagerClass = /** @class */ (function () {
                 if (ProcessData.CheckNumberArray(LinkStatusField.STORE, ProcessFilter.Pack.LinkStatus) == false) {
                     //归档
                     delete ProcessData.LinkMap[data.Lid];
-                    $('#content tr[lid="' + data.Lid + '"]').remove();
+                    $('#content .trLink[lid="' + data.Lid + '"]').remove();
                 }
                 else {
                     link.Status = data.Status;
