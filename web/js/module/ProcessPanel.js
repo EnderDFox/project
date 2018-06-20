@@ -207,9 +207,12 @@ var ProcessPanelClass = /** @class */ (function () {
             return html;
         }
         html += "<tr class=\"trLink\" lid=\"" + link.Lid + "\">";
-        html += "\t<td class=\"link bg_" + link.Color + "\" type=\"link\">" + (link.Name == '' ? '空' : link.Name) + ProcessPanel.GetModeLinkStatusName(link.Status) + "</td>\n\t\t\t\t\t<td class=\"duty\" type=\"duty\">" + Data.GetUser(link.Uid).Name + "</td>";
+        html += "\t<td class=\"link bg_" + link.Color + "\" type=\"link\">\n\t\t\t\t\t\t" + this.GetLinkName(link) + "\n\t\t\t\t\t</td>\n\t\t\t\t\t<td class=\"duty\" type=\"duty\">" + Data.GetUser(link.Uid).Name + "</td>";
         html += '</tr>';
         return html;
+    };
+    ProcessPanelClass.prototype.GetLinkName = function (link) {
+        return "<div>\n\t\t\t\t" + (link.Name == '' ? '空' : link.Name) + " " + ProcessPanel.GetModeLinkStatusName(link.Status) + "\n\t\t\t\t</div>";
     };
     //组合work列表 一个mode下的多个link中的每个work
     ProcessPanelClass.prototype.GetWorkListHtml = function (mode) {
@@ -248,10 +251,19 @@ var ProcessPanelClass = /** @class */ (function () {
         if (!mode) {
             return html;
         }
-        html += "<tr class=\"trModeLeft\" mid=\"" + mode.Mid + "\">\n\t\t\t\t\t<td class=\"mode bg_" + mode.Color + "\" mid=\"" + mode.Mid + "\">" + VersionManager.GetVersionVer(mode.Vid) + (mode.Name == '' ? '空' : mode.Name) + this.GetModeLinkStatusName(mode.Status) + "</td> \n\t\t\t\t\t<td colspan=\"2\">\n\t\t\t\t\t" + this.GetLinkListHtml(mode) + "\n\t\t\t\t\t</td> \n\t\t\t\t</tr> ";
+        html += "<tr class=\"trModeLeft\" mid=\"" + mode.Mid + "\">\n\t\t\t\t\t<td class=\"mode bg_" + mode.Color + "\" mid=\"" + mode.Mid + "\">\n\t\t\t\t\t\t" + this.GetModeName(mode) + "\n\t\t\t\t\t</td> \n\t\t\t\t\t<td colspan=\"2\">\n\t\t\t\t\t\t" + this.GetLinkListHtml(mode) + "\n\t\t\t\t\t</td> \n\t\t\t\t</tr> ";
         html += "<tr class=\"space\"><td colspan=\"3\"></td></tr>";
         // html += `<tr class="space"><td colspan="${(this.DateList.list.length + 3)}"></td></tr>`
         return html;
+    };
+    /**修改mdoe td内部的最大高度 */
+    ProcessPanelClass.prototype.ChangeModeNameMaxHeight = function (mode) {
+        var maxHeight = Math.max(1, mode.LinkList ? mode.LinkList.length : 0) * 40;
+        $('#content .mode[mid="' + mode.Mid + '"] div').css('max-height', maxHeight);
+    };
+    ProcessPanelClass.prototype.GetModeName = function (mode) {
+        var maxHeight = Math.max(1, mode.LinkList ? mode.LinkList.length : 0) * 40;
+        return "<div style=\"max-height:" + maxHeight + "px;\">\n\t\t\t\t" + VersionManager.GetVersionVer(mode.Vid) + (mode.Name == '' ? '空' : mode.Name) + this.GetModeLinkStatusName(mode.Status) + "\n\t\t\t\t<div>";
     };
     ProcessPanelClass.prototype.GetModeHtmlRight = function (mid) {
         var html = '';

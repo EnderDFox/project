@@ -13,10 +13,17 @@
 .process table{border-collapse:collapse;border-width:0px;border-style:hidden;width:100%;height:100%;}
 /* .process thead{position:absolute;top:510px;z-index:2;background:#fff;} */
 .process tr{border:1px solid #6c6c6c;}
-.process td{height:40px;min-width:40px;width:40px;text-align:center;cursor:pointer;padding:0px;border:1px solid #6c6c6c;}
+.process td{height:40px;min-width:40px;width:40px;text-align:center;cursor:pointer;padding:0px;border:1px solid #6c6c6c;
+}
+.process td div{
+  /* 如果这里可以换行,会导致变高, 导致很多问题 */
+  word-break: break-all;
+  word-wrap:break-word;
+  overflow: hidden;
+}
 .process .info{height:40px;line-height:40px;width:40px;position:absoute;}
 .process .mode{min-width:135px;max-width:135px;width:135px;font-weight:bold;font-size:16px;padding:0px 10px 0px 10px;
-  word-break: break-all;
+  /* word-break: break-all; */
 }
 .process .title{font-weight:bold;}
 .process .func{min-width:135px;max-width:135px;width:135px;font-weight:normal;padding:0px 10px 0px 10px;}
