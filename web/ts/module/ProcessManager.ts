@@ -55,7 +55,8 @@ class ProcessManagerClass {
 	LinkUserChange(data: LinkSingle) {
 		//数据变化
 		ProcessData.LinkMap[data.Lid] = data
-		$('#content .trLink[lid="' + data.Lid + '"] td:eq(1)').html(Data.GetUser(data.Uid).Name)
+		// $('#content .trLink[lid="' + data.Lid + '"] td:eq(1)').html(Data.GetUser(data.Uid).Name)
+		$('#content .trLink[lid="' + data.Lid + '"] .duty').html(Data.GetUser(data.Uid).Name)
 	}
 	//新增流程
 	LinkAdd(data: L2C_ProcessGridAdd) {

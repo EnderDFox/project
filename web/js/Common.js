@@ -80,9 +80,39 @@ var CommonClass = /** @class */ (function () {
         }
         return false;
     };
-    /**警告提示*/
-    CommonClass.prototype.Warning = function (o, e, func, txt) {
-        var plan = $('#warning').css({ left: e.pageX, top: e.pageY }).show().adjust(-5);
+    CommonClass.prototype.Warning = function () {
+        var _a, _b, _c;
+        var args = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            args[_i] = arguments[_i];
+        }
+        var dom, evt, func, txt;
+        if (args.length == 4) {
+            dom = $(args[0]); //TODO:Ldom也没用上呢
+            _a = args.slice(1, 4), evt = _a[0], func = _a[1], txt = _a[2];
+        }
+        else if (args.length == 3) {
+            evt = args[0], func = args[1], txt = args[2];
+        }
+        else if (args.length == 2) {
+            if (typeof args[0] == 'function') {
+                _b = [args[0], args[1]], func = _b[0], txt = _b[1];
+            }
+            else {
+                _c = [args[0], args[1]], evt = _c[0], txt = _c[1];
+            }
+        }
+        else if (args.length == 1) {
+            txt = args[1];
+        }
+        var plan = $('#warning');
+        if (evt) {
+            plan.xy(evt.pageX, evt.pageY);
+        }
+        else {
+            this.AlginCenterInWindow(plan);
+        }
+        plan.show().adjust(-5);
         plan.find('.tips').html(txt);
         plan.find('.cancel,.close').unbind().click(function (e) {
             e.stopPropagation(); //防止冒泡上去 引发mouseOut关闭了uploadWork
@@ -95,6 +125,13 @@ var CommonClass = /** @class */ (function () {
                 func(e);
             }
         });
+    };
+    /**在window内居中 */
+    CommonClass.prototype.AlginCenterInWindow = function (dom) {
+        var $dom = $(dom);
+        var winLeft = $(window).scrollLeft();
+        var winTop = $(window).scrollTop();
+        $dom.xy(winLeft + $(window).innerWidth() / 2 - $dom.width() / 2, winTop + $(window).innerHeight() / 2 - $dom.height() / 2);
     };
     /**在#dynamicDom前插入newDom*/
     CommonClass.prototype.InsertBeforeDynamicDom = function (newDom) {

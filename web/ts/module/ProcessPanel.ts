@@ -645,18 +645,24 @@ class ProcessPanelClass {
 					break
 				case 'store':
 					if (link.Status == LinkStatusField.NORMAL) {
-						Common.Warning(o, e, function () {
-							WSConn.sendMsg(C2L.C2L_PROCESS_LINK_STORE, { 'Lid': cur.data('lid'), 'Status': LinkStatusField.STORE })
-						}, '是否将已完成的流程进行归档？')
+						if (cur.parent().find('tr').length > 1) {
+							Common.Warning(cur,e, function () {
+								WSConn.sendMsg(C2L.C2L_PROCESS_LINK_STORE, { 'Lid': cur.data('lid'), 'Status': LinkStatusField.STORE })
+							}, '是否将已完成的流程进行归档？')
+						} else {
+							Common.Warning(cur,e,null, '至少要保留一个流程')
+						}
 					} else {
 						WSConn.sendMsg(C2L.C2L_PROCESS_LINK_STORE, { 'Lid': cur.data('lid'), 'Status': LinkStatusField.NORMAL })
 					}
 					break
 				case 'delete':
 					if (cur.parent().find('tr').length > 1) {
-						Common.Warning(o, e, function () {
+						Common.Warning(cur,e, function () {
 							WSConn.sendMsg(C2L.C2L_PROCESS_LINK_DELETE, { 'Lid': cur.data('lid') })
 						}, '删除后不可恢复，确认删除吗？')
+					} else {
+						Common.Warning(cur,e,null, '至少要保留一个流程')
 					}
 					break
 			}

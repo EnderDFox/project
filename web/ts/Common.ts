@@ -77,8 +77,34 @@ class CommonClass {
 		return false
 	}
 	/**警告提示*/
-	Warning(o: HTMLElement, e: JQuery.Event | MouseEvent, func: Function, txt: string): void {
-		var plan = $('#warning').css({ left: e.pageX, top: e.pageY }).show().adjust(-5)
+	Warning(dom: HTMLElement|JQuery<HTMLElement>, evt: JQuery.Event | MouseEvent, func: Function, txt: string): void;
+	Warning(evt: JQuery.Event | MouseEvent, func: Function, txt: string): void;
+	Warning(evt: JQuery.Event | MouseEvent, txt: string): void;
+	Warning(func: Function, txt: string): void;
+	Warning(txt: string): void;
+	Warning(...args): void {
+		var dom:HTMLElement|JQuery<HTMLElement>,evt: JQuery.Event | MouseEvent, func: Function, txt: string
+		if (args.length == 4) {
+			dom = $(args[0] as HTMLElement);//TODO:Ldom也没用上呢
+			[evt, func, txt] = args.slice(1,4)
+		} else if (args.length == 3) {
+			[evt, func, txt] = args
+		} else if (args.length == 2) {
+			if (typeof args[0] == 'function') {
+				[func, txt] = [args[0], args[1]]
+			} else {
+				[evt, txt] = [args[0], args[1]]
+			}
+		} else if (args.length == 1) {
+			txt = args[1]
+		}
+		var plan = $('#warning')
+		if (evt) {
+			plan.xy(evt.pageX, evt.pageY)
+		} else {
+			this.AlginCenterInWindow(plan)
+		}
+		plan.show().adjust(-5)
 		plan.find('.tips').html(txt)
 		plan.find('.cancel,.close').unbind().click(function (e) {
 			e.stopPropagation()//防止冒泡上去 引发mouseOut关闭了uploadWork
@@ -91,6 +117,13 @@ class CommonClass {
 				func(e)
 			}
 		})
+	}
+	/**在window内居中 */
+	AlginCenterInWindow(dom:HTMLElement|JQuery<HTMLElement>){
+		var $dom = $(dom)
+		var winLeft = $(window).scrollLeft()
+        var winTop = $(window).scrollTop()
+		$dom.xy(winLeft + $(window).innerWidth()/2-$dom.width()/2, winTop + $(window).innerHeight()/2-$dom.height()/2)
 	}
 	/**在#dynamicDom前插入newDom*/
 	InsertBeforeDynamicDom(newDom: HTMLElement): void {
@@ -164,8 +197,8 @@ class ArrayUtil {
 	}
 	static RemoveByAttr(arr: any[], key: string, value: any): number {
 		var index = ArrayUtil.IndexOfAttr(arr, key, value)
-		if(index>-1){
-			arr.splice(index,1)
+		if (index > -1) {
+			arr.splice(index, 1)
 		}
 		return index
 	}
