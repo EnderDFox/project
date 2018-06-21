@@ -6,25 +6,31 @@ const (
 	L2C_DEPARTMENT_LIST        = 10003
 	L2C_SAVE_COLLATE           = 11001
 	L2C_SESSION_LOGIN_ERROR    = 20001
+	//#
 	L2C_PROCESS_VIEW           = 50001
-	L2C_PROCESS_GRID_CHANGE    = 50002
-	L2C_PROCESS_GRID_CLEAR     = 50003
-	L2C_PROCESS_USER_CHANGE    = 50004
-	L2C_PROCESS_GRID_SWAP      = 50005
-	L2C_PROCESS_GRID_ADD       = 50006
-	L2C_PROCESS_LINK_DELETE    = 50007
-	L2C_PROCESS_LINK_EDIT      = 50008
-	L2C_PROCESS_WORK_EDIT      = 50009
-	L2C_PROCESS_MODE_EDIT      = 50010
+	//mode
 	L2C_PROCESS_MODE_ADD       = 50011
-	L2C_PROCESS_MODE_DELETE    = 50012
+	L2C_PROCESS_MODE_EDIT      = 50012
 	L2C_PROCESS_MODE_COLOR     = 50013
-	L2C_PROCESS_SCORE_EDIT     = 50014
-	L2C_PROCESS_MODE_MOVE      = 50015
-	L2C_PROCESS_MODE_STORE     = 50016
-	L2C_PROCESS_LINK_COLOR     = 50017
-	L2C_PROCESS_LINK_STORE     = 50018
+	L2C_PROCESS_MODE_SWAP_SORT      = 50014
+	L2C_PROCESS_MODE_STORE     = 50015
+	L2C_PROCESS_MODE_DELETE    = 50016
+	//link
+	L2C_PROCESS_LINK_ADD       = 50021
+	L2C_PROCESS_LINK_EDIT      = 50022
+	L2C_PROCESS_LINK_COLOR     = 50023
+	L2C_PROCESS_LINK_SWAP_SORT      = 50024
+	L2C_PROCESS_LINK_STORE     = 50025
+	L2C_PROCESS_LINK_DELETE    = 50026
+	L2C_PROCESS_LINK_USER_CHANGE    = 50027
+	//work
+	L2C_PROCESS_WORK_EDIT      = 50031
+	L2C_PROCESS_WORK_STATUS    = 50032
+	L2C_PROCESS_WORK_SCORE     = 50033
+	L2C_PROCESS_WORK_CLEAR     = 50034
+	//
 	L2C_PROCESS_SCORE_NOTICE   = 51001
+	//#
 	L2C_COLLATE_VIEW           = 60001
 	L2C_COLLATE_STEP_EDIT      = 60002
 	L2C_COLLATE_STEP_ADD       = 60003
@@ -113,15 +119,15 @@ type L2C_ProfileView struct {
 	ProfileList []*ProfileSingle
 }
 
-type L2C_ProcessGridClear struct {
+type L2C_ProcessWorkClear struct {
 	Wid uint64
 }
 
-type L2C_ProcessGridSwap struct {
+type L2C_ProcessLinkSwapSort struct {
 	Swap []uint64
 }
 
-type L2C_ProcessGridAdd struct {
+type L2C_ProcessLinkAdd struct {
 	PrevLid    uint64
 	LinkSingle *LinkSingle
 }
@@ -140,7 +146,7 @@ type L2C_ProcessModeDelete struct {
 	Mid uint64
 }
 
-type L2C_ProcessModeMove struct {
+type L2C_ProcessModeSwapSort struct {
 	Swap []uint64
 }
 

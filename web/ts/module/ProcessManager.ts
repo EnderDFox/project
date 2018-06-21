@@ -7,22 +7,22 @@ class ProcessManagerClass {
 		Commond.Register(L2C.L2C_PROCESS_MODE_ADD, this.ModeAdd.bind(this))
 		Commond.Register(L2C.L2C_PROCESS_MODE_EDIT, this.ModeEdit.bind(this))
 		Commond.Register(L2C.L2C_PROCESS_MODE_COLOR, this.ModeColor.bind(this))
-		Commond.Register(L2C.L2C_PROCESS_MODE_MOVE, this.ModeSwapSort.bind(this))
+		Commond.Register(L2C.L2C_PROCESS_MODE_SWAP_SORT, this.ModeSwapSort.bind(this))
 		Commond.Register(L2C.L2C_PROCESS_MODE_STORE, this.ModeStore.bind(this))
 		Commond.Register(L2C.L2C_PROCESS_MODE_DELETE, this.ModeDelete.bind(this))
 		//link
-		Commond.Register(L2C.L2C_PROCESS_GRID_ADD, this.LinkAdd.bind(this))
+		Commond.Register(L2C.L2C_PROCESS_LINK_ADD, this.LinkAdd.bind(this))
 		Commond.Register(L2C.L2C_PROCESS_LINK_EDIT, this.LinkEdit.bind(this))
 		Commond.Register(L2C.L2C_PROCESS_LINK_COLOR, this.LinkColor.bind(this))
-		Commond.Register(L2C.L2C_PROCESS_GRID_SWAP, this.LinkSwapSort.bind(this))
-		Commond.Register(L2C.L2C_PROCESS_USER_CHANGE, this.LinkUserChange.bind(this))
+		Commond.Register(L2C.L2C_PROCESS_LINK_SWAP_SORT, this.LinkSwapSort.bind(this))
 		Commond.Register(L2C.L2C_PROCESS_LINK_STORE, this.LinkStore.bind(this))
 		Commond.Register(L2C.L2C_PROCESS_LINK_DELETE, this.LinkDelete.bind(this))
+		Commond.Register(L2C.L2C_PROCESS_LINK_USER_CHANGE, this.LinkUserChange.bind(this))
 		//work
 		Commond.Register(L2C.L2C_PROCESS_WORK_EDIT, this.WorkEdit.bind(this))	//工作编辑
-		Commond.Register(L2C.L2C_PROCESS_GRID_CHANGE, this.WorkChangeStatus.bind(this))		//改变工作状态
-		Commond.Register(L2C.L2C_PROCESS_SCORE_EDIT, this.WorkScoreEdit.bind(this))
-		Commond.Register(L2C.L2C_PROCESS_GRID_CLEAR, this.WorkClear.bind(this))
+		Commond.Register(L2C.L2C_PROCESS_WORK_STATUS, this.WorkStatus.bind(this))		//改变工作状态
+		Commond.Register(L2C.L2C_PROCESS_WORK_SCORE, this.WorkScore.bind(this))
+		Commond.Register(L2C.L2C_PROCESS_WORK_CLEAR, this.WorkClear.bind(this))
 	}
 	//预览
 	View(data: L2C_ProcessView) {
@@ -31,7 +31,7 @@ class ProcessManagerClass {
 		ProcessPanel.CreateProcess()
 	}
 	//清空工作
-	WorkClear(data: L2C_ProcessGridClear) {
+	WorkClear(data: L2C_ProcessWorkClear) {
 		var work = ProcessData.WorkMap[data.Wid]
 		$('#content .trWork[lid="' + work.Lid + '"] td').each((index: number, el: HTMLElement): void | false => {
 			var grid: IWorkGrid = $(el).data('grid')
@@ -59,7 +59,7 @@ class ProcessManagerClass {
 		$('#content .trLink[lid="' + data.Lid + '"] .duty').html(Data.GetUser(data.Uid).Name)
 	}
 	//新增流程
-	LinkAdd(data: L2C_ProcessGridAdd) {
+	LinkAdd(data: L2C_ProcessLinkAdd) {
 		//数据变化
 		ProcessData.LinkMap[data.LinkSingle.Lid] = data.LinkSingle
 		var mode: ModeSingle = ProcessData.ModeMap[data.LinkSingle.Mid]
@@ -101,7 +101,7 @@ class ProcessManagerClass {
 		}
 	}
 	//交换流程
-	LinkSwapSort(data: L2C_ProcessGridSwap) {
+	LinkSwapSort(data: L2C_ProcessLinkSwapSort) {
 		//数据变化
 		var link0 = ProcessData.LinkMap[data.Swap[0]]
 		var link1 = ProcessData.LinkMap[data.Swap[1]]
@@ -172,7 +172,7 @@ class ProcessManagerClass {
 		$('#content .trWork[lid="' + link.Lid + '"]').remove()
 	}
 	/**改变工作 状态 :工作 完成 延期 等待 优化 请假*/
-	WorkChangeStatus(data: WorkSingle) {
+	WorkStatus(data: WorkSingle) {
 		this.WorkEdit(data)
 	}
 	/**工作编辑 */
@@ -244,7 +244,7 @@ class ProcessManagerClass {
 		}
 	}
 	//功能交换
-	ModeSwapSort(data: L2C_ProcessModeMove): void {
+	ModeSwapSort(data: L2C_ProcessModeSwapSort): void {
 		//数据变化
 		var mode0: ModeSingle = ProcessData.ModeMap[data.Swap[0]]
 		var mode1: ModeSingle = ProcessData.ModeMap[data.Swap[1]]
@@ -323,7 +323,7 @@ class ProcessManagerClass {
 		del.remove()
 	}
 	//设置评分
-	WorkScoreEdit(data: ScoreSingle) {
+	WorkScore(data: ScoreSingle) {
 		//数据变化
 		// if (data.Score == 0) {
 		// delete ProcessData.ScoreMap[data.Wid]

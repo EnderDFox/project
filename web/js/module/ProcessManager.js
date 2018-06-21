@@ -9,22 +9,22 @@ var ProcessManagerClass = /** @class */ (function () {
         Commond.Register(L2C.L2C_PROCESS_MODE_ADD, this.ModeAdd.bind(this));
         Commond.Register(L2C.L2C_PROCESS_MODE_EDIT, this.ModeEdit.bind(this));
         Commond.Register(L2C.L2C_PROCESS_MODE_COLOR, this.ModeColor.bind(this));
-        Commond.Register(L2C.L2C_PROCESS_MODE_MOVE, this.ModeSwapSort.bind(this));
+        Commond.Register(L2C.L2C_PROCESS_MODE_SWAP_SORT, this.ModeSwapSort.bind(this));
         Commond.Register(L2C.L2C_PROCESS_MODE_STORE, this.ModeStore.bind(this));
         Commond.Register(L2C.L2C_PROCESS_MODE_DELETE, this.ModeDelete.bind(this));
         //link
-        Commond.Register(L2C.L2C_PROCESS_GRID_ADD, this.LinkAdd.bind(this));
+        Commond.Register(L2C.L2C_PROCESS_LINK_ADD, this.LinkAdd.bind(this));
         Commond.Register(L2C.L2C_PROCESS_LINK_EDIT, this.LinkEdit.bind(this));
         Commond.Register(L2C.L2C_PROCESS_LINK_COLOR, this.LinkColor.bind(this));
-        Commond.Register(L2C.L2C_PROCESS_GRID_SWAP, this.LinkSwapSort.bind(this));
-        Commond.Register(L2C.L2C_PROCESS_USER_CHANGE, this.LinkUserChange.bind(this));
+        Commond.Register(L2C.L2C_PROCESS_LINK_SWAP_SORT, this.LinkSwapSort.bind(this));
         Commond.Register(L2C.L2C_PROCESS_LINK_STORE, this.LinkStore.bind(this));
         Commond.Register(L2C.L2C_PROCESS_LINK_DELETE, this.LinkDelete.bind(this));
+        Commond.Register(L2C.L2C_PROCESS_LINK_USER_CHANGE, this.LinkUserChange.bind(this));
         //work
         Commond.Register(L2C.L2C_PROCESS_WORK_EDIT, this.WorkEdit.bind(this)); //工作编辑
-        Commond.Register(L2C.L2C_PROCESS_GRID_CHANGE, this.WorkChangeStatus.bind(this)); //改变工作状态
-        Commond.Register(L2C.L2C_PROCESS_SCORE_EDIT, this.WorkScoreEdit.bind(this));
-        Commond.Register(L2C.L2C_PROCESS_GRID_CLEAR, this.WorkClear.bind(this));
+        Commond.Register(L2C.L2C_PROCESS_WORK_STATUS, this.WorkStatus.bind(this)); //改变工作状态
+        Commond.Register(L2C.L2C_PROCESS_WORK_SCORE, this.WorkScore.bind(this));
+        Commond.Register(L2C.L2C_PROCESS_WORK_CLEAR, this.WorkClear.bind(this));
     };
     //预览
     ProcessManagerClass.prototype.View = function (data) {
@@ -175,7 +175,7 @@ var ProcessManagerClass = /** @class */ (function () {
         $('#content .trWork[lid="' + link.Lid + '"]').remove();
     };
     /**改变工作 状态 :工作 完成 延期 等待 优化 请假*/
-    ProcessManagerClass.prototype.WorkChangeStatus = function (data) {
+    ProcessManagerClass.prototype.WorkStatus = function (data) {
         this.WorkEdit(data);
     };
     /**工作编辑 */
@@ -328,7 +328,7 @@ var ProcessManagerClass = /** @class */ (function () {
         del.remove();
     };
     //设置评分
-    ProcessManagerClass.prototype.WorkScoreEdit = function (data) {
+    ProcessManagerClass.prototype.WorkScore = function (data) {
         //数据变化
         // if (data.Score == 0) {
         // delete ProcessData.ScoreMap[data.Wid]

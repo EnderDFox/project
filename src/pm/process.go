@@ -16,7 +16,7 @@ func NewProcess(user *User) *Process {
 }
 
 //评分
-func (this *Process) ScoreEdit(wid, quality, efficiency, manner uint64, info string) bool {
+func (this *Process) WorkScore(wid, quality, efficiency, manner uint64, info string) bool {
 	if wid == 0 {
 		return false
 	}
@@ -37,7 +37,7 @@ func (this *Process) ScoreEdit(wid, quality, efficiency, manner uint64, info str
 		Efficiency: efficiency,
 		Manner:     manner,
 	}
-	this.owner.SendToAll(L2C_PROCESS_SCORE_EDIT, scoreSingle)
+	this.owner.SendToAll(L2C_PROCESS_WORK_SCORE, scoreSingle)
 	return true
 }
 
@@ -82,12 +82,12 @@ func (this *Process) LinkStore(lid uint64, status uint8) bool {
 }
 
 //移动
-func (this *Process) ModeMove(swap []uint64) bool {
+func (this *Process) ModeSwapSort(swap []uint64) bool {
 	db.SwapSort(`pm_mode`, `mid`, swap[0], swap[1])
-	data := &L2C_ProcessModeMove{
+	data := &L2C_ProcessModeSwapSort{
 		Swap: swap,
 	}
-	this.owner.SendToAll(L2C_PROCESS_MODE_MOVE, data)
+	this.owner.SendToAll(L2C_PROCESS_MODE_SWAP_SORT, data)
 	return true
 }
 
@@ -340,7 +340,7 @@ func (this *Process) LinkDelete(lid uint64) bool {
 }
 
 //插入新 link
-func (this *Process) GridAdd(prevLid uint64, name string) bool {
+func (this *Process) LinkAdd(prevLid uint64, name string) bool {
 	//获得prev link的mid和sort
 	stmt, err := db.GetDb().Prepare(`SELECT mid,sort FROM ` + config.Pm + `.pm_link WHERE lid = ?`)
 	defer stmt.Close()
@@ -374,26 +374,26 @@ func (this *Process) GridAdd(prevLid uint64, name string) bool {
 		Name: name,
 		Sort: sort + 1,
 	}
-	data := &L2C_ProcessGridAdd{
+	data := &L2C_ProcessLinkAdd{
 		PrevLid:    prevLid,
 		LinkSingle: linkSingle,
 	}
-	this.owner.SendToAll(L2C_PROCESS_GRID_ADD, data)
+	this.owner.SendToAll(L2C_PROCESS_LINK_ADD, data)
 	return true
 }
 
 //link交换  link 交换位置
-func (this *Process) GridSwap(swap []uint64) bool {
+func (this *Process) LinkSwapSort(swap []uint64) bool {
 	db.SwapSort(`pm_link`, `lid`, swap[0], swap[1])
-	data := &L2C_ProcessGridSwap{
+	data := &L2C_ProcessLinkSwapSort{
 		Swap: swap,
 	}
-	this.owner.SendToAll(L2C_PROCESS_GRID_SWAP, data)
+	this.owner.SendToAll(L2C_PROCESS_LINK_SWAP_SORT, data)
 	return true
 }
 
 //用户改变
-func (this *Process) UserChange(lid, uid uint64) bool {
+func (this *Process) LinkUserChange(lid, uid uint64) bool {
 	//查询
 	stmt, err := db.GetDb().Prepare(`SELECT mid,name FROM ` + config.Pm + `.pm_link WHERE lid = ?`)
 	defer stmt.Close()
@@ -416,12 +416,12 @@ func (this *Process) UserChange(lid, uid uint64) bool {
 		Mid:  mid,
 		Name: name,
 	}
-	this.owner.SendToAll(L2C_PROCESS_USER_CHANGE, data)
+	this.owner.SendToAll(L2C_PROCESS_LINK_USER_CHANGE, data)
 	return true
 }
 
 //状态改变
-func (this *Process) GridChange(lid uint64, date string, status uint64) bool {
+func (this *Process) WorkStatus(lid uint64, date string, status uint64) bool {
 	//查询
 	stmt, err := db.GetDb().Prepare(`SELECT wid,tips,min_num,max_num,tag FROM ` + config.Pm + `.pm_work WHERE date = ? AND lid = ?`)
 	defer stmt.Close()
@@ -459,12 +459,12 @@ func (this *Process) GridChange(lid uint64, date string, status uint64) bool {
 		Tag:      tag,
 		FileList: this.owner.Upload().GetFileList(FILE_JOIN_KIND_WORK, wid),
 	}
-	this.owner.SendToAll(L2C_PROCESS_GRID_CHANGE, data)
+	this.owner.SendToAll(L2C_PROCESS_WORK_STATUS, data)
 	return true
 }
 
 //清理状态
-func (this *Process) GridClear(lid uint64, date string) bool {
+func (this *Process) WorkClear(lid uint64, date string) bool {
 	stmt, err := db.GetDb().Prepare(`SELECT wid FROM ` + config.Pm + `.pm_work WHERE date = ? AND lid = ?`)
 	defer stmt.Close()
 	db.CheckErr(err)
@@ -478,10 +478,10 @@ func (this *Process) GridClear(lid uint64, date string) bool {
 	db.CheckErr(err)
 	_, err = stmt.Exec(wid)
 	db.CheckErr(err)
-	data := &L2C_ProcessGridClear{
+	data := &L2C_ProcessWorkClear{
 		Wid: wid,
 	}
-	this.owner.SendToAll(L2C_PROCESS_GRID_CLEAR, data)
+	this.owner.SendToAll(L2C_PROCESS_WORK_CLEAR, data)
 	return true
 }
 

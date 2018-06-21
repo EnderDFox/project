@@ -271,16 +271,16 @@ interface L2C_ProcessLinkDelete {
     Lid?: uint64
 }
 
-interface L2C_ProcessGridAdd {
+interface L2C_ProcessLinkAdd {
     PrevLid?: uint64
     LinkSingle?: LinkSingle
 }
 
-interface L2C_ProcessGridSwap {
+interface L2C_ProcessLinkSwapSort {
     Swap?: uint64[]
 }
 
-interface L2C_ProcessGridClear {
+interface L2C_ProcessWorkClear {
     Wid?: uint64
 }
 
@@ -296,7 +296,7 @@ interface L2C_ProcessModeDelete {
 }
 
 
-interface L2C_ProcessModeMove {
+interface L2C_ProcessModeSwapSort {
     Swap?: uint64[]
 }
 

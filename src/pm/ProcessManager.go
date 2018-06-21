@@ -15,23 +15,23 @@ func NewProcessManager() *ProcessManager {
 
 func (this *ProcessManager) RegisterFunction() {
 	command.Register(C2L_PROCESS_VIEW, &C2L_M_PROCESS_VIEW{})
-	command.Register(C2L_PROCESS_GRID_CHANGE, &C2L_M_PROCESS_GRID_CHANGE{})
-	command.Register(C2L_PROCESS_GRID_CLEAR, &C2L_M_PROCESS_GRID_CLEAR{})
-	command.Register(C2L_PROCESS_USER_CHANGE, &C2L_M_PROCESS_USER_CHANGE{})
-	command.Register(C2L_PROCESS_GRID_SWAP, &C2L_M_PROCESS_GRID_SWAP{})
-	command.Register(C2L_PROCESS_GRID_ADD, &C2L_M_PROCESS_GRID_ADD{})
-	command.Register(C2L_PROCESS_LINK_DELETE, &C2L_M_PROCESS_LINK_DELETE{})
-	command.Register(C2L_PROCESS_LINK_EDIT, &C2L_M_PROCESS_LINK_EDIT{})
-	command.Register(C2L_PROCESS_WORK_EDIT, &C2L_M_PROCESS_WORK_EDIT{})
-	command.Register(C2L_PROCESS_MODE_EDIT, &C2L_M_PROCESS_MODE_EDIT{})
 	command.Register(C2L_PROCESS_MODE_ADD, &C2L_M_PROCESS_MODE_ADD{})
-	command.Register(C2L_PROCESS_MODE_DELETE, &C2L_M_PROCESS_MODE_DELETE{})
+	command.Register(C2L_PROCESS_MODE_EDIT, &C2L_M_PROCESS_MODE_EDIT{})
 	command.Register(C2L_PROCESS_MODE_COLOR, &C2L_M_PROCESS_MODE_COLOR{})
-	command.Register(C2L_PROCESS_SCORE_EDIT, &C2L_M_PROCESS_SCORE_EDIT{})
-	command.Register(C2L_PROCESS_MODE_MOVE, &C2L_M_PROCESS_MODE_MOVE{})
+	command.Register(C2L_PROCESS_MODE_SWAP_SORT, &C2L_M_PROCESS_MODE_SWAP_SORT{})
 	command.Register(C2L_PROCESS_MODE_STORE, &C2L_M_PROCESS_MODE_STORE{})
+	command.Register(C2L_PROCESS_MODE_DELETE, &C2L_M_PROCESS_MODE_DELETE{})
+	command.Register(C2L_PROCESS_LINK_ADD, &C2L_M_PROCESS_LINK_ADD{})
+	command.Register(C2L_PROCESS_LINK_EDIT, &C2L_M_PROCESS_LINK_EDIT{})
 	command.Register(C2L_PROCESS_LINK_COLOR, &C2L_M_PROCESS_LINK_COLOR{})
+	command.Register(C2L_PROCESS_LINK_SWAP_SORT, &C2L_M_PROCESS_LINK_SWAP_SORT{})
 	command.Register(C2L_PROCESS_LINK_STORE, &C2L_M_PROCESS_LINK_STORE{})
+	command.Register(C2L_PROCESS_LINK_DELETE, &C2L_M_PROCESS_LINK_DELETE{})
+	command.Register(C2L_PROCESS_LINK_USER_CHANGE, &C2L_M_PROCESS_LINK_USER_CHANGE{})
+	command.Register(C2L_PROCESS_WORK_EDIT, &C2L_M_PROCESS_WORK_EDIT{})
+	command.Register(C2L_PROCESS_WORK_STATUS, &C2L_M_PROCESS_WORK_STATUS{})
+	command.Register(C2L_PROCESS_WORK_SCORE, &C2L_M_PROCESS_WORK_SCORE{})
+	command.Register(C2L_PROCESS_WORK_CLEAR, &C2L_M_PROCESS_WORK_CLEAR{})
 }
 
 //归档
@@ -69,10 +69,10 @@ func (this *C2L_M_PROCESS_MODE_STORE) execute(client *websocket.Conn, msg *Messa
 }
 
 //移动
-type C2L_M_PROCESS_MODE_MOVE struct{}
+type C2L_M_PROCESS_MODE_SWAP_SORT struct{}
 
-func (this *C2L_M_PROCESS_MODE_MOVE) execute(client *websocket.Conn, msg *Message) bool {
-	param := &C2L_ProcessModeMove{}
+func (this *C2L_M_PROCESS_MODE_SWAP_SORT) execute(client *websocket.Conn, msg *Message) bool {
+	param := &C2L_ProcessModeSwapSort{}
 	err := json.Unmarshal([]byte(msg.Param), param)
 	if err != nil {
 		return false
@@ -81,15 +81,15 @@ func (this *C2L_M_PROCESS_MODE_MOVE) execute(client *websocket.Conn, msg *Messag
 	if user == nil {
 		return false
 	}
-	user.Process().ModeMove(param.Swap)
+	user.Process().ModeSwapSort(param.Swap)
 	return true
 }
 
 //评分
-type C2L_M_PROCESS_SCORE_EDIT struct{}
+type C2L_M_PROCESS_WORK_SCORE struct{}
 
-func (this *C2L_M_PROCESS_SCORE_EDIT) execute(client *websocket.Conn, msg *Message) bool {
-	param := &C2L_ProcessScoreEdit{}
+func (this *C2L_M_PROCESS_WORK_SCORE) execute(client *websocket.Conn, msg *Message) bool {
+	param := &C2L_ProcessWorkScore{}
 	err := json.Unmarshal([]byte(msg.Param), param)
 	if err != nil {
 		return false
@@ -98,7 +98,7 @@ func (this *C2L_M_PROCESS_SCORE_EDIT) execute(client *websocket.Conn, msg *Messa
 	if user == nil {
 		return false
 	}
-	user.Process().ScoreEdit(param.Wid, param.Quality, param.Efficiency, param.Manner, param.Info)
+	user.Process().WorkScore(param.Wid, param.Quality, param.Efficiency, param.Manner, param.Info)
 	return true
 }
 
@@ -241,10 +241,10 @@ func (this *C2L_M_PROCESS_LINK_DELETE) execute(client *websocket.Conn, msg *Mess
 }
 
 //添加
-type C2L_M_PROCESS_GRID_ADD struct{}
+type C2L_M_PROCESS_LINK_ADD struct{}
 
-func (this *C2L_M_PROCESS_GRID_ADD) execute(client *websocket.Conn, msg *Message) bool {
-	param := &C2L_ProcessGridAdd{}
+func (this *C2L_M_PROCESS_LINK_ADD) execute(client *websocket.Conn, msg *Message) bool {
+	param := &C2L_ProcessLinkAdd{}
 	err := json.Unmarshal([]byte(msg.Param), param)
 	if err != nil {
 		return false
@@ -253,15 +253,15 @@ func (this *C2L_M_PROCESS_GRID_ADD) execute(client *websocket.Conn, msg *Message
 	if user == nil {
 		return false
 	}
-	user.Process().GridAdd(param.Lid, param.Name)
+	user.Process().LinkAdd(param.Lid, param.Name)
 	return true
 }
 
 //交换
-type C2L_M_PROCESS_GRID_SWAP struct{}
+type C2L_M_PROCESS_LINK_SWAP_SORT struct{}
 
-func (this *C2L_M_PROCESS_GRID_SWAP) execute(client *websocket.Conn, msg *Message) bool {
-	param := &C2L_ProcessGridSwap{}
+func (this *C2L_M_PROCESS_LINK_SWAP_SORT) execute(client *websocket.Conn, msg *Message) bool {
+	param := &C2L_ProcessLinkSwapSort{}
 	err := json.Unmarshal([]byte(msg.Param), param)
 	if err != nil {
 		return false
@@ -270,15 +270,15 @@ func (this *C2L_M_PROCESS_GRID_SWAP) execute(client *websocket.Conn, msg *Messag
 	if user == nil {
 		return false
 	}
-	user.Process().GridSwap(param.Swap)
+	user.Process().LinkSwapSort(param.Swap)
 	return true
 }
 
 //改用户
-type C2L_M_PROCESS_USER_CHANGE struct{}
+type C2L_M_PROCESS_LINK_USER_CHANGE struct{}
 
-func (this *C2L_M_PROCESS_USER_CHANGE) execute(client *websocket.Conn, msg *Message) bool {
-	param := &C2L_ProcessUserChange{}
+func (this *C2L_M_PROCESS_LINK_USER_CHANGE) execute(client *websocket.Conn, msg *Message) bool {
+	param := &C2L_ProcessLinkUserChange{}
 	err := json.Unmarshal([]byte(msg.Param), param)
 	if err != nil {
 		return false
@@ -287,15 +287,15 @@ func (this *C2L_M_PROCESS_USER_CHANGE) execute(client *websocket.Conn, msg *Mess
 	if user == nil {
 		return false
 	}
-	user.Process().UserChange(param.Lid, param.Uid)
+	user.Process().LinkUserChange(param.Lid, param.Uid)
 	return true
 }
 
 //清理
-type C2L_M_PROCESS_GRID_CLEAR struct{}
+type C2L_M_PROCESS_WORK_CLEAR struct{}
 
-func (this *C2L_M_PROCESS_GRID_CLEAR) execute(client *websocket.Conn, msg *Message) bool {
-	param := &C2L_ProcessGridClear{}
+func (this *C2L_M_PROCESS_WORK_CLEAR) execute(client *websocket.Conn, msg *Message) bool {
+	param := &C2L_ProcessWorkClear{}
 	err := json.Unmarshal([]byte(msg.Param), param)
 	if err != nil {
 		return false
@@ -304,15 +304,15 @@ func (this *C2L_M_PROCESS_GRID_CLEAR) execute(client *websocket.Conn, msg *Messa
 	if user == nil {
 		return false
 	}
-	user.Process().GridClear(param.Lid, param.Date)
+	user.Process().WorkClear(param.Lid, param.Date)
 	return true
 }
 
 //状态
-type C2L_M_PROCESS_GRID_CHANGE struct{}
+type C2L_M_PROCESS_WORK_STATUS struct{}
 
-func (this *C2L_M_PROCESS_GRID_CHANGE) execute(client *websocket.Conn, msg *Message) bool {
-	param := &C2L_ProcessGridChange{}
+func (this *C2L_M_PROCESS_WORK_STATUS) execute(client *websocket.Conn, msg *Message) bool {
+	param := &C2L_ProcessWorkStatus{}
 	err := json.Unmarshal([]byte(msg.Param), param)
 	if err != nil {
 		return false
@@ -321,7 +321,7 @@ func (this *C2L_M_PROCESS_GRID_CHANGE) execute(client *websocket.Conn, msg *Mess
 	if user == nil {
 		return false
 	}
-	user.Process().GridChange(param.Lid, param.Date, param.Status)
+	user.Process().WorkStatus(param.Lid, param.Date, param.Status)
 	return true
 }
 

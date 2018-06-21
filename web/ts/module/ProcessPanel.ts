@@ -412,14 +412,14 @@ class ProcessPanelClass {
 					var prev = $(o).parent().prev().prev()
 					if (prev.length > 0) {
 						var beMid = prev.find('.mode').attr('mid')
-						WSConn.sendMsg(C2L.C2L_PROCESS_MODE_MOVE, { 'Swap': [parseInt(beMid), mode.Mid] })
+						WSConn.sendMsg(C2L.C2L_PROCESS_MODE_SWAP_SORT, { 'Swap': [parseInt(beMid), mode.Mid] })
 					}
 					break
 				case 'backward':
 					var next = $(o).parent().next().next()
 					if (next.length > 0) {
 						var beMid = next.find('.mode').attr('mid')
-						WSConn.sendMsg(C2L.C2L_PROCESS_MODE_MOVE, { 'Swap': [mode.Mid, parseInt(beMid)] })
+						WSConn.sendMsg(C2L.C2L_PROCESS_MODE_SWAP_SORT, { 'Swap': [mode.Mid, parseInt(beMid)] })
 					}
 					break
 				case 'store':
@@ -526,7 +526,7 @@ class ProcessPanelClass {
 				case 'rest':
 				case 'optimize':
 					var status = $(e.currentTarget).attr('status')
-					WSConn.sendMsg(C2L.C2L_PROCESS_GRID_CHANGE, { 'Lid': grid.lid, 'Wid': grid.wid, 'Date': grid.s, 'Status': parseInt(status) })
+					WSConn.sendMsg(C2L.C2L_PROCESS_WORK_STATUS, { 'Lid': grid.lid, 'Wid': grid.wid, 'Date': grid.s, 'Status': parseInt(status) })
 					break
 				case 'edit':
 					this.ShowEditStep(o)
@@ -543,7 +543,7 @@ class ProcessPanelClass {
 					break
 				case 'clear':
 					if (grid.wid) {
-						WSConn.sendMsg(C2L.C2L_PROCESS_GRID_CLEAR, { 'Lid': grid.lid, 'Wid': grid.wid, 'Date': grid.s })
+						WSConn.sendMsg(C2L.C2L_PROCESS_WORK_CLEAR, { 'Lid': grid.lid, 'Wid': grid.wid, 'Date': grid.s })
 					}
 					break
 			}
@@ -607,7 +607,7 @@ class ProcessPanelClass {
 		}
 		UploadManager.ShowProcessWorkFileBox(wid)
 		plan.find('.confirm').unbind().click(function () {
-			WSConn.sendMsg(C2L.C2L_PROCESS_SCORE_EDIT, { 'Wid': wid, 'Quality': parseInt(qcos.val() as string), 'Efficiency': parseInt(ecos.val() as string), 'Manner': parseInt(mcos.val() as string), 'Info': info.val() })
+			WSConn.sendMsg(C2L.C2L_PROCESS_WORK_SCORE, { 'Wid': wid, 'Quality': parseInt(qcos.val() as string), 'Efficiency': parseInt(ecos.val() as string), 'Manner': parseInt(mcos.val() as string), 'Info': info.val() })
 			$('#editScore').hide()
 		})
 		plan.find('.cancel,.close').unbind().click(function () {
@@ -628,17 +628,17 @@ class ProcessPanelClass {
 				case 'forward':
 					var prev = cur.prev()
 					if (prev.length > 0) {
-						WSConn.sendMsg(C2L.C2L_PROCESS_GRID_SWAP, { 'Swap': [prev.data('lid'), cur.data('lid')] })
+						WSConn.sendMsg(C2L.C2L_PROCESS_LINK_SWAP_SORT, { 'Swap': [prev.data('lid'), cur.data('lid')] })
 					}
 					break
 				case 'backward':
 					var next = cur.next()
 					if (next.length > 0) {
-						WSConn.sendMsg(C2L.C2L_PROCESS_GRID_SWAP, { 'Swap': [cur.data('lid'), next.data('lid')] })
+						WSConn.sendMsg(C2L.C2L_PROCESS_LINK_SWAP_SORT, { 'Swap': [cur.data('lid'), next.data('lid')] })
 					}
 					break
 				case 'insert':
-					this.ShowEditLink(o, C2L.C2L_PROCESS_GRID_ADD)
+					this.ShowEditLink(o, C2L.C2L_PROCESS_LINK_ADD)
 					break
 				case 'edit':
 					this.ShowEditLink(o, C2L.C2L_PROCESS_LINK_EDIT)
@@ -705,7 +705,7 @@ class ProcessPanelClass {
 		plan.css({ left: left, top: top }).unbind().delegate('.spread .row', 'click', (e: JQuery.Event) => {
 			var uid = $(e.currentTarget).attr('uid')
 			if (uid) {
-				WSConn.sendMsg(C2L.C2L_PROCESS_USER_CHANGE, { 'Lid': lid, 'Uid': parseInt(uid) })
+				WSConn.sendMsg(C2L.C2L_PROCESS_LINK_USER_CHANGE, { 'Lid': lid, 'Uid': parseInt(uid) })
 				this.HideMenu()
 			}
 		}).show().adjust(-5)

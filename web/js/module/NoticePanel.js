@@ -76,7 +76,7 @@ var NoticePanelClass = /** @class */ (function () {
         pan.find('.list').unbind().delegate('li', 'click', function (e) {
             var wid = parseInt($(this).attr('wid'));
             if (e.currentTarget.localName == 'div') {
-                WSConn.sendMsg(C2L.C2L_PROCESS_SCORE_EDIT, { 'Wid': wid, 'Score': 0, 'Info': '' });
+                WSConn.sendMsg(C2L.C2L_PROCESS_WORK_SCORE, { 'Wid': wid, 'Score': 0, 'Info': '' });
             }
             else {
                 NoticePanel.OnShowEditScore(e, wid);

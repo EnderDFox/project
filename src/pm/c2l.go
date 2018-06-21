@@ -3,24 +3,29 @@ package main
 const (
 	C2L_SESSION_LOGIN          = 10001
 	C2L_SAVE_COLLATE           = 11001
+	//#
 	C2L_PROCESS_VIEW           = 50001
-	C2L_PROCESS_GRID_CHANGE    = 50002
-	C2L_PROCESS_GRID_CLEAR     = 50003
-	C2L_PROCESS_USER_CHANGE    = 50004
-	C2L_PROCESS_GRID_SWAP      = 50005
-	C2L_PROCESS_GRID_ADD       = 50006
-	C2L_PROCESS_LINK_DELETE    = 50007
-	C2L_PROCESS_LINK_EDIT      = 50008
-	C2L_PROCESS_WORK_EDIT      = 50009
-	C2L_PROCESS_MODE_EDIT      = 50010
+	//mode
 	C2L_PROCESS_MODE_ADD       = 50011
-	C2L_PROCESS_MODE_DELETE    = 50012
+	C2L_PROCESS_MODE_EDIT      = 50012
 	C2L_PROCESS_MODE_COLOR     = 50013
-	C2L_PROCESS_SCORE_EDIT     = 50014
-	C2L_PROCESS_MODE_MOVE      = 50015
-	C2L_PROCESS_MODE_STORE     = 50016
-	C2L_PROCESS_LINK_COLOR     = 50017
-	C2L_PROCESS_LINK_STORE     = 50018
+	C2L_PROCESS_MODE_SWAP_SORT      = 50014
+	C2L_PROCESS_MODE_STORE     = 50015
+	C2L_PROCESS_MODE_DELETE    = 50016
+	//link
+	C2L_PROCESS_LINK_ADD       = 50021
+	C2L_PROCESS_LINK_EDIT      = 50022
+	C2L_PROCESS_LINK_COLOR     = 50023
+	C2L_PROCESS_LINK_SWAP_SORT      = 50024
+	C2L_PROCESS_LINK_STORE     = 50025
+	C2L_PROCESS_LINK_DELETE    = 50026
+	C2L_PROCESS_LINK_USER_CHANGE    = 50027
+	//work
+	C2L_PROCESS_WORK_EDIT      = 50031
+	C2L_PROCESS_WORK_STATUS    = 50032
+	C2L_PROCESS_WORK_SCORE     = 50033
+	C2L_PROCESS_WORK_CLEAR     = 50034
+	//#
 	C2L_COLLATE_VIEW           = 60001
 	C2L_COLLATE_STEP_EDIT      = 60002
 	C2L_COLLATE_STEP_ADD       = 60003
@@ -60,29 +65,29 @@ type C2L_ProcessView struct {
 	LinkName  string
 }
 
-type C2L_ProcessGridChange struct {
+type C2L_ProcessWorkStatus struct {
 	Wid    uint64
 	Lid    uint64
 	Date   string
 	Status uint64
 }
 
-type C2L_ProcessGridClear struct {
+type C2L_ProcessWorkClear struct {
 	Wid  uint64
 	Lid  uint64
 	Date string
 }
 
-type C2L_ProcessUserChange struct {
+type C2L_ProcessLinkUserChange struct {
 	Lid uint64
 	Uid uint64
 }
 
-type C2L_ProcessGridSwap struct {
+type C2L_ProcessLinkSwapSort struct {
 	Swap []uint64
 }
 
-type C2L_ProcessGridAdd struct {
+type C2L_ProcessLinkAdd struct {
 	Lid  uint64
 	Name string
 }
@@ -135,7 +140,7 @@ type C2L_ProcessLinkColor struct {
 	Color uint64
 }
 
-type C2L_ProcessScoreEdit struct {
+type C2L_ProcessWorkScore struct {
 	Wid        uint64
 	Quality    uint64
 	Efficiency uint64
@@ -143,7 +148,7 @@ type C2L_ProcessScoreEdit struct {
 	Info       string
 }
 
-type C2L_ProcessModeMove struct {
+type C2L_ProcessModeSwapSort struct {
 	Swap []uint64
 }
 
