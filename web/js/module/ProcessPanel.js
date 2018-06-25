@@ -207,12 +207,18 @@ var ProcessPanelClass = /** @class */ (function () {
             return html;
         }
         html += "<tr class=\"trLink\" lid=\"" + link.Lid + "\">";
-        html += "\t<td class=\"link bg_" + link.Color + "\" type=\"link\">\n\t\t\t\t\t\t" + this.GetLinkName(link) + "\n\t\t\t\t\t</td>\n\t\t\t\t\t<td class=\"duty\" type=\"duty\">" + Data.GetUser(link.Uid).Name + "</td>";
+        html += "\t<td class=\"link bg_" + link.Color + "\" type=\"link\">\n\t\t\t\t\t\t" + this.GetLinkName(link) + "\n\t\t\t\t\t</td>\n\t\t\t\t\t<td class=\"duty\" type=\"duty\">\n\t\t\t\t\t\t" + this.GetLinkUserName(link) + "\n\t\t\t\t\t</td>";
         html += '</tr>';
         return html;
     };
     ProcessPanelClass.prototype.GetLinkName = function (link) {
         return "<div>\n\t\t\t\t" + (link.Name == '' ? '空' : link.Name) + " " + ProcessPanel.GetModeLinkStatusName(link.Status) + "\n\t\t\t\t</div>";
+    };
+    ProcessPanelClass.prototype.GetLinkUserName = function (link) {
+        if (!link || !Data.GetUser(link.Uid)) {
+            return "<div>\u7A7A</div>";
+        }
+        return "<div>\n\t\t" + Data.GetUser(link.Uid).Name + "\n\t\t\t\t</div>";
     };
     //组合work列表 一个mode下的多个link中的每个work
     ProcessPanelClass.prototype.GetWorkListHtml = function (mode) {

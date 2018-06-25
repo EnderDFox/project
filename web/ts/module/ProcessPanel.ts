@@ -214,13 +214,23 @@ class ProcessPanelClass {
 		html += `	<td class="link bg_${link.Color}" type="link">
 						${this.GetLinkName(link)}
 					</td>
-					<td class="duty" type="duty">${Data.GetUser(link.Uid).Name}</td>`
+					<td class="duty" type="duty">
+						${this.GetLinkUserName(link)}
+					</td>`
 		html += '</tr>'
 		return html
 	}
 	GetLinkName(link: LinkSingle): string {
 		return `<div>
 				${(link.Name == '' ? '空' : link.Name)} ${ProcessPanel.GetModeLinkStatusName(link.Status)}
+				</div>`
+	}
+	GetLinkUserName(link:LinkSingle):string{
+		if(!link || !Data.GetUser(link.Uid)){
+			return `<div>空</div>`
+		}
+		return `<div>
+		${Data.GetUser(link.Uid).Name}
 				</div>`
 	}
 	//组合work列表 一个mode下的多个link中的每个work

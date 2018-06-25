@@ -16,6 +16,7 @@
 .process td{height:40px;min-width:40px;width:40px;text-align:center;cursor:pointer;padding:0px;border:1px solid #6c6c6c;
 }
 .process td div{
+  max-height: 40px;
   /* 如果这里可以换行,会导致变高, 导致很多问题 */
   word-break: break-all;
   word-wrap:break-word;
@@ -231,7 +232,7 @@
 .editInfo .num{margin-left:15px;font-size:14px;}
 
 /*编辑评分*/
-.editScore{z-index:2;width:435px;}
+.editScore{width:435px;}
 .editScore .text{text-align:center;}
 .editScore .text textarea{height:120px;width:85%;padding:5px;margin:12px 0px 5px 0px;}
 .editScore .select{margin-left:25px;margin-bottom:3px;float:left;}
@@ -328,14 +329,16 @@
 }
 
 /*点评通知*/
-.scoreNotice{position:fixed;min-width:100px;width:100px;z-index:1;}
+.scoreNotice{position:fixed;min-width:100px;width:100px;}
 .scoreNotice span{font-weight:bold;font-size:16px;color:#ff0000;}
 .scoreNotice .body ul{height:40px;line-height:40px;background:#fff;padding:0px;margin:0px;border-radius:5px;cursor:pointer;}
 .scoreNotice .body li{float:left;}
 .scoreNotice .txt{width:100px;text-align:center;}
 
 /*点评列表*/
-.extraNotice{position:fixed;left:20px;top:20px;min-width:360px;width:360px;z-index:1;}
+.extraNotice{position:fixed;left:20px;top:20px;min-width:360px;width:360px;
+  z-index:99;/* 为了比其它的弹窗低一点 */
+}
 .extraNotice .list{margin:0px 0px 10px 0px;padding:0px;height:383px;overflow-y:auto;overflow-x:auto;}
 .extraNotice .list .chunk{margin:10px 0px 0px 10px;display:inline-table;box-shadow:0px 0px 3px #333333;}
 .extraNotice .list li{margin:0px;padding:0px;cursor:pointer;}
