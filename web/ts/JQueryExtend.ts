@@ -69,8 +69,10 @@ $.fn.extend({
         var timeoutId = -1
         var prevScrollX = win.scrollLeft()
         var resetFixed = function () {
+            timeoutId = -1
             $dom.css({
                 position: 'fixed',
+                'z-index':'2',
                 'left': -win.scrollLeft(),
                 'top': 0
             })
@@ -84,20 +86,20 @@ $.fn.extend({
             if (currScrollX != prevScrollX) {
                 $dom.css({
                     'position': 'absolute',
+                    'z-index':'3',
                     'left': 0,
                     'top': win.scrollTop()
                 })
                 if (timeoutId >= 0) {
                     clearTimeout(timeoutId)
                 }
-                timeoutId = setTimeout(resetFixed, 1000)
+                timeoutId = setTimeout(resetFixed, 500)
+                prevScrollX = currScrollX
             } else {
                 if (timeoutId >= 0) {
                     clearTimeout(timeoutId)
-                    timeoutId = -1
                     resetFixed()
                 }
-                prevScrollX = currScrollX
             }
         }).resize(function () {
             $dom.css({ 'left': -$(this).scrollLeft() })
@@ -110,8 +112,10 @@ $.fn.extend({
         var timeoutId = -1
         var prevScrollY = win.scrollTop()
         var resetFixed = function () {
+            timeoutId = -1
             $dom.css({
                 position: 'fixed',
+                'z-index':'2',
                 'left': 0,
                 'top': -win.scrollTop()
             })
@@ -124,20 +128,20 @@ $.fn.extend({
             if (currScrollY != prevScrollY) {
                 $dom.css({
                     'position': 'absolute',
+                    'z-index':'3',
                     'left': win.scrollLeft(),
                     'top': 0
                 })
                 if (timeoutId >= 0) {
                     clearTimeout(timeoutId)
                 }
-                timeoutId = setTimeout(resetFixed, 1000)
+                timeoutId = setTimeout(resetFixed, 500)
+                prevScrollY = currScrollY
             } else {
                 if (timeoutId >= 0) {
                     clearTimeout(timeoutId)
-                    timeoutId = -1
                     resetFixed()
                 }
-                prevScrollY = currScrollY
             }
         }).resize(function () {
             $dom.css({ 'top': -$(this).scrollTop() })
