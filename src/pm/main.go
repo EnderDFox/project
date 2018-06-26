@@ -2,6 +2,7 @@
 package main
 
 import (
+	"flag"
 	"log"
 	"net/http"
 
@@ -20,6 +21,7 @@ type PackMsg struct {
 }
 
 var (
+	path      = flag.String("file", "./config.xml", "Use -file <filesource>")
 	broadcast = make(chan PackMsg)
 	upgrader  = websocket.Upgrader{}
 	command   = NewCommand()
@@ -38,7 +40,6 @@ func main() {
 	}
 	//定时器
 	go timer.Run()
-
 	//wb服务器
 	http.Handle("/", http.FileServer(http.Dir(config.Web)))
 	//http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./web/upload/"))))
@@ -50,6 +51,7 @@ func main() {
 	dispather.Retister()
 	//写回通道
 	go handleMessages()
+	//NewTest().Debug()
 	//开启监听
 	err := http.ListenAndServe(config.Ws.Host+":"+config.Ws.Port, nil)
 	if err != nil {

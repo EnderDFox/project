@@ -4,6 +4,6 @@
     },  
     "files.exclude": {  
         "**/.idea": true,  
-        "**/web": true
+       "**/web": true
     }  
 } 

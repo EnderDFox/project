@@ -122,8 +122,11 @@ class ProcessDataClass {
 				return true
 			}
 			*/
-			if (ProjectNav.FilterDid == DidField.VERSION && DidField.VERSION != mode.Did) {
-				return true
+			// if (ProjectNav.FilterDid == DidField.VERSION && DidField.VERSION != mode.Did) {//old
+			if (ProjectNav.FilterDid == DidField.VERSION) {//改成显示有版本号的
+				if(mode.Vid==0){
+					return true
+				}
 			}
 			if (ProjectNav.FilterDid == DidField.QA && DidField.QA != mode.Did) {
 				return true

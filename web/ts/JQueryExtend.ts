@@ -93,7 +93,7 @@ $.fn.extend({
                 if (timeoutId >= 0) {
                     clearTimeout(timeoutId)
                 }
-                timeoutId = setTimeout(resetFixed, 500)
+                timeoutId = setTimeout(resetFixed, 300)
                 prevScrollX = currScrollX
             } else {
                 if (timeoutId >= 0) {
@@ -135,7 +135,7 @@ $.fn.extend({
                 if (timeoutId >= 0) {
                     clearTimeout(timeoutId)
                 }
-                timeoutId = setTimeout(resetFixed, 500)
+                timeoutId = setTimeout(resetFixed, 300)
                 prevScrollY = currScrollY
             } else {
                 if (timeoutId >= 0) {

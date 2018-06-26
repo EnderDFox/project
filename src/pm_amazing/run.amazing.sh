@@ -1,6 +1,6 @@
-# 直接运行  sh /root/trunk/src/pm_beta/run.beta.sh
+# 直接运行  sh /root/trunk/src/pm_amazing/run.amazing.sh
 
-proj_name="pm_beta"
+proj_name="pm_amazing"
 path_svn="/root/trunk"
 bin_pm="/root/bin/"$proj_name
 bin_pm_web=$bin_pm"/web"

@@ -22,7 +22,8 @@ func NewDbSave() *DbSave {
 //写入通道
 func (this *DbSave) WriteChan() {
 	msg := &DbMsg{}
-	msg.Data = "xxxxx"
+	data := "xxxxxx"
+	msg.Data = &data
 	msg.Type = 100
 	this.Broadcast <- msg
 }
@@ -31,6 +32,6 @@ func (this *DbSave) WriteChan() {
 func (this *DbSave) ReadChan() {
 	for {
 		msg := <-this.Broadcast
-		fmt.Println(msg)
+		fmt.Println(msg.Type, *msg.Data.(*string))
 	}
 }

@@ -43,9 +43,9 @@ type ConfigXML struct {
 }
 
 func (this *Config) LoadCfg() bool {
-	contents, err := ioutil.ReadFile("config.xml")
+	contents, err := ioutil.ReadFile(*path)
 	if err != nil {
-		fmt.Println("config.xml 加载失败", err)
+		fmt.Println(*path, " 加载失败", err)
 		return false
 	}
 	err = xml.Unmarshal(contents, this)
