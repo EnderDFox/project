@@ -146,13 +146,6 @@ var ProcessPanelClass = /** @class */ (function () {
             $('#workTips').hide();
         });
     };
-    //组合头部
-    ProcessPanelClass.prototype.GetTheadHtmlLeft = function () {
-        var today = Common.GetDate(0);
-        var html = "";
-        html += "<thead>\n\t\t\t\t<tr> \n\t\t\t\t\t<td colspan=\"3\" class=\"tools\">\u529F\u80FD\u5217\u8868</td>\n\t\t\t\t</tr> \n\t\t\t\t<tr> \n\t\t\t\t\t<td class=\"func\">\u529F\u80FD</td> \n\t\t\t\t\t<td class=\"link\">\u6D41\u7A0B</td> \n\t\t\t\t\t<td class=\"duty\">\u8D1F\u8D23\u4EBA</td>\n\t\t\t\t</tr>\n\t\t\t\t</thead>";
-        return html;
-    };
     ProcessPanelClass.prototype.GetTheadHtmlRight = function () {
         var today = Common.GetDate(0);
         var html = "";
@@ -282,17 +275,16 @@ var ProcessPanelClass = /** @class */ (function () {
         return html;
     };
     //组合tbody
-    ProcessPanelClass.prototype.GetTbodyHtmlLeft = function () {
-        var _this = this;
-        var html = '';
-        html += '<tbody>';
+    /* GetTbodyHtmlLeft() {
+        var html = ''
+        html += '<tbody>'
         //功能
-        $.each(ProcessData.Project.ModeList, function (k, mode) {
-            html += _this.GetModeHtmlLeft(mode.Mid);
-        });
-        html += '</tbody>';
-        return html;
-    };
+        $.each(ProcessData.Project.ModeList, (k, mode: ModeSingle) => {
+            html += this.GetModeHtmlLeft(mode.Mid)
+        })
+        html += '</tbody>'
+        return html
+    } */
     //组合tbody
     ProcessPanelClass.prototype.GetTbodyHtmlRight = function () {
         var _this = this;
@@ -309,11 +301,35 @@ var ProcessPanelClass = /** @class */ (function () {
     ProcessPanelClass.prototype.CreateProcess = function () {
         var _this = this;
         Loader.LoadVueTemplate(ProcessFilter.VuePath + "PanelFrame", function (tpl) {
-            var $main = Main.Draw(tpl);
+            var data = {
+                modeList: [],
+            };
+            var len = ProcessData.Project.ModeList.length;
+            for (var i = 0; i < len; i++) {
+                var mode = ProcessData.Project.ModeList[i];
+                if (ProcessData.ModeMap[mode.Mid]) {
+                    data.modeList.push(mode);
+                }
+            }
+            //
+            // Object.freeze(data)
             //组合thead
-            $('#tableTitleLeft').html(_this.GetTheadHtmlLeft());
+            var vue = new Vue({
+                template: tpl,
+                data: data,
+                methods: {
+                    GetModeName: function (mode) {
+                        return _this.GetModeName(mode);
+                    },
+                    GetLinkListHtml: function (mode) {
+                        return _this.GetLinkListHtml(mode);
+                    },
+                },
+            }).$mount();
+            var $main = Main.Draw(vue.$el);
+            // $('#tableBodyLeft').html(this.GetTbodyHtmlLeft())
+            //
             $('#tableTitleRight').html(_this.GetTheadHtmlRight());
-            $('#tableBodyLeft').html(_this.GetTbodyHtmlLeft());
             $('#tableBodyRight').html(_this.GetTbodyHtmlRight());
             //流程数据
             $main.find('.trLink').each(function (index, el) {

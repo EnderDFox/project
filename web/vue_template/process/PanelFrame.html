@@ -1,16 +1,49 @@
-<div class="lockTop freeze" id="freezeTitleLeft">
-    <table class="process" id="tableTitleLeft">
-    </table>
-</div>
-<div class="lockTop freeze" id="freezeTitleRight" style="margin-left: 488px;">
-    <table class="process" id="tableTitleRight">
-    </table>
-</div>
-<div class="processLockBody freeze" id="freezeBodyLeft" style="margin-top: 127px;">
-    <table class="process" id="tableBodyLeft">
-    </table>
-</div>
-<div class="processLockBody" id="freezeBodyRight" style="margin-left: 488px;margin-top: 127px;">
-    <table class="process" id="tableBodyRight">
-    </table>
+<div>
+    <div class="lockTop freeze" id="freezeTitleLeft">
+        <table class="process" id="tableTitleLeft">
+            <thead>
+                <tr>
+                    <td colspan="3" class="tools">功能列表</td>
+                </tr>
+                <tr>
+                    <td class="func">功能</td>
+                    <td class="link">流程</td>
+                    <td class="duty">负责人</td>
+                </tr>
+            </thead>
+        </table>
+    </div>
+    <div class="lockTop freeze" id="freezeTitleRight" style="margin-left: 488px;">
+        <table class="process" id="tableTitleRight">
+        </table>
+    </div>
+    <div class="processLockBody freeze" id="freezeBodyLeft" style="margin-top: 127px;">
+        <table class="process" id="tableBodyLeft">
+            <tbody>
+                <tr v-for="mode,index in modeList" class="trModeLeft" :mid="mode.Mid">
+                    <td :class="['mode bg_'+mode.Color]" :mid="mode.Mid" v-html="GetModeName(mode)">
+                    </td>
+                    <td colspan="2">
+                        <table class="linkMap">
+                            <tr v-for="link,index in list" class="trLink" :lid="link.Lid">
+                                <td class="link bg_${link.Color}" type="link">
+                                    ${this.GetLinkName(link)}
+                                </td>
+                                <td class="duty" type="duty">
+                                    ${this.GetLinkUserName(link)}
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+                <tr class="space">
+                    <td colspan="3"></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="processLockBody" id="freezeBodyRight" style="margin-left: 488px;margin-top: 127px;">
+        <table class="process" id="tableBodyRight">
+        </table>
+    </div>
 </div>

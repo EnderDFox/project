@@ -144,22 +144,6 @@ class ProcessPanelClass {
 			$('#workTips').hide()
 		})
 	}
-	//组合头部
-	GetTheadHtmlLeft(): string {
-		var today = Common.GetDate(0)
-		var html = ``
-		html += `<thead>
-				<tr> 
-					<td colspan="3" class="tools">功能列表</td>
-				</tr> 
-				<tr> 
-					<td class="func">功能</td> 
-					<td class="link">流程</td> 
-					<td class="duty">负责人</td>
-				</tr>
-				</thead>`
-		return html
-	}
 	GetTheadHtmlRight(): string {
 		var today = Common.GetDate(0)
 		var html = ``
@@ -225,8 +209,8 @@ class ProcessPanelClass {
 				${(link.Name == '' ? '空' : link.Name)} ${ProcessPanel.GetModeLinkStatusName(link.Status)}
 				</div>`
 	}
-	GetLinkUserName(link:LinkSingle):string{
-		if(!link || !Data.GetUser(link.Uid)){
+	GetLinkUserName(link: LinkSingle): string {
+		if (!link || !Data.GetUser(link.Uid)) {
 			return `<div>空</div>`
 		}
 		return `<div>
@@ -307,7 +291,7 @@ class ProcessPanelClass {
 		return html
 	}
 	//组合tbody
-	GetTbodyHtmlLeft() {
+	/* GetTbodyHtmlLeft() {
 		var html = ''
 		html += '<tbody>'
 		//功能
@@ -316,7 +300,7 @@ class ProcessPanelClass {
 		})
 		html += '</tbody>'
 		return html
-	}
+	} */
 	//组合tbody
 	GetTbodyHtmlRight() {
 		var html = ''
@@ -331,11 +315,35 @@ class ProcessPanelClass {
 	//建立内容
 	CreateProcess() {
 		Loader.LoadVueTemplate(ProcessFilter.VuePath + `PanelFrame`, (tpl: string) => {
-			var $main = Main.Draw(tpl)
+			var data = {
+				modeList:[],
+			}
+			var len = ProcessData.Project.ModeList.length
+			for (var i = 0; i < len; i++) {
+				var mode = ProcessData.Project.ModeList[i]
+				if(ProcessData.ModeMap[mode.Mid]){
+					data.modeList.push(mode)
+				}
+			}
+			//
+			// Object.freeze(data)
 			//组合thead
-			$('#tableTitleLeft').html(this.GetTheadHtmlLeft())
+			var vue = new Vue({
+				template: tpl,
+				data: data,
+				methods: {
+					GetModeName: (mode: ModeSingle) => {
+						return this.GetModeName(mode)
+					},
+					GetLinkListHtml: (mode: ModeSingle) => {
+						return this.GetLinkListHtml(mode)
+					},
+				},
+			}).$mount()
+			var $main = Main.Draw(vue.$el)
+			// $('#tableBodyLeft').html(this.GetTbodyHtmlLeft())
+			//
 			$('#tableTitleRight').html(this.GetTheadHtmlRight())
-			$('#tableBodyLeft').html(this.GetTbodyHtmlLeft())
 			$('#tableBodyRight').html(this.GetTbodyHtmlRight())
 			//流程数据
 			$main.find('.trLink').each((index: number, el: HTMLElement) => {
@@ -657,11 +665,11 @@ class ProcessPanelClass {
 				case 'store':
 					if (link.Status == LinkStatusField.NORMAL) {
 						if (cur.parent().find('tr').length > 1) {
-							Common.Warning(cur,e, function () {
+							Common.Warning(cur, e, function () {
 								WSConn.sendMsg(C2L.C2L_PROCESS_LINK_STORE, { 'Lid': cur.data('lid'), 'Status': LinkStatusField.STORE })
 							}, '是否将已完成的流程进行归档？')
 						} else {
-							Common.Warning(cur,e,null, '至少要保留一个流程')
+							Common.Warning(cur, e, null, '至少要保留一个流程')
 						}
 					} else {
 						WSConn.sendMsg(C2L.C2L_PROCESS_LINK_STORE, { 'Lid': cur.data('lid'), 'Status': LinkStatusField.NORMAL })
@@ -669,11 +677,11 @@ class ProcessPanelClass {
 					break
 				case 'delete':
 					if (cur.parent().find('tr').length > 1) {
-						Common.Warning(cur,e, function () {
+						Common.Warning(cur, e, function () {
 							WSConn.sendMsg(C2L.C2L_PROCESS_LINK_DELETE, { 'Lid': cur.data('lid') })
 						}, '删除后不可恢复，确认删除吗？')
 					} else {
-						Common.Warning(cur,e,null, '至少要保留一个流程')
+						Common.Warning(cur, e, null, '至少要保留一个流程')
 					}
 					break
 			}
