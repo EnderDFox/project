@@ -29,8 +29,8 @@
 .process .title{font-weight:bold;}
 .process .func{min-width:100px;max-width:100px;width:100px;font-weight:normal;padding:0px 0px 0px 0px;}
 .process .link{min-width:315px;max-width:315px;width:315px;font-weight:normal;}
-.process .linkChild0{min-width:156px;max-width:156px;width:156px;font-weight:normal;}
-.process .linkChild{min-width:157px;max-width:157px;width:157px;font-weight:normal;}
+.process .linkChild0{min-width:126px;max-width:126px;width:126px;font-weight:normal;}
+.process .linkChild{min-width:187px;max-width:187px;width:187px;font-weight:normal;}
 .process .duty{min-width:60px;max-width:60px;width:60px;font-weight:normal;}
 .process .date_0{background:#0070c0;color:#ffffff;font-weight:bold;}
 .process .date_1{background:#ed7d31;color:#ffffff;font-weight:bold;}
@@ -105,7 +105,7 @@
 
 /*编辑模板-模块 (编辑模板-流程也用这个class)*/
 .editTplMode {min-width:400px;width:400px;}
-.editTplModeDetail {min-width:440px;width:440px;}
+.editTplModeDetail {min-width:470px;width:470px;}
 .editTplModeDetail .title {max-width:380px;white-space: nowrap;text-overflow: ellipsis;overflow: hidden;}
 .editTplMode ul{padding: 0px;}
 .editTplModeDetail ul{padding: 0px; max-height: 400px;overflow-x: hidden}
@@ -120,7 +120,8 @@
   height: 30px; line-height: 30px; margin: 0px;padding: 0px;vertical-align: middle;
 }
 .editTplMode .btnSmall1{width: 30px; height: 30px; line-height: 30px;}
-.editTplMode .btnSmall2{width: 72px;}
+.editTplMode .btnSmall2{width: 72px; white-space: nowrap;}
+.editTplMode .btnDid{width: 42px;}
 .editTplMode .btnSmall3{width: 72px;}
 .editTplMode .leftBlock{margin-left: 30px;}
 

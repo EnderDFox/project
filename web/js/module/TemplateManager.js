@@ -271,9 +271,13 @@ var TemplateManagerClass = /** @class */ (function () {
         }
     };
     //显示编辑模版-功能-流程列表
-    TemplateManagerClass.prototype.ShowEditTplModeDetail = function (e, showTmid) {
+    TemplateManagerClass.prototype.ShowEditTplModeDetail = function (e, showTmid, parentTlink) {
         var _this = this;
-        TemplateManager.RemoveEditTplModeDetail();
+        if (parentTlink === void 0) { parentTlink = null; }
+        console.log("[debug]", e, ":[e]");
+        if (!parentTlink) {
+            TemplateManager.RemoveEditTplModeDetail();
+        }
         ProcessPanel.HideMenu();
         var modes = TemplateManager.vue_editTplModeList.modes;
         var mode;
@@ -290,20 +294,22 @@ var TemplateManagerClass = /** @class */ (function () {
         var show = function () {
             //为了和功能列表面板高度相同
             var pageX, pageY;
-            var tplModeList = $(TemplateManager.vue_editTplModeList.$el);
-            if (tplModeList.isShow()) {
-                pageX = tplModeList.x() + tplModeList.width() + 5;
-                if (index > -1) {
-                    var btnEdit = tplModeList.find('.btnEdit').get(index); //放到编辑按钮下面
-                    if (btnEdit) {
-                        pageY = tplModeList.y() + $(btnEdit).y() + $(btnEdit).outerHeight() + 2;
+            if (!parentTlink) {
+                var tplModeList = $(TemplateManager.vue_editTplModeList.$el);
+                if (tplModeList.isShow()) {
+                    pageX = tplModeList.x() + tplModeList.width() + 5;
+                    if (index > -1) {
+                        var btnEdit = tplModeList.find('.btnEdit').get(index); //放到编辑按钮下面
+                        if (btnEdit) {
+                            pageY = tplModeList.y() + $(btnEdit).y() + $(btnEdit).outerHeight() + 2;
+                        }
+                        else {
+                            pageY = tplModeList.y();
+                        }
                     }
                     else {
                         pageY = tplModeList.y();
                     }
-                }
-                else {
-                    pageY = tplModeList.y();
                 }
             }
             if (!pageX) {
@@ -336,7 +342,8 @@ var TemplateManagerClass = /** @class */ (function () {
                 data: {
                     newName: "",
                     newDid: User.Did,
-                    mode: mode
+                    mode: mode,
+                    isChild: parentTlink != null,
                 },
                 methods: {
                     onAdd: function (e) {
@@ -369,6 +376,9 @@ var TemplateManagerClass = /** @class */ (function () {
                         else {
                             return;
                         }
+                    },
+                    onEditChildren: function (e, tlink) {
+                        _this.ShowEditTplModeDetail(e, showTmid, tlink);
                     },
                     onChangeDid: function (e, tlid) {
                         _this.ShowMenuDepartment(e, function (newDid) {

@@ -13,6 +13,7 @@ interface TplLinkSingle {
     Did: number;
     Name: String
     Sort: number;
+    Children?: TplLinkSingle[]
 }
 interface L2C_TplLinkEditSort {
     Tmid: number;
@@ -296,8 +297,11 @@ class TemplateManagerClass {
         }
     }
     //显示编辑模版-功能-流程列表
-    ShowEditTplModeDetail(e, showTmid) {
-        TemplateManager.RemoveEditTplModeDetail()
+    ShowEditTplModeDetail(e, showTmid:number,parentTlink:TplLinkSingle=null) {
+        console.log("[debug]",e,":[e]")
+        if(!parentTlink){
+            TemplateManager.RemoveEditTplModeDetail()
+        }
         ProcessPanel.HideMenu()
         var modes = TemplateManager.vue_editTplModeList.modes;
         var mode;
@@ -313,18 +317,20 @@ class TemplateManagerClass {
         var show = () => {
             //为了和功能列表面板高度相同
             var pageX, pageY
-            var tplModeList = $(TemplateManager.vue_editTplModeList.$el)
-            if (tplModeList.isShow()) {
-                pageX = tplModeList.x() + tplModeList.width() + 5
-                if (index > -1) {
-                    var btnEdit = tplModeList.find('.btnEdit').get(index)//放到编辑按钮下面
-                    if (btnEdit) {
-                        pageY = tplModeList.y() + $(btnEdit).y() + $(btnEdit).outerHeight() + 2
+            if(!parentTlink){
+                var tplModeList = $(TemplateManager.vue_editTplModeList.$el)
+                if (tplModeList.isShow()) {
+                    pageX = tplModeList.x() + tplModeList.width() + 5
+                    if (index > -1) {
+                        var btnEdit = tplModeList.find('.btnEdit').get(index)//放到编辑按钮下面
+                        if (btnEdit) {
+                            pageY = tplModeList.y() + $(btnEdit).y() + $(btnEdit).outerHeight() + 2
+                        } else {
+                            pageY = tplModeList.y()
+                        }
                     } else {
                         pageY = tplModeList.y()
                     }
-                } else {
-                    pageY = tplModeList.y()
                 }
             }
             if (!pageX) {
@@ -357,7 +363,8 @@ class TemplateManagerClass {
                 data: {
                     newName: "",
                     newDid: User.Did,
-                    mode: mode
+                    mode: mode,
+                    isChild:parentTlink!=null,
                 },
                 methods: {
                     onAdd: (e) => {
@@ -388,6 +395,9 @@ class TemplateManagerClass {
                         } else {
                             return;
                         }
+                    },
+                    onEditChildren: (e, tlink: TplLinkSingle) => {
+                        this.ShowEditTplModeDetail(e, showTmid,tlink)
                     },
                     onChangeDid: (e, tlid: number) => {
                         this.ShowMenuDepartment(e, (newDid: DidField) => {
