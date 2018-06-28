@@ -570,7 +570,8 @@ var ProcessPanelClass = /** @class */ (function () {
             pack.Wid = work.Wid;
         }
         plan.find('.confirm').unbind().click(function () {
-            pack.Lid = cur.data('lid');
+            // pack.Lid = parseInt(cur.attr('lid'))//或者 = grid.lid 
+            pack.Lid = grid.lid;
             pack.Date = grid.s;
             pack.Tips = tips.val();
             pack.MinNum = parseInt(minNum.val());

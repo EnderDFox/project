@@ -75,7 +75,7 @@ var NoticePanelClass = /** @class */ (function () {
         //名字点评
         pan.find('.list').unbind().delegate('li', 'click', function (e) {
             var wid = parseInt($(this).attr('wid'));
-            if (e.currentTarget.localName == 'div') {
+            if (e.target.localName == 'div') {
                 WSConn.sendMsg(C2L.C2L_PROCESS_WORK_SCORE, { 'Wid': wid, 'Score': 0, 'Info': '' });
             }
             else {
