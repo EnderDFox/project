@@ -26,15 +26,31 @@
                     <td colspan="2">
                         <table class="linkMap">
                             <tr v-for="link,index in mode.LinkList" class="trLink" :lid="link.Lid">
-                                <td :class="['link bg_'+link.Color]" type="link" v-html="GetLinkName(link)">
-                                </td>
-                                <td class="duty" type="duty" v-html="GetLinkUserName(link)">
+                                <td>
+                                    <table v-if="link.Children && link.Children.length>0" class="linkChildTable">
+                                        <tr v-for="linkChild,index in link.Children">
+                                            <td v-if="index==0" rowspan="3" class="linkChild0" :class="['bg_'+link.Color]" type="link" v-html="GetLinkName(link)" :lid="link.Lid">
+                                            </td>
+                                            <td class="linkChild" :class="['bg_'+linkChild.Color]" type="link" v-html="GetLinkName(linkChild)" :lid="linkChild.Lid">
+                                            </td>
+                                            <td class="duty" type="duty" v-html="GetLinkUserName(linkChild)" :lid="linkChild.Lid">
+                                            </td>
+                                        </tr>
+                                    </table>
+                                    <table v-else>
+                                        <tr>
+                                            <td class="link" :class="['bg_'+link.Color]" type="link" v-html="GetLinkName(link)" :lid="link.Lid">
+                                            </td>
+                                            <td class="duty" type="duty" v-html="GetLinkUserName(link)" :lid="link.Lid">
+                                            </td>
+                                        </tr>
+                                    </table>
                                 </td>
                             </tr>
                         </table>
                     </td>
                 </tr>
-              <!--   <tr class="space">
+                <!--   <tr class="space">
                     <td colspan="3"></td>
                 </tr> -->
             </tbody>

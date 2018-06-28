@@ -110,6 +110,7 @@ interface LinkSingle {
     Color?: number
     Status?: LinkStatusField
     Sort?:number
+    Children?:LinkSingle[]
 }
 
 interface WorkSingle {

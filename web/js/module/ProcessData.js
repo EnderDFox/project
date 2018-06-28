@@ -98,6 +98,9 @@ var ProcessDataClass = /** @class */ (function () {
                 }
             }
             //有效模块
+            // if(!link.Children){
+            // link.Children = []
+            // }
             checkMode[link.Mid] = true;
             return true;
         });

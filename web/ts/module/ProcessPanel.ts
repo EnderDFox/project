@@ -223,7 +223,10 @@ class ProcessPanelClass {
 		html += '<table class="linkMap">'
 		$.each(mode.LinkList, (k, link: LinkSingle) => {
 			//流程与进度
-			html += this.GetWorkHtml(link)
+			var times = (link.Children && link.Children.length) ? link.Children.length : 1
+			while (times--) {
+				html += this.GetWorkHtml(link)
+			}
 		})
 		html += '</table>'
 		return html
@@ -267,11 +270,11 @@ class ProcessPanelClass {
 	} */
 	/**修改mdoe td内部的最大高度 */
 	ChangeModeNameMaxHeight(mode: ModeSingle) {
-		var maxHeight = Math.max(1, mode.LinkList ? mode.LinkList.length : 0) * 40
+		var maxHeight = Math.max(1, mode.LinkList ? mode.LinkList.length : 0) * 40 * 3
 		$('#content .mode[mid="' + mode.Mid + '"] div').css('max-height', maxHeight)
 	}
 	GetModeName(mode: ModeSingle): string {
-		var maxHeight = Math.max(1, mode.LinkList ? mode.LinkList.length : 0) * 40
+		var maxHeight = Math.max(1, mode.LinkList ? mode.LinkList.length : 0) * 80 * 3
 		return `<div style="max-height:${maxHeight}px;">
 				${VersionManager.GetVersionVer(mode.Vid)}${(mode.Name == '' ? '空' : mode.Name)}${this.GetModeLinkStatusName(mode.Status)}
 				<div>`
@@ -318,6 +321,23 @@ class ProcessPanelClass {
 			var data = {
 				// modeList:[],
 				modeList: ProcessData.Project.ModeList,
+			}
+			//temp
+			var t_mode = data.modeList[1]
+			var t_link = t_mode.LinkList[0]
+			t_link.Children = []
+			for (var i = 0; i < 3; i++) {
+				var t_linkChild: LinkSingle = {
+					Lid: 14141414 + i,
+					Mid: t_mode.Mid,
+					Uid: User.Uid,
+					Name: '子流程' + (i + 1),
+					Status: 0,
+					Sort: i + 1,
+					Children: [],
+					Color: Math.round(Math.random() * 6),
+				}
+				t_link.Children.push(t_linkChild)
 			}
 			/* var len = ProcessData.Project.ModeList.length
 			for (var i = 0; i < len; i++) {
@@ -639,9 +659,7 @@ class ProcessPanelClass {
 	}
 	//流程菜单
 	ShowMenuLink(o: HTMLElement, e: JQuery.Event) {
-		var cur = $(o).parent()
-		var lid = parseInt(cur.attr('lid'))
-		console.log("[debug]",'ShowMenuLink',o,e,cur,lid)
+		var lid = parseInt($(o).attr('lid'))
 		if (lid > 0) {
 			var link: LinkSingle = ProcessData.LinkMap[lid]
 			var mode: ModeSingle = ProcessData.ModeMap[link.Mid]
@@ -649,7 +667,6 @@ class ProcessPanelClass {
 		}
 	}
 	ShowLinkMenu(o: HTMLElement, e: JQuery.Event, mode: ModeSingle, link: LinkSingle) {
-		var cur = $(o).parent()
 		var top = e.pageY + 1
 		var left = e.pageX + 1
 		var $menuLink = $('#menuLink')
@@ -679,24 +696,24 @@ class ProcessPanelClass {
 					break
 				case 'store':
 					if (link.Status == LinkStatusField.NORMAL) {
-						if (cur.parent().find('tr').length > 1) {
-							Common.Warning(cur, e, function () {
+						if (mode.LinkList.length > 1) {
+							Common.Warning(o, e, function () {
 								WSConn.sendMsg(C2L.C2L_PROCESS_LINK_STORE, { 'Lid': link.Lid, 'Status': LinkStatusField.STORE })
 							}, '是否将已完成的流程进行归档？')
 						} else {
-							Common.Warning(cur, e, null, '至少要保留一个流程')
+							Common.Warning(o, e, null, '至少要保留一个流程')
 						}
 					} else {
 						WSConn.sendMsg(C2L.C2L_PROCESS_LINK_STORE, { 'Lid': link.Lid, 'Status': LinkStatusField.NORMAL })
 					}
 					break
 				case 'delete':
-					if (cur.parent().find('tr').length > 1) {
-						Common.Warning(cur, e, function () {
+					if (mode.LinkList.length > 1) {
+						Common.Warning(o, e, function () {
 							WSConn.sendMsg(C2L.C2L_PROCESS_LINK_DELETE, { 'Lid': link.Lid })
 						}, '删除后不可恢复，确认删除吗？')
 					} else {
-						Common.Warning(cur, e, null, '至少要保留一个流程')
+						Common.Warning(o, e, null, '至少要保留一个流程')
 					}
 					break
 			}
@@ -712,8 +729,7 @@ class ProcessPanelClass {
 	}
 	//编辑流程名字
 	ShowEditLink(o: HTMLElement, cid: number) {
-		var cur = $(o).parent()
-		var lid: number = parseInt(cur.attr('lid'));
+		var lid: number = parseInt($(o).attr('lid'));
 		var top: number = $(o).position().top - 2
 		var left: number = $(o).position().left + $(o).outerWidth() - 2
 		var link: LinkSingle = ProcessData.LinkMap[lid]
@@ -734,7 +750,7 @@ class ProcessPanelClass {
 	ShowMenuUser(o: HTMLElement, e: JQuery.Event) {
 		var top = e.pageY + 1
 		var left = e.pageX + 1
-		var lid = parseInt($(o).parent().attr('lid'))
+		var lid = parseInt($(o).attr('lid'))
 		var plan = $('#menuUser')
 		plan.css({ left: left, top: top }).unbind().delegate('.spread .row', 'click', (e: JQuery.Event) => {
 			var uid = $(e.currentTarget).attr('uid')
