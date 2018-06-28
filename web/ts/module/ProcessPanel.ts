@@ -178,7 +178,7 @@ class ProcessPanelClass {
 		return html
 	}
 	//组合流程列表 一个mode下的多个link
-	GetLinkListHtml(mode: ModeSingle) {
+	/* GetLinkListHtml(mode: ModeSingle) {
 		var html = ''
 		html += '<table class="linkMap">'
 		$.each(mode.LinkList, (k, link: LinkSingle) => {
@@ -187,9 +187,9 @@ class ProcessPanelClass {
 		})
 		html += '</table>'
 		return html
-	}
+	} */
 	//组合流程 单个link
-	GetLinkHtml(link: LinkSingle) {
+	/* GetLinkHtml(link: LinkSingle) {
 		var html = ''
 		if (!link) {
 			return html
@@ -203,7 +203,7 @@ class ProcessPanelClass {
 					</td>`
 		html += '</tr>'
 		return html
-	}
+	} */
 	GetLinkName(link: LinkSingle): string {
 		return `<div>
 				${(link.Name == '' ? '空' : link.Name)} ${ProcessPanel.GetModeLinkStatusName(link.Status)}
@@ -246,14 +246,14 @@ class ProcessPanelClass {
 		return html
 	}
 	//组合功能
-	GetModeHtmlLeft(mid: number) {
+	/* GetModeHtmlLeft(mid: number) {
 		var html = ''
 		var mode = ProcessData.ModeMap[mid]
 		if (!mode) {
 			return html
 		}
 
-		html += `<tr class="trModeLeft" mid="${mode.Mid}">
+		html += `<tr class="trModeLeft" mid="${mode.Mid}" style="border-bottom: solid 4px #002060;">
 					<td class="mode bg_${mode.Color}" mid="${mode.Mid}">
 						${this.GetModeName(mode)}
 					</td> 
@@ -261,10 +261,10 @@ class ProcessPanelClass {
 						${this.GetLinkListHtml(mode)}
 					</td> 
 				</tr> `
-		html += `<tr class="space"><td colspan="3"></td></tr>`
+		// html += `<tr class="space"><td colspan="3"></td></tr>`
 		// html += `<tr class="space"><td colspan="${(this.DateList.list.length + 3)}"></td></tr>`
 		return html
-	}
+	} */
 	/**修改mdoe td内部的最大高度 */
 	ChangeModeNameMaxHeight(mode: ModeSingle) {
 		var maxHeight = Math.max(1, mode.LinkList ? mode.LinkList.length : 0) * 40
@@ -282,12 +282,12 @@ class ProcessPanelClass {
 		if (!mode) {
 			return html
 		}
-		html += `<tr class="trModeRight" mid="${mode.Mid}">
+		html += `<tr class="trModeRight" mid="${mode.Mid}" style="border-bottom: solid 4px #002060;">
 					<td colspan="${(this.DateList.list.length)}">
 					${this.GetWorkListHtml(mode)}
 					</td> 
 				</tr> `
-		html += `<tr class="space"><td colspan="${(this.DateList.list.length)}"></td></tr>`
+		// html += `<tr class="space"><td colspan="${(this.DateList.list.length)}"></td></tr>`
 		return html
 	}
 	//组合tbody
@@ -316,16 +316,16 @@ class ProcessPanelClass {
 	CreateProcess() {
 		Loader.LoadVueTemplate(ProcessFilter.VuePath + `PanelFrame`, (tpl: string) => {
 			var data = {
-				modeList:[],
+				// modeList:[],
+				modeList: ProcessData.Project.ModeList,
 			}
-			var len = ProcessData.Project.ModeList.length
+			/* var len = ProcessData.Project.ModeList.length
 			for (var i = 0; i < len; i++) {
 				var mode = ProcessData.Project.ModeList[i]
-				if(ProcessData.ModeMap[mode.Mid]){
+				// if(ProcessData.ModeMap[mode.Mid]){
 					data.modeList.push(mode)
-				}
-			}
-			//
+				// }
+			} */
 			// Object.freeze(data)
 			//组合thead
 			var vue = new Vue({
@@ -335,8 +335,18 @@ class ProcessPanelClass {
 					GetModeName: (mode: ModeSingle) => {
 						return this.GetModeName(mode)
 					},
-					GetLinkListHtml: (mode: ModeSingle) => {
-						return this.GetLinkListHtml(mode)
+					GetLinkName: (link: LinkSingle) => {
+						return this.GetLinkName(link)
+					},
+					GetLinkUserName: (link: LinkSingle) => {
+						return this.GetLinkUserName(link)
+					},
+					ShowLinkMenu: (e: Event, mode: ModeSingle, link: LinkSingle) => {
+						console.log("[debug]", e)
+						if (!User.IsWrite) {
+							return
+						}
+						// this.ShowLinkMenu(mode, link)
 					},
 				},
 			}).$mount()
@@ -346,10 +356,6 @@ class ProcessPanelClass {
 			$('#tableTitleRight').html(this.GetTheadHtmlRight())
 			$('#tableBodyRight').html(this.GetTbodyHtmlRight())
 			//流程数据
-			$main.find('.trLink').each((index: number, el: HTMLElement) => {
-				var lid = parseInt($(el).attr('lid'))
-				this.SetLinkData(lid, el)
-			})
 			$main.find('.trWork').each((index: number, el: HTMLElement) => {
 				var lid = parseInt($(el).attr('lid'))
 				this.SetWorkData(lid, el)
@@ -358,10 +364,6 @@ class ProcessPanelClass {
 			$('#freezeBodyLeft').unbind().freezeLeft(false)
 			this.BindActions()
 		})
-	}
-	SetLinkData(lid: number, dom: HTMLElement) {
-		//绑定lid
-		$(dom).data('lid', lid)
 	}
 	//work数据
 	SetWorkData(lid: number, dom: HTMLElement) {
@@ -427,14 +429,16 @@ class ProcessPanelClass {
 					}, '删除后不可恢复，确认删除吗？')
 					break
 				case 'forward':
-					var prev = $(o).parent().prev().prev()
+					// var prev = $(o).parent().prev().prev()
+					var prev = $(o).parent().prev()
 					if (prev.length > 0) {
 						var beMid = prev.find('.mode').attr('mid')
 						WSConn.sendMsg(C2L.C2L_PROCESS_MODE_SWAP_SORT, { 'Swap': [parseInt(beMid), mode.Mid] })
 					}
 					break
 				case 'backward':
-					var next = $(o).parent().next().next()
+					// var next = $(o).parent().next().next()
+					var next = $(o).parent().next()
 					if (next.length > 0) {
 						var beMid = next.find('.mode').attr('mid')
 						WSConn.sendMsg(C2L.C2L_PROCESS_MODE_SWAP_SORT, { 'Swap': [mode.Mid, parseInt(beMid)] })
@@ -591,7 +595,7 @@ class ProcessPanelClass {
 		}
 		plan.find('.confirm').unbind().click(function () {
 			// pack.Lid = parseInt(cur.attr('lid'))//或者 = grid.lid 
-			pack.Lid = grid.lid 
+			pack.Lid = grid.lid
 			pack.Date = grid.s
 			pack.Tips = tips.val() as string
 			pack.MinNum = parseInt(minNum.val() as string)
@@ -636,24 +640,35 @@ class ProcessPanelClass {
 	//流程菜单
 	ShowMenuLink(o: HTMLElement, e: JQuery.Event) {
 		var cur = $(o).parent()
+		var lid = parseInt(cur.attr('lid'))
+		console.log("[debug]",'ShowMenuLink',o,e,cur,lid)
+		if (lid > 0) {
+			var link: LinkSingle = ProcessData.LinkMap[lid]
+			var mode: ModeSingle = ProcessData.ModeMap[link.Mid]
+			this.ShowLinkMenu(o, e, mode, link)
+		}
+	}
+	ShowLinkMenu(o: HTMLElement, e: JQuery.Event, mode: ModeSingle, link: LinkSingle) {
+		var cur = $(o).parent()
 		var top = e.pageY + 1
 		var left = e.pageX + 1
-		var link: LinkSingle = ProcessData.LinkMap[parseInt(cur.data('lid'))]
 		var $menuLink = $('#menuLink')
 		$menuLink.find(`.store_txt`).text(link.Status == LinkStatusField.NORMAL ? '归档' : '恢复归档')
 		$menuLink.css({ left: left, top: top }).unbind().delegate('.row', 'click', (e: JQuery.Event) => {
 			var type = $(e.currentTarget).attr('type')
 			switch (type) {
-				case 'forward':
-					var prev = cur.prev()
-					if (prev.length > 0) {
-						WSConn.sendMsg(C2L.C2L_PROCESS_LINK_SWAP_SORT, { 'Swap': [prev.data('lid'), cur.data('lid')] })
+				case 'forward'://上移
+					var index0 = ArrayUtil.IndexOfAttr(mode.LinkList, FieldName.Lid, link.Lid)
+					if (index0 > 0) {
+						mode.LinkList[index0 - 1]
+						WSConn.sendMsg(C2L.C2L_PROCESS_LINK_SWAP_SORT, { 'Swap': [mode.LinkList[index0 - 1].Lid, link.Lid] })
 					}
 					break
-				case 'backward':
-					var next = cur.next()
-					if (next.length > 0) {
-						WSConn.sendMsg(C2L.C2L_PROCESS_LINK_SWAP_SORT, { 'Swap': [cur.data('lid'), next.data('lid')] })
+				case 'backward'://下移动
+					var index0 = ArrayUtil.IndexOfAttr(mode.LinkList, FieldName.Lid, link.Lid)
+					if (index0 < mode.LinkList.length - 1) {
+						mode.LinkList[index0 + 1]
+						WSConn.sendMsg(C2L.C2L_PROCESS_LINK_SWAP_SORT, { 'Swap': [link.Lid, mode.LinkList[index0 + 1].Lid] })
 					}
 					break
 				case 'insert':
@@ -666,19 +681,19 @@ class ProcessPanelClass {
 					if (link.Status == LinkStatusField.NORMAL) {
 						if (cur.parent().find('tr').length > 1) {
 							Common.Warning(cur, e, function () {
-								WSConn.sendMsg(C2L.C2L_PROCESS_LINK_STORE, { 'Lid': cur.data('lid'), 'Status': LinkStatusField.STORE })
+								WSConn.sendMsg(C2L.C2L_PROCESS_LINK_STORE, { 'Lid': link.Lid, 'Status': LinkStatusField.STORE })
 							}, '是否将已完成的流程进行归档？')
 						} else {
 							Common.Warning(cur, e, null, '至少要保留一个流程')
 						}
 					} else {
-						WSConn.sendMsg(C2L.C2L_PROCESS_LINK_STORE, { 'Lid': cur.data('lid'), 'Status': LinkStatusField.NORMAL })
+						WSConn.sendMsg(C2L.C2L_PROCESS_LINK_STORE, { 'Lid': link.Lid, 'Status': LinkStatusField.NORMAL })
 					}
 					break
 				case 'delete':
 					if (cur.parent().find('tr').length > 1) {
 						Common.Warning(cur, e, function () {
-							WSConn.sendMsg(C2L.C2L_PROCESS_LINK_DELETE, { 'Lid': cur.data('lid') })
+							WSConn.sendMsg(C2L.C2L_PROCESS_LINK_DELETE, { 'Lid': link.Lid })
 						}, '删除后不可恢复，确认删除吗？')
 					} else {
 						Common.Warning(cur, e, null, '至少要保留一个流程')
@@ -688,7 +703,7 @@ class ProcessPanelClass {
 			this.HideMenu()
 		}).show().adjust(-5).find('.row[type="color"]').unbind().hover((e: JQuery.Event) => {
 			$(e.currentTarget).find('.pluginColor').show().unbind().delegate('div', 'click', (e: JQuery.Event) => {
-				WSConn.sendMsg(C2L.C2L_PROCESS_LINK_COLOR, { 'Lid': cur.data('lid'), 'Color': $(e.currentTarget).index() })
+				WSConn.sendMsg(C2L.C2L_PROCESS_LINK_COLOR, { 'Lid': link.Lid, 'Color': $(e.currentTarget).index() })
 				this.HideMenu()
 			})
 		}, (e: JQuery.Event) => {
@@ -698,7 +713,7 @@ class ProcessPanelClass {
 	//编辑流程名字
 	ShowEditLink(o: HTMLElement, cid: number) {
 		var cur = $(o).parent()
-		var lid: number = cur.data('lid')
+		var lid: number = parseInt(cur.attr('lid'));
 		var top: number = $(o).position().top - 2
 		var left: number = $(o).position().left + $(o).outerWidth() - 2
 		var link: LinkSingle = ProcessData.LinkMap[lid]
@@ -719,7 +734,7 @@ class ProcessPanelClass {
 	ShowMenuUser(o: HTMLElement, e: JQuery.Event) {
 		var top = e.pageY + 1
 		var left = e.pageX + 1
-		var lid = $(o).parent().data('lid')
+		var lid = parseInt($(o).parent().attr('lid'))
 		var plan = $('#menuUser')
 		plan.css({ left: left, top: top }).unbind().delegate('.spread .row', 'click', (e: JQuery.Event) => {
 			var uid = $(e.currentTarget).attr('uid')

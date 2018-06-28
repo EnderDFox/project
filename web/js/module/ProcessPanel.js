@@ -182,28 +182,32 @@ var ProcessPanelClass = /** @class */ (function () {
         return html;
     };
     //组合流程列表 一个mode下的多个link
-    ProcessPanelClass.prototype.GetLinkListHtml = function (mode) {
-        var _this = this;
-        var html = '';
-        html += '<table class="linkMap">';
-        $.each(mode.LinkList, function (k, link) {
+    /* GetLinkListHtml(mode: ModeSingle) {
+        var html = ''
+        html += '<table class="linkMap">'
+        $.each(mode.LinkList, (k, link: LinkSingle) => {
             //流程与进度
-            html += _this.GetLinkHtml(link);
-        });
-        html += '</table>';
-        return html;
-    };
+            html += this.GetLinkHtml(link)
+        })
+        html += '</table>'
+        return html
+    } */
     //组合流程 单个link
-    ProcessPanelClass.prototype.GetLinkHtml = function (link) {
-        var html = '';
+    /* GetLinkHtml(link: LinkSingle) {
+        var html = ''
         if (!link) {
-            return html;
+            return html
         }
-        html += "<tr class=\"trLink\" lid=\"" + link.Lid + "\">";
-        html += "\t<td class=\"link bg_" + link.Color + "\" type=\"link\">\n\t\t\t\t\t\t" + this.GetLinkName(link) + "\n\t\t\t\t\t</td>\n\t\t\t\t\t<td class=\"duty\" type=\"duty\">\n\t\t\t\t\t\t" + this.GetLinkUserName(link) + "\n\t\t\t\t\t</td>";
-        html += '</tr>';
-        return html;
-    };
+        html += `<tr class="trLink" lid="${link.Lid}">`
+        html += `	<td class="link bg_${link.Color}" type="link">
+                        ${this.GetLinkName(link)}
+                    </td>
+                    <td class="duty" type="duty">
+                        ${this.GetLinkUserName(link)}
+                    </td>`
+        html += '</tr>'
+        return html
+    } */
     ProcessPanelClass.prototype.GetLinkName = function (link) {
         return "<div>\n\t\t\t\t" + (link.Name == '' ? '空' : link.Name) + " " + ProcessPanel.GetModeLinkStatusName(link.Status) + "\n\t\t\t\t</div>";
     };
@@ -244,17 +248,25 @@ var ProcessPanelClass = /** @class */ (function () {
         return html;
     };
     //组合功能
-    ProcessPanelClass.prototype.GetModeHtmlLeft = function (mid) {
-        var html = '';
-        var mode = ProcessData.ModeMap[mid];
+    /* GetModeHtmlLeft(mid: number) {
+        var html = ''
+        var mode = ProcessData.ModeMap[mid]
         if (!mode) {
-            return html;
+            return html
         }
-        html += "<tr class=\"trModeLeft\" mid=\"" + mode.Mid + "\">\n\t\t\t\t\t<td class=\"mode bg_" + mode.Color + "\" mid=\"" + mode.Mid + "\">\n\t\t\t\t\t\t" + this.GetModeName(mode) + "\n\t\t\t\t\t</td> \n\t\t\t\t\t<td colspan=\"2\">\n\t\t\t\t\t\t" + this.GetLinkListHtml(mode) + "\n\t\t\t\t\t</td> \n\t\t\t\t</tr> ";
-        html += "<tr class=\"space\"><td colspan=\"3\"></td></tr>";
+
+        html += `<tr class="trModeLeft" mid="${mode.Mid}" style="border-bottom: solid 4px #002060;">
+                    <td class="mode bg_${mode.Color}" mid="${mode.Mid}">
+                        ${this.GetModeName(mode)}
+                    </td>
+                    <td colspan="2">
+                        ${this.GetLinkListHtml(mode)}
+                    </td>
+                </tr> `
+        // html += `<tr class="space"><td colspan="3"></td></tr>`
         // html += `<tr class="space"><td colspan="${(this.DateList.list.length + 3)}"></td></tr>`
-        return html;
-    };
+        return html
+    } */
     /**修改mdoe td内部的最大高度 */
     ProcessPanelClass.prototype.ChangeModeNameMaxHeight = function (mode) {
         var maxHeight = Math.max(1, mode.LinkList ? mode.LinkList.length : 0) * 40;
@@ -270,8 +282,8 @@ var ProcessPanelClass = /** @class */ (function () {
         if (!mode) {
             return html;
         }
-        html += "<tr class=\"trModeRight\" mid=\"" + mode.Mid + "\">\n\t\t\t\t\t<td colspan=\"" + (this.DateList.list.length) + "\">\n\t\t\t\t\t" + this.GetWorkListHtml(mode) + "\n\t\t\t\t\t</td> \n\t\t\t\t</tr> ";
-        html += "<tr class=\"space\"><td colspan=\"" + (this.DateList.list.length) + "\"></td></tr>";
+        html += "<tr class=\"trModeRight\" mid=\"" + mode.Mid + "\" style=\"border-bottom: solid 4px #002060;\">\n\t\t\t\t\t<td colspan=\"" + (this.DateList.list.length) + "\">\n\t\t\t\t\t" + this.GetWorkListHtml(mode) + "\n\t\t\t\t\t</td> \n\t\t\t\t</tr> ";
+        // html += `<tr class="space"><td colspan="${(this.DateList.list.length)}"></td></tr>`
         return html;
     };
     //组合tbody
@@ -302,16 +314,16 @@ var ProcessPanelClass = /** @class */ (function () {
         var _this = this;
         Loader.LoadVueTemplate(ProcessFilter.VuePath + "PanelFrame", function (tpl) {
             var data = {
-                modeList: [],
+                // modeList:[],
+                modeList: ProcessData.Project.ModeList,
             };
-            var len = ProcessData.Project.ModeList.length;
+            /* var len = ProcessData.Project.ModeList.length
             for (var i = 0; i < len; i++) {
-                var mode = ProcessData.Project.ModeList[i];
-                if (ProcessData.ModeMap[mode.Mid]) {
-                    data.modeList.push(mode);
-                }
-            }
-            //
+                var mode = ProcessData.Project.ModeList[i]
+                // if(ProcessData.ModeMap[mode.Mid]){
+                    data.modeList.push(mode)
+                // }
+            } */
             // Object.freeze(data)
             //组合thead
             var vue = new Vue({
@@ -321,8 +333,18 @@ var ProcessPanelClass = /** @class */ (function () {
                     GetModeName: function (mode) {
                         return _this.GetModeName(mode);
                     },
-                    GetLinkListHtml: function (mode) {
-                        return _this.GetLinkListHtml(mode);
+                    GetLinkName: function (link) {
+                        return _this.GetLinkName(link);
+                    },
+                    GetLinkUserName: function (link) {
+                        return _this.GetLinkUserName(link);
+                    },
+                    ShowLinkMenu: function (e, mode, link) {
+                        console.log("[debug]", e);
+                        if (!User.IsWrite) {
+                            return;
+                        }
+                        // this.ShowLinkMenu(mode, link)
                     },
                 },
             }).$mount();
@@ -332,10 +354,6 @@ var ProcessPanelClass = /** @class */ (function () {
             $('#tableTitleRight').html(_this.GetTheadHtmlRight());
             $('#tableBodyRight').html(_this.GetTbodyHtmlRight());
             //流程数据
-            $main.find('.trLink').each(function (index, el) {
-                var lid = parseInt($(el).attr('lid'));
-                _this.SetLinkData(lid, el);
-            });
             $main.find('.trWork').each(function (index, el) {
                 var lid = parseInt($(el).attr('lid'));
                 _this.SetWorkData(lid, el);
@@ -344,10 +362,6 @@ var ProcessPanelClass = /** @class */ (function () {
             $('#freezeBodyLeft').unbind().freezeLeft(false);
             _this.BindActions();
         });
-    };
-    ProcessPanelClass.prototype.SetLinkData = function (lid, dom) {
-        //绑定lid
-        $(dom).data('lid', lid);
     };
     //work数据
     ProcessPanelClass.prototype.SetWorkData = function (lid, dom) {
@@ -416,14 +430,16 @@ var ProcessPanelClass = /** @class */ (function () {
                     }, '删除后不可恢复，确认删除吗？');
                     break;
                 case 'forward':
-                    var prev = $(o).parent().prev().prev();
+                    // var prev = $(o).parent().prev().prev()
+                    var prev = $(o).parent().prev();
                     if (prev.length > 0) {
                         var beMid = prev.find('.mode').attr('mid');
                         WSConn.sendMsg(C2L.C2L_PROCESS_MODE_SWAP_SORT, { 'Swap': [parseInt(beMid), mode.Mid] });
                     }
                     break;
                 case 'backward':
-                    var next = $(o).parent().next().next();
+                    // var next = $(o).parent().next().next()
+                    var next = $(o).parent().next();
                     if (next.length > 0) {
                         var beMid = next.find('.mode').attr('mid');
                         WSConn.sendMsg(C2L.C2L_PROCESS_MODE_SWAP_SORT, { 'Swap': [mode.Mid, parseInt(beMid)] });
@@ -631,26 +647,37 @@ var ProcessPanelClass = /** @class */ (function () {
     };
     //流程菜单
     ProcessPanelClass.prototype.ShowMenuLink = function (o, e) {
+        var cur = $(o).parent();
+        var lid = parseInt(cur.attr('lid'));
+        console.log("[debug]", 'ShowMenuLink', o, e, cur, lid);
+        if (lid > 0) {
+            var link = ProcessData.LinkMap[lid];
+            var mode = ProcessData.ModeMap[link.Mid];
+            this.ShowLinkMenu(o, e, mode, link);
+        }
+    };
+    ProcessPanelClass.prototype.ShowLinkMenu = function (o, e, mode, link) {
         var _this = this;
         var cur = $(o).parent();
         var top = e.pageY + 1;
         var left = e.pageX + 1;
-        var link = ProcessData.LinkMap[parseInt(cur.data('lid'))];
         var $menuLink = $('#menuLink');
         $menuLink.find(".store_txt").text(link.Status == LinkStatusField.NORMAL ? '归档' : '恢复归档');
         $menuLink.css({ left: left, top: top }).unbind().delegate('.row', 'click', function (e) {
             var type = $(e.currentTarget).attr('type');
             switch (type) {
-                case 'forward':
-                    var prev = cur.prev();
-                    if (prev.length > 0) {
-                        WSConn.sendMsg(C2L.C2L_PROCESS_LINK_SWAP_SORT, { 'Swap': [prev.data('lid'), cur.data('lid')] });
+                case 'forward': //上移
+                    var index0 = ArrayUtil.IndexOfAttr(mode.LinkList, FieldName.Lid, link.Lid);
+                    if (index0 > 0) {
+                        mode.LinkList[index0 - 1];
+                        WSConn.sendMsg(C2L.C2L_PROCESS_LINK_SWAP_SORT, { 'Swap': [mode.LinkList[index0 - 1].Lid, link.Lid] });
                     }
                     break;
-                case 'backward':
-                    var next = cur.next();
-                    if (next.length > 0) {
-                        WSConn.sendMsg(C2L.C2L_PROCESS_LINK_SWAP_SORT, { 'Swap': [cur.data('lid'), next.data('lid')] });
+                case 'backward': //下移动
+                    var index0 = ArrayUtil.IndexOfAttr(mode.LinkList, FieldName.Lid, link.Lid);
+                    if (index0 < mode.LinkList.length - 1) {
+                        mode.LinkList[index0 + 1];
+                        WSConn.sendMsg(C2L.C2L_PROCESS_LINK_SWAP_SORT, { 'Swap': [link.Lid, mode.LinkList[index0 + 1].Lid] });
                     }
                     break;
                 case 'insert':
@@ -663,7 +690,7 @@ var ProcessPanelClass = /** @class */ (function () {
                     if (link.Status == LinkStatusField.NORMAL) {
                         if (cur.parent().find('tr').length > 1) {
                             Common.Warning(cur, e, function () {
-                                WSConn.sendMsg(C2L.C2L_PROCESS_LINK_STORE, { 'Lid': cur.data('lid'), 'Status': LinkStatusField.STORE });
+                                WSConn.sendMsg(C2L.C2L_PROCESS_LINK_STORE, { 'Lid': link.Lid, 'Status': LinkStatusField.STORE });
                             }, '是否将已完成的流程进行归档？');
                         }
                         else {
@@ -671,13 +698,13 @@ var ProcessPanelClass = /** @class */ (function () {
                         }
                     }
                     else {
-                        WSConn.sendMsg(C2L.C2L_PROCESS_LINK_STORE, { 'Lid': cur.data('lid'), 'Status': LinkStatusField.NORMAL });
+                        WSConn.sendMsg(C2L.C2L_PROCESS_LINK_STORE, { 'Lid': link.Lid, 'Status': LinkStatusField.NORMAL });
                     }
                     break;
                 case 'delete':
                     if (cur.parent().find('tr').length > 1) {
                         Common.Warning(cur, e, function () {
-                            WSConn.sendMsg(C2L.C2L_PROCESS_LINK_DELETE, { 'Lid': cur.data('lid') });
+                            WSConn.sendMsg(C2L.C2L_PROCESS_LINK_DELETE, { 'Lid': link.Lid });
                         }, '删除后不可恢复，确认删除吗？');
                     }
                     else {
@@ -688,7 +715,7 @@ var ProcessPanelClass = /** @class */ (function () {
             _this.HideMenu();
         }).show().adjust(-5).find('.row[type="color"]').unbind().hover(function (e) {
             $(e.currentTarget).find('.pluginColor').show().unbind().delegate('div', 'click', function (e) {
-                WSConn.sendMsg(C2L.C2L_PROCESS_LINK_COLOR, { 'Lid': cur.data('lid'), 'Color': $(e.currentTarget).index() });
+                WSConn.sendMsg(C2L.C2L_PROCESS_LINK_COLOR, { 'Lid': link.Lid, 'Color': $(e.currentTarget).index() });
                 _this.HideMenu();
             });
         }, function (e) {
@@ -698,7 +725,7 @@ var ProcessPanelClass = /** @class */ (function () {
     //编辑流程名字
     ProcessPanelClass.prototype.ShowEditLink = function (o, cid) {
         var cur = $(o).parent();
-        var lid = cur.data('lid');
+        var lid = parseInt(cur.attr('lid'));
         var top = $(o).position().top - 2;
         var left = $(o).position().left + $(o).outerWidth() - 2;
         var link = ProcessData.LinkMap[lid];
@@ -720,7 +747,7 @@ var ProcessPanelClass = /** @class */ (function () {
         var _this = this;
         var top = e.pageY + 1;
         var left = e.pageX + 1;
-        var lid = $(o).parent().data('lid');
+        var lid = parseInt($(o).parent().attr('lid'));
         var plan = $('#menuUser');
         plan.css({ left: left, top: top }).unbind().delegate('.spread .row', 'click', function (e) {
             var uid = $(e.currentTarget).attr('uid');

@@ -23,11 +23,6 @@ class ProcessDataClass {
 		//初始化
 		this.Project = data.Project
 		this.Project.ModeList = []
-		var len = data.ModeList.length
-		for (var i = 0; i < len; i++) {
-			var mode = data.ModeList[i]
-			this.Project.ModeList.push(mode)
-		}
 		this.WorkMap = {}
 		this.LinkMap = {}
 		this.ModeMap = {}
@@ -149,6 +144,7 @@ class ProcessDataClass {
 			}
 			mode.LinkList = []
 			this.ModeMap[mode.Mid] = mode
+			this.Project.ModeList.push(mode)//data.ModeList中的mode是服务器按照sort排序好的,所以这样加进来的也是正确的
 			return true
 		})
 		//把link都放入mode.LinkList

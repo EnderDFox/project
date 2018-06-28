@@ -20,25 +20,23 @@
     <div class="processLockBody freeze" id="freezeBodyLeft" style="margin-top: 127px;">
         <table class="process" id="tableBodyLeft">
             <tbody>
-                <tr v-for="mode,index in modeList" class="trModeLeft" :mid="mode.Mid">
+                <tr v-for="mode,index in modeList" class="trModeLeft" :mid="mode.Mid" style="border-bottom: solid 4px #002060;">
                     <td :class="['mode bg_'+mode.Color]" :mid="mode.Mid" v-html="GetModeName(mode)">
                     </td>
                     <td colspan="2">
                         <table class="linkMap">
-                            <tr v-for="link,index in list" class="trLink" :lid="link.Lid">
-                                <td class="link bg_${link.Color}" type="link">
-                                    ${this.GetLinkName(link)}
+                            <tr v-for="link,index in mode.LinkList" class="trLink" :lid="link.Lid">
+                                <td :class="['link bg_'+link.Color]" type="link" v-html="GetLinkName(link)">
                                 </td>
-                                <td class="duty" type="duty">
-                                    ${this.GetLinkUserName(link)}
+                                <td class="duty" type="duty" v-html="GetLinkUserName(link)">
                                 </td>
                             </tr>
                         </table>
                     </td>
                 </tr>
-                <tr class="space">
+              <!--   <tr class="space">
                     <td colspan="3"></td>
-                </tr>
+                </tr> -->
             </tbody>
         </table>
     </div>
