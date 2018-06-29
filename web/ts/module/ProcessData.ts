@@ -50,12 +50,20 @@ class ProcessDataClass {
 			checkLink[work.Lid] = true
 			return true
 		})
-		//
+		//整理link列表
 		var _linkDict: { [key: number]: LinkSingle } = {}
+		var _parentChildrenDict: { [key: number]: LinkSingle[] } = {}	//key: ParentLid  item: children id 
 		$.each(data.LinkList, (k, link: LinkSingle) => {
 			link.Children = []
 			_linkDict[link.Lid] = link
+			if (link.ParentLid) {
+				if (!_parentChildrenDict[link.ParentLid]) {
+					_parentChildrenDict[link.ParentLid] = []
+				}
+				_parentChildrenDict[link.ParentLid].push(link)
+			}
 		})
+		//
 		var _addLinkMap = (link: LinkSingle) => {
 			if (link.ParentLid) {
 				var parentLink: LinkSingle = _linkDict[link.ParentLid]
@@ -65,10 +73,22 @@ class ProcessDataClass {
 				} else {
 					this.LinkMap[link.Lid] = link
 					this.LinkMap[link.ParentLid] = parentLink
-					parentLink.Children.push(link)
+					if(ArrayUtil.IndexOfAttr(parentLink.Children, FieldName.Lid, link.Lid)==-1){
+						parentLink.Children.push(link)
+					}
 				}
 			} else {
 				this.LinkMap[link.Lid] = link
+				//children加进去
+				var _children = _parentChildrenDict[link.Lid]
+				if (_children) {
+					link.Children = []
+					var len = _children.length
+					for (var i = 0; i < len; i++) {
+						this.LinkMap[_children[i].Lid] = _children[i]
+						link.Children.push(_children[i])
+					}
+				}
 			}
 		}
 		//环节过滤  通过判断的 会将link.Mid放入checkMode 没通过的则用`return true`跳过

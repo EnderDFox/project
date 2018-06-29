@@ -323,15 +323,17 @@ func (this *Process) LinkEdit(lid uint64, name string) bool {
 //删除
 func (this *Process) LinkDelete(lid uint64) bool {
 	//删除环节
-	stmt, err := db.GetDb().Prepare(`DELETE FROM ` + config.Pm + `.pm_link WHERE lid = ?`)
+	stmt, err := db.GetDb().Prepare(`DELETE FROM ` + config.Pm + `.pm_link WHERE lid = ? OR parent_lid = ?`)
 	db.CheckErr(err)
-	_, err = stmt.Exec(lid)
+	_, err = stmt.Exec(lid,lid)
 	db.CheckErr(err)
-	//删除数据
-	stmt, err = db.GetDb().Prepare(`DELETE FROM ` + config.Pm + `.pm_work WHERE lid = ?`)
+	//删除work数据
+	stmt, err = db.GetDb().Prepare(`DELETE FROM ` + config.Pm + `.pm_work WHERE lid IN (SELECT lid FROM ` + config.Pm + `.pm_link WHERE lid = ? OR parent_lid = ?)`)
 	db.CheckErr(err)
-	_, err = stmt.Exec(lid)
+	_, err = stmt.Exec(lid,lid)
 	db.CheckErr(err)
+	//# 子流程 删除 work
+	//#
 	data := &L2C_ProcessLinkDelete{
 		Lid: lid,
 	}

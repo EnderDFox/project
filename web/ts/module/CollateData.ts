@@ -53,10 +53,15 @@ class CollateDataClass {
 			if (!this.DateUserMap[v.Date]) {
 				this.DateUserMap[v.Date] = {}
 			}
-			if (!this.DateUserMap[v.Date][this.LinkMap[v.Lid].Uid]) {
-				this.DateUserMap[v.Date][this.LinkMap[v.Lid].Uid] = []
+			var link:LinkSingle = this.LinkMap[v.Lid]
+			if(!link){
+				console.log("[error]","Can not find link",v.Lid,":[v.Lid]")
+			}else{
+				if (!this.DateUserMap[v.Date][link.Uid]) {
+					this.DateUserMap[v.Date][link.Uid] = []
+				}
+				this.DateUserMap[v.Date][link.Uid].push(v)
 			}
-			this.DateUserMap[v.Date][this.LinkMap[v.Lid].Uid].push(v)
 		})
 		//补充内容
 		$.each(data.ExtraList, (k, v: ExtraSingle) => {

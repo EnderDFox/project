@@ -176,7 +176,20 @@ var CollatePanelClass = /** @class */ (function () {
         var html = '';
         var link = CollateData.LinkMap[work.Lid];
         html += '<li wid="' + work.Wid + '">';
-        html += '<span wid="' + work.Wid + '" class="check_' + work.Inspect + '">' + VersionManager.GetVersionVer(CollateData.ModeMap[link.Mid].Vid) + CollateData.ModeMap[link.Mid].Name + '-' + link.Name + '</span>';
+        var mode = CollateData.ModeMap[link.Mid];
+        if (!mode) {
+            console.log("[debug]", "Can not find mode", link.Mid, ":[link.Mid]", link, ":[link]");
+            return '';
+        }
+        var linkFullName = VersionManager.GetVersionVer(mode.Vid) + mode.Name;
+        if (link.ParentLid > 0) {
+            var parentLink = CollateData.LinkMap[link.ParentLid];
+            if (parentLink) {
+                linkFullName = linkFullName + '-' + parentLink.Name;
+            }
+        }
+        linkFullName = linkFullName + '-' + link.Name;
+        html += '<span wid="' + work.Wid + '" class="check_' + work.Inspect + '">' + linkFullName + '</span>';
         html += '<span class="special">';
         if (work.MinNum > 0 || work.MaxNum > 0) {
             html += '（' + work.MinNum + '/' + work.MaxNum + '）';
@@ -223,10 +236,10 @@ var CollatePanelClass = /** @class */ (function () {
                     // var hR = $(trRight).height()
                     var hL = trLeft.clientHeight;
                     var hR = trRight.clientHeight;
-                    console.log("[debug]", i, ":[i]------");
-                    console.log("[info]", $(trRight).get(0).clientHeight, ":[$(trLeft).get(0).clientHeight]", hR);
+                    // console.log("[debug]",i,":[i]------")
+                    // console.log("[info]",$(trRight).get(0).clientHeight,":[$(trLeft).get(0).clientHeight]",hR)
                     // continue;
-                    console.log("[info]", i, ":[i]", hL, ":[hL]", hR, ":[hR]", hMax, ":[hMax]");
+                    // console.log("[info]", i,":[i]", hL, ":[hL]", hR, ":[hR]", hMax, ":[hMax]")
                     if (hL == hR && hR == 40) {
                         //还没刷新, 等下一次
                         requestAnimationFrame(resetSize);

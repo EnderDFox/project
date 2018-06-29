@@ -173,7 +173,20 @@ class CollatePanelClass {
 		var html = ''
 		var link = CollateData.LinkMap[work.Lid]
 		html += '<li wid="' + work.Wid + '">'
-		html += '<span wid="' + work.Wid + '" class="check_' + work.Inspect + '">' + VersionManager.GetVersionVer(CollateData.ModeMap[link.Mid].Vid) + CollateData.ModeMap[link.Mid].Name + '-' + link.Name + '</span>'
+		var mode = CollateData.ModeMap[link.Mid]
+		if(!mode){
+			console.log("[debug]","Can not find mode",link.Mid,":[link.Mid]",link,":[link]")
+			return ''
+		}
+		var linkFullName = VersionManager.GetVersionVer(mode.Vid) + mode.Name
+		if(link.ParentLid>0){
+			var parentLink = CollateData.LinkMap[link.ParentLid]
+			if(parentLink){
+				linkFullName = linkFullName + '-' + parentLink.Name
+			}
+		}
+		linkFullName = linkFullName + '-' + link.Name
+		html += '<span wid="' + work.Wid + '" class="check_' + work.Inspect + '">' + linkFullName + '</span>'
 		html += '<span class="special">'
 		if (work.MinNum > 0 || work.MaxNum > 0) {
 			html += '（' + work.MinNum + '/' + work.MaxNum + '）'
@@ -215,19 +228,19 @@ class CollatePanelClass {
 					var trRight = $trRightList[i]
 					// var hL = $(trLeft).height()
 					// var hR = $(trRight).height()
-					var hL  = trLeft.clientHeight
-					var hR  = trRight.clientHeight
-					console.log("[debug]",i,":[i]------")
-					console.log("[info]",$(trRight).get(0).clientHeight,":[$(trLeft).get(0).clientHeight]",hR)
+					var hL = trLeft.clientHeight
+					var hR = trRight.clientHeight
+					// console.log("[debug]",i,":[i]------")
+					// console.log("[info]",$(trRight).get(0).clientHeight,":[$(trLeft).get(0).clientHeight]",hR)
 					// continue;
-					console.log("[info]", i,":[i]", hL, ":[hL]", hR, ":[hR]", hMax, ":[hMax]")
+					// console.log("[info]", i,":[i]", hL, ":[hL]", hR, ":[hR]", hMax, ":[hMax]")
 					if (hL == hR && hR == 40) {
 						//还没刷新, 等下一次
 						requestAnimationFrame(resetSize);
 						break;
 					}
 					var _offset = 2//不明白为什么必须+2 双方高度才能对齐,可能是因为border?
-					if(Common.IsIE()){
+					if (Common.IsIE()) {
 						_offset = 0
 					}
 					var hMax = Math.max(hL, hR)

@@ -35,7 +35,7 @@ func (this *Collate) GetStepList(BeginDate, EndDate string, lidMap map[uint64]ui
 	return workList
 }
 
-//环节
+//环节 还有问题 parent link没有被拿出来
 func (this *Collate) GetLinkList(lidMap, midMap map[uint64]uint64) []*LinkSingle {
 	if len(lidMap) == 0 {
 		return nil
@@ -44,16 +44,47 @@ func (this *Collate) GetLinkList(lidMap, midMap map[uint64]uint64) []*LinkSingle
 	for _, lid := range lidMap {
 		lidList = append(lidList, strconv.Itoa(int(lid)))
 	}
-	stmt, err := db.GetDb().Prepare(`SELECT lid,mid,name,uid,sort FROM ` + config.Pm + `.pm_link WHERE lid IN (` + strings.Join(lidList, ",") + `)`)
+	parentLidMap := make(map[uint64]uint64)
+	var linkList []*LinkSingle
+	linkList = this.GetLinkList2(lidMap,midMap)
+	//把parent_lid拿出来
+	for _,link := range linkList{
+		if(link.ParentLid>0){
+			_, okP := parentLidMap[link.ParentLid]
+			if(okP==false){
+				_, okC := lidMap[link.ParentLid]
+				if(okC==false){
+					parentLidMap[link.ParentLid] = link.ParentLid
+				}
+			}
+		} 
+	}
+	var parentLinkList []*LinkSingle
+	parentLinkList = this.GetLinkList2(parentLidMap,midMap)
+	for _,parentLink := range parentLinkList{
+		linkList = append(linkList, parentLink)
+	}
+	return linkList
+}
+
+func (this *Collate) GetLinkList2(lidMap, midMap map[uint64]uint64) []*LinkSingle{
+	if len(lidMap) == 0 {
+		return nil
+	}
+	var linkList []*LinkSingle
+	var lidList []string
+	for _, lid := range lidMap {
+		lidList = append(lidList, strconv.Itoa(int(lid)))
+	}
+	stmt, err := db.GetDb().Prepare(`SELECT lid,mid,name,uid,sort,parent_lid FROM ` + config.Pm + `.pm_link WHERE lid IN (` + strings.Join(lidList, ",") + `)`)
 	defer stmt.Close()
 	db.CheckErr(err)
 	rows, err := stmt.Query()
 	defer rows.Close()
 	db.CheckErr(err)
-	var linkList []*LinkSingle
 	for rows.Next() {
 		single := &LinkSingle{}
-		rows.Scan(&single.Lid, &single.Mid, &single.Name, &single.Uid, &single.Sort)
+		rows.Scan(&single.Lid, &single.Mid, &single.Name, &single.Uid, &single.Sort, &single.ParentLid)
 		linkList = append(linkList, single)
 		midMap[single.Mid] = single.Mid
 	}

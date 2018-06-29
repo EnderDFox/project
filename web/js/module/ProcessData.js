@@ -37,12 +37,20 @@ var ProcessDataClass = /** @class */ (function () {
             checkLink[work.Lid] = true;
             return true;
         });
-        //
+        //整理link列表
         var _linkDict = {};
+        var _parentChildrenDict = {}; //key: ParentLid  item: children id 
         $.each(data.LinkList, function (k, link) {
             link.Children = [];
             _linkDict[link.Lid] = link;
+            if (link.ParentLid) {
+                if (!_parentChildrenDict[link.ParentLid]) {
+                    _parentChildrenDict[link.ParentLid] = [];
+                }
+                _parentChildrenDict[link.ParentLid].push(link);
+            }
         });
+        //
         var _addLinkMap = function (link) {
             if (link.ParentLid) {
                 var parentLink = _linkDict[link.ParentLid];
@@ -53,11 +61,23 @@ var ProcessDataClass = /** @class */ (function () {
                 else {
                     _this.LinkMap[link.Lid] = link;
                     _this.LinkMap[link.ParentLid] = parentLink;
-                    parentLink.Children.push(link);
+                    if (ArrayUtil.IndexOfAttr(parentLink.Children, FieldName.Lid, link.Lid) == -1) {
+                        parentLink.Children.push(link);
+                    }
                 }
             }
             else {
                 _this.LinkMap[link.Lid] = link;
+                //children加进去
+                var _children = _parentChildrenDict[link.Lid];
+                if (_children) {
+                    link.Children = [];
+                    var len = _children.length;
+                    for (var i = 0; i < len; i++) {
+                        _this.LinkMap[_children[i].Lid] = _children[i];
+                        link.Children.push(_children[i]);
+                    }
+                }
             }
         };
         //环节过滤  通过判断的 会将link.Mid放入checkMode 没通过的则用`return true`跳过

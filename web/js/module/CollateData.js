@@ -56,10 +56,16 @@ var CollateDataClass = /** @class */ (function () {
             if (!_this.DateUserMap[v.Date]) {
                 _this.DateUserMap[v.Date] = {};
             }
-            if (!_this.DateUserMap[v.Date][_this.LinkMap[v.Lid].Uid]) {
-                _this.DateUserMap[v.Date][_this.LinkMap[v.Lid].Uid] = [];
+            var link = _this.LinkMap[v.Lid];
+            if (!link) {
+                console.log("[error]", "Can not find link", v.Lid, ":[v.Lid]");
             }
-            _this.DateUserMap[v.Date][_this.LinkMap[v.Lid].Uid].push(v);
+            else {
+                if (!_this.DateUserMap[v.Date][link.Uid]) {
+                    _this.DateUserMap[v.Date][link.Uid] = [];
+                }
+                _this.DateUserMap[v.Date][link.Uid].push(v);
+            }
         });
         //补充内容
         $.each(data.ExtraList, function (k, v) {
