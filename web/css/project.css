@@ -29,8 +29,8 @@
 .process .title{font-weight:bold;}
 .process .func{min-width:100px;max-width:100px;width:100px;font-weight:normal;padding:0px 0px 0px 0px;}
 .process .link{min-width:315px;max-width:315px;width:315px;font-weight:normal;}
-.process .linkChild0{min-width:126px;max-width:126px;width:126px;font-weight:normal;}
-.process .linkChild{min-width:187px;max-width:187px;width:187px;font-weight:normal;}
+.process .linkParent{min-width:126px;max-width:126px;width:126px;font-weight:normal;}
+.process .linkChild{min-width:188px;max-width:188px;width:188px;font-weight:normal;}
 .process .duty{min-width:60px;max-width:60px;width:60px;font-weight:normal;}
 .process .date_0{background:#0070c0;color:#ffffff;font-weight:bold;}
 .process .date_1{background:#ed7d31;color:#ffffff;font-weight:bold;}

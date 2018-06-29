@@ -83,12 +83,12 @@ var ProcessPanelClass = /** @class */ (function () {
                     }
                     _this.ShowMenuUser(e.currentTarget, e);
                     break;
-                case 'link':
+                /* case 'link':
                     if (!User.IsWrite) {
-                        return false;
+                        return false
                     }
-                    _this.ShowMenuLink(e.currentTarget, e);
-                    break;
+                    this.ShowMenuLink(e.currentTarget as HTMLElement, e)
+                    break */
             }
             //console.log('鼠标右键点击',type,navigator.platform)
         }).delegate('td', 'mouseenter', function (e) {
@@ -181,33 +181,6 @@ var ProcessPanelClass = /** @class */ (function () {
         html += "</thead>";
         return html;
     };
-    //组合流程列表 一个mode下的多个link
-    /* GetLinkListHtml(mode: ModeSingle) {
-        var html = ''
-        html += '<table class="linkMap">'
-        $.each(mode.LinkList, (k, link: LinkSingle) => {
-            //流程与进度
-            html += this.GetLinkHtml(link)
-        })
-        html += '</table>'
-        return html
-    } */
-    //组合流程 单个link
-    /* GetLinkHtml(link: LinkSingle) {
-        var html = ''
-        if (!link) {
-            return html
-        }
-        html += `<tr class="trLink" lid="${link.Lid}">`
-        html += `	<td class="link bg_${link.Color}" type="link">
-                        ${this.GetLinkName(link)}
-                    </td>
-                    <td class="duty" type="duty">
-                        ${this.GetLinkUserName(link)}
-                    </td>`
-        html += '</tr>'
-        return html
-    } */
     ProcessPanelClass.prototype.GetLinkName = function (link) {
         return "<div>\n\t\t\t\t" + (link.Name == '' ? '空' : link.Name) + " " + ProcessPanel.GetModeLinkStatusName(link.Status) + "\n\t\t\t\t</div>";
     };
@@ -250,34 +223,29 @@ var ProcessPanelClass = /** @class */ (function () {
         html += '</tr>';
         return html;
     };
-    //组合功能
-    /* GetModeHtmlLeft(mid: number) {
-        var html = ''
-        var mode = ProcessData.ModeMap[mid]
-        if (!mode) {
-            return html
-        }
-
-        html += `<tr class="trModeLeft" mid="${mode.Mid}" style="border-bottom: solid 4px #002060;">
-                    <td class="mode bg_${mode.Color}" mid="${mode.Mid}">
-                        ${this.GetModeName(mode)}
-                    </td>
-                    <td colspan="2">
-                        ${this.GetLinkListHtml(mode)}
-                    </td>
-                </tr> `
-        // html += `<tr class="space"><td colspan="3"></td></tr>`
-        // html += `<tr class="space"><td colspan="${(this.DateList.list.length + 3)}"></td></tr>`
-        return html
-    } */
     /**修改mdoe td内部的最大高度 */
+    ProcessPanelClass.prototype.GetModeNameMaxHeight = function (mode) {
+        var count = 0;
+        if (mode.LinkList) {
+            var len = mode.LinkList.length;
+            for (var i = 0; i < len; i++) {
+                var link = mode.LinkList[i];
+                if (link.Children && link.Children.length > 0) {
+                    count += link.Children.length;
+                }
+                else {
+                    count++;
+                }
+            }
+        }
+        var maxHeight = Math.max(1, count) * 40;
+        return maxHeight;
+    };
     ProcessPanelClass.prototype.ChangeModeNameMaxHeight = function (mode) {
-        var maxHeight = Math.max(1, mode.LinkList ? mode.LinkList.length : 0) * 40 * 3;
-        $('#content .mode[mid="' + mode.Mid + '"] div').css('max-height', maxHeight);
+        $('#content .mode[mid="' + mode.Mid + '"] div').css('max-height', this.GetModeNameMaxHeight(mode));
     };
     ProcessPanelClass.prototype.GetModeName = function (mode) {
-        var maxHeight = Math.max(1, mode.LinkList ? mode.LinkList.length : 0) * 80 * 3;
-        return "<div style=\"max-height:" + maxHeight + "px;\">\n\t\t\t\t" + VersionManager.GetVersionVer(mode.Vid) + (mode.Name == '' ? '空' : mode.Name) + this.GetModeLinkStatusName(mode.Status) + "\n\t\t\t\t<div>";
+        return "<div style=\"max-height:" + this.GetModeNameMaxHeight(mode) + "px;\">\n\t\t\t\t" + VersionManager.GetVersionVer(mode.Vid) + (mode.Name == '' ? '空' : mode.Name) + this.GetModeLinkStatusName(mode.Status) + "\n\t\t\t\t<div>";
     };
     ProcessPanelClass.prototype.GetModeHtmlRight = function (mid) {
         var html = '';
@@ -289,17 +257,6 @@ var ProcessPanelClass = /** @class */ (function () {
         // html += `<tr class="space"><td colspan="${(this.DateList.list.length)}"></td></tr>`
         return html;
     };
-    //组合tbody
-    /* GetTbodyHtmlLeft() {
-        var html = ''
-        html += '<tbody>'
-        //功能
-        $.each(ProcessData.Project.ModeList, (k, mode: ModeSingle) => {
-            html += this.GetModeHtmlLeft(mode.Mid)
-        })
-        html += '</tbody>'
-        return html
-    } */
     //组合tbody
     ProcessPanelClass.prototype.GetTbodyHtmlRight = function () {
         var _this = this;
@@ -320,31 +277,6 @@ var ProcessPanelClass = /** @class */ (function () {
                 // modeList:[],
                 modeList: ProcessData.Project.ModeList,
             };
-            //temp
-            var t_mode = data.modeList[1];
-            var t_link = t_mode.LinkList[0];
-            t_link.Children = [];
-            for (var i = 0; i < 3; i++) {
-                var t_linkChild = {
-                    Lid: 14141414 + i,
-                    Mid: t_mode.Mid,
-                    Uid: User.Uid,
-                    Name: '子流程' + (i + 1),
-                    Status: 0,
-                    Sort: i + 1,
-                    Children: [],
-                    Color: Math.round(Math.random() * 6),
-                };
-                t_link.Children.push(t_linkChild);
-            }
-            /* var len = ProcessData.Project.ModeList.length
-            for (var i = 0; i < len; i++) {
-                var mode = ProcessData.Project.ModeList[i]
-                // if(ProcessData.ModeMap[mode.Mid]){
-                    data.modeList.push(mode)
-                // }
-            } */
-            // Object.freeze(data)
             //组合thead
             var vue = new Vue({
                 template: tpl,
@@ -359,17 +291,17 @@ var ProcessPanelClass = /** @class */ (function () {
                     GetLinkUserName: function (link) {
                         return _this.GetLinkUserName(link);
                     },
-                    ShowLinkMenu: function (e, mode, link) {
-                        console.log("[debug]", e);
+                    onLinkName: function (e, mode, link, isChild) {
+                        if (isChild === void 0) { isChild = false; }
+                        // console.log("[debug] onLinkName", e, ":[e]")
                         if (!User.IsWrite) {
                             return;
                         }
-                        // this.ShowLinkMenu(mode, link)
+                        _this.ShowLinkMenu(e.target, e.pageX, e.pageY, mode, link, isChild);
                     },
                 },
             }).$mount();
             var $main = Main.Draw(vue.$el);
-            // $('#tableBodyLeft').html(this.GetTbodyHtmlLeft())
             //
             $('#tableTitleRight').html(_this.GetTheadHtmlRight());
             $('#tableBodyRight').html(_this.GetTbodyHtmlRight());
@@ -666,52 +598,61 @@ var ProcessPanelClass = /** @class */ (function () {
         });
     };
     //流程菜单
-    ProcessPanelClass.prototype.ShowMenuLink = function (o, e) {
-        var lid = parseInt($(o).attr('lid'));
+    ProcessPanelClass.prototype.ShowMenuLink = function (dom, e) {
+        var lid = parseInt($(dom).attr('lid'));
         if (lid > 0) {
             var link = ProcessData.LinkMap[lid];
             var mode = ProcessData.ModeMap[link.Mid];
-            this.ShowLinkMenu(o, e, mode, link);
+            this.ShowLinkMenu(dom, e.pageX, e.pageY, mode, link);
         }
     };
-    ProcessPanelClass.prototype.ShowLinkMenu = function (o, e, mode, link) {
+    ProcessPanelClass.prototype.ShowLinkMenu = function (dom, pageX, pageY, mode, link, isChild) {
         var _this = this;
-        var top = e.pageY + 1;
-        var left = e.pageX + 1;
+        if (isChild === void 0) { isChild = false; }
         var $menuLink = $('#menuLink');
         $menuLink.find(".store_txt").text(link.Status == LinkStatusField.NORMAL ? '归档' : '恢复归档');
-        $menuLink.css({ left: left, top: top }).unbind().delegate('.row', 'click', function (e) {
+        if (isChild) {
+            $('#menuLink').find('[type="addLinkChild"]').hide();
+        }
+        else {
+            $('#menuLink').find('[type="addLinkChild"]').show();
+        }
+        // console.log("[debug]", "xy:", pageX, pageY)
+        $menuLink.xy(pageX + 1, pageY + 1).unbind().delegate('.row', 'click', function (e) {
             var type = $(e.currentTarget).attr('type');
             switch (type) {
                 case 'forward': //上移
-                    var index0 = ArrayUtil.IndexOfAttr(mode.LinkList, FieldName.Lid, link.Lid);
+                    var _linkList = link.ParentLid ? ProcessData.LinkMap[link.ParentLid].Children : mode.LinkList;
+                    var index0 = ArrayUtil.IndexOfAttr(_linkList, FieldName.Lid, link.Lid);
                     if (index0 > 0) {
-                        mode.LinkList[index0 - 1];
-                        WSConn.sendMsg(C2L.C2L_PROCESS_LINK_SWAP_SORT, { 'Swap': [mode.LinkList[index0 - 1].Lid, link.Lid] });
+                        WSConn.sendMsg(C2L.C2L_PROCESS_LINK_SWAP_SORT, { 'Swap': [_linkList[index0 - 1].Lid, link.Lid] });
                     }
                     break;
                 case 'backward': //下移动
-                    var index0 = ArrayUtil.IndexOfAttr(mode.LinkList, FieldName.Lid, link.Lid);
-                    if (index0 < mode.LinkList.length - 1) {
-                        mode.LinkList[index0 + 1];
-                        WSConn.sendMsg(C2L.C2L_PROCESS_LINK_SWAP_SORT, { 'Swap': [link.Lid, mode.LinkList[index0 + 1].Lid] });
+                    var _linkList = link.ParentLid ? ProcessData.LinkMap[link.ParentLid].Children : mode.LinkList;
+                    var index0 = ArrayUtil.IndexOfAttr(_linkList, FieldName.Lid, link.Lid);
+                    if (index0 < _linkList.length - 1) {
+                        WSConn.sendMsg(C2L.C2L_PROCESS_LINK_SWAP_SORT, { 'Swap': [link.Lid, _linkList[index0 + 1].Lid] });
                     }
                     break;
                 case 'insert':
-                    _this.ShowEditLink(o, C2L.C2L_PROCESS_LINK_ADD);
+                    _this.ShowEditLink(dom, link, C2L.C2L_PROCESS_LINK_ADD);
                     break;
                 case 'edit':
-                    _this.ShowEditLink(o, C2L.C2L_PROCESS_LINK_EDIT);
+                    _this.ShowEditLink(dom, link, C2L.C2L_PROCESS_LINK_EDIT);
+                    break;
+                case 'addLinkChild':
+                    _this.ShowEditLink(dom, link, C2L.C2L_PROCESS_LINK_ADD, true);
                     break;
                 case 'store':
                     if (link.Status == LinkStatusField.NORMAL) {
                         if (mode.LinkList.length > 1) {
-                            Common.Warning(o, e, function () {
+                            Common.Warning(e, function () {
                                 WSConn.sendMsg(C2L.C2L_PROCESS_LINK_STORE, { 'Lid': link.Lid, 'Status': LinkStatusField.STORE });
                             }, '是否将已完成的流程进行归档？');
                         }
                         else {
-                            Common.Warning(o, e, null, '至少要保留一个流程');
+                            Common.Warning(e, null, '至少要保留一个流程');
                         }
                     }
                     else {
@@ -720,12 +661,12 @@ var ProcessPanelClass = /** @class */ (function () {
                     break;
                 case 'delete':
                     if (mode.LinkList.length > 1) {
-                        Common.Warning(o, e, function () {
+                        Common.Warning(e, function () {
                             WSConn.sendMsg(C2L.C2L_PROCESS_LINK_DELETE, { 'Lid': link.Lid });
                         }, '删除后不可恢复，确认删除吗？');
                     }
                     else {
-                        Common.Warning(o, e, null, '至少要保留一个流程');
+                        Common.Warning(e, null, '至少要保留一个流程');
                     }
                     break;
             }
@@ -740,18 +681,30 @@ var ProcessPanelClass = /** @class */ (function () {
         });
     };
     //编辑流程名字
-    ProcessPanelClass.prototype.ShowEditLink = function (o, cid) {
-        var lid = parseInt($(o).attr('lid'));
-        var top = $(o).position().top - 2;
-        var left = $(o).position().left + $(o).outerWidth() - 2;
-        var link = ProcessData.LinkMap[lid];
-        var plan = $('#editLink').css({ left: left, top: top }).show().adjust(-5);
+    ProcessPanelClass.prototype.ShowEditLink = function (dom, link, cmdId, addLinkChild) {
+        if (addLinkChild === void 0) { addLinkChild = false; }
+        var top = $(dom).position().top - 2;
+        var left = $(dom).position().left + $(dom).outerWidth() - 2;
+        var plan = $('#editLink').xy(left, top).show().adjust(-5);
         var name = plan.find('textarea').val('').focus();
-        if (cid == C2L.C2L_PROCESS_LINK_EDIT) {
+        if (cmdId == C2L.C2L_PROCESS_LINK_EDIT) {
+            //填入旧数据
             name.val(link.Name).select();
         }
         plan.find('.confirm').unbind().click(function () {
-            WSConn.sendMsg(cid, { 'Lid': lid, 'Name': $.trim(name.val()) });
+            if (cmdId == C2L.C2L_PROCESS_LINK_ADD) {
+                var dataAdd = {};
+                dataAdd.Name = $.trim(name.val());
+                dataAdd.PrevLid = addLinkChild ? 0 : link.Lid;
+                dataAdd.ParentLid = addLinkChild ? link.Lid : 0;
+                WSConn.sendMsg(cmdId, dataAdd);
+            }
+            else {
+                var dataEdit = {};
+                dataEdit.Name = $.trim(name.val());
+                dataEdit.Lid = link.Lid;
+                WSConn.sendMsg(cmdId, dataEdit);
+            }
             $('#editLink').hide();
         });
         plan.find('.cancel,.close').unbind().click(function () {

@@ -37,6 +37,29 @@ var ProcessDataClass = /** @class */ (function () {
             checkLink[work.Lid] = true;
             return true;
         });
+        //
+        var _linkDict = {};
+        $.each(data.LinkList, function (k, link) {
+            link.Children = [];
+            _linkDict[link.Lid] = link;
+        });
+        var _addLinkMap = function (link) {
+            if (link.ParentLid) {
+                var parentLink = _linkDict[link.ParentLid];
+                if (!parentLink) {
+                    //parent link 应该是被删除了,不是错误
+                    // console.log("[error] can not find parentLink", link.ParentLid, ":[link.ParentLid]")
+                }
+                else {
+                    _this.LinkMap[link.Lid] = link;
+                    _this.LinkMap[link.ParentLid] = parentLink;
+                    parentLink.Children.push(link);
+                }
+            }
+            else {
+                _this.LinkMap[link.Lid] = link;
+            }
+        };
         //环节过滤  通过判断的 会将link.Mid放入checkMode 没通过的则用`return true`跳过
         $.each(data.LinkList, function (k, link) {
             //流程名查询
@@ -63,28 +86,28 @@ var ProcessDataClass = /** @class */ (function () {
                 //环节保存
                 if (isFilterWork) {
                     if (checkLink[link.Lid]) {
-                        _this.LinkMap[link.Lid] = link;
+                        _addLinkMap(link);
                     }
                     else {
                         return true;
                     }
                 }
                 else {
-                    _this.LinkMap[link.Lid] = link;
+                    _addLinkMap(link);
                 }
             }
             else {
                 //环节保存
                 if (isFilterWork) {
                     if (checkLink[link.Lid]) {
-                        _this.LinkMap[link.Lid] = link;
+                        _addLinkMap(link);
                     }
                     else {
                         return true;
                     }
                 }
                 else {
-                    _this.LinkMap[link.Lid] = link;
+                    _addLinkMap(link);
                 }
                 //用户检查			
                 if (checkUser && !checkUser[link.Uid]) {
@@ -142,11 +165,13 @@ var ProcessDataClass = /** @class */ (function () {
             _this.Project.ModeList.push(mode); //data.ModeList中的mode是服务器按照sort排序好的,所以这样加进来的也是正确的
             return true;
         });
-        //把link都放入mode.LinkList
+        //把link放入mode.LinkList
         $.each(this.LinkMap, function (k, link) {
-            var mode = _this.ModeMap[link.Mid];
-            if (mode) {
-                mode.LinkList.push(link);
+            if (link.ParentLid == 0) {
+                var mode = _this.ModeMap[link.Mid];
+                if (mode) {
+                    mode.LinkList.push(link);
+                }
             }
         });
         //排序LinkList
@@ -157,6 +182,17 @@ var ProcessDataClass = /** @class */ (function () {
                 if (a.Sort > b.Sort)
                     return 1;
                 return 0;
+            });
+            $.each(mode.LinkList, function (k, link) {
+                if (link.Children) {
+                    link.Children.sort(function (a, b) {
+                        if (a.Sort < b.Sort)
+                            return -1;
+                        if (a.Sort > b.Sort)
+                            return 1;
+                        return 0;
+                    });
+                }
             });
         });
         //可用进度

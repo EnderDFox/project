@@ -1,6 +1,6 @@
 //进度数据
 class ProcessDataClass {
-	IsInit:boolean = false
+	IsInit: boolean = false
 	//项目信息
 	Project: ProjectSingle
 	//工作内容
@@ -50,6 +50,27 @@ class ProcessDataClass {
 			checkLink[work.Lid] = true
 			return true
 		})
+		//
+		var _linkDict: { [key: number]: LinkSingle } = {}
+		$.each(data.LinkList, (k, link: LinkSingle) => {
+			link.Children = []
+			_linkDict[link.Lid] = link
+		})
+		var _addLinkMap = (link: LinkSingle) => {
+			if (link.ParentLid) {
+				var parentLink: LinkSingle = _linkDict[link.ParentLid]
+				if (!parentLink) {
+					//parent link 应该是被删除了,不是错误
+					// console.log("[error] can not find parentLink", link.ParentLid, ":[link.ParentLid]")
+				} else {
+					this.LinkMap[link.Lid] = link
+					this.LinkMap[link.ParentLid] = parentLink
+					parentLink.Children.push(link)
+				}
+			} else {
+				this.LinkMap[link.Lid] = link
+			}
+		}
 		//环节过滤  通过判断的 会将link.Mid放入checkMode 没通过的则用`return true`跳过
 		$.each(data.LinkList, (k, link: LinkSingle) => {
 			//流程名查询
@@ -76,23 +97,23 @@ class ProcessDataClass {
 				//环节保存
 				if (isFilterWork) {
 					if (checkLink[link.Lid]) {
-						this.LinkMap[link.Lid] = link
+						_addLinkMap(link)
 					} else {
 						return true
 					}
 				} else {
-					this.LinkMap[link.Lid] = link
+					_addLinkMap(link)
 				}
 			} else {
 				//环节保存
 				if (isFilterWork) {
 					if (checkLink[link.Lid]) {
-						this.LinkMap[link.Lid] = link
+						_addLinkMap(link)
 					} else {
 						return true
 					}
 				} else {
-					this.LinkMap[link.Lid] = link
+					_addLinkMap(link)
 				}
 				//用户检查			
 				if (checkUser && !checkUser[link.Uid]) {
@@ -100,14 +121,14 @@ class ProcessDataClass {
 				}
 			}
 			//过滤无效Link
-			if(isFilterWork){//没过滤work时就不要checkLink了, 因为checkLink仅包括了有work的link, 没有work的link会被弃掉
+			if (isFilterWork) {//没过滤work时就不要checkLink了, 因为checkLink仅包括了有work的link, 没有work的link会被弃掉
 				if (!checkLink[link.Lid]) {
 					return true
 				}
 			}
 			//有效模块
 			// if(!link.Children){
-				// link.Children = []
+			// link.Children = []
 			// }
 			checkMode[link.Mid] = true
 			return true
@@ -122,7 +143,7 @@ class ProcessDataClass {
 			*/
 			// if (ProjectNav.FilterDid == DidField.VERSION && DidField.VERSION != mode.Did) {//old
 			if (ProjectNav.FilterDid == DidField.VERSION) {//改成显示有版本号的
-				if(mode.Vid==0){
+				if (mode.Vid == 0) {
 					return true
 				}
 			}
@@ -150,19 +171,30 @@ class ProcessDataClass {
 			this.Project.ModeList.push(mode)//data.ModeList中的mode是服务器按照sort排序好的,所以这样加进来的也是正确的
 			return true
 		})
-		//把link都放入mode.LinkList
+		//把link放入mode.LinkList
 		$.each(this.LinkMap, (k, link: LinkSingle) => {
-			var mode = this.ModeMap[link.Mid]
-			if(mode){
-				mode.LinkList.push(link)
+			if (link.ParentLid == 0) {
+				var mode = this.ModeMap[link.Mid]
+				if (mode) {
+					mode.LinkList.push(link)
+				}
 			}
 		})
 		//排序LinkList
-		$.each(this.ModeMap, (k,mode:ModeSingle)=>{
-			mode.LinkList.sort((a:LinkSingle,b:LinkSingle):number=>{
-				if(a.Sort<b.Sort) return -1
-				if(a.Sort>b.Sort) return 1
+		$.each(this.ModeMap, (k, mode: ModeSingle) => {
+			mode.LinkList.sort((a: LinkSingle, b: LinkSingle): number => {
+				if (a.Sort < b.Sort) return -1
+				if (a.Sort > b.Sort) return 1
 				return 0
+			})
+			$.each(mode.LinkList, (k, link: LinkSingle) => {
+				if (link.Children) {
+					link.Children.sort((a: LinkSingle, b: LinkSingle): number => {
+						if (a.Sort < b.Sort) return -1
+						if (a.Sort > b.Sort) return 1
+						return 0
+					})
+				}
 			})
 		})
 		//可用进度

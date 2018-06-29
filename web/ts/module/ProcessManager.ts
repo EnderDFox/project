@@ -53,25 +53,44 @@ class ProcessManagerClass {
 	}
 	//新增流程
 	LinkAdd(data: L2C_ProcessLinkAdd) {
+		var _prevLid: number = data.PrevLid
 		//数据变化
 		ProcessData.LinkMap[data.LinkSingle.Lid] = data.LinkSingle
-		var mode: ModeSingle = ProcessData.ModeMap[data.LinkSingle.Mid]
-		if (mode) {
-			var prevIndex = ArrayUtil.IndexOfAttr(mode.LinkList, FieldName.Lid, data.PrevLid)
-			if (prevIndex > -1) {
-				mode.LinkList.splice(prevIndex + 1, 0, data.LinkSingle)
+		if (data.LinkSingle.ParentLid == 0) {
+			var mode: ModeSingle = ProcessData.ModeMap[data.LinkSingle.Mid]
+			if (mode) {
+				var prevIndex = ArrayUtil.IndexOfAttr(mode.LinkList, FieldName.Lid, data.PrevLid)
+				if (prevIndex > -1) {
+					mode.LinkList.splice(prevIndex + 1, 0, data.LinkSingle)
+					_prevLid = data.PrevLid
+				}
+				ProcessPanel.ChangeModeNameMaxHeight(mode)
+				//
+				//vue会自动处理的,这里可以注释掉了
+				/* 	var add = $(ProcessPanel.GetLinkHtml(data.LinkSingle))
+					$('#content .trLink[lid="' + data.PrevLid + '"]').after(add)
+					ProcessPanel.SetLinkData(data.LinkSingle.Lid, add.get(0))
+					//
+					*/
 			}
-			ProcessPanel.ChangeModeNameMaxHeight(mode)
-			//
-			//vue会自动处理的,这里可以注释掉了
-		/* 	var add = $(ProcessPanel.GetLinkHtml(data.LinkSingle))
-			$('#content .trLink[lid="' + data.PrevLid + '"]').after(add)
-			ProcessPanel.SetLinkData(data.LinkSingle.Lid, add.get(0))
-			//
-			*/
+		} else {
+			//is Child
+			var parentLink: LinkSingle = ProcessData.LinkMap[data.LinkSingle.ParentLid]
+			if (data.PrevLid) {
+				var prevIndex = ArrayUtil.IndexOfAttr(parentLink.Children, FieldName.Lid, data.PrevLid)
+				if (prevIndex > -1) {
+					parentLink.Children.splice(prevIndex + 1, 0, data.LinkSingle)
+					_prevLid = data.PrevLid
+				}
+			} else {
+				parentLink.Children.push(data.LinkSingle)
+				_prevLid = 0
+			}
+		}
+		if(_prevLid){//TODO: 父流程work不是空时怎么办呢?
 			var add = $(ProcessPanel.GetWorkHtml(data.LinkSingle))
-			$('#content .trWork[lid="' + data.PrevLid + '"]').after(add)
-			ProcessPanel.SetWorkData(data.LinkSingle.Lid, add.get(0)) 
+			$('#content .trWork[lid="' + _prevLid + '"]').after(add)
+			ProcessPanel.SetWorkData(data.LinkSingle.Lid, add.get(0))
 		}
 	}
 	//流程名字
@@ -80,9 +99,9 @@ class ProcessManagerClass {
 		var link: LinkSingle = ProcessData.LinkMap[data.Lid]
 		if (link) {
 			ProcessData.LinkMap[link.Lid].Name = data.Name
-		/* 	$('#content .trLink[lid="' + link.Lid + '"] .link').html(
-				ProcessPanel.GetLinkName(link)
-			) */
+			/* 	$('#content .trLink[lid="' + link.Lid + '"] .link').html(
+					ProcessPanel.GetLinkName(link)
+				) */
 		}
 	}
 	//流程颜色
@@ -111,19 +130,20 @@ class ProcessManagerClass {
 		if (!link0 || !link1) {
 		} else {
 			var mode: ModeSingle = ProcessData.ModeMap[link0.Mid]
-			var index0 = ArrayUtil.IndexOfAttr(mode.LinkList, FieldName.Lid, link0.Lid)
-			var index1 = ArrayUtil.IndexOfAttr(mode.LinkList, FieldName.Lid, link1.Lid)
+			var _linkList: LinkSingle[] = link0.ParentLid ? ProcessData.LinkMap[link0.ParentLid].Children : mode.LinkList
+			var index0 = ArrayUtil.IndexOfAttr(_linkList, FieldName.Lid, link0.Lid)
+			var index1 = ArrayUtil.IndexOfAttr(_linkList, FieldName.Lid, link1.Lid)
 			if (index0 > -1 && index0 > -1) {
-				mode.LinkList.splice(index0, 1, ...mode.LinkList.splice(index1, 1, link0))
+				_linkList.splice(index0, 1, ..._linkList.splice(index1, 1, link0))
 			}
 			//
-		/* 	var A = $('#content .trLink[lid="' + link0.Lid + '"]')
-			var B = $('#content .trLink[lid="' + link1.Lid + '"]')
-			A.before(B)
-			//
-			var A = $('#content .trWork[lid="' + link0.Lid + '"]')
-			var B = $('#content .trWork[lid="' + link1.Lid + '"]')
-			A.before(B) */
+			/* 	var A = $('#content .trLink[lid="' + link0.Lid + '"]')
+				var B = $('#content .trLink[lid="' + link1.Lid + '"]')
+				A.before(B)
+				//
+				var A = $('#content .trWork[lid="' + link0.Lid + '"]')
+				var B = $('#content .trWork[lid="' + link1.Lid + '"]')
+				A.before(B) */
 		}
 	}
 	//归档处理
@@ -159,7 +179,9 @@ class ProcessManagerClass {
 	}
 	DoLinkDelete(link: LinkSingle) {
 		var mode: ModeSingle = ProcessData.ModeMap[link.Mid]
-		ArrayUtil.RemoveByAttr(mode.LinkList, FieldName.Lid, link.Lid)
+		var mode: ModeSingle = ProcessData.ModeMap[link.Mid]
+		var _linkList: LinkSingle[] = link.ParentLid ? ProcessData.LinkMap[link.ParentLid].Children : mode.LinkList
+		ArrayUtil.RemoveByAttr(_linkList, FieldName.Lid, link.Lid)
 		//删除工作
 		$.each(ProcessData.WorkMap, (k, v: WorkSingle) => {
 			if (v.Lid != link.Lid) {
@@ -326,12 +348,12 @@ class ProcessManagerClass {
 			delete ProcessData.LinkMap[link.Lid]
 		})
 		//
-	/* 	var del = $('#content .mode[mid="' + mode.Mid + '"]').parent()
-		// del.next().remove()
-		del.remove()
-		del = $('#content .trModeRight[mid="' + mode.Mid + '"]')
-		// del.next().remove()
-		del.remove() */
+		/* 	var del = $('#content .mode[mid="' + mode.Mid + '"]').parent()
+			// del.next().remove()
+			del.remove()
+			del = $('#content .trModeRight[mid="' + mode.Mid + '"]')
+			// del.next().remove()
+			del.remove() */
 	}
 	//设置评分
 	WorkScore(data: ScoreSingle) {

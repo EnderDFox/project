@@ -65,6 +65,7 @@ type LinkSingle struct {
 	Color  uint64
 	Status uint64
 	Sort   uint32
+	ParentLid uint64
 }
 
 type WorkSingle struct {

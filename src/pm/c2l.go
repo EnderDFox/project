@@ -88,8 +88,9 @@ type C2L_ProcessLinkSwapSort struct {
 }
 
 type C2L_ProcessLinkAdd struct {
-	Lid  uint64
+	PrevLid  uint64
 	Name string
+	ParentLid uint64
 }
 
 type C2L_ProcessLinkDelete struct {

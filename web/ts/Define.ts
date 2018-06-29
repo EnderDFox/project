@@ -52,7 +52,7 @@ enum LinkStatusField {
 
 //# const
 
-class FieldName{
+class FieldName {
     static Mid = "Mid"
     static Lid = "Lid"
 }
@@ -99,7 +99,7 @@ interface ModeSingle {
     Did?: DidField
     Status?: ModeStatusField
     //client temp data
-    LinkList?:LinkSingle[]
+    LinkList?: LinkSingle[]
 }
 
 interface LinkSingle {
@@ -109,8 +109,9 @@ interface LinkSingle {
     Name?: string
     Color?: number
     Status?: LinkStatusField
-    Sort?:number
-    Children?:LinkSingle[]
+    Sort?: number
+    Children?: LinkSingle[]
+    ParentLid?: number
 }
 
 interface WorkSingle {
@@ -268,6 +269,17 @@ interface C2L_ProcessWorkEdit {
     Tag?: string
 }
 
+interface C2L_ProcessLinkAdd {
+    PrevLid?: number
+    Name?: string
+    ParentLid?: number
+}
+interface C2L_ProcessLinkEdit {
+    Lid?: number
+    Name?: string
+}
+
+
 interface L2C_ProcessLinkDelete {
     Lid?: uint64
 }
@@ -303,11 +315,11 @@ interface L2C_ProcessModeSwapSort {
 
 interface L2C_ProcessModeStore {
     Mid?: uint64
-    Status?:ModeStatusField
+    Status?: ModeStatusField
 }
 interface L2C_ProcessLinkStore {
     Lid?: uint64
-    Status?:LinkStatusField
+    Status?: LinkStatusField
 }
 interface L2C_ProcessPublishEdit {
     Genre?: uint64

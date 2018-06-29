@@ -55,24 +55,45 @@ var ProcessManagerClass = /** @class */ (function () {
     };
     //新增流程
     ProcessManagerClass.prototype.LinkAdd = function (data) {
+        var _prevLid = data.PrevLid;
         //数据变化
         ProcessData.LinkMap[data.LinkSingle.Lid] = data.LinkSingle;
-        var mode = ProcessData.ModeMap[data.LinkSingle.Mid];
-        if (mode) {
-            var prevIndex = ArrayUtil.IndexOfAttr(mode.LinkList, FieldName.Lid, data.PrevLid);
-            if (prevIndex > -1) {
-                mode.LinkList.splice(prevIndex + 1, 0, data.LinkSingle);
-            }
-            ProcessPanel.ChangeModeNameMaxHeight(mode);
-            //
-            //vue会自动处理的,这里可以注释掉了
-            /* 	var add = $(ProcessPanel.GetLinkHtml(data.LinkSingle))
-                $('#content .trLink[lid="' + data.PrevLid + '"]').after(add)
-                ProcessPanel.SetLinkData(data.LinkSingle.Lid, add.get(0))
+        if (data.LinkSingle.ParentLid == 0) {
+            var mode = ProcessData.ModeMap[data.LinkSingle.Mid];
+            if (mode) {
+                var prevIndex = ArrayUtil.IndexOfAttr(mode.LinkList, FieldName.Lid, data.PrevLid);
+                if (prevIndex > -1) {
+                    mode.LinkList.splice(prevIndex + 1, 0, data.LinkSingle);
+                    _prevLid = data.PrevLid;
+                }
+                ProcessPanel.ChangeModeNameMaxHeight(mode);
                 //
-                */
+                //vue会自动处理的,这里可以注释掉了
+                /* 	var add = $(ProcessPanel.GetLinkHtml(data.LinkSingle))
+                    $('#content .trLink[lid="' + data.PrevLid + '"]').after(add)
+                    ProcessPanel.SetLinkData(data.LinkSingle.Lid, add.get(0))
+                    //
+                    */
+            }
+        }
+        else {
+            //is Child
+            var parentLink = ProcessData.LinkMap[data.LinkSingle.ParentLid];
+            if (data.PrevLid) {
+                var prevIndex = ArrayUtil.IndexOfAttr(parentLink.Children, FieldName.Lid, data.PrevLid);
+                if (prevIndex > -1) {
+                    parentLink.Children.splice(prevIndex + 1, 0, data.LinkSingle);
+                    _prevLid = data.PrevLid;
+                }
+            }
+            else {
+                parentLink.Children.push(data.LinkSingle);
+                _prevLid = 0;
+            }
+        }
+        if (_prevLid) { //TODO: 父流程work不是空时怎么办呢?
             var add = $(ProcessPanel.GetWorkHtml(data.LinkSingle));
-            $('#content .trWork[lid="' + data.PrevLid + '"]').after(add);
+            $('#content .trWork[lid="' + _prevLid + '"]').after(add);
             ProcessPanel.SetWorkData(data.LinkSingle.Lid, add.get(0));
         }
     };
@@ -107,7 +128,6 @@ var ProcessManagerClass = /** @class */ (function () {
     };
     //交换流程
     ProcessManagerClass.prototype.LinkSwapSort = function (data) {
-        var _a;
         //数据变化
         var link0 = ProcessData.LinkMap[data.Swap[0]];
         var link1 = ProcessData.LinkMap[data.Swap[1]];
@@ -115,10 +135,11 @@ var ProcessManagerClass = /** @class */ (function () {
         }
         else {
             var mode = ProcessData.ModeMap[link0.Mid];
-            var index0 = ArrayUtil.IndexOfAttr(mode.LinkList, FieldName.Lid, link0.Lid);
-            var index1 = ArrayUtil.IndexOfAttr(mode.LinkList, FieldName.Lid, link1.Lid);
+            var _linkList = link0.ParentLid ? ProcessData.LinkMap[link0.ParentLid].Children : mode.LinkList;
+            var index0 = ArrayUtil.IndexOfAttr(_linkList, FieldName.Lid, link0.Lid);
+            var index1 = ArrayUtil.IndexOfAttr(_linkList, FieldName.Lid, link1.Lid);
             if (index0 > -1 && index0 > -1) {
-                (_a = mode.LinkList).splice.apply(_a, [index0, 1].concat(mode.LinkList.splice(index1, 1, link0)));
+                _linkList.splice.apply(_linkList, [index0, 1].concat(_linkList.splice(index1, 1, link0)));
             }
             //
             /* 	var A = $('#content .trLink[lid="' + link0.Lid + '"]')
@@ -164,7 +185,9 @@ var ProcessManagerClass = /** @class */ (function () {
     };
     ProcessManagerClass.prototype.DoLinkDelete = function (link) {
         var mode = ProcessData.ModeMap[link.Mid];
-        ArrayUtil.RemoveByAttr(mode.LinkList, FieldName.Lid, link.Lid);
+        var mode = ProcessData.ModeMap[link.Mid];
+        var _linkList = link.ParentLid ? ProcessData.LinkMap[link.ParentLid].Children : mode.LinkList;
+        ArrayUtil.RemoveByAttr(_linkList, FieldName.Lid, link.Lid);
         //删除工作
         $.each(ProcessData.WorkMap, function (k, v) {
             if (v.Lid != link.Lid) {

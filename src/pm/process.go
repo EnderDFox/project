@@ -340,29 +340,27 @@ func (this *Process) LinkDelete(lid uint64) bool {
 }
 
 //插入新 link
-func (this *Process) LinkAdd(prevLid uint64, name string) bool {
-	//获得prev link的mid和sort
-	stmt, err := db.GetDb().Prepare(`SELECT mid,sort FROM ` + config.Pm + `.pm_link WHERE lid = ?`)
-	defer stmt.Close()
-	db.CheckErr(err)
-	var mid uint64
-	var sort uint32
-	stmt.QueryRow(prevLid).Scan(&mid, &sort)
+func (this *Process) LinkAdd(prevLid uint64, name string,parentLid uint64) bool {
+	if(prevLid==0 && parentLid==0){
+		log.Println(`revLid==0 && parentLid==0`)
+		return false
+	}
+	var mid,sort,_parentLid = this.GetMidSortByPrevLidAndParentLid(prevLid,parentLid)
 	if mid == 0 {
-		log.Println(`Can not find mid, when prevLid=`, prevLid)
+		log.Println(`Can not find mid, when prevLid=`, prevLid,`parentLid=`,parentLid)
 		return false
 	}
 	//目标后的link的sort+1
-	stmt, err = db.GetDb().Prepare(`UPDATE ` + config.Pm + `.pm_link SET sort=sort+1 WHERE is_del=0 AND mid=? AND sort >?`)
+	stmt, err := db.GetDb().Prepare(`UPDATE ` + config.Pm + `.pm_link SET sort=sort+1 WHERE is_del=0 AND mid=? AND parent_lid=? AND sort >?`)
 	defer stmt.Close()
 	db.CheckErr(err)
-	_, err = stmt.Exec(mid, sort)
+	_, err = stmt.Exec(mid, _parentLid,sort)
 	db.CheckErr(err)
 	//插入新的行
-	stmt, err = db.GetDb().Prepare(`INSERT INTO ` + config.Pm + `.pm_link (mid,uid,add_uid,name,create_time,sort) VALUES (?,?,?,?,?,?)`)
+	stmt, err = db.GetDb().Prepare(`INSERT INTO ` + config.Pm + `.pm_link (mid,uid,add_uid,name,create_time,sort,parent_lid) VALUES (?,?,?,?,?,?,?)`)
 	db.CheckErr(err)
 	uid := this.owner.GetUid()
-	res, err := stmt.Exec(mid, uid, uid, name, time.Now().Unix(), sort+1)
+	res, err := stmt.Exec(mid, uid, uid, name, time.Now().Unix(), sort+1,_parentLid)
 	db.CheckErr(err)
 	newLid, err := res.LastInsertId()
 	db.CheckErr(err)
@@ -373,6 +371,7 @@ func (this *Process) LinkAdd(prevLid uint64, name string) bool {
 		Uid:  uid,
 		Name: name,
 		Sort: sort + 1,
+		ParentLid: _parentLid,
 	}
 	data := &L2C_ProcessLinkAdd{
 		PrevLid:    prevLid,
@@ -380,6 +379,33 @@ func (this *Process) LinkAdd(prevLid uint64, name string) bool {
 	}
 	this.owner.SendToAll(L2C_PROCESS_LINK_ADD, data)
 	return true
+}
+
+func (this *Process) GetMidSortByPrevLidAndParentLid(prevLid uint64, parentLid uint64) (uint64,uint32,uint64){
+	var lid uint64
+	if(prevLid==0){
+		lid = parentLid
+	}else{
+		lid = prevLid
+	}
+	//获得prev link的mid和sort
+	stmt, err := db.GetDb().Prepare(`SELECT mid,sort,parent_lid FROM ` + config.Pm + `.pm_link WHERE lid = ?`)
+	defer stmt.Close()
+	db.CheckErr(err)
+	var mid uint64
+	var sort uint32
+	var _parentLid uint64
+	stmt.QueryRow(lid).Scan(&mid, &sort, &_parentLid)
+	if(prevLid==0 && parentLid>0){//增加一个新的子流程
+		_parentLid = parentLid
+		//获取子流程里最大sort值
+		// SELECT IFNULL(max(sort),0) FROM pm.pm_link WHERE is_del=0 AND parent_lid=4877
+		stmt, err := db.GetDb().Prepare(`SELECT IFNULL(max(sort),0) FROM ` + config.Pm + `.pm_link WHERE is_del=0 AND parent_lid=?`)
+		defer stmt.Close()
+		db.CheckErr(err)
+		stmt.QueryRow(parentLid).Scan(&sort)
+	}
+	return mid,sort,_parentLid
 }
 
 //link交换  link 交换位置
@@ -504,7 +530,7 @@ func (this *Process) GetModeList() []*ModeSingle {
 
 //获取环节列表
 func (this *Process) GetLinkList() []*LinkSingle {
-	stmt, err := db.GetDb().Prepare(`SELECT lid,mid,name,uid,color,status,sort FROM ` + config.Pm + `.pm_link WHERE is_del=0 ORDER BY sort`)
+	stmt, err := db.GetDb().Prepare(`SELECT lid,mid,name,uid,color,status,sort,parent_lid FROM ` + config.Pm + `.pm_link WHERE is_del=0 ORDER BY sort`)
 	defer stmt.Close()
 	db.CheckErr(err)
 	rows, err := stmt.Query()
@@ -513,7 +539,7 @@ func (this *Process) GetLinkList() []*LinkSingle {
 	var linkList []*LinkSingle
 	for rows.Next() {
 		single := &LinkSingle{}
-		rows.Scan(&single.Lid, &single.Mid, &single.Name, &single.Uid, &single.Color, &single.Status, &single.Sort)
+		rows.Scan(&single.Lid, &single.Mid, &single.Name, &single.Uid, &single.Color, &single.Status, &single.Sort, &single.ParentLid)
 		linkList = append(linkList, single)
 	}
 	return linkList

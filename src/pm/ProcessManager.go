@@ -253,7 +253,7 @@ func (this *C2L_M_PROCESS_LINK_ADD) execute(client *websocket.Conn, msg *Message
 	if user == nil {
 		return false
 	}
-	user.Process().LinkAdd(param.Lid, param.Name)
+	user.Process().LinkAdd(param.PrevLid, param.Name, param.ParentLid)
 	return true
 }
 
