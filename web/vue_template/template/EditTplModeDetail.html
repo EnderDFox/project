@@ -9,7 +9,7 @@
             <input type=" text " class="ver " placeholder="空 " :value="link.Name " :id=" 'editTplModeDetail_'+link.Tlid+'_name' " @blur="onEditName($event,link.Tlid) "
                 @keyup.enter="onEditName($event,link.Tlid) " />
             <button :disabled="link.Children && link.Children.length>0" class="confirm btnSmall2 btnDid " title="修改负责人所属的部门 " @click="onChangeDid($event,link.Tlid) ">{{link.Did|didName}}</button>
-            <button v-if="!isChild" class="confirm btnSmall2 " title="子流程(3)" @click="onEditChildren($event,link) ">{{'子流程(99)'}}</button>
+            <button v-if="!isChild" class="confirm btnSmall2 " @click="onEditChildren($event,link) ">子流程({{link.Children.length}})</button>
             <button :class="{ 'confirm':true, 'btnSmall1':true, 'button-disabled':index==0} " title="排序上移 " @click="onSortUp($event,link,index) "
                 :disabled="index==0 ">↑</button>
             <button :class="{ 'confirm':true, 'btnSmall1':true, 'button-disabled':index>=(mode.Links.length-1)}" title="排序下移" @click="onSortDown($event,link,index)"
