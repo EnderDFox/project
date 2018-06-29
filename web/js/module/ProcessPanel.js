@@ -182,13 +182,13 @@ var ProcessPanelClass = /** @class */ (function () {
         return html;
     };
     ProcessPanelClass.prototype.GetLinkName = function (link) {
-        return "<div>\n\t\t\t\t" + (link.Name == '' ? '空' : link.Name) + " " + ProcessPanel.GetModeLinkStatusName(link.Status) + "\n\t\t\t\t</div>";
+        return "<div>" + (link.Name == '' ? '空' : link.Name) + (Loader.isDebug ? '(' + link.Lid + ')' : '') + " " + ProcessPanel.GetModeLinkStatusName(link.Status) + "</div>";
     };
     ProcessPanelClass.prototype.GetLinkUserName = function (link) {
         if (!link || !Data.GetUser(link.Uid)) {
             return "<div>\u7A7A</div>";
         }
-        return "<div>\n\t\t" + Data.GetUser(link.Uid).Name + "\n\t\t\t\t</div>";
+        return "<div>" + Data.GetUser(link.Uid).Name + "</div>";
     };
     //组合work列表 一个mode下的多个link中的每个work
     ProcessPanelClass.prototype.GetWorkListHtml = function (mode) {
@@ -197,8 +197,14 @@ var ProcessPanelClass = /** @class */ (function () {
         html += '<table class="linkMap">';
         $.each(mode.LinkList, function (k, link) {
             //流程与进度
-            var times = (link.Children && link.Children.length) ? link.Children.length : 1;
-            while (times--) {
+            if (link.Children && link.Children.length) {
+                var len = link.Children.length;
+                for (var i = 0; i < len; i++) {
+                    var linkChild = link.Children[i];
+                    html += _this.GetWorkHtml(linkChild);
+                }
+            }
+            else {
                 html += _this.GetWorkHtml(link);
             }
         });
@@ -612,10 +618,10 @@ var ProcessPanelClass = /** @class */ (function () {
         var $menuLink = $('#menuLink');
         $menuLink.find(".store_txt").text(link.Status == LinkStatusField.NORMAL ? '归档' : '恢复归档');
         if (isChild) {
-            $('#menuLink').find('[type="addLinkChild"]').hide();
+            $('#menuLink').find('div[type="addLinkChild"]').hide();
         }
         else {
-            $('#menuLink').find('[type="addLinkChild"]').show();
+            $('#menuLink').find('div[type="addLinkChild"]').show();
         }
         // console.log("[debug]", "xy:", pageX, pageY)
         $menuLink.xy(pageX + 1, pageY + 1).unbind().delegate('.row', 'click', function (e) {

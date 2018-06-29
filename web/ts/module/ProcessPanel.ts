@@ -178,17 +178,13 @@ class ProcessPanelClass {
 		return html
 	}
 	GetLinkName(link: LinkSingle): string {
-		return `<div>
-				${(link.Name == '' ? '空' : link.Name)} ${ProcessPanel.GetModeLinkStatusName(link.Status)}
-				</div>`
+		return `<div>${(link.Name == '' ? '空' : link.Name)}${Loader.isDebug?'('+link.Lid+')':''} ${ProcessPanel.GetModeLinkStatusName(link.Status)}</div>`
 	}
 	GetLinkUserName(link: LinkSingle): string {
 		if (!link || !Data.GetUser(link.Uid)) {
 			return `<div>空</div>`
 		}
-		return `<div>
-		${Data.GetUser(link.Uid).Name}
-				</div>`
+		return `<div>${Data.GetUser(link.Uid).Name}</div>`
 	}
 	//组合work列表 一个mode下的多个link中的每个work
 	GetWorkListHtml(mode: ModeSingle) {
@@ -196,8 +192,13 @@ class ProcessPanelClass {
 		html += '<table class="linkMap">'
 		$.each(mode.LinkList, (k, link: LinkSingle) => {
 			//流程与进度
-			var times = (link.Children && link.Children.length) ? link.Children.length : 1
-			while (times--) {
+			if (link.Children && link.Children.length) {
+				var len = link.Children.length
+				for (var i = 0; i < len; i++) {
+					var linkChild = link.Children[i]
+					html += this.GetWorkHtml(linkChild)
+				}
+			} else {
 				html += this.GetWorkHtml(link)
 			}
 		})
@@ -292,12 +293,12 @@ class ProcessPanelClass {
 					GetLinkUserName: (link: LinkSingle) => {
 						return this.GetLinkUserName(link)
 					},
-					onLinkName: (e: MouseEvent, mode: ModeSingle, link: LinkSingle,isChild:boolean=false) => {
+					onLinkName: (e: MouseEvent, mode: ModeSingle, link: LinkSingle, isChild: boolean = false) => {
 						// console.log("[debug] onLinkName", e, ":[e]")
 						if (!User.IsWrite) {
 							return
 						}
-						this.ShowLinkMenu(e.target as HTMLElement, e.pageX, e.pageY, mode, link,isChild)
+						this.ShowLinkMenu(e.target as HTMLElement, e.pageX, e.pageY, mode, link, isChild)
 					},
 				},
 			}).$mount()
@@ -596,13 +597,13 @@ class ProcessPanelClass {
 			this.ShowLinkMenu(dom, e.pageX, e.pageY, mode, link)
 		}
 	}
-	ShowLinkMenu(dom: HTMLElement, pageX: number, pageY: number, mode: ModeSingle, link: LinkSingle,isChild:boolean=false) {
+	ShowLinkMenu(dom: HTMLElement, pageX: number, pageY: number, mode: ModeSingle, link: LinkSingle, isChild: boolean = false) {
 		var $menuLink = $('#menuLink')
 		$menuLink.find(`.store_txt`).text(link.Status == LinkStatusField.NORMAL ? '归档' : '恢复归档')
-		if(isChild){
-			$('#menuLink').find('[type="addLinkChild"]').hide()
-		}else{
-			$('#menuLink').find('[type="addLinkChild"]').show()
+		if (isChild) {
+			$('#menuLink').find('div[type="addLinkChild"]').hide()
+		} else {
+			$('#menuLink').find('div[type="addLinkChild"]').show()
 		}
 		// console.log("[debug]", "xy:", pageX, pageY)
 		$menuLink.xy(pageX + 1, pageY + 1).unbind().delegate('.row', 'click', (e: JQuery.Event) => {
@@ -726,11 +727,7 @@ class ProcessPanelClass {
 		var left = offset.left
 		var height = 38
 		var width = 38
-
 		//$(o).append($('#commonMini').show().css({'height':height,'width':width}))
-
-
-
 		$('#commonMini').show().css({ 'top': top, 'left': left, 'height': height, 'width': width }).unbind().bind('mousedown', function (ev): void | false {
 			if (ev.button !== Main.MouseDir) {
 				// return false

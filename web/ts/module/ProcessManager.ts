@@ -53,9 +53,13 @@ class ProcessManagerClass {
 	}
 	//新增流程
 	LinkAdd(data: L2C_ProcessLinkAdd) {
+		var removeParentTrWork = false
 		var _prevLid: number = data.PrevLid
 		//数据变化
 		ProcessData.LinkMap[data.LinkSingle.Lid] = data.LinkSingle
+		if (!data.LinkSingle.Children) {
+			data.LinkSingle.Children = []
+		}
 		if (data.LinkSingle.ParentLid == 0) {
 			var mode: ModeSingle = ProcessData.ModeMap[data.LinkSingle.Mid]
 			if (mode) {
@@ -83,14 +87,27 @@ class ProcessManagerClass {
 					_prevLid = data.PrevLid
 				}
 			} else {
+				//通过 父link '增加子流程' 把link加到最后面
+				if (parentLink.Children.length == 0) {
+					//TODO: 父流程work替换成自己子流程的
+					removeParentTrWork = true
+					// this.GetTrWork(_prevLid).attr('lid',data.LinkSingle.Lid)
+					// console.log("[debug]",this.GetTrWork(data.LinkSingle.Lid))
+					// ProcessPanel.SetWorkData(data.LinkSingle.Lid, this.GetTrWork(data.LinkSingle.Lid).get(0))
+					_prevLid = parentLink.Lid
+				} else {
+					_prevLid = parentLink.Children[parentLink.Children.length - 1].Lid
+				}
 				parentLink.Children.push(data.LinkSingle)
-				_prevLid = 0
 			}
 		}
-		if(_prevLid){//TODO: 父流程work不是空时怎么办呢?
+		if (_prevLid) {
 			var add = $(ProcessPanel.GetWorkHtml(data.LinkSingle))
-			$('#content .trWork[lid="' + _prevLid + '"]').after(add)
+			this.GetTrWork(_prevLid).after(add)
 			ProcessPanel.SetWorkData(data.LinkSingle.Lid, add.get(0))
+		}
+		if (removeParentTrWork) {
+			this.GetTrWork(_prevLid).remove()
 		}
 	}
 	//流程名字
@@ -139,11 +156,24 @@ class ProcessManagerClass {
 			//
 			/* 	var A = $('#content .trLink[lid="' + link0.Lid + '"]')
 				var B = $('#content .trLink[lid="' + link1.Lid + '"]')
-				A.before(B)
-				//
-				var A = $('#content .trWork[lid="' + link0.Lid + '"]')
-				var B = $('#content .trWork[lid="' + link1.Lid + '"]')
-				A.before(B) */
+				A.before(B)*/
+			//#
+			var B = this.GetTrWork(link1.Children.length == 0 ? link1.Lid : link1.Children[link1.Children.length - 1].Lid)//获取下面的最后一个
+			console.log("[debug]B:",B.attr('lid'))
+			if (link0.Children.length == 0) {
+				var A = this.GetTrWork(link0.Lid)
+				console.log("[debug]",link0.Lid,":[link0.Lid]")
+				B.after(A)
+			} else {
+				var len = link0.Children.length
+				for (var i = 0;i<len;i++){
+					var linkChild = link0.Children[i]
+					var A = this.GetTrWork(linkChild.Lid)
+					console.log("[debug]",linkChild.Lid,":[linkChild.Lid]",i)
+					B.after(A)
+					B = A
+				}
+			}
 		}
 	}
 	//归档处理
@@ -179,7 +209,6 @@ class ProcessManagerClass {
 	}
 	DoLinkDelete(link: LinkSingle) {
 		var mode: ModeSingle = ProcessData.ModeMap[link.Mid]
-		var mode: ModeSingle = ProcessData.ModeMap[link.Mid]
 		var _linkList: LinkSingle[] = link.ParentLid ? ProcessData.LinkMap[link.ParentLid].Children : mode.LinkList
 		ArrayUtil.RemoveByAttr(_linkList, FieldName.Lid, link.Lid)
 		//删除工作
@@ -194,7 +223,34 @@ class ProcessManagerClass {
 		ProcessPanel.ChangeModeNameMaxHeight(mode)
 		//
 		// $('#content .trLink[lid="' + link.Lid + '"]').remove()
-		$('#content .trWork[lid="' + link.Lid + '"]').remove()
+		if (link.ParentLid > 0) {
+			//父link恢复回来
+			var parentLink = ProcessData.LinkMap[link.ParentLid]
+			if (parentLink.Children.length == 0) {
+				var addParent = $(ProcessPanel.GetWorkHtml(parentLink))
+				this.GetTrWork(link.Lid).after(addParent)
+				ProcessPanel.SetWorkData(parentLink.Lid, addParent.get(0))
+			}
+		}
+		this.GetTrWork(link.Lid).remove()
+		if (link && link.Children.length > 0) {
+			var len = link.Children.length
+			for (var i = 0; i < len; i++) {
+				var linkChild = link.Children[i]
+				this.GetTrWork(linkChild.Lid).remove()
+			}
+		}
+
+	}
+	/**获取lid对应的那一行 */
+	GetTrWork(...lids: number[]): JQuery<HTMLElement> {
+		var names: string[] = []
+		var len = lids.length
+		for (var i = 0; i < len; i++) {
+			var lid = lids[i]
+			names.push(`#content .trWork[lid="${lid}"]`)
+		}
+		return $(names.join(','))
 	}
 	/**改变工作 状态 :工作 完成 延期 等待 优化 请假*/
 	WorkStatus(data: WorkSingle) {
@@ -348,12 +404,12 @@ class ProcessManagerClass {
 			delete ProcessData.LinkMap[link.Lid]
 		})
 		//
-		/* 	var del = $('#content .mode[mid="' + mode.Mid + '"]').parent()
-			// del.next().remove()
-			del.remove()
-			del = $('#content .trModeRight[mid="' + mode.Mid + '"]')
-			// del.next().remove()
-			del.remove() */
+		/* var del = $('#content .mode[mid="' + mode.Mid + '"]').parent()
+		// del.next().remove()
+		del.remove() */
+		var del = $('#content .trModeRight[mid="' + mode.Mid + '"]')
+		// del.next().remove()
+		del.remove()
 	}
 	//设置评分
 	WorkScore(data: ScoreSingle) {
