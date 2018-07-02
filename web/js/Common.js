@@ -199,6 +199,15 @@ var ArrayUtil = /** @class */ (function () {
         }
         return -1;
     };
+    ArrayUtil.FindOfAttr = function (arr, key, value) {
+        var len = arr.length;
+        for (var i = 0; i < len; i++) {
+            if ((key == null && arr[key] == value) || arr[i][key] == value) {
+                return arr[i];
+            }
+        }
+        return null;
+    };
     ArrayUtil.RemoveByAttr = function (arr, key, value) {
         var index = ArrayUtil.IndexOfAttr(arr, key, value);
         if (index > -1) {

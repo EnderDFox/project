@@ -251,6 +251,7 @@ type C2L_TplLinkAdd struct {
 	Tmid uint64
 	Name string
 	Did  uint64
+	ParentTlid uint64
 }
 type C2L_TplLinkEditName struct {
 	Tlid uint64
@@ -263,6 +264,7 @@ type C2L_TplLinkEditDid struct {
 
 type C2L_TplLinkEditSort struct {
 	Tmid  uint64
+	ParentTlid uint64
 	Tlid1 uint64
 	Tlid2 uint64
 }

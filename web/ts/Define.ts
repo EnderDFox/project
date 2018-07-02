@@ -56,6 +56,8 @@ enum LinkStatusField {
 class FieldName {
     static Mid = "Mid"
     static Lid = "Lid"
+    static Tmid = "Tmid"
+    static Tlid = "Tlid"
 }
 
 

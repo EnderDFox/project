@@ -46,6 +46,18 @@ var CollateDataClass = /** @class */ (function () {
         $.each(data.LinkList, function (k, v) {
             _this.LinkMap[v.Lid] = v;
         });
+        //子流程
+        $.each(data.LinkList, function (k, link) {
+            if (link.ParentLid) {
+                var parentLink = _this.LinkMap[link.ParentLid];
+                if (parentLink) {
+                    if (!parentLink.Children) {
+                        parentLink.Children = [];
+                    }
+                    parentLink.Children.push(link);
+                }
+            }
+        });
         //标签内容
         $.each(data.TagsList, function (k, v) {
             _this.TagsMap[v.Tag] = v;

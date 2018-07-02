@@ -51,6 +51,8 @@ var FieldName = /** @class */ (function () {
     }
     FieldName.Mid = "Mid";
     FieldName.Lid = "Lid";
+    FieldName.Tmid = "Tmid";
+    FieldName.Tlid = "Tlid";
     return FieldName;
 }());
 //# sourceMappingURL=Define.js.map

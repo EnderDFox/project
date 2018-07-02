@@ -195,6 +195,15 @@ class ArrayUtil {
 		}
 		return -1;
 	}
+	static FindOfAttr<T>(arr: T[], key: string, value: any): T {
+		var len = arr.length
+		for (var i = 0; i < len; i++) {
+			if ((key == null && arr[key] == value) || arr[i][key] == value) {
+				return arr[i];
+			}
+		}
+		return null;
+	}
 	static RemoveByAttr(arr: any[], key: string, value: any): number {
 		var index = ArrayUtil.IndexOfAttr(arr, key, value)
 		if (index > -1) {

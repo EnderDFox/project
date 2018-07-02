@@ -165,7 +165,7 @@ func (this *C2L_M_TPL_LINK_EDIT_SORT) execute(client *websocket.Conn, msg *Messa
 	if user == nil {
 		return false
 	}
-	user.Template().TemplateLinkEditSort(param.Tmid, param.Tlid1, param.Tlid2)
+	user.Template().TemplateLinkEditSort(param.Tmid, param.ParentTlid, param.Tlid1, param.Tlid2)
 	return true
 }
 

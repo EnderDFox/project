@@ -429,15 +429,16 @@ class ProcessPanelClass {
 			plan.find(".tpl_li").hide()
 			plan.find(".tpl_edit").hide()
 		} else {
-			plan.find(".tpl_li").hide()
-			plan.find(".tpl_edit").hide()
+			//TEST
+			// plan.find(".tpl_li").hide()
+			// plan.find(".tpl_edit").hide()
 			//TODO:子流程模板好了再打开
-			// plan.find(".tpl_li").show();
-			/* TemplateManager.BindTplSelect("#place_tplModeSelect")
+			plan.find(".tpl_li").show();
+			TemplateManager.BindTplSelect("#place_tplModeSelect")
 			plan.find('.tpl_edit').show().unbind().click(function (e) {
 				TemplateManager.ShowEditTplModeList(e)
 				VersionManager.Hide()
-			}) */
+			})
 		}
 		//版本
 		VersionManager.BindSelect("#place_versionSelect", mode.Vid, function (dom) {

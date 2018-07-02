@@ -159,17 +159,17 @@ class ProcessManagerClass {
 				A.before(B)*/
 			//#
 			var B = this.GetTrWork(link1.Children.length == 0 ? link1.Lid : link1.Children[link1.Children.length - 1].Lid)//获取下面的最后一个
-			console.log("[debug]B:",B.attr('lid'))
+			console.log("[debug]B:", B.attr('lid'))
 			if (link0.Children.length == 0) {
 				var A = this.GetTrWork(link0.Lid)
-				console.log("[debug]",link0.Lid,":[link0.Lid]")
+				console.log("[debug]", link0.Lid, ":[link0.Lid]")
 				B.after(A)
 			} else {
 				var len = link0.Children.length
-				for (var i = 0;i<len;i++){
+				for (var i = 0; i < len; i++) {
 					var linkChild = link0.Children[i]
 					var A = this.GetTrWork(linkChild.Lid)
-					console.log("[debug]",linkChild.Lid,":[linkChild.Lid]",i)
+					console.log("[debug]", linkChild.Lid, ":[linkChild.Lid]", i)
 					B.after(A)
 					B = A
 				}
@@ -282,10 +282,18 @@ class ProcessManagerClass {
 		var len = data.ModeSingle.LinkList.length
 		for (var i = 0; i < len; i++) {
 			var link = data.ModeSingle.LinkList[i];
-			if(!link.Children){
+			if (!link.Children) {
 				link.Children = []
 			}
 			ProcessData.LinkMap[link.Lid] = link
+			//
+			for (var j = 0; j < link.Children.length; j++) {
+				var linkChild = link.Children[j]
+				ProcessData.LinkMap[linkChild.Lid] = linkChild
+			}
+			if (!linkChild.Children) {
+				linkChild.Children = []
+			}
 		}
 		if (prevIndex > -1) {
 			ProcessData.Project.ModeList.splice(prevIndex + 1, 0, data.ModeSingle)

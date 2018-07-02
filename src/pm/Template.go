@@ -77,30 +77,31 @@ func (this *Template) TemplateModeDelete(param *C2L_TplModeDelete) bool {
 }
 
 func (this *Template) TemplateLinkAdd(param *C2L_TplLinkAdd) bool {
-	links := this.GetLinkList(param.Tmid)
+	links := this.GetLinkList(param.Tmid,0)
 	if len(links) >= template_manager.LinkMax {
 		return false
 	}
 	//插入一个模板-模块
-	stmt, err := db.GetDb().Prepare(`INSERT INTO ` + config.Pm + `.pm_template_link (tmid,name,did,add_uid,create_time,sort) VALUES (?,?,?,?,?,(
+	stmt, err := db.GetDb().Prepare(`INSERT INTO ` + config.Pm + `.pm_template_link (tmid,name,did,add_uid,create_time,parent_tlid,sort) VALUES (?,?,?,?,?,?,(
 		(SELECT IFNULL(
-			(SELECT ms FROM(SELECT max(sort)+1 AS ms FROM ` + config.Pm + `.pm_template_link WHERE tmid=?) m)
+			(SELECT ms FROM(SELECT max(sort)+1 AS ms FROM ` + config.Pm + `.pm_template_link WHERE tmid=? AND parent_tlid=?) m)
 		,1))
 		))`)
 	defer stmt.Close()
 	db.CheckErr(err)
-	res, err := stmt.Exec(param.Tmid, param.Name, param.Did, this.owner.Uid, time.Now().Unix(), param.Tmid)
+	res, err := stmt.Exec(param.Tmid, param.Name, param.Did, this.owner.Uid, time.Now().Unix(), param.ParentTlid, param.Tmid, param.ParentTlid)
 	db.CheckErr(err)
 	newTlid, err := res.LastInsertId()
 	db.CheckErr(err)
 	//
-	data := &L2C_TplLinkAdd{
+	single := &TplLinkSingle{
 		Tlid: uint64(newTlid),
 		Tmid: param.Tmid,
 		Did:  param.Did,
 		Name: param.Name,
+		ParentTlid: param.ParentTlid,
 	}
-	this.owner.SendTo(L2C_TPL_LINK_ADD, data)
+	this.owner.SendTo(L2C_TPL_LINK_ADD, single)
 	return true
 }
 
@@ -132,11 +133,12 @@ func (this *Template) TemplateLinkEditDid(param *C2L_TplLinkEditDid) bool {
 	return true
 }
 
-func (this *Template) TemplateLinkEditSort(tmid uint64, tlid1 uint64, tlid2 uint64) bool {
+func (this *Template) TemplateLinkEditSort(tmid uint64, parentTlid uint64, tlid1 uint64, tlid2 uint64) bool {
 	db.SwapSort(`pm_template_link`, `tlid`, tlid1, tlid2)
 	//
 	data := &L2C_TplLinkEditSort{
 		Tmid:  tmid,
+		ParentTlid: parentTlid,
 		Tlid1: tlid1,
 		Tlid2: tlid2,
 	}
@@ -171,7 +173,7 @@ func (this *Template) GetTmidByTlid(Tlid uint64) uint64 {
 
 //获取功能列表
 func (this *Template) GetModeList(uid uint64) []*TplModeSingle {
-	stmt, err := db.GetDb().Prepare(`SELECT tmid,name FROM ` + config.Pm + `.pm_template_mode WHERE add_uid=? and is_del=0`)
+	stmt, err := db.GetDb().Prepare(`SELECT tmid,name FROM ` + config.Pm + `.pm_template_mode WHERE add_uid=? AND is_del=0`)
 	defer stmt.Close()
 	db.CheckErr(err)
 	rows, err := stmt.Query(uid)
@@ -182,31 +184,34 @@ func (this *Template) GetModeList(uid uint64) []*TplModeSingle {
 		single := &TplModeSingle{}
 		rows.Scan(&single.Tmid, &single.Name)
 		modeList = append(modeList, single)
-		single.Links = this.GetLinkList(single.Tmid)
+		single.Links = this.GetLinkList(single.Tmid,0)
 	}
 	return modeList
 }
 
 //获取流程列表
-func (this *Template) GetLinkList(tmid uint64) []*TplLinkSingle {
-	stmt, err := db.GetDb().Prepare(`SELECT tlid,tmid,name,did FROM ` + config.Pm + `.pm_template_link WHERE tmid=? and is_del=0 ORDER BY sort`)
+func (this *Template) GetLinkList(tmid uint64,parentTlid uint64) []*TplLinkSingle {
+	stmt, err := db.GetDb().Prepare(`SELECT tlid,tmid,name,did,sort,parent_tlid FROM ` + config.Pm + `.pm_template_link WHERE tmid=? AND is_del=0 AND parent_tlid=? ORDER BY sort`)
 	defer stmt.Close()
 	db.CheckErr(err)
-	rows, err := stmt.Query(tmid)
+	rows, err := stmt.Query(tmid,parentTlid)
 	defer rows.Close()
 	db.CheckErr(err)
 	var modeList []*TplLinkSingle
 	for rows.Next() {
 		single := &TplLinkSingle{}
-		rows.Scan(&single.Tlid, &single.Tmid, &single.Name, &single.Did)
+		rows.Scan(&single.Tlid, &single.Tmid, &single.Name, &single.Did, &single.Sort, &single.ParentTlid)
 		modeList = append(modeList, single)
+		if(parentTlid==0){
+			single.Children = this.GetLinkList(tmid,single.Tlid)
+		}
 	}
 	return modeList
 }
 
 //获取功能模板, 通过 功能模板id
 func (this *Template) GetTplModeByTmid(tmid uint64) *TplModeSingle {
-	stmt, err := db.GetDb().Prepare(`SELECT tmid,name FROM ` + config.Pm + `.pm_template_mode WHERE tmid=? and is_del=0`)
+	stmt, err := db.GetDb().Prepare(`SELECT tmid,name FROM ` + config.Pm + `.pm_template_mode WHERE tmid=? AND is_del=0`)
 	defer stmt.Close()
 	db.CheckErr(err)
 	var mode = &TplModeSingle{}

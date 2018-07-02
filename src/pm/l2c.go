@@ -212,10 +212,7 @@ type L2C_TplModeDelete struct {
 }
 
 type L2C_TplLinkAdd struct {
-	Tlid uint64
-	Tmid uint64
-	Name string
-	Did  uint64
+	Tlink *TplLinkSingle
 }
 
 type L2C_TplLinkEditName struct {
@@ -229,6 +226,7 @@ type L2C_TplLinkEditDid struct {
 }
 type L2C_TplLinkEditSort struct {
 	Tmid  uint64
+	ParentTlid uint64
 	Tlid1 uint64
 	Tlid2 uint64
 }

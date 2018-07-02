@@ -170,8 +170,11 @@ class CollatePanelClass {
 	}
 	//工作内容
 	GetWorkInfo(work: WorkSingle) {
-		var html = ''
 		var link = CollateData.LinkMap[work.Lid]
+		if(link.Children && link.Children.length>0){
+			return ''//有子流程的显示子流程,不显示父流程
+		}
+		var html = ''
 		html += '<li wid="' + work.Wid + '">'
 		var mode = CollateData.ModeMap[link.Mid]
 		if(!mode){

@@ -43,6 +43,18 @@ class CollateDataClass {
 		$.each(data.LinkList, (k, v: LinkSingle) => {
 			this.LinkMap[v.Lid] = v
 		})
+		//子流程
+		$.each(data.LinkList, (k, link: LinkSingle) => {
+			if(link.ParentLid){
+				var parentLink = this.LinkMap[link.ParentLid]
+				if(parentLink){
+					if(!parentLink.Children){
+						parentLink.Children = []
+					}
+					parentLink.Children.push(link)
+				}
+			}
+		})
 		//标签内容
 		$.each(data.TagsList, (k, v: TagSingle) => {
 			this.TagsMap[v.Tag] = v

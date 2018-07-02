@@ -297,6 +297,14 @@ var ProcessManagerClass = /** @class */ (function () {
                 link.Children = [];
             }
             ProcessData.LinkMap[link.Lid] = link;
+            //
+            for (var j = 0; j < link.Children.length; j++) {
+                var linkChild = link.Children[j];
+                ProcessData.LinkMap[linkChild.Lid] = linkChild;
+            }
+            if (!linkChild.Children) {
+                linkChild.Children = [];
+            }
         }
         if (prevIndex > -1) {
             ProcessData.Project.ModeList.splice(prevIndex + 1, 0, data.ModeSingle);

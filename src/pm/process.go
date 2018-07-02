@@ -197,8 +197,7 @@ func (this *Process) ModeAdd(prevMid uint64, name string, vid uint64, did uint64
 		//
 	} else {
 		//按照模板中插入环节
-		var tplLinkList = this.owner.Template().GetLinkList(tmid)
-		this.owner.Template().GetLinkList(tmid)
+		var tplLinkList = this.owner.Template().GetLinkList(tmid,0)
 		if len(tplLinkList) == 0 {
 			//模板里没有流程 插入一个空环节
 			linkSingle := this.LinkAddOne(uint64(newMid))
@@ -221,7 +220,26 @@ func (this *Process) ModeAdd(prevMid uint64, name string, vid uint64, did uint64
 				linkSingle.Uid = didToUidMap[tplLink.Did]
 				linkSingle.Name = tplLink.Name
 				linkSingle.Sort = uint32(i) + 1
+				linkSingle.ParentLid = 0
 				linkList = append(linkList, linkSingle)
+				//# 插入子流程
+				for iChild, tplLinkChild := range tplLink.Children {
+					log.Println(`iChild:`,iChild)
+					stmt, err = db.GetDb().Prepare(`INSERT INTO ` + config.Pm + `.pm_link (mid,uid,add_uid,create_time,name,sort,parent_lid) VALUES (?,?,?,?,?,?,?)`)
+					res, err = stmt.Exec(newMid, didToUidMap[tplLinkChild.Did], this.owner.GetUid(), time.Now().Unix(), tplLinkChild.Name, iChild+1,linkSingle.Lid)
+					db.CheckErr(err)
+					child_lid, err := res.LastInsertId()
+					db.CheckErr(err)
+					//
+					linkSingleChild := &LinkSingle{}
+					linkSingleChild.Lid = uint64(child_lid)
+					linkSingleChild.Mid = uint64(newMid)
+					linkSingleChild.Uid = didToUidMap[tplLinkChild.Did]
+					linkSingleChild.Name = tplLinkChild.Name
+					linkSingleChild.Sort = uint32(iChild) + 1
+					linkSingleChild.ParentLid = linkSingle.Lid
+					linkSingle.Children = append(linkSingle.Children, linkSingleChild)
+				}
 			}
 		}
 	}

@@ -66,6 +66,7 @@ type LinkSingle struct {
 	Status uint64
 	Sort   uint32
 	ParentLid uint64
+	Children []*LinkSingle
 }
 
 type WorkSingle struct {
@@ -140,6 +141,9 @@ type TplLinkSingle struct {
 	Tmid uint64
 	Name string
 	Did  uint64
+	Sort uint64
+	ParentTlid uint64
+	Children []*TplLinkSingle
 }
 
 type FileSingle struct {
