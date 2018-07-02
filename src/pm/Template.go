@@ -81,7 +81,13 @@ func (this *Template) TemplateLinkAdd(param *C2L_TplLinkAdd) bool {
 	if len(links) >= template_manager.LinkMax {
 		return false
 	}
-	//插入一个模板-模块
+	single := this.TemplateLinkAddOne(param.Tmid,param.Name,param.Did,param.ParentTlid)
+	this.owner.SendTo(L2C_TPL_LINK_ADD, single)
+	return true
+}
+
+//插入一个模板-模块
+func (this *Template) TemplateLinkAddOne(tmid uint64,name string, did uint64,parentTlid uint64) *TplLinkSingle {
 	stmt, err := db.GetDb().Prepare(`INSERT INTO ` + config.Pm + `.pm_template_link (tmid,name,did,add_uid,create_time,parent_tlid,sort) VALUES (?,?,?,?,?,?,(
 		(SELECT IFNULL(
 			(SELECT ms FROM(SELECT max(sort)+1 AS ms FROM ` + config.Pm + `.pm_template_link WHERE tmid=? AND parent_tlid=?) m)
@@ -89,19 +95,29 @@ func (this *Template) TemplateLinkAdd(param *C2L_TplLinkAdd) bool {
 		))`)
 	defer stmt.Close()
 	db.CheckErr(err)
-	res, err := stmt.Exec(param.Tmid, param.Name, param.Did, this.owner.Uid, time.Now().Unix(), param.ParentTlid, param.Tmid, param.ParentTlid)
+	res, err := stmt.Exec(tmid, name, did, this.owner.Uid, time.Now().Unix(), parentTlid, tmid, parentTlid)
 	db.CheckErr(err)
 	newTlid, err := res.LastInsertId()
 	db.CheckErr(err)
 	//
 	single := &TplLinkSingle{
 		Tlid: uint64(newTlid),
-		Tmid: param.Tmid,
-		Did:  param.Did,
-		Name: param.Name,
-		ParentTlid: param.ParentTlid,
+		Tmid: tmid,
+		Did:  did,
+		Name: name,
+		ParentTlid: parentTlid,
 	}
-	this.owner.SendTo(L2C_TPL_LINK_ADD, single)
+	return single
+}
+
+func (this *Template) TemplateLinkClone(copyTlid uint64) bool{
+	copyTlink := this.GetTplLinkByTmid(copyTlid)
+	linkSingle := this.TemplateLinkAddOne(copyTlink.Tmid,copyTlink.Name+`(clone)`,copyTlink.Did,0)
+	for _, tplLinkChild := range copyTlink.Children {
+		linkChild := this.TemplateLinkAddOne(copyTlink.Tmid,tplLinkChild.Name,tplLinkChild.Did,linkSingle.Tlid)
+		linkSingle.Children = append(linkSingle.Children, linkChild)
+	}
+	this.owner.SendTo(L2C_TPL_LINK_ADD, linkSingle)
 	return true
 }
 
@@ -216,6 +232,16 @@ func (this *Template) GetTplModeByTmid(tmid uint64) *TplModeSingle {
 	db.CheckErr(err)
 	var mode = &TplModeSingle{}
 	stmt.QueryRow(tmid).Scan(&mode.Tmid, &mode.Name)
-	db.CheckErr(err)
 	return mode
 }
+
+func (this *Template) GetTplLinkByTmid(tlid uint64) *TplLinkSingle {
+	stmt, err := db.GetDb().Prepare(`SELECT tlid,tmid,name,did,sort,parent_tlid FROM ` + config.Pm + `.pm_template_link WHERE tlid=?`)
+	defer stmt.Close()
+	db.CheckErr(err)
+	single := &TplLinkSingle{}
+	stmt.QueryRow(tlid).Scan(&single.Tlid, &single.Tmid, &single.Name, &single.Did, &single.Sort, &single.ParentTlid)
+	single.Children = this.GetLinkList(single.Tmid,single.Tlid)
+	return single
+}
+

@@ -178,7 +178,7 @@ class ProcessPanelClass {
 		return html
 	}
 	GetLinkName(link: LinkSingle): string {
-		return `<div>${(link.Name == '' ? '空' : link.Name)} ${ProcessPanel.GetModeLinkStatusName(link.Status)}${Loader.isDebug?'('+link.Lid+')':''}</div>`
+		return `<div>${(link.Name == '' ? '空' : link.Name)} ${ProcessPanel.GetModeLinkStatusName(link.Status)}${Loader.isDebug ? '(' + link.Lid + ')' : ''}</div>`
 	}
 	GetLinkUserName(link: LinkSingle): string {
 		if (!link || !Data.GetUser(link.Uid)) {
@@ -244,7 +244,7 @@ class ProcessPanelClass {
 	}
 	GetModeName(mode: ModeSingle): string {
 		return `<div style="max-height:${this.GetModeNameMaxHeight(mode)}px;">
-		${VersionManager.GetVersionVer(mode.Vid)}${(mode.Name == '' ? '空' : mode.Name)}${this.GetModeLinkStatusName(mode.Status)}${Loader.isDebug?'('+mode.Mid+')':''}
+		${VersionManager.GetVersionVer(mode.Vid)}${(mode.Name == '' ? '空' : mode.Name)}${this.GetModeLinkStatusName(mode.Status)}${Loader.isDebug ? '(' + mode.Mid + ')' : ''}
 				<div>`
 	}
 	GetModeHtmlRight(mid: number) {
@@ -630,7 +630,7 @@ class ProcessPanelClass {
 					break
 				case 'store':
 					if (link.Status == LinkStatusField.NORMAL) {
-						if (mode.LinkList.length > 1) {
+						if (link.ParentLid>0 || mode.LinkList.length > 1) {
 							Common.Warning(e, function () {
 								WSConn.sendMsg(C2L.C2L_PROCESS_LINK_STORE, { 'Lid': link.Lid, 'Status': LinkStatusField.STORE })
 							}, '是否将已完成的流程进行归档？')
@@ -642,7 +642,7 @@ class ProcessPanelClass {
 					}
 					break
 				case 'delete':
-					if (mode.LinkList.length > 1) {
+					if (link.ParentLid>0 || mode.LinkList.length > 1) {
 						Common.Warning(e, function () {
 							WSConn.sendMsg(C2L.C2L_PROCESS_LINK_DELETE, { 'Lid': link.Lid })
 						}, '删除后不可恢复，确认删除吗？')
@@ -671,11 +671,11 @@ class ProcessPanelClass {
 			$('#editLinkSelectAddKind').hide()
 			//填入旧数据
 			name.val(link.Name).select()
-		}else{
+		} else {
 			$('#editLinkSelectAddKind').val('0').show()
-			if(link.ParentLid==0){
+			if (link.ParentLid == 0) {
 				$('#editLinkSelectAddKind option[value="1"]').show()
-			}else{
+			} else {
 				$('#editLinkSelectAddKind option[value="1"]').hide()
 			}
 		}

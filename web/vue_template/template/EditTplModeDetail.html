@@ -1,5 +1,5 @@
 <!-- 编辑模板-功能中的流程列表 -->
-<div class="commonDialog editTplMode editTplModeDetail" id="editTplModeDetail" :style="{'min-width':parentLink!=null?'400px':'470px','width':parentLink!=null?'400px':'470px'}">
+<div class="commonDialog editTplMode editTplModeDetail" id="editTplModeDetail" :style="{'min-width':parentLink!=null?'400px':'525px','width':parentLink!=null?'400px':'525px'}">
     <div class="head">
         <div class="title">编辑模板-{{parentLink!=null?mode.Name:'子流程'}}</div>
         <div class="close" @click="onClose($event)">x</div>
@@ -13,7 +13,8 @@
                 :disabled="index==0 ">↑</button>
             <button :class="{'confirm':true, 'btnSmall1':true, 'button-disabled':index>=(linkList.length-1)}" title="排序下移" @click="onSortDown($event,link,index)"
                 :disabled="index>=(linkList.length-1)">↓</button>
-            <button :class="{'confirm':true,'btnSmall1':true}" title="删除" @click="onDel($event,link)">X</button>
+            <button class="confirm btnSmall1" title="删除" @click="onDel($event,link)">X</button>
+            <button v-if="parentLink==null" class="confirm 'btnSmall1 btnDid" title="复制" @click="onClone($event,link)">复制</button>
         </li>
     </transition-group>
     <div class="body" v-if="linkList.length<50">

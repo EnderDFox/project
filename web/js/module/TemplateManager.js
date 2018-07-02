@@ -106,7 +106,7 @@ var TemplateManagerClass = /** @class */ (function () {
             for (var j = 0; j < mode.Links.length; j++) {
                 var tlink = mode.Links[j];
                 if (tlink.Tlid == data.Tlid) {
-                    mode.Links[i].Name = data.Name;
+                    tlink.Name = data.Name;
                     return;
                 }
                 else {
@@ -127,7 +127,7 @@ var TemplateManagerClass = /** @class */ (function () {
             for (var j = 0; j < mode.Links.length; j++) {
                 var tlink = mode.Links[j];
                 if (tlink.Tlid == data.Tlid) {
-                    mode.Links[i].Did = data.Did;
+                    tlink.Did = data.Did;
                     return;
                 }
                 else {
@@ -483,6 +483,11 @@ var TemplateManagerClass = /** @class */ (function () {
                             ParentTlid: parentTlink == null ? 0 : parentTlink.Tlid,
                         });
                         _vue.newName = "";
+                    },
+                    onClone: function (e, tlink) {
+                        WSConn.sendMsg(C2L.C2L_TPL_LINK_CLONE, {
+                            CopyTlid: tlink.Tlid
+                        });
                     },
                     onEditName: function (e, tlink) {
                         var newName = $('#editTplModeDetail_' + tlink.Tlid + '_name').val().trim();

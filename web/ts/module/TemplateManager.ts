@@ -151,7 +151,7 @@ class TemplateManagerClass {
             for (var j = 0; j < mode.Links.length; j++) {
                 var tlink: TplLinkSingle = mode.Links[j]
                 if (tlink.Tlid == data.Tlid) {
-                    mode.Links[i].Name = data.Name;
+                    tlink.Name = data.Name;
                     return
                 } else {
                     var index = ArrayUtil.IndexOfAttr(tlink.Children, FieldName.Tlid, data.Tlid);
@@ -171,7 +171,7 @@ class TemplateManagerClass {
             for (var j = 0; j < mode.Links.length; j++) {
                 var tlink: TplLinkSingle = mode.Links[j]
                 if (tlink.Tlid == data.Tlid) {
-                    mode.Links[i].Did = data.Did;
+                    tlink.Did = data.Did;
                     return
                 } else {
                     var index = ArrayUtil.IndexOfAttr(tlink.Children, FieldName.Tlid, data.Tlid);
@@ -237,7 +237,7 @@ class TemplateManagerClass {
                 var tlink: TplLinkSingle = mode.Links[j]
                 if (tlink.Tlid == data.Tlid) {
                     mode.Links.splice(j, 1)
-                    if(this.vue_editTplLinkChild && this.vue_editTplLinkChild.parentLink.Tlid==data.Tlid){
+                    if (this.vue_editTplLinkChild && this.vue_editTplLinkChild.parentLink.Tlid == data.Tlid) {
                         this.RemoveEditTplLinkChild()
                     }
                     return
@@ -517,6 +517,11 @@ class TemplateManagerClass {
                             ParentTlid: parentTlink == null ? 0 : parentTlink.Tlid,
                         });
                         _vue.newName = ""
+                    },
+                    onClone: (e, tlink: TplLinkSingle) => {
+                        WSConn.sendMsg(C2L.C2L_TPL_LINK_CLONE, {
+                            CopyTlid: tlink.Tlid
+                        });
                     },
                     onEditName: (e, tlink: TplLinkSingle) => {
                         var newName = ($('#editTplModeDetail_' + tlink.Tlid + '_name').val() as string).trim();

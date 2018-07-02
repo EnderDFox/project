@@ -26,6 +26,7 @@ func (this *TemplateManager) RegisterFunction() {
 	command.Register(C2L_TPL_MODE_DELETE, &C2L_M_TPL_MODE_DELETE{})
 	//流程
 	command.Register(C2L_TPL_LINK_ADD, &C2L_M_TPL_LINK_ADD{})
+	command.Register(C2L_TPL_LINK_CLONE, &C2L_M_TPL_LINK_CLONE{})
 	command.Register(C2L_TPL_LINK_EDIT_NAME, &C2L_M_TPL_LINK_EDIT_NAME{})
 	command.Register(C2L_TPL_LINK_EDIT_DID, &C2L_M_TPL_LINK_EDIT_DID{})
 	command.Register(C2L_TPL_LINK_EDIT_SORT, &C2L_M_TPL_LINK_EDIT_SORT{})
@@ -115,6 +116,22 @@ func (this *C2L_M_TPL_LINK_ADD) execute(client *websocket.Conn, msg *Message) bo
 		return false
 	}
 	user.Template().TemplateLinkAdd(param)
+	return true
+}
+//克隆 流程
+type C2L_M_TPL_LINK_CLONE struct{}
+
+func (this *C2L_M_TPL_LINK_CLONE) execute(client *websocket.Conn, msg *Message) bool {
+	param := &C2L_TplLinkClone{}
+	err := json.Unmarshal([]byte(msg.Param), param)
+	if err != nil {
+		return false
+	}
+	user := session.GetUser(msg.Uid)
+	if user == nil {
+		return false
+	}
+	user.Template().TemplateLinkClone(param.CopyTlid)
 	return true
 }
 

@@ -41,6 +41,7 @@ const (
 	C2L_TPL_LINK_EDIT_DID      = 51023
 	C2L_TPL_LINK_EDIT_SORT     = 51024
 	C2L_TPL_LINK_DELETE        = 51025
+	C2L_TPL_LINK_CLONE        = 51026
 	C2L_UPLOAD_ADD             = 80001
 	C2L_UPLOAD_DELETE          = 80002
 	C2L_VERSION_ADD            = 80101
@@ -252,6 +253,9 @@ type C2L_TplLinkAdd struct {
 	Name string
 	Did  uint64
 	ParentTlid uint64
+}
+type C2L_TplLinkClone struct {
+	CopyTlid uint64
 }
 type C2L_TplLinkEditName struct {
 	Tlid uint64

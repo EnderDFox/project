@@ -647,7 +647,7 @@ var ProcessPanelClass = /** @class */ (function () {
                     break;
                 case 'store':
                     if (link.Status == LinkStatusField.NORMAL) {
-                        if (mode.LinkList.length > 1) {
+                        if (link.ParentLid > 0 || mode.LinkList.length > 1) {
                             Common.Warning(e, function () {
                                 WSConn.sendMsg(C2L.C2L_PROCESS_LINK_STORE, { 'Lid': link.Lid, 'Status': LinkStatusField.STORE });
                             }, '是否将已完成的流程进行归档？');
@@ -661,7 +661,7 @@ var ProcessPanelClass = /** @class */ (function () {
                     }
                     break;
                 case 'delete':
-                    if (mode.LinkList.length > 1) {
+                    if (link.ParentLid > 0 || mode.LinkList.length > 1) {
                         Common.Warning(e, function () {
                             WSConn.sendMsg(C2L.C2L_PROCESS_LINK_DELETE, { 'Lid': link.Lid });
                         }, '删除后不可恢复，确认删除吗？');
