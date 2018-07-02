@@ -289,10 +289,10 @@ class ProcessManagerClass {
 			//
 			for (var j = 0; j < link.Children.length; j++) {
 				var linkChild = link.Children[j]
+				if (!linkChild.Children) {
+					linkChild.Children = []
+				}
 				ProcessData.LinkMap[linkChild.Lid] = linkChild
-			}
-			if (!linkChild.Children) {
-				linkChild.Children = []
 			}
 		}
 		if (prevIndex > -1) {
