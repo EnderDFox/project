@@ -73,7 +73,7 @@ class ProcessDataClass {
 				} else {
 					this.LinkMap[link.Lid] = link
 					this.LinkMap[link.ParentLid] = parentLink
-					if(ArrayUtil.IndexOfAttr(parentLink.Children, FieldName.Lid, link.Lid)==-1){
+					if (ArrayUtil.IndexOfAttr(parentLink.Children, FieldName.Lid, link.Lid) == -1) {
 						parentLink.Children.push(link)
 					}
 				}
@@ -108,13 +108,8 @@ class ProcessDataClass {
 			if (this.CheckNumberArray(Data.GetUser(link.Uid).Did, ProcessFilter.Pack.LinkUserDid) == false) {
 				return true
 			}
-			//策划特例  策划仅显示自己部门负责的流程,因此要先checkUser再保存环节
-			if (ProjectNav.FilterDid == DidField.DESIGN) {
-				//用户检查			
-				if (checkUser && !checkUser[link.Uid]) {
-					return true
-				}
-				//环节保存
+			if (ProjectNav.FilterDid == DidField.SUPERVISOR_ART) {
+				//美监是完全独立的一页,只显示在这一页创建的模块,其它模块也不要显示它
 				if (isFilterWork) {
 					if (checkLink[link.Lid]) {
 						_addLinkMap(link)
@@ -125,19 +120,37 @@ class ProcessDataClass {
 					_addLinkMap(link)
 				}
 			} else {
-				//环节保存
-				if (isFilterWork) {
-					if (checkLink[link.Lid]) {
-						_addLinkMap(link)
-					} else {
+				//策划特例  策划仅显示自己部门负责的流程,因此要先checkUser再保存环节
+				if (ProjectNav.FilterDid == DidField.DESIGN) {
+					//用户检查			
+					if (checkUser && !checkUser[link.Uid]) {
 						return true
 					}
+					//环节保存
+					if (isFilterWork) {
+						if (checkLink[link.Lid]) {
+							_addLinkMap(link)
+						} else {
+							return true
+						}
+					} else {
+						_addLinkMap(link)
+					}
 				} else {
-					_addLinkMap(link)
-				}
-				//用户检查			
-				if (checkUser && !checkUser[link.Uid]) {
-					return true
+					//环节保存
+					if (isFilterWork) {
+						if (checkLink[link.Lid]) {
+							_addLinkMap(link)
+						} else {
+							return true
+						}
+					} else {
+						_addLinkMap(link)
+					}
+					//用户检查			
+					if (checkUser && !checkUser[link.Uid]) {
+						return true
+					}
 				}
 			}
 			//过滤无效Link
@@ -167,7 +180,15 @@ class ProcessDataClass {
 					return true
 				}
 			}
-			if (ProjectNav.FilterDid == DidField.QA && DidField.QA != mode.Did) {
+			//-美监仅在这个标签里显示
+			if (ProjectNav.FilterDid == DidField.SUPERVISOR_ART && mode.Did != DidField.SUPERVISOR_ART) {
+				return true
+			}
+			if (ProjectNav.FilterDid != DidField.SUPERVISOR_ART && mode.Did == DidField.SUPERVISOR_ART) {
+				return true
+			}
+			//-
+			if (ProjectNav.FilterDid == DidField.QA && mode.Did != ProjectNav.FilterDid) {
 				return true
 			}
 			//查看版本

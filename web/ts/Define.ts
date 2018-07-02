@@ -19,6 +19,7 @@ enum DidField {
     QA = 6,         //质检
     SUPERVISOR = 14, //监修
     TOOL = 16,       //工具
+    SUPERVISOR_ART = 101,   //美监
 }
 /**db.pm.publish.genre*/
 enum GenreField {

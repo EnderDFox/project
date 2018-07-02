@@ -182,7 +182,7 @@ var ProcessPanelClass = /** @class */ (function () {
         return html;
     };
     ProcessPanelClass.prototype.GetLinkName = function (link) {
-        return "<div>" + (link.Name == '' ? '空' : link.Name) + (Loader.isDebug ? '(' + link.Lid + ')' : '') + " " + ProcessPanel.GetModeLinkStatusName(link.Status) + "</div>";
+        return "<div>" + (link.Name == '' ? '空' : link.Name) + " " + ProcessPanel.GetModeLinkStatusName(link.Status) + (Loader.isDebug ? '(' + link.Lid + ')' : '') + "</div>";
     };
     ProcessPanelClass.prototype.GetLinkUserName = function (link) {
         if (!link || !Data.GetUser(link.Uid)) {
@@ -251,7 +251,7 @@ var ProcessPanelClass = /** @class */ (function () {
         $('#content .mode[mid="' + mode.Mid + '"] div').css('max-height', this.GetModeNameMaxHeight(mode));
     };
     ProcessPanelClass.prototype.GetModeName = function (mode) {
-        return "<div style=\"max-height:" + this.GetModeNameMaxHeight(mode) + "px;\">\n\t\t" + VersionManager.GetVersionVer(mode.Vid) + (mode.Name == '' ? '空' : mode.Name) + this.GetModeLinkStatusName(mode.Status) + "\n\t\t\t\t<div>";
+        return "<div style=\"max-height:" + this.GetModeNameMaxHeight(mode) + "px;\">\n\t\t" + VersionManager.GetVersionVer(mode.Vid) + (mode.Name == '' ? '空' : mode.Name) + this.GetModeLinkStatusName(mode.Status) + (Loader.isDebug ? '(' + mode.Mid + ')' : '') + "\n\t\t\t\t<div>";
     };
     ProcessPanelClass.prototype.GetModeHtmlRight = function (mid) {
         var html = '';

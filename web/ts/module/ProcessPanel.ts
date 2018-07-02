@@ -178,7 +178,7 @@ class ProcessPanelClass {
 		return html
 	}
 	GetLinkName(link: LinkSingle): string {
-		return `<div>${(link.Name == '' ? '空' : link.Name)}${Loader.isDebug?'('+link.Lid+')':''} ${ProcessPanel.GetModeLinkStatusName(link.Status)}</div>`
+		return `<div>${(link.Name == '' ? '空' : link.Name)} ${ProcessPanel.GetModeLinkStatusName(link.Status)}${Loader.isDebug?'('+link.Lid+')':''}</div>`
 	}
 	GetLinkUserName(link: LinkSingle): string {
 		if (!link || !Data.GetUser(link.Uid)) {
@@ -244,7 +244,7 @@ class ProcessPanelClass {
 	}
 	GetModeName(mode: ModeSingle): string {
 		return `<div style="max-height:${this.GetModeNameMaxHeight(mode)}px;">
-		${VersionManager.GetVersionVer(mode.Vid)}${(mode.Name == '' ? '空' : mode.Name)}${this.GetModeLinkStatusName(mode.Status)}
+		${VersionManager.GetVersionVer(mode.Vid)}${(mode.Name == '' ? '空' : mode.Name)}${this.GetModeLinkStatusName(mode.Status)}${Loader.isDebug?'('+mode.Mid+')':''}
 				<div>`
 	}
 	GetModeHtmlRight(mid: number) {

@@ -11,6 +11,7 @@ var DidField;
     DidField[DidField["QA"] = 6] = "QA";
     DidField[DidField["SUPERVISOR"] = 14] = "SUPERVISOR";
     DidField[DidField["TOOL"] = 16] = "TOOL";
+    DidField[DidField["SUPERVISOR_ART"] = 101] = "SUPERVISOR_ART";
 })(DidField || (DidField = {}));
 /**db.pm.publish.genre*/
 var GenreField;
