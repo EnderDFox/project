@@ -23,15 +23,15 @@
   overflow: hidden;
 }
 .process .info{height:40px;line-height:40px;width:40px;position:absoute;}
-.process .mode{min-width:100px;max-width:100px;width:100px;font-weight:bold;font-size:16px;padding:0px 0px 0px 0px;
+.process .mode{min-width:135px;max-width:135px;width:135px;font-weight:bold;font-size:16px;padding:0px 10px 0px 10px;
   /* word-break: break-all; */
 }
 .process .title{font-weight:bold;}
-.process .func{min-width:100px;max-width:100px;width:100px;font-weight:normal;padding:0px 0px 0px 0px;}
+.process .func{min-width:135px;max-width:135px;width:135px;font-weight:normal;padding:0px 10px 0px 10px;}
 .process .link{min-width:315px;max-width:315px;width:315px;font-weight:normal;}
 .process .linkParent{min-width:126px;max-width:126px;width:126px;font-weight:normal;}
 .process .linkChild{min-width:188px;max-width:188px;width:188px;font-weight:normal;}
-.process .duty{min-width:60px;max-width:60px;width:60px;font-weight:normal;}
+.process .duty{min-width:120px;max-width:120px;width:120px;font-weight:normal;}
 .process .date_0{background:#0070c0;color:#ffffff;font-weight:bold;}
 .process .date_1{background:#ed7d31;color:#ffffff;font-weight:bold;}
 .process .today{background:#ffff00;font-weight:bold;}

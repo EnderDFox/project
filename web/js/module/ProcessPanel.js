@@ -251,7 +251,7 @@ var ProcessPanelClass = /** @class */ (function () {
         $('#content .mode[mid="' + mode.Mid + '"] div').css('max-height', this.GetModeNameMaxHeight(mode));
     };
     ProcessPanelClass.prototype.GetModeName = function (mode) {
-        return "<div style=\"max-height:" + this.GetModeNameMaxHeight(mode) + "px;\">\n\t\t\t\t" + VersionManager.GetVersionVer(mode.Vid) + (mode.Name == '' ? '空' : mode.Name) + this.GetModeLinkStatusName(mode.Status) + "\n\t\t\t\t<div>";
+        return "<div style=\"max-height:" + this.GetModeNameMaxHeight(mode) + "px;\">\n\t\t" + VersionManager.GetVersionVer(mode.Vid) + (mode.Name == '' ? '空' : mode.Name) + this.GetModeLinkStatusName(mode.Status) + "\n\t\t\t\t<div>";
     };
     ProcessPanelClass.prototype.GetModeHtmlRight = function (mid) {
         var html = '';
@@ -439,12 +439,15 @@ var ProcessPanelClass = /** @class */ (function () {
             plan.find(".tpl_edit").hide();
         }
         else {
-            plan.find(".tpl_li").show();
-            TemplateManager.BindTplSelect("#place_tplModeSelect");
+            plan.find(".tpl_li").hide();
+            plan.find(".tpl_edit").hide();
+            //TODO:子流程模板好了再打开
+            // plan.find(".tpl_li").show();
+            /* TemplateManager.BindTplSelect("#place_tplModeSelect")
             plan.find('.tpl_edit').show().unbind().click(function (e) {
-                TemplateManager.ShowEditTplModeList(e);
-                VersionManager.Hide();
-            });
+                TemplateManager.ShowEditTplModeList(e)
+                VersionManager.Hide()
+            }) */
         }
         //版本
         VersionManager.BindSelect("#place_versionSelect", mode.Vid, function (dom) {
@@ -617,12 +620,6 @@ var ProcessPanelClass = /** @class */ (function () {
         if (isChild === void 0) { isChild = false; }
         var $menuLink = $('#menuLink');
         $menuLink.find(".store_txt").text(link.Status == LinkStatusField.NORMAL ? '归档' : '恢复归档');
-        if (isChild) {
-            $('#menuLink').find('div[type="addLinkChild"]').hide();
-        }
-        else {
-            $('#menuLink').find('div[type="addLinkChild"]').show();
-        }
         // console.log("[debug]", "xy:", pageX, pageY)
         $menuLink.xy(pageX + 1, pageY + 1).unbind().delegate('.row', 'click', function (e) {
             var type = $(e.currentTarget).attr('type');
@@ -646,9 +643,6 @@ var ProcessPanelClass = /** @class */ (function () {
                     break;
                 case 'edit':
                     _this.ShowEditLink(dom, link, C2L.C2L_PROCESS_LINK_EDIT);
-                    break;
-                case 'addLinkChild':
-                    _this.ShowEditLink(dom, link, C2L.C2L_PROCESS_LINK_ADD, true);
                     break;
                 case 'store':
                     if (link.Status == LinkStatusField.NORMAL) {
@@ -687,22 +681,33 @@ var ProcessPanelClass = /** @class */ (function () {
         });
     };
     //编辑流程名字
-    ProcessPanelClass.prototype.ShowEditLink = function (dom, link, cmdId, addLinkChild) {
-        if (addLinkChild === void 0) { addLinkChild = false; }
+    ProcessPanelClass.prototype.ShowEditLink = function (dom, link, cmdId) {
         var top = $(dom).position().top - 2;
         var left = $(dom).position().left + $(dom).outerWidth() - 2;
         var plan = $('#editLink').xy(left, top).show().adjust(-5);
         var name = plan.find('textarea').val('').focus();
         if (cmdId == C2L.C2L_PROCESS_LINK_EDIT) {
+            $('#editLinkSelectAddKind').hide();
             //填入旧数据
             name.val(link.Name).select();
         }
+        else {
+            $('#editLinkSelectAddKind').val('0').show();
+            if (link.ParentLid == 0) {
+                $('#editLinkSelectAddKind option[value="1"]').show();
+            }
+            else {
+                $('#editLinkSelectAddKind option[value="1"]').hide();
+            }
+        }
+        //
         plan.find('.confirm').unbind().click(function () {
             if (cmdId == C2L.C2L_PROCESS_LINK_ADD) {
+                var _addLinkChild = parseInt($('#editLinkSelectAddKind').val());
                 var dataAdd = {};
                 dataAdd.Name = $.trim(name.val());
-                dataAdd.PrevLid = addLinkChild ? 0 : link.Lid;
-                dataAdd.ParentLid = addLinkChild ? link.Lid : 0;
+                dataAdd.PrevLid = _addLinkChild ? 0 : link.Lid;
+                dataAdd.ParentLid = _addLinkChild ? link.Lid : 0;
                 WSConn.sendMsg(cmdId, dataAdd);
             }
             else {
@@ -766,7 +771,7 @@ var ProcessPanelClass = /** @class */ (function () {
     ProcessPanelClass.prototype.GetModeLinkStatusName = function (status) {
         switch (status) {
             case ModeStatusField.STORE:
-                return "<span class=\"status_store\">(\u5DF2\u5F52\u6863)<span>";
+                return "<span class=\"status_store\">(\u5DF2\u5F52\u6863)</span>";
         }
         return '';
     };

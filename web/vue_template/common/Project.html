@@ -156,11 +156,6 @@
         <div class="txt">下移</div>
         <div class="dev"></div>
     </div>
-    <div class="row" type="addLinkChild">
-        <div class="ico"></div>
-        <div class="txt">增加子流程</div>
-        <div class="dev"></div>
-    </div>
     <div class="row" type="store">
         <div class="ico"></div>
         <div class="txt store_txt">归档</div>
@@ -229,7 +224,7 @@
 </div>
 
 <!--编辑流程-->
-<ul class="commonDialog editLink" id="editLink">
+<ul class="commonDialog editLink" id="editLink" style="width:310px;">
     <li class="head">
         <div class="title">编辑流程</div>
         <div class="close">x</div>
@@ -241,6 +236,10 @@
     </li>
     <li class="foot">
         <div class="buttons">
+            <select id="editLinkSelectAddKind" style="height: 28px;">
+                <option value="0">作为下一个流程</option>
+                <option value="1">作为子流程</option>
+            </select>
             <button class="confirm">确定</button>
             <button class="cancel">取消</button>
         </div>

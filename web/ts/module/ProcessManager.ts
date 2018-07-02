@@ -275,7 +275,6 @@ class ProcessManagerClass {
 	}
 	//添加功能
 	ModeAdd(data: L2C_ProcessModeAdd) {
-		//
 		var prevIndex = ArrayUtil.IndexOfAttr(ProcessData.Project.ModeList, FieldName.Mid, data.PrevMid)
 		data.ModeSingle.LinkList = data.LinkList
 		delete data['LinkList']
@@ -283,6 +282,9 @@ class ProcessManagerClass {
 		var len = data.ModeSingle.LinkList.length
 		for (var i = 0; i < len; i++) {
 			var link = data.ModeSingle.LinkList[i];
+			if(!link.Children){
+				link.Children = []
+			}
 			ProcessData.LinkMap[link.Lid] = link
 		}
 		if (prevIndex > -1) {

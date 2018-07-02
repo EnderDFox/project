@@ -244,7 +244,7 @@ class ProcessPanelClass {
 	}
 	GetModeName(mode: ModeSingle): string {
 		return `<div style="max-height:${this.GetModeNameMaxHeight(mode)}px;">
-				${VersionManager.GetVersionVer(mode.Vid)}${(mode.Name == '' ? '空' : mode.Name)}${this.GetModeLinkStatusName(mode.Status)}
+		${VersionManager.GetVersionVer(mode.Vid)}${(mode.Name == '' ? '空' : mode.Name)}${this.GetModeLinkStatusName(mode.Status)}
 				<div>`
 	}
 	GetModeHtmlRight(mid: number) {
@@ -429,12 +429,15 @@ class ProcessPanelClass {
 			plan.find(".tpl_li").hide()
 			plan.find(".tpl_edit").hide()
 		} else {
-			plan.find(".tpl_li").show();
-			TemplateManager.BindTplSelect("#place_tplModeSelect")
+			plan.find(".tpl_li").hide()
+			plan.find(".tpl_edit").hide()
+			//TODO:子流程模板好了再打开
+			// plan.find(".tpl_li").show();
+			/* TemplateManager.BindTplSelect("#place_tplModeSelect")
 			plan.find('.tpl_edit').show().unbind().click(function (e) {
 				TemplateManager.ShowEditTplModeList(e)
 				VersionManager.Hide()
-			})
+			}) */
 		}
 		//版本
 		VersionManager.BindSelect("#place_versionSelect", mode.Vid, function (dom) {
@@ -600,11 +603,6 @@ class ProcessPanelClass {
 	ShowLinkMenu(dom: HTMLElement, pageX: number, pageY: number, mode: ModeSingle, link: LinkSingle, isChild: boolean = false) {
 		var $menuLink = $('#menuLink')
 		$menuLink.find(`.store_txt`).text(link.Status == LinkStatusField.NORMAL ? '归档' : '恢复归档')
-		if (isChild) {
-			$('#menuLink').find('div[type="addLinkChild"]').hide()
-		} else {
-			$('#menuLink').find('div[type="addLinkChild"]').show()
-		}
 		// console.log("[debug]", "xy:", pageX, pageY)
 		$menuLink.xy(pageX + 1, pageY + 1).unbind().delegate('.row', 'click', (e: JQuery.Event) => {
 			var type = $(e.currentTarget).attr('type')
@@ -629,9 +627,6 @@ class ProcessPanelClass {
 				case 'edit':
 					this.ShowEditLink(dom, link, C2L.C2L_PROCESS_LINK_EDIT)
 					break
-				case 'addLinkChild':
-					this.ShowEditLink(dom, link, C2L.C2L_PROCESS_LINK_ADD, true)
-					break;
 				case 'store':
 					if (link.Status == LinkStatusField.NORMAL) {
 						if (mode.LinkList.length > 1) {
@@ -666,21 +661,31 @@ class ProcessPanelClass {
 		})
 	}
 	//编辑流程名字
-	ShowEditLink(dom: HTMLElement, link: LinkSingle, cmdId: number, addLinkChild: boolean = false) {
+	ShowEditLink(dom: HTMLElement, link: LinkSingle, cmdId: number) {
 		var top: number = $(dom).position().top - 2
 		var left: number = $(dom).position().left + $(dom).outerWidth() - 2
 		var plan: JQuery = $('#editLink').xy(left, top).show().adjust(-5)
 		var name = plan.find('textarea').val('').focus()
 		if (cmdId == C2L.C2L_PROCESS_LINK_EDIT) {
+			$('#editLinkSelectAddKind').hide()
 			//填入旧数据
 			name.val(link.Name).select()
+		}else{
+			$('#editLinkSelectAddKind').val('0').show()
+			if(link.ParentLid==0){
+				$('#editLinkSelectAddKind option[value="1"]').show()
+			}else{
+				$('#editLinkSelectAddKind option[value="1"]').hide()
+			}
 		}
+		//
 		plan.find('.confirm').unbind().click(function () {
 			if (cmdId == C2L.C2L_PROCESS_LINK_ADD) {
+				var _addLinkChild = parseInt($('#editLinkSelectAddKind').val() as string)
 				var dataAdd: C2L_ProcessLinkAdd = {}
 				dataAdd.Name = $.trim(name.val() as string)
-				dataAdd.PrevLid = addLinkChild ? 0 : link.Lid
-				dataAdd.ParentLid = addLinkChild ? link.Lid : 0
+				dataAdd.PrevLid = _addLinkChild ? 0 : link.Lid
+				dataAdd.ParentLid = _addLinkChild ? link.Lid : 0
 				WSConn.sendMsg(cmdId, dataAdd)
 			} else {
 				var dataEdit: C2L_ProcessLinkEdit = {}
@@ -743,7 +748,7 @@ class ProcessPanelClass {
 	GetModeLinkStatusName(status: ModeStatusField | LinkStatusField): string {
 		switch (status) {
 			case ModeStatusField.STORE:
-				return `<span class="status_store">(已归档)<span>`
+				return `<span class="status_store">(已归档)</span>`
 		}
 		return ''
 	}
