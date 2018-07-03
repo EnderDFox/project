@@ -58,15 +58,15 @@ type TagSingle struct {
 }
 
 type LinkSingle struct {
-	Lid    uint64
-	Mid    uint64
-	Uid    uint64
-	Name   string
-	Color  uint64
-	Status uint64
-	Sort   uint32
+	Lid       uint64
+	Mid       uint64
+	Uid       uint64
+	Name      string
+	Color     uint64
+	Status    uint64
+	Sort      uint32
 	ParentLid uint64
-	Children []*LinkSingle
+	Children  []*LinkSingle
 }
 
 type WorkSingle struct {
@@ -137,13 +137,13 @@ type TplModeSingle struct {
 }
 
 type TplLinkSingle struct {
-	Tlid uint64
-	Tmid uint64
-	Name string
-	Did  uint64
-	Sort uint64
+	Tlid       uint64
+	Tmid       uint64
+	Name       string
+	Did        uint64
+	Sort       uint64
 	ParentTlid uint64
-	Children []*TplLinkSingle
+	Children   []*TplLinkSingle
 }
 
 type FileSingle struct {

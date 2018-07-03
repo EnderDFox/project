@@ -1,30 +1,30 @@
 package main
 
 const (
-	C2L_SESSION_LOGIN          = 10001
-	C2L_SAVE_COLLATE           = 11001
+	C2L_SESSION_LOGIN = 10001
+	C2L_SAVE_COLLATE  = 11001
 	//#
-	C2L_PROCESS_VIEW           = 50001
+	C2L_PROCESS_VIEW = 50001
 	//mode
 	C2L_PROCESS_MODE_ADD       = 50011
 	C2L_PROCESS_MODE_EDIT      = 50012
 	C2L_PROCESS_MODE_COLOR     = 50013
-	C2L_PROCESS_MODE_SWAP_SORT      = 50014
+	C2L_PROCESS_MODE_SWAP_SORT = 50014
 	C2L_PROCESS_MODE_STORE     = 50015
 	C2L_PROCESS_MODE_DELETE    = 50016
 	//link
-	C2L_PROCESS_LINK_ADD       = 50021
-	C2L_PROCESS_LINK_EDIT      = 50022
-	C2L_PROCESS_LINK_COLOR     = 50023
-	C2L_PROCESS_LINK_SWAP_SORT      = 50024
-	C2L_PROCESS_LINK_STORE     = 50025
-	C2L_PROCESS_LINK_DELETE    = 50026
-	C2L_PROCESS_LINK_USER_CHANGE    = 50027
+	C2L_PROCESS_LINK_ADD         = 50021
+	C2L_PROCESS_LINK_EDIT        = 50022
+	C2L_PROCESS_LINK_COLOR       = 50023
+	C2L_PROCESS_LINK_SWAP_SORT   = 50024
+	C2L_PROCESS_LINK_STORE       = 50025
+	C2L_PROCESS_LINK_DELETE      = 50026
+	C2L_PROCESS_LINK_USER_CHANGE = 50027
 	//work
-	C2L_PROCESS_WORK_EDIT      = 50031
-	C2L_PROCESS_WORK_STATUS    = 50032
-	C2L_PROCESS_WORK_SCORE     = 50033
-	C2L_PROCESS_WORK_CLEAR     = 50034
+	C2L_PROCESS_WORK_EDIT   = 50031
+	C2L_PROCESS_WORK_STATUS = 50032
+	C2L_PROCESS_WORK_SCORE  = 50033
+	C2L_PROCESS_WORK_CLEAR  = 50034
 	//#
 	C2L_COLLATE_VIEW           = 60001
 	C2L_COLLATE_STEP_EDIT      = 60002
@@ -41,7 +41,7 @@ const (
 	C2L_TPL_LINK_EDIT_DID      = 51023
 	C2L_TPL_LINK_EDIT_SORT     = 51024
 	C2L_TPL_LINK_DELETE        = 51025
-	C2L_TPL_LINK_CLONE        = 51026
+	C2L_TPL_LINK_CLONE         = 51026
 	C2L_UPLOAD_ADD             = 80001
 	C2L_UPLOAD_DELETE          = 80002
 	C2L_VERSION_ADD            = 80101
@@ -89,8 +89,8 @@ type C2L_ProcessLinkSwapSort struct {
 }
 
 type C2L_ProcessLinkAdd struct {
-	PrevLid  uint64
-	Name string
+	PrevLid   uint64
+	Name      string
 	ParentLid uint64
 }
 
@@ -249,9 +249,9 @@ type C2L_TplModeDelete struct {
 	Tmid uint64
 }
 type C2L_TplLinkAdd struct {
-	Tmid uint64
-	Name string
-	Did  uint64
+	Tmid       uint64
+	Name       string
+	Did        uint64
 	ParentTlid uint64
 }
 type C2L_TplLinkClone struct {
@@ -267,10 +267,10 @@ type C2L_TplLinkEditDid struct {
 }
 
 type C2L_TplLinkEditSort struct {
-	Tmid  uint64
+	Tmid       uint64
 	ParentTlid uint64
-	Tlid1 uint64
-	Tlid2 uint64
+	Tlid1      uint64
+	Tlid2      uint64
 }
 
 type C2L_TplLinkDelete struct {
