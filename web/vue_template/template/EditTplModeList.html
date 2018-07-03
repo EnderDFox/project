@@ -12,7 +12,7 @@
             <button class="cancel btnSmall1" title="删除" @click="onDel($event,mode.Tmid)">X</button>
         </li>
     </transition-group>
-    <div class="body" v-if="modes.length<5">
+    <div class="body" v-if="modes.length<10">
         <input type="text" class="ver" placeholder="新功能名称" v-model="newName" @keyup.enter="onAdd" />
         <button class="confirm btnSmall3" @click="onAdd">增加</button>
     </div>

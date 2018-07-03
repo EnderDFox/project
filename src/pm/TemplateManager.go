@@ -13,7 +13,7 @@ type TemplateManager struct {
 
 func NewTemplateManager() *TemplateManager {
 	ob := &TemplateManager{}
-	ob.ModeMax = 5
+	ob.ModeMax = 10
 	ob.LinkMax = 50
 	return ob
 }
