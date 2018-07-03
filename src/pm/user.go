@@ -5,24 +5,23 @@ import (
 )
 
 type User struct {
-	//数据集合
-	Uid         uint64
-	Pid         uint64
-	Gid         uint64
-	Did         uint64
-	Name        string
-	Vip         uint64
-	Is_del      uint64
-	Is_hide     uint64
-	Rtx_name    string
-	Rtx_account string
-	Rtx_group   string
-	Reg_time    uint64
-	Login_count uint64
-	Login_time  uint64
-	//文件描述
-	client *websocket.Conn
-	//初始化类
+	/*================公有变量Public================*/
+	Uid        uint64
+	Pid        uint64
+	Gid        uint64
+	Did        uint64
+	Name       string
+	Vip        uint64
+	IsDel      uint64
+	IsHide     uint64
+	RtxName    string
+	RtxAccount string
+	RtxGroup   string
+	RegTime    uint64
+	LoginCount uint64
+	LoginTime  uint64
+	/*================私有变量Private================*/
+	client      *websocket.Conn
 	profilePtr  *Profile
 	processPtr  *Process
 	collatePtr  *Collate
@@ -147,13 +146,13 @@ func (this *User) NtfUser() bool {
 		Did:         this.Did,
 		Name:        this.Name,
 		Vip:         this.Vip,
-		Is_del:      this.Is_del,
-		Rtx_name:    this.Rtx_name,
-		Rtx_account: this.Rtx_account,
-		Rtx_group:   this.Rtx_group,
-		Reg_time:    this.Reg_time,
-		Login_count: this.Login_count,
-		Login_time:  this.Login_time,
+		Is_del:      this.IsDel,
+		Rtx_name:    this.RtxName,
+		Rtx_account: this.RtxAccount,
+		Rtx_group:   this.RtxGroup,
+		Reg_time:    this.RegTime,
+		Login_count: this.LoginCount,
+		Login_time:  this.LoginTime,
 		IsWrite:     IsWrite,
 	}
 	this.SendTo(L2C_SESSION_LOGIN, data)

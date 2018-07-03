@@ -28,7 +28,7 @@ func (this *Timer) getDidToUidMap() *map[uint64]uint64 {
 	stmt, err := db.GetDb().Prepare(`SELECT t3.uid,t4.did FROM (
 	SELECT t1.*,if(t2.fid=0,t1.did,t2.fid) AS fid FROM (
 	SELECT uid,did,name FROM ` + config.Mg + `.mag_user WHERE gid = 1 AND did > 0
-	) AS t1 LEFT JOIN ` + config.Mg + `.mag_department AS t2 ON t1.did = t2.did ) AS t3 LEFT JOIN ` + config.Mg + `.mag_department AS t4 ON t3.fid = t4.did OR t3.fid = t4.fid ORDER BY t3.uid`)
+	) AS t1 LEFT JOIN ` + config.Mg + `.mag_department AS t2 ON t1.did = t2.did ) AS t3 LEFT JOIN ` + config.Mg + `.mag_department AS t4 ON t3.fid = t4.did OR t3.fid = t4.fid ORDER BY t3.uid DESC`)
 	defer stmt.Close()
 	db.CheckErr(err)
 	rows, err := stmt.Query()

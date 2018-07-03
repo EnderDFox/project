@@ -77,7 +77,7 @@ func (this *Session) Login(client *websocket.Conn, account, verify string) bool 
 		return false
 	}
 	row = stmt.QueryRow(uid)
-	row.Scan(&user.Uid, &user.Pid, &user.Gid, &user.Did, &user.Name, &user.Vip, &user.Is_del, &user.Is_hide, &user.Rtx_name, &user.Rtx_account, &user.Rtx_group, &user.Reg_time, &user.Login_count, &user.Login_time)
+	row.Scan(&user.Uid, &user.Pid, &user.Gid, &user.Did, &user.Name, &user.Vip, &user.IsDel, &user.IsHide, &user.RtxName, &user.RtxAccount, &user.RtxGroup, &user.RegTime, &user.LoginCount, &user.LoginTime)
 	this.AddUser(user)
 	user.Login(client)
 	return true
