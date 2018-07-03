@@ -286,7 +286,6 @@ var ProcessManagerClass = /** @class */ (function () {
     };
     //添加功能
     ProcessManagerClass.prototype.ModeAdd = function (data) {
-        var prevIndex = ArrayUtil.IndexOfAttr(ProcessData.Project.ModeList, FieldName.Mid, data.PrevMid);
         data.ModeSingle.LinkList = data.LinkList;
         delete data['LinkList'];
         // ProcessData.LinkMap[data.LinkSingle.Lid] = data.LinkSingle
@@ -306,24 +305,19 @@ var ProcessManagerClass = /** @class */ (function () {
                 ProcessData.LinkMap[linkChild.Lid] = linkChild;
             }
         }
-        if (prevIndex > -1) {
-            ProcessData.Project.ModeList.splice(prevIndex + 1, 0, data.ModeSingle);
-        }
         ProcessData.ModeMap[data.ModeSingle.Mid] = data.ModeSingle;
-        /*
-        //# add mode
-        //lfet
-        var add = $(ProcessPanel.GetModeHtmlLeft(data.ModeSingle.Mid))
-        // $('#content .trModeLeft[mid="' + data.PrevMid + '"]').next().after(add)
-        $('#content .trModeLeft[mid="' + data.PrevMid + '"]').after(add)
-        add.find('.trLink').each(function () {
-            var lid = parseInt($(this).attr('lid'))
-            ProcessPanel.SetLinkData(lid, this)
-        })*/
+        if (data.PrevMid > 0) {
+            var prevIndex = ArrayUtil.IndexOfAttr(ProcessData.Project.ModeList, FieldName.Mid, data.PrevMid);
+            if (prevIndex > -1) {
+                ProcessData.Project.ModeList.splice(prevIndex + 1, 0, data.ModeSingle);
+            }
+        }
+        else {
+            ProcessData.Project.ModeList.unshift(data.ModeSingle); //加到最前面
+        }
         //right
         var add = $(ProcessPanel.GetModeHtmlRight(data.ModeSingle.Mid));
         $('#content .trModeRight[mid="' + data.PrevMid + '"]').after(add);
-        // $('#content .trModeRight[mid="' + data.PrevMid + '"]').next().after(add)
         add.find('.trWork').each(function () {
             var lid = parseInt($(this).attr('lid'));
             ProcessPanel.SetWorkData(lid, this);

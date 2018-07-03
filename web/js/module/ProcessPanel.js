@@ -51,7 +51,9 @@ var ProcessPanelClass = /** @class */ (function () {
     ProcessPanelClass.prototype.BindActions = function () {
         var _this = this;
         //功能区域绑定
-        Main.Content.unbind().delegate('.mode', 'mousedown', function (e) {
+        Main.Content.unbind().delegate('.addNew', 'click', function (e) {
+            _this.ShowEditMode(0, e, C2L.C2L_PROCESS_MODE_ADD);
+        }).delegate('.mode', 'mousedown', function (e) {
             e.stopPropagation();
             _this.HideMenu();
             TemplateManager.Hide();
@@ -377,10 +379,10 @@ var ProcessPanelClass = /** @class */ (function () {
             var type = $(e.currentTarget).attr('type');
             switch (type) {
                 case 'insert':
-                    _this.ShowEditMode(o, e, C2L.C2L_PROCESS_MODE_ADD);
+                    _this.ShowEditMode(mid, e, C2L.C2L_PROCESS_MODE_ADD);
                     break;
                 case 'edit':
-                    _this.ShowEditMode(o, e, C2L.C2L_PROCESS_MODE_EDIT);
+                    _this.ShowEditMode(mid, e, C2L.C2L_PROCESS_MODE_EDIT);
                     break;
                 case 'delete':
                     Common.Warning(o, e, function () {
@@ -425,12 +427,14 @@ var ProcessPanelClass = /** @class */ (function () {
         });
     };
     //编辑功能
-    ProcessPanelClass.prototype.ShowEditMode = function (o, e, cid) {
+    ProcessPanelClass.prototype.ShowEditMode = function (mid, e, cid) {
         ProcessFilter.HideFilter();
         TemplateManager.Hide();
         VersionManager.Hide();
-        var mid = $(o).attr('mid');
-        var mode = ProcessData.ModeMap[mid];
+        var mode;
+        if (mid > 0) { //新增时可能没有mid
+            mode = ProcessData.ModeMap[mid];
+        }
         var plan = $('#editMode').css({ left: e.pageX, top: e.pageY }).show().adjust(-5);
         var name = plan.find('textarea').val('').focus();
         if (cid == C2L.C2L_PROCESS_MODE_EDIT) {
@@ -451,7 +455,7 @@ var ProcessPanelClass = /** @class */ (function () {
             });
         }
         //版本
-        VersionManager.BindSelect("#place_versionSelect", mode.Vid, function (dom) {
+        VersionManager.BindSelect("#place_versionSelect", mode ? mode.Vid : 0, function (dom) {
             if (cid == C2L.C2L_PROCESS_MODE_EDIT) {
                 if (ProcessData.VersionMap[mode.Vid]) {
                     $(dom).val(mode.Vid);
@@ -472,11 +476,11 @@ var ProcessPanelClass = /** @class */ (function () {
         plan.find('.confirm').unbind().click(function () {
             var data = { 'Did': Math.abs(ProjectNav.FilterDid), 'Name': $.trim(name.val()), 'Vid': parseInt(plan.find("#versionSelect").val()) };
             if (cid == C2L.C2L_PROCESS_MODE_ADD) {
-                data["PrevMid"] = mode.Mid;
+                data["PrevMid"] = mid;
                 data["Tmid"] = parseInt(plan.find("#tplModeSelect").val());
             }
             else {
-                data["Mid"] = mode.Mid;
+                data["Mid"] = mid;
             }
             WSConn.sendMsg(cid, data);
             plan.hide();

@@ -28,6 +28,24 @@
 }
 .process .title{font-weight:bold;}
 .process .func{min-width:135px;max-width:135px;width:135px;font-weight:normal;padding:0px 10px 0px 10px;}
+.process .func .addNew{
+  position: absolute;
+  margin-left: 74px;
+  margin-top: 12px;
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  line-height: 12px;
+  font-size: 12px;
+  font-weight: bold;
+  /* font-family: Arial, Helvetica, sans-serif; */
+  /* font-weight: normal; */
+  color: #FFFFFF;
+  background-color: rgba(0, 0, 0, 0.612);
+  padding: 0px 0px 0px 0px;
+  z-index:100;
+
+}
 .process .link{min-width:315px;max-width:315px;width:315px;font-weight:normal;}
 .process .linkParent{min-width:126px;max-width:126px;width:126px;font-weight:normal;}
 .process .linkChild{min-width:188px;max-width:188px;width:188px;font-weight:normal;}

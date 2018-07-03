@@ -49,7 +49,9 @@ class ProcessPanelClass {
 	//绑定事件
 	BindActions() {
 		//功能区域绑定
-		Main.Content.unbind().delegate('.mode', 'mousedown', (e: JQuery.Event): void | false => {
+		Main.Content.unbind().delegate('.addNew', 'click',(e: JQuery.Event): void | false => {
+			this.ShowEditMode(0, e, C2L.C2L_PROCESS_MODE_ADD)
+		}).delegate('.mode', 'mousedown', (e: JQuery.Event): void | false => {
 			e.stopPropagation()
 			this.HideMenu()
 			TemplateManager.Hide()
@@ -369,10 +371,10 @@ class ProcessPanelClass {
 			var type = $(e.currentTarget).attr('type')
 			switch (type) {
 				case 'insert':
-					this.ShowEditMode(o, e, C2L.C2L_PROCESS_MODE_ADD)
+					this.ShowEditMode(mid, e, C2L.C2L_PROCESS_MODE_ADD)
 					break
 				case 'edit':
-					this.ShowEditMode(o, e, C2L.C2L_PROCESS_MODE_EDIT)
+					this.ShowEditMode(mid, e, C2L.C2L_PROCESS_MODE_EDIT)
 					break
 				case 'delete':
 					Common.Warning(o, e, function () {
@@ -416,12 +418,14 @@ class ProcessPanelClass {
 		})
 	}
 	//编辑功能
-	ShowEditMode(o: HTMLElement, e: JQuery.Event, cid: number) {
+	ShowEditMode(mid: number, e: JQuery.Event, cid: number) {
 		ProcessFilter.HideFilter()
 		TemplateManager.Hide();
 		VersionManager.Hide()
-		var mid = $(o).attr('mid')
-		var mode = ProcessData.ModeMap[mid]
+		var mode:ModeSingle
+		if(mid>0){//新增时可能没有mid
+			mode = ProcessData.ModeMap[mid]
+		}
 		var plan = $('#editMode').css({ left: e.pageX, top: e.pageY }).show().adjust(-5)
 		var name = plan.find('textarea').val('').focus()
 		if (cid == C2L.C2L_PROCESS_MODE_EDIT) {
@@ -435,13 +439,13 @@ class ProcessPanelClass {
 			//TODO:子流程模板好了再打开
 			plan.find(".tpl_li").show();
 			TemplateManager.BindTplSelect("#place_tplModeSelect")
-			plan.find('.tpl_edit').show().unbind().click(function (e) {
+			plan.find('.tpl_edit').show().unbind().click((e) => {
 				TemplateManager.ShowEditTplModeList(e)
 				VersionManager.Hide()
 			})
 		}
 		//版本
-		VersionManager.BindSelect("#place_versionSelect", mode.Vid, function (dom) {
+		VersionManager.BindSelect("#place_versionSelect", mode?mode.Vid:0, (dom: HTMLElement) => {
 			if (cid == C2L.C2L_PROCESS_MODE_EDIT) {
 				if (ProcessData.VersionMap[mode.Vid]) {
 					$(dom).val(mode.Vid)
@@ -452,7 +456,7 @@ class ProcessPanelClass {
 				$(dom).val(0)
 			}
 		})
-		plan.find('.version_edit').show().unbind().click(function (e) {
+		plan.find('.version_edit').show().unbind().click((e) => {
 			TemplateManager.Hide()
 			VersionManager.ShowVersionList()
 		})
@@ -460,10 +464,10 @@ class ProcessPanelClass {
 		plan.find('.confirm').unbind().click(function () {
 			var data = { 'Did': Math.abs(ProjectNav.FilterDid), 'Name': $.trim(name.val() as string), 'Vid': parseInt(plan.find("#versionSelect").val() as string) };
 			if (cid == C2L.C2L_PROCESS_MODE_ADD) {
-				data["PrevMid"] = mode.Mid
+				data["PrevMid"] = mid
 				data["Tmid"] = parseInt(plan.find("#tplModeSelect").val() as string)
 			} else {
-				data["Mid"] = mode.Mid
+				data["Mid"] = mid
 			}
 			WSConn.sendMsg(cid, data)
 			plan.hide()

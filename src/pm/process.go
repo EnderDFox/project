@@ -161,21 +161,30 @@ func (this *Process) LinkAddOne(mid uint64) *LinkSingle {
 	return linkSingle
 }
 
+func (this *Process) GetPidSortByMid(mid uint64) (uint64 , uint32){
+	if(mid>0){
+		var pid uint64
+		var sort uint32
+		stmt, err := db.GetDb().Prepare(`SELECT pid,sort FROM ` + config.Pm + `.pm_mode WHERE mid = ?`)
+		defer stmt.Close()
+		db.CheckErr(err)
+		stmt.QueryRow(mid).Scan(&pid, &sort)
+		if pid == 0 {
+			log.Println(`Can not find pid, when mid=`, mid)
+			return 0,0
+		}
+		return pid,sort
+	}else{
+		return COMMON_PID,0
+	}
+}
+
 //插入
 func (this *Process) ModeAdd(prevMid uint64, name string, vid uint64, did uint64, tmid uint64) bool {
 	//获取 prev mode 的 pid 和sort
-	stmt, err := db.GetDb().Prepare(`SELECT pid,sort FROM ` + config.Pm + `.pm_mode WHERE mid = ?`)
-	defer stmt.Close()
-	db.CheckErr(err)
-	var pid uint64
-	var sort uint32
-	stmt.QueryRow(prevMid).Scan(&pid, &sort)
-	if pid == 0 {
-		log.Println(`Can not find pid, when prevMid=`, prevMid)
-		return false
-	}
+	pid,sort := this.GetPidSortByMid(prevMid)
 	//目标后的link的sort+1
-	stmt, err = db.GetDb().Prepare(`UPDATE ` + config.Pm + `.pm_mode SET sort=sort+1 WHERE is_del=0 AND pid=? AND sort >?`)
+	stmt, err := db.GetDb().Prepare(`UPDATE ` + config.Pm + `.pm_mode SET sort=sort+1 WHERE is_del=0 AND pid=? AND sort >?`)
 	defer stmt.Close()
 	db.CheckErr(err)
 	_, err = stmt.Exec(pid, sort)
