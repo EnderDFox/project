@@ -492,7 +492,7 @@ class ProcessPanelClass {
 			//$('#menuDay').find(".extends,[type=work],[type=finish],[type=delay],[type=wait],[type=rest],[type=optimize],[type=edit],[type=score],[type=clear]").hide()
 			$('#menuDay .row[type!=upload]').hide()
 		}
-		//
+		//delegate('.row[type!="status"],.row[type!="supervisor"]' 无效, 只好仅用一个了
 		$('#menuDay').css({ left: left, top: top }).unbind().delegate('.row[type!="status"]', 'click', (e: JQuery.Event) => {
 			var type = $(e.currentTarget).attr('type')
 			switch (type) {
@@ -502,6 +502,10 @@ class ProcessPanelClass {
 				case 'wait':
 				case 'rest':
 				case 'optimize':
+				case 'complete':
+				case 'submit':
+				case 'modify':
+				case 'pass':
 					var status = $(e.currentTarget).attr('status')
 					WSConn.sendMsg(C2L.C2L_PROCESS_WORK_STATUS, { 'Lid': grid.lid, 'Wid': grid.wid, 'Date': grid.s, 'Status': parseInt(status) })
 					break
@@ -523,6 +527,9 @@ class ProcessPanelClass {
 						WSConn.sendMsg(C2L.C2L_PROCESS_WORK_CLEAR, { 'Lid': grid.lid, 'Wid': grid.wid, 'Date': grid.s })
 					}
 					break
+				default:
+					console.log("[warn]", "click unknown type:", type)
+					return
 			}
 			this.HideMenu()
 		}).show().adjust(-5)
@@ -630,7 +637,7 @@ class ProcessPanelClass {
 					break
 				case 'store':
 					if (link.Status == LinkStatusField.NORMAL) {
-						if (link.ParentLid>0 || mode.LinkList.length > 1) {
+						if (link.ParentLid > 0 || mode.LinkList.length > 1) {
 							Common.Warning(e, function () {
 								WSConn.sendMsg(C2L.C2L_PROCESS_LINK_STORE, { 'Lid': link.Lid, 'Status': LinkStatusField.STORE })
 							}, '是否将已完成的流程进行归档？')
@@ -642,7 +649,7 @@ class ProcessPanelClass {
 					}
 					break
 				case 'delete':
-					if (link.ParentLid>0 || mode.LinkList.length > 1) {
+					if (link.ParentLid > 0 || mode.LinkList.length > 1) {
 						Common.Warning(e, function () {
 							WSConn.sendMsg(C2L.C2L_PROCESS_LINK_DELETE, { 'Lid': link.Lid })
 						}, '删除后不可恢复，确认删除吗？')

@@ -40,6 +40,10 @@ enum WorkStatusField {
     WAIT = 2,
     REST = 4,
     OPTIMIZE = 5,
+    COMPLETE = 6,
+    SUBMIT = 7,
+    MODIFY = 8,
+    PASS = 9,
 }
 //mode/link  0:正常  1:归档
 enum ModeStatusField {

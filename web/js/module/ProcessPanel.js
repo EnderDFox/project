@@ -507,7 +507,7 @@ var ProcessPanelClass = /** @class */ (function () {
             //$('#menuDay').find(".extends,[type=work],[type=finish],[type=delay],[type=wait],[type=rest],[type=optimize],[type=edit],[type=score],[type=clear]").hide()
             $('#menuDay .row[type!=upload]').hide();
         }
-        //
+        //delegate('.row[type!="status"],.row[type!="supervisor"]' 无效, 只好仅用一个了
         $('#menuDay').css({ left: left, top: top }).unbind().delegate('.row[type!="status"]', 'click', function (e) {
             var type = $(e.currentTarget).attr('type');
             switch (type) {
@@ -517,6 +517,10 @@ var ProcessPanelClass = /** @class */ (function () {
                 case 'wait':
                 case 'rest':
                 case 'optimize':
+                case 'complete':
+                case 'submit':
+                case 'modify':
+                case 'pass':
                     var status = $(e.currentTarget).attr('status');
                     WSConn.sendMsg(C2L.C2L_PROCESS_WORK_STATUS, { 'Lid': grid.lid, 'Wid': grid.wid, 'Date': grid.s, 'Status': parseInt(status) });
                     break;
@@ -538,6 +542,9 @@ var ProcessPanelClass = /** @class */ (function () {
                         WSConn.sendMsg(C2L.C2L_PROCESS_WORK_CLEAR, { 'Lid': grid.lid, 'Wid': grid.wid, 'Date': grid.s });
                     }
                     break;
+                default:
+                    console.log("[warn]", "click unknown type:", type);
+                    return;
             }
             _this.HideMenu();
         }).show().adjust(-5);

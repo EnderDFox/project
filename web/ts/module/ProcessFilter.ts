@@ -253,6 +253,10 @@ class ProcessFilterClass {
                     { Value: WorkStatusField.WAIT, Label: '等待', Checked: false, Title: '', },
                     { Value: WorkStatusField.REST, Label: '休假', Checked: false, Title: '', },
                     { Value: WorkStatusField.OPTIMIZE, Label: '优化', Checked: false, Title: '', },
+                    { Value: WorkStatusField.COMPLETE, Label: '资源完成', Checked: false, Title: '', },
+                    { Value: WorkStatusField.SUBMIT, Label: '提交', Checked: false, Title: '', },
+                    { Value: WorkStatusField.MODIFY, Label: '修改', Checked: false, Title: '', },
+                    { Value: WorkStatusField.PASS, Label: '通过', Checked: false, Title: '', },
                 ]
             }
             data.workFile = {

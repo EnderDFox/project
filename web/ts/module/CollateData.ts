@@ -21,7 +21,18 @@ class CollateDataClass {
 	 */
 	DateExtraMap: { [key: number]: { [key: number]: ExtraSingle[] } } = {};
 	//状态描述
-	StatusList = [{ 'Info': '持续', 'Tag': '' }, { 'Info': '延期', 'Tag': '延' }, { 'Info': '等待', 'Tag': '待' }, { 'Info': '完成', 'Tag': '完' }, { 'Info': '休息', 'Tag': '休' }, { 'Info': '优化', 'Tag': '优' }]
+	StatusList = [
+		{ 'Info': '持续', 'Tag': '' },
+		{ 'Info': '延期', 'Tag': '延' },
+		{ 'Info': '等待', 'Tag': '待' },
+		{ 'Info': '完成', 'Tag': '完' },
+		{ 'Info': '休息', 'Tag': '休' },
+		{ 'Info': '优化', 'Tag': '优' },
+		{ 'Info': '资源完成', 'Tag': '资' },
+		{ 'Info': '提交', 'Tag': '提' },
+		{ 'Info': '修改', 'Tag': '修' },
+		{ 'Info': '通过', 'Tag': '过' },
+	]
 	//检查描述
 	InspectList = ['未知', '完成', '持续', '未完成']
 	//数据初始化
@@ -45,10 +56,10 @@ class CollateDataClass {
 		})
 		//子流程
 		$.each(data.LinkList, (k, link: LinkSingle) => {
-			if(link.ParentLid){
+			if (link.ParentLid) {
 				var parentLink = this.LinkMap[link.ParentLid]
-				if(parentLink){
-					if(!parentLink.Children){
+				if (parentLink) {
+					if (!parentLink.Children) {
 						parentLink.Children = []
 					}
 					parentLink.Children.push(link)
@@ -65,10 +76,10 @@ class CollateDataClass {
 			if (!this.DateUserMap[v.Date]) {
 				this.DateUserMap[v.Date] = {}
 			}
-			var link:LinkSingle = this.LinkMap[v.Lid]
-			if(!link){
-				console.log("[error]","Can not find link",v.Lid,":[v.Lid]")
-			}else{
+			var link: LinkSingle = this.LinkMap[v.Lid]
+			if (!link) {
+				console.log("[error]", "Can not find link", v.Lid, ":[v.Lid]")
+			} else {
 				if (!this.DateUserMap[v.Date][link.Uid]) {
 					this.DateUserMap[v.Date][link.Uid] = []
 				}

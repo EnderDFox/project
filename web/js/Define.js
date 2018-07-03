@@ -33,6 +33,10 @@ var WorkStatusField;
     WorkStatusField[WorkStatusField["WAIT"] = 2] = "WAIT";
     WorkStatusField[WorkStatusField["REST"] = 4] = "REST";
     WorkStatusField[WorkStatusField["OPTIMIZE"] = 5] = "OPTIMIZE";
+    WorkStatusField[WorkStatusField["COMPLETE"] = 6] = "COMPLETE";
+    WorkStatusField[WorkStatusField["SUBMIT"] = 7] = "SUBMIT";
+    WorkStatusField[WorkStatusField["MODIFY"] = 8] = "MODIFY";
+    WorkStatusField[WorkStatusField["PASS"] = 9] = "PASS";
 })(WorkStatusField || (WorkStatusField = {}));
 //mode/link  0:正常  1:归档
 var ModeStatusField;

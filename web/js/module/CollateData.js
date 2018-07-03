@@ -22,7 +22,18 @@ var CollateDataClass = /** @class */ (function () {
          */
         this.DateExtraMap = {};
         //状态描述
-        this.StatusList = [{ 'Info': '持续', 'Tag': '' }, { 'Info': '延期', 'Tag': '延' }, { 'Info': '等待', 'Tag': '待' }, { 'Info': '完成', 'Tag': '完' }, { 'Info': '休息', 'Tag': '休' }, { 'Info': '优化', 'Tag': '优' }];
+        this.StatusList = [
+            { 'Info': '持续', 'Tag': '' },
+            { 'Info': '延期', 'Tag': '延' },
+            { 'Info': '等待', 'Tag': '待' },
+            { 'Info': '完成', 'Tag': '完' },
+            { 'Info': '休息', 'Tag': '休' },
+            { 'Info': '优化', 'Tag': '优' },
+            { 'Info': '资源完成', 'Tag': '资' },
+            { 'Info': '提交', 'Tag': '提' },
+            { 'Info': '修改', 'Tag': '修' },
+            { 'Info': '通过', 'Tag': '过' },
+        ];
         //检查描述
         this.InspectList = ['未知', '完成', '持续', '未完成'];
     }

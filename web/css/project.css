@@ -80,6 +80,10 @@
 .process .ss_3{background:#92d050;}			/*3完成*/
 .process .ss_4{background:#92cddc;}			/*4休息*/
 .process .ss_5{background:#ffc7ce;}			/*5优化*/
+.process .ss_6{background:#ffc000;}			/*6资源完成*/
+.process .ss_7{background:#fabf8f;}			/*7提交*/
+.process .ss_8{background:#ffc7ce;}			/*8修改*/
+.process .ss_9{background:#92d050;}			/*9通过*/
 .process .weekend{background:#d9d9d9;}		/*节假日*/
 
 /*工作Tips*/
