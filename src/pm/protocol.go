@@ -16,6 +16,11 @@ type L2C_Message struct {
 
 //=======================业务数据结构=======================
 
+type ProjectSingle struct {
+	Pid  uint64
+	Name string
+}
+
 type UserSingle struct {
 	Uid    uint64
 	Did    uint64
@@ -93,11 +98,6 @@ type ProfileSingle struct {
 	MaxNum  uint64
 	Tag     string
 	Vid     uint64
-}
-
-type ProjectSingle struct {
-	Pid  uint64
-	Name string
 }
 
 type ExtraSingle struct {

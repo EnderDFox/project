@@ -58,7 +58,6 @@ const (
 
 type L2C_SessionLogin struct {
 	Uid         uint64
-	Pid         uint64
 	Gid         uint64
 	Did         uint64
 	Name        string

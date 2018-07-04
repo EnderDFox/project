@@ -36,7 +36,9 @@ func NewUser() *User {
 	instance.Init()
 	return instance
 }
-
+func (this *User) GetPid() uint64 {
+	return this.Pid
+}
 func (this *User) GetUid() uint64 {
 	return this.Uid
 }
@@ -141,7 +143,6 @@ func (this *User) NtfUser() bool {
 	IsWrite := this.Gid == 1
 	data := &L2C_SessionLogin{
 		Uid:         this.Uid,
-		Pid:         this.Pid,
 		Gid:         this.Gid,
 		Did:         this.Did,
 		Name:        this.Name,

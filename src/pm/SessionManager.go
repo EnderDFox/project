@@ -27,6 +27,6 @@ func (this *C2L_M_SESSION_LOGIN) execute(client *websocket.Conn, msg *Message) b
 		log.Println("C2L_M_SESSION_LOGIN err:", err)
 		return false
 	}
-	session.Login(client, param.Account, param.Verify)
+	session.Login(client, param.Account, param.Verify, param.Pid)
 	return true
 }

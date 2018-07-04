@@ -175,7 +175,7 @@ func (this *Process) GetPidSortByMid(mid uint64) (uint64, uint32) {
 		}
 		return pid, sort
 	} else {
-		return COMMON_PID, 0
+		return this.owner.GetPid(), 0
 	}
 }
 
@@ -425,9 +425,9 @@ func (this *Process) GetMidSortByPrevLidAndParentLid(prevLid uint64, parentLid u
 	var sort uint32
 	var _parentLid uint64
 	stmt.QueryRow(lid).Scan(&mid, &sort, &_parentLid)
-	if prevLid == 0 && parentLid > 0 { //增加一个新的子流程
+	if prevLid == 0 && parentLid > 0 { //在子流程最后增加一个新的子流程
 		_parentLid = parentLid
-		//获取子流程里最大sort值
+		//获取子流程里最大sort值, 父流程都是插入,没有在最后补充一个的情况,因此不需要max(sort)
 		// SELECT IFNULL(max(sort),0) FROM pm.pm_link WHERE is_del=0 AND parent_lid=4877
 		stmt, err := db.GetDb().Prepare(`SELECT IFNULL(max(sort),0) FROM ` + config.Pm + `.pm_link WHERE is_del=0 AND parent_lid=?`)
 		defer stmt.Close()
@@ -542,10 +542,10 @@ func (this *Process) WorkClear(lid uint64, date string) bool {
 
 //获取模块列表
 func (this *Process) GetModeList() []*ModeSingle {
-	stmt, err := db.GetDb().Prepare(`SELECT mid,vid,name,color,did,status,sort FROM ` + config.Pm + `.pm_mode WHERE is_del=0 ORDER BY sort`)
+	stmt, err := db.GetDb().Prepare(`SELECT mid,vid,name,color,did,status,sort FROM ` + config.Pm + `.pm_mode WHERE is_del=0 AND pid=? ORDER BY sort`)
 	defer stmt.Close()
 	db.CheckErr(err)
-	rows, err := stmt.Query()
+	rows, err := stmt.Query(this.owner.GetPid())
 	defer rows.Close()
 	db.CheckErr(err)
 	var modeList []*ModeSingle
@@ -576,7 +576,7 @@ func (this *Process) GetLinkList() []*LinkSingle {
 
 //获取工作列表
 func (this *Process) GetWorkList(BeginDate, EndDate string) []*WorkSingle {
-	stmt, err := db.GetDb().Prepare(`SELECT wid,lid,date,status,tips,min_num,max_num,tag FROM ` + config.Pm + `.pm_work WHERE date >= ? AND date <= ?`)
+	stmt, err := db.GetDb().Prepare(`SELECT wid,lid,date,status,tips,min_num,max_num,tag FROM ` + config.Pm + `.pm_work WHERE date >= ? AND date <= ? `)
 	defer stmt.Close()
 	db.CheckErr(err)
 	rows, err := stmt.Query(BeginDate, EndDate)
@@ -594,10 +594,10 @@ func (this *Process) GetWorkList(BeginDate, EndDate string) []*WorkSingle {
 
 //所属项目
 func (this *Process) GetProject() *ProjectSingle {
-	stmt, err := db.GetDb().Prepare(`SELECT pid,name,mode_sort FROM ` + config.Pm + `.pm_project WHERE pid = ?`)
+	stmt, err := db.GetDb().Prepare(`SELECT pid,name FROM ` + config.Pm + `.pm_project WHERE pid = ?`)
 	defer stmt.Close()
 	db.CheckErr(err)
-	row := stmt.QueryRow(COMMON_PID)
+	row := stmt.QueryRow(this.owner.GetPid())
 	project := &ProjectSingle{}
 	row.Scan(&project.Pid, &project.Name)
 	return project

@@ -9,7 +9,7 @@ class NoticeManagerClass {
         NoticeData.Init(data)
         //此时 process中数据还没过来呢, 所以要等
         var checkInit = ()=>{
-            if(ProcessData.IsInit){
+            if(ProcessData.IsFirst){
                 NoticePanel.CreateNotice()
                 NoticePanel.BindActions()
             }else{

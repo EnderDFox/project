@@ -7,6 +7,10 @@ type uint32 = number
 type uint64 = number
 type char = string
 
+//项目id  pm_project.pid
+enum PidFeild {
+    AGAME = 1,
+}
 //# 数据库中的字段
 /**db.manager.department.did*/
 enum DidField {
@@ -195,7 +199,21 @@ interface ScoreNoticeSingle {
     Mname: string
     Vid: number
 }
-
+interface L2C_SessionLogin {
+    Uid?: uint64
+    Gid?: uint64
+    Did?: uint64
+    Name?: string
+    Vip?: uint64
+    Is_del?: uint64
+    Rtx_name?: string
+    Rtx_account?: string
+    Rtx_group?: string
+    Reg_time?: uint64
+    Login_count?: uint64
+    Login_time?: uint64
+    IsWrite?: boolean
+}
 interface L2C_ProfileView {
     ProfileList: ProfileSingle[]
     TagsList: TagSingle[]

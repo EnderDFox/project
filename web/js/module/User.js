@@ -19,7 +19,6 @@ var UserClass = /** @class */ (function () {
     }
     UserClass.prototype.LoadData = function (data) {
         this.Uid = data.Uid;
-        this.Pid = data.Pid;
         this.Gid = data.Gid;
         this.Did = data.Did;
         this.Name = data.Name;
@@ -41,7 +40,7 @@ var UserClass = /** @class */ (function () {
     UserClass.prototype.Login = function () {
         var Account = $.cookie('get', { name: 'Account' });
         var Verify = $.cookie('get', { name: 'Verify' });
-        WSConn.sendMsg(C2L.C2L_SESSION_LOGIN, { 'Account': Account, 'Verify': Verify });
+        WSConn.sendMsg(C2L.C2L_SESSION_LOGIN, { 'Account': Account, 'Verify': Verify, 'Pid': this.Pid });
     };
     //登陆错误
     UserClass.prototype.LoginError = function (data) {

@@ -41,11 +41,12 @@ func (this *Session) GetUsers() map[uint64]*User {
 }
 
 //登陆
-func (this *Session) Login(client *websocket.Conn, account, verify string) bool {
+func (this *Session) Login(client *websocket.Conn, account, verify string, pid uint64) bool {
 	has := md5.Sum([]byte(this.Key + account))
 	md5str := fmt.Sprintf("%x", has)
-	log.Println(md5str, ":[md5str]", verify, ":[verify]", this.Key, ":[this.Key]", account, ":[account]")
+	log.Println(md5str, ":[md5str]", verify, ":[verify]", this.Key, ":[this.Key]", account, ":[account]", pid, ":[pid]")
 	if md5str != verify {
+		log.Println(account, " login error")
 		msg := &L2C_Message{
 			Cid:  L2C_SESSION_LOGIN_ERROR,
 			Uid:  0,
@@ -53,9 +54,22 @@ func (this *Session) Login(client *websocket.Conn, account, verify string) bool 
 			Ret:  COMMON_OK,
 		}
 		client.WriteJSON(msg)
-		log.Println(account, " is login error")
 		return false
 	}
+	//
+	projectSingle := common.GetProjectById(pid)
+	if projectSingle == nil {
+		log.Println(account, " no pid:", pid)
+		msg := &L2C_Message{
+			Cid:  L2C_SESSION_LOGIN_ERROR,
+			Uid:  0,
+			Data: &L2C_LoginError{},
+			Ret:  COMMON_OK,
+		}
+		client.WriteJSON(msg)
+		return false
+	}
+	//
 	stmt, err := db.GetDb().Prepare(`SELECT uid FROM ` + config.Mg + `.mag_user WHERE rtx_account = ?`)
 	defer stmt.Close()
 	db.CheckErr(err)
@@ -78,6 +92,7 @@ func (this *Session) Login(client *websocket.Conn, account, verify string) bool 
 	}
 	row = stmt.QueryRow(uid)
 	row.Scan(&user.Uid, &user.Pid, &user.Gid, &user.Did, &user.Name, &user.Vip, &user.IsDel, &user.IsHide, &user.RtxName, &user.RtxAccount, &user.RtxGroup, &user.RegTime, &user.LoginCount, &user.LoginTime)
+	user.Pid = pid
 	this.AddUser(user)
 	user.Login(client)
 	return true

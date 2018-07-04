@@ -8,8 +8,7 @@ import (
 )
 
 const (
-	COMMON_OK  = 1
-	COMMON_PID = 1
+	COMMON_OK = 1
 )
 
 type Common struct {
@@ -202,6 +201,19 @@ func (this *Common) TplUpdateSort2(tmid uint64) {
 	db.CheckErr(err)
 	_, err = stmt.Exec()
 	db.CheckErr(err)
+}
+
+func (this *Common) GetProjectById(pid uint64) *ProjectSingle {
+	stmt, err := db.GetDb().Prepare(`SELECT name FROM ` + config.Pm + `.pm_project WHERE is_del=0 AND pid = ?`)
+	if err != nil {
+		return nil
+	}
+	row := stmt.QueryRow(pid)
+	var single = &ProjectSingle{
+		Pid: pid,
+	}
+	row.Scan(&single.Name)
+	return single
 }
 
 //===
