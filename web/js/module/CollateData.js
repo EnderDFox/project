@@ -81,7 +81,7 @@ var CollateDataClass = /** @class */ (function () {
             }
             var link = _this.LinkMap[v.Lid];
             if (!link) {
-                console.log("[error]", "Can not find link", v.Lid, ":[v.Lid]");
+                // console.log("[error]", "Can not find link", v.Lid, ":[v.Lid]")
             }
             else {
                 if (!_this.DateUserMap[v.Date][link.Uid]) {

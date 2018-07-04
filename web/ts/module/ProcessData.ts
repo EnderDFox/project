@@ -100,15 +100,19 @@ class ProcessDataClass {
 			if (this.CheckStringArray(link.Name.toLowerCase(), ProcessFilter.Pack.LinkNameLower) == false) {
 				return true
 			}
+			var user:UserSingle = Data.GetUser(link.Uid)
+			if(link.Uid>0 && user==null){
+				console.log("[warn]","link.uid -> user is null",link)
+			}
 			//流程负责人查询
-			if (this.CheckStringArray(Data.GetUser(link.Uid).Name.toString(), ProcessFilter.Pack.LinkUserNameLower) == false) {
+			if (link.Uid>0 && this.CheckStringArray(Data.GetUser(link.Uid).Name.toString(), ProcessFilter.Pack.LinkUserNameLower) == false) {
 				return true
 			}
 			//流程是否归档
 			if (this.CheckNumberArray(link.Status, ProcessFilter.Pack.LinkStatus) == false) {
 				return true
 			}
-			if (this.CheckNumberArray(Data.GetUser(link.Uid).Did, ProcessFilter.Pack.LinkUserDid) == false) {
+			if (link.Uid>0 && this.CheckNumberArray(Data.GetUser(link.Uid).Did, ProcessFilter.Pack.LinkUserDid) == false) {
 				return true
 			}
 			if (ProjectNav.FilterDid == DidField.SUPERVISOR_ART) {

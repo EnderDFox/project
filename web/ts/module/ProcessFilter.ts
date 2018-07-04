@@ -295,7 +295,6 @@ class ProcessFilterClass {
                     },
                     //数据框变化(暂时仅用于负责人)
                     onInputChange: (e: Event, item: IFilterItemTextField) => {
-                        console.log("[info]", e.type, ":[e.type]")
                         switch (item.InputName) {
                             case this.VueFilter.linkUserName.InputName:
                                 var dom = e.currentTarget as HTMLInputElement
@@ -325,18 +324,37 @@ class ProcessFilterClass {
                                 }
                                 var word = wordArr.join('')
                                 //### menu data
-                                if (!word) {
-                                    Common.HidePullDownMenu()
-                                    return
-                                }
                                 var itemList: IPullDownMenuItem[] = []
-                                var len = Data.UserList.length
-                                for (var i = 0; i < len; i++) {
-                                    var user: UserSingle = Data.UserList[i]
-                                    if (user.Name.indexOf(word) == -1) {
-                                        continue
+                                if (!word) {//没输入关键字时,显示同一个部门
+                                    // Common.HidePullDownMenu()
+                                    // return
+                                    for (var i = 0; i < Data.UserList.length; i++) {
+                                        var _user: UserSingle = Data.UserList[i]
+                                        if (_user.Pid != User.Pid) {
+                                            continue
+                                        }
+                                        // if (_user.Did != User.Did) {
+                                        // continue
+                                        // }
+                                        itemList.push({ Key: _user.Uid, Label: _user.Name })
+                                        if (itemList.length >= 10) {
+                                            break
+                                        }
                                     }
-                                    itemList.push({ Key: user.Uid, Label: user.Name })
+                                } else {
+                                    for (var i = 0; i < Data.UserList.length; i++) {
+                                        var _user: UserSingle = Data.UserList[i]
+                                        if (_user.Pid != User.Pid) {
+                                            continue
+                                        }
+                                        if (_user.Name.indexOf(word) == -1) {
+                                            continue
+                                        }
+                                        itemList.push({ Key: _user.Uid, Label: _user.Name })
+                                        if (itemList.length >= 10) {
+                                            break
+                                        }
+                                    }
                                 }
                                 //### show menu
                                 var left: number

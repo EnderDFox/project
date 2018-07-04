@@ -162,7 +162,7 @@ func (this *User) NtfUser() bool {
 
 //同步用户列表
 func (this *User) NtfUserList() bool {
-	stmt, err := db.GetDb().Prepare(`SELECT uid,did,name,is_del,is_hide FROM ` + config.Mg + `.mag_user ORDER BY sort ASC`)
+	stmt, err := db.GetDb().Prepare(`SELECT uid,did,pid,name,is_del,is_hide FROM ` + config.Mg + `.mag_user ORDER BY sort ASC`)
 	defer stmt.Close()
 	if err != nil {
 		return false
@@ -175,7 +175,7 @@ func (this *User) NtfUserList() bool {
 	data := &L2C_UserList{}
 	for rows.Next() {
 		single := &UserSingle{}
-		rows.Scan(&single.Uid, &single.Did, &single.Name, &single.IsDel, &single.IsHide)
+		rows.Scan(&single.Uid, &single.Did, &single.Pid, &single.Name, &single.IsDel, &single.IsHide)
 		data.List = append(data.List, single)
 	}
 	this.SendTo(L2C_USER_LIST, data)

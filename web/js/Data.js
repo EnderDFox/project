@@ -65,11 +65,14 @@ var DataClass = /** @class */ (function () {
         }
         //v:UserSingle
         $.each(this.UserList, function (k, v) {
-            if (v.Did == dpt.Did) {
-                _this.DepartmentUserMap[RootId][v.Uid] = v;
+            if (v.Pid != User.Pid) {
+                return true;
             }
             if (v.IsDel == 1) {
                 return true;
+            }
+            if (v.Did == dpt.Did) {
+                _this.DepartmentUserMap[RootId][v.Uid] = v;
             }
             if (v.Did == dpt.Did) {
                 user.push(v);

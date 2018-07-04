@@ -60,11 +60,14 @@ class DataClass {
         }
         //v:UserSingle
         $.each(this.UserList, (k, v: UserSingle) => {
-            if (v.Did == dpt.Did) {
-                this.DepartmentUserMap[RootId][v.Uid] = v
+            if (v.Pid != User.Pid) {
+                return true
             }
             if (v.IsDel == 1) {
                 return true
+            }
+            if (v.Did == dpt.Did) {
+                this.DepartmentUserMap[RootId][v.Uid] = v
             }
             if (v.Did == dpt.Did) {
                 user.push(v)

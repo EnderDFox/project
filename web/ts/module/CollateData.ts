@@ -78,7 +78,7 @@ class CollateDataClass {
 			}
 			var link: LinkSingle = this.LinkMap[v.Lid]
 			if (!link) {
-				console.log("[error]", "Can not find link", v.Lid, ":[v.Lid]")
+				// console.log("[error]", "Can not find link", v.Lid, ":[v.Lid]")
 			} else {
 				if (!this.DateUserMap[v.Date][link.Uid]) {
 					this.DateUserMap[v.Date][link.Uid] = []

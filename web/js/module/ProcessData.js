@@ -89,15 +89,19 @@ var ProcessDataClass = /** @class */ (function () {
             if (_this.CheckStringArray(link.Name.toLowerCase(), ProcessFilter.Pack.LinkNameLower) == false) {
                 return true;
             }
+            var user = Data.GetUser(link.Uid);
+            if (link.Uid > 0 && user == null) {
+                console.log("[warn]", "link.uid -> user is null", link);
+            }
             //流程负责人查询
-            if (_this.CheckStringArray(Data.GetUser(link.Uid).Name.toString(), ProcessFilter.Pack.LinkUserNameLower) == false) {
+            if (link.Uid > 0 && _this.CheckStringArray(Data.GetUser(link.Uid).Name.toString(), ProcessFilter.Pack.LinkUserNameLower) == false) {
                 return true;
             }
             //流程是否归档
             if (_this.CheckNumberArray(link.Status, ProcessFilter.Pack.LinkStatus) == false) {
                 return true;
             }
-            if (_this.CheckNumberArray(Data.GetUser(link.Uid).Did, ProcessFilter.Pack.LinkUserDid) == false) {
+            if (link.Uid > 0 && _this.CheckNumberArray(Data.GetUser(link.Uid).Did, ProcessFilter.Pack.LinkUserDid) == false) {
                 return true;
             }
             if (ProjectNav.FilterDid == DidField.SUPERVISOR_ART) {

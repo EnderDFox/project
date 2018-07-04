@@ -45,6 +45,9 @@ class CollatePanelClass {
 		var html = ''
 		html += '<tr class="title">'
 		$.each(Data.UserList, (k, user: UserSingle) => {
+			if(user.Pid!=User.Pid){
+				return true
+			}
 			if (user.Did == 0) {
 				return true
 			}
@@ -125,6 +128,9 @@ class CollatePanelClass {
 			//
 			var cols = 1
 			$.each(Data.UserList, (k, user: UserSingle) => {
+				if(user.Pid!=User.Pid){
+					return
+				}
 				if (user.Did == 0) {
 					return
 				}
@@ -178,7 +184,7 @@ class CollatePanelClass {
 		html += '<li wid="' + work.Wid + '">'
 		var mode = CollateData.ModeMap[link.Mid]
 		if(!mode){
-			console.log("[debug]","Can not find mode",link.Mid,":[link.Mid]",link,":[link]")
+			// console.log("[debug]","Can not find mode",link.Mid,":[link.Mid]",link,":[link]")
 			return ''
 		}
 		var linkFullName = VersionManager.GetVersionVer(mode.Vid) + mode.Name

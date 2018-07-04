@@ -15,7 +15,7 @@ class UserClass {
 	Login_time: number = 0
 	/**是否有管理权限 */
 	IsWrite: boolean = false
-	LoadData(data: any) {
+	LoadData(data: L2C_SessionLogin) {
 		this.Uid = data.Uid
 		this.Gid = data.Gid
 		this.Did = data.Did

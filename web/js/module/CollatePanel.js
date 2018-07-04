@@ -46,6 +46,9 @@ var CollatePanelClass = /** @class */ (function () {
         var html = '';
         html += '<tr class="title">';
         $.each(Data.UserList, function (k, user) {
+            if (user.Pid != User.Pid) {
+                return true;
+            }
             if (user.Did == 0) {
                 return true;
             }
@@ -128,6 +131,9 @@ var CollatePanelClass = /** @class */ (function () {
             //
             var cols = 1;
             $.each(Data.UserList, function (k, user) {
+                if (user.Pid != User.Pid) {
+                    return;
+                }
                 if (user.Did == 0) {
                     return;
                 }
@@ -181,7 +187,7 @@ var CollatePanelClass = /** @class */ (function () {
         html += '<li wid="' + work.Wid + '">';
         var mode = CollateData.ModeMap[link.Mid];
         if (!mode) {
-            console.log("[debug]", "Can not find mode", link.Mid, ":[link.Mid]", link, ":[link]");
+            // console.log("[debug]","Can not find mode",link.Mid,":[link.Mid]",link,":[link]")
             return '';
         }
         var linkFullName = VersionManager.GetVersionVer(mode.Vid) + mode.Name;

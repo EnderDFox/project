@@ -78,6 +78,7 @@ interface IXY {
 interface UserSingle {
     Uid?: number
     Did?: DidField
+    Pid?: PidFeild
     Name?: string
     IsDel?: number
     IsHide?: number

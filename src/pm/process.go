@@ -212,7 +212,7 @@ func (this *Process) ModeAdd(prevMid uint64, name string, vid uint64, did uint64
 			linkSingle := this.LinkAddOne(uint64(newMid))
 			linkList = append(linkList, linkSingle)
 		} else {
-			didToUidMap := *timer.getDidToUidMap()
+			didToUidMap := *timer.getDidUidMapByPid(this.owner.GetPid())
 			for i, tplLink := range tplLinkList {
 				//stmt, err = db.GetDb().Prepare(`INSERT INTO ` + config.Pm + `.pm_link (mid,uid,add_uid,create_time,name) SELECT ?,?,?,?,name FROM pm.pm_template_link WHERE tlid = ?`)
 				//res, err = stmt.Exec(newMid, this.owner.GetUid(), this.owner.GetUid(), time.Now().Unix(),tlid)

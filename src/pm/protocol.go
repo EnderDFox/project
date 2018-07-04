@@ -24,6 +24,7 @@ type ProjectSingle struct {
 type UserSingle struct {
 	Uid    uint64
 	Did    uint64
+	Pid    uint64
 	Name   string
 	IsDel  uint64
 	IsHide uint64
