@@ -6,7 +6,10 @@
                     <td colspan="3" class="tools">功能列表</td>
                 </tr>
                 <tr>
-                    <td class="func"><button class="addNew" title="新增功能">+</button>功能</td>
+                    <td class="func">
+                        <button class="addNew" title="添加新功能">+</button>
+                        功能
+                    </td>
                     <td class="link">流程</td>
                     <td class="duty">负责人</td>
                 </tr>
@@ -30,7 +33,8 @@
                                     <!-- 有子流程 -->
                                     <table v-if="link.Children && link.Children.length>0" class="linkChildTable">
                                         <tr v-for="linkChild,index in link.Children">
-                                            <td v-if="index==0" :rowspan="link.Children.length" class="linkParent" :class="['bg_'+link.Color]" type="link" v-html="GetLinkName(link)" :lid="link.Lid" @contextmenu="onLinkName($event,mode,link)">
+                                            <td v-if="index==0" :rowspan="link.Children.length" class="linkParent" :class="['bg_'+link.Color]" type="link" v-html="GetLinkName(link)"
+                                                :lid="link.Lid" @contextmenu="onLinkName($event,mode,link)">
                                             </td>
                                             <td class="linkChild" :class="['bg_'+linkChild.Color]" type="link" v-html="GetLinkName(linkChild)" :lid="linkChild.Lid" @contextmenu="onLinkName($event,mode,linkChild,true)">
                                             </td>
