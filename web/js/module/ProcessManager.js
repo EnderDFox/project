@@ -450,7 +450,7 @@ var ProcessManagerClass = /** @class */ (function () {
             if (data.DateLine != v.s) {
                 return true;
             }
-            var pub = $('#content .title td:eq(' + (k + 3) + ')');
+            var pub = $('#content .title td:eq(' + (k) + ')');
             pub.find('.stroke').remove();
             pub.append('<div class="stroke sk_' + data.Genre + '" date_line="' + data.DateLine + '"></div>');
             return false;
@@ -466,7 +466,7 @@ var ProcessManagerClass = /** @class */ (function () {
             if (dateLine != v.s) {
                 return true;
             }
-            $('#content .title td:eq(' + (k + 3) + ')').find('.stroke').remove();
+            $('#content .title td:eq(' + (k) + ')').find('.stroke').remove();
             return false;
         });
         //数据变化
