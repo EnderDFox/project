@@ -1,14 +1,17 @@
 //进度数据
 var ProcessDataClass = /** @class */ (function () {
     function ProcessDataClass() {
-        this.IsInit = false;
+        this.IsFirst = false;
     }
     //数据初始化
     ProcessDataClass.prototype.Init = function (data) {
         var _this = this;
-        this.IsInit = true;
         //初始化
         this.Project = data.Project;
+        if (this.IsFirst == false) {
+            document.title = document.title + ("- " + this.Project.Name);
+            this.IsFirst = true;
+        }
         this.Project.ModeList = [];
         this.WorkMap = {};
         this.LinkMap = {};

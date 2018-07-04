@@ -46,28 +46,28 @@ func (this *Collate) GetLinkList(lidMap, midMap map[uint64]uint64) []*LinkSingle
 	}
 	parentLidMap := make(map[uint64]uint64)
 	var linkList []*LinkSingle
-	linkList = this.GetLinkList2(lidMap,midMap)
+	linkList = this.GetLinkList2(lidMap, midMap)
 	//把parent_lid拿出来
-	for _,link := range linkList{
-		if(link.ParentLid>0){
+	for _, link := range linkList {
+		if link.ParentLid > 0 {
 			_, okP := parentLidMap[link.ParentLid]
-			if(okP==false){
+			if okP == false {
 				_, okC := lidMap[link.ParentLid]
-				if(okC==false){
+				if okC == false {
 					parentLidMap[link.ParentLid] = link.ParentLid
 				}
 			}
-		} 
+		}
 	}
 	var parentLinkList []*LinkSingle
-	parentLinkList = this.GetLinkList2(parentLidMap,midMap)
-	for _,parentLink := range parentLinkList{
+	parentLinkList = this.GetLinkList2(parentLidMap, midMap)
+	for _, parentLink := range parentLinkList {
 		linkList = append(linkList, parentLink)
 	}
 	return linkList
 }
 
-func (this *Collate) GetLinkList2(lidMap, midMap map[uint64]uint64) []*LinkSingle{
+func (this *Collate) GetLinkList2(lidMap, midMap map[uint64]uint64) []*LinkSingle {
 	if len(lidMap) == 0 {
 		return nil
 	}
@@ -100,10 +100,10 @@ func (this *Collate) GetModeList(midMap map[uint64]uint64) []*ModeSingle {
 	for _, mid := range midMap {
 		midList = append(midList, strconv.Itoa(int(mid)))
 	}
-	stmt, err := db.GetDb().Prepare(`SELECT mid,vid,name FROM ` + config.Pm + `.pm_mode WHERE mid IN (` + strings.Join(midList, ",") + `)`)
+	stmt, err := db.GetDb().Prepare(`SELECT mid,vid,name FROM ` + config.Pm + `.pm_mode WHERE pid=?  AND mid IN (` + strings.Join(midList, ",") + `)`)
 	defer stmt.Close()
 	db.CheckErr(err)
-	rows, err := stmt.Query()
+	rows, err := stmt.Query(this.owner.GetPid())
 	defer rows.Close()
 	db.CheckErr(err)
 	var modeList []*ModeSingle

@@ -21,7 +21,7 @@ func (this *Version) VersionList() []*VersionSingle {
 	stmt, err := db.GetDb().Prepare(`SELECT vid,ver,name FROM ` + config.Pm + `.pm_version WHERE pid = ? AND is_del=0 ORDER BY sort DESC, vid DESC`)
 	defer stmt.Close()
 	db.CheckErr(err)
-	rows, err := stmt.Query(COMMON_PID)
+	rows, err := stmt.Query(this.owner.GetPid())
 	defer rows.Close()
 	db.CheckErr(err)
 	var versionList []*VersionSingle
@@ -38,7 +38,7 @@ func (this *Version) PublishList(vid uint64) []*PublishSingle {
 	stmt, err := db.GetDb().Prepare(`SELECT genre,date_line FROM ` + config.Pm + `.pm_publish WHERE pid = ? AND vid = ? ORDER BY genre`)
 	defer stmt.Close()
 	db.CheckErr(err)
-	rows, err := stmt.Query(COMMON_PID, vid)
+	rows, err := stmt.Query(this.owner.GetPid(), vid)
 	defer rows.Close()
 	db.CheckErr(err)
 	var publishList []*PublishSingle
@@ -53,12 +53,12 @@ func (this *Version) PublishList(vid uint64) []*PublishSingle {
 func (this *Version) VersionAdd(ver string, name string) bool {
 	stmt, err := db.GetDb().Prepare(`INSERT INTO ` + config.Pm + `.pm_version (pid,ver,name,add_uid,create_time,sort) VALUES (?,?,?,?,?,(
 		(SELECT IFNULL(
-			(SELECT ms FROM(SELECT max(sort)+1 AS ms FROM ` + config.Pm + `.pm_version) m)
+			(SELECT ms FROM(SELECT max(sort)+1 AS ms FROM ` + config.Pm + `.pm_version WHERE is_del=0 AND pid=?) m)
 		,1))
 		))`)
 	defer stmt.Close()
 	db.CheckErr(err)
-	res, err := stmt.Exec(COMMON_PID, ver, name, this.owner.GetUid(), time.Now().Unix())
+	res, err := stmt.Exec(this.owner.GetPid(), ver, name, this.owner.GetUid(), time.Now().Unix(), this.owner.GetPid())
 	db.CheckErr(err)
 	vid, err := res.LastInsertId()
 	db.CheckErr(err)
@@ -126,7 +126,7 @@ func (this *Version) VersionChangePublish(vid uint64, genre uint32, dateLine str
 		stmt, err := db.GetDb().Prepare(`DELETE FROM ` + config.Pm + `.pm_publish WHERE pid=? AND vid=? AND genre=?`)
 		defer stmt.Close()
 		db.CheckErr(err)
-		res, err := stmt.Exec(COMMON_PID, vid, genre)
+		res, err := stmt.Exec(this.owner.GetPid(), vid, genre)
 		db.CheckErr(err)
 		num, err := res.RowsAffected()
 		db.CheckErr(err)
@@ -138,7 +138,7 @@ func (this *Version) VersionChangePublish(vid uint64, genre uint32, dateLine str
 		stmt, err := db.GetDb().Prepare(`REPLACE INTO ` + config.Pm + `.pm_publish (pid, vid, genre, date_line, create_time) VALUES (?,?,?,?,?)`)
 		defer stmt.Close()
 		db.CheckErr(err)
-		res, err := stmt.Exec(COMMON_PID, vid, genre, dateLine, time.Now().Unix())
+		res, err := stmt.Exec(this.owner.GetPid(), vid, genre, dateLine, time.Now().Unix())
 		db.CheckErr(err)
 		num, err := res.RowsAffected()
 		db.CheckErr(err)

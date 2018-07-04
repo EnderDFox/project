@@ -109,6 +109,17 @@ var LoaderClass = /** @class */ (function () {
         $.cookie("set", { duration: 0, name: 'Account', value: account });
         $.cookie("set", { duration: 0, name: 'Verify', value: verify });
     };
+    LoaderClass.prototype.InitPid = function () {
+        var str = window.location.href.toLowerCase();
+        if (str.indexOf('pid=') > -1) {
+            str = str.split('pid=').pop().toString();
+            str = str.split('&').shift().toString();
+            User.Pid = parseInt(str);
+        }
+        else {
+            User.Pid = PidFeild.AGAME;
+        }
+    };
     //脚本加载完毕
     LoaderClass.prototype.ScriptComplete = function () {
         //调试
@@ -212,6 +223,7 @@ var LoaderClass = /** @class */ (function () {
     //链接初始化
     LoaderClass.prototype.Connect = function () {
         var _this = this;
+        this.InitPid();
         //链接服务
         WSConn.Init();
         //登陆

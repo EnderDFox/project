@@ -56,6 +56,7 @@ const (
 type C2L_SessionLogin struct {
 	Account string
 	Verify  string
+	Pid     uint64
 }
 
 type C2L_ProcessView struct {

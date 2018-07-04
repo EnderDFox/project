@@ -1,3 +1,8 @@
+//项目id  pm_project.pid
+var PidFeild;
+(function (PidFeild) {
+    PidFeild[PidFeild["AGAME"] = 1] = "AGAME";
+})(PidFeild || (PidFeild = {}));
 //# 数据库中的字段
 /**db.manager.department.did*/
 var DidField;

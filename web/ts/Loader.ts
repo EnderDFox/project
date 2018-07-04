@@ -105,6 +105,16 @@ class LoaderClass {
         $.cookie("set", { duration: 0, name: 'Account', value: account })
         $.cookie("set", { duration: 0, name: 'Verify', value: verify })
     }
+    InitPid(){
+        var str = window.location.href.toLowerCase()
+        if (str.indexOf('pid=') > -1) {
+            str = str.split('pid=').pop().toString()
+            str = str.split('&').shift().toString()
+            User.Pid = parseInt(str)
+        }else{
+            User.Pid = PidFeild.AGAME
+        }
+    }
     //脚本加载完毕
     ScriptComplete() {
         //调试
@@ -204,6 +214,7 @@ class LoaderClass {
     }
     //链接初始化
     Connect() {
+        this.InitPid()
         //链接服务
         WSConn.Init()
         //登陆
