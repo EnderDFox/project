@@ -24,16 +24,16 @@ func (this *Timer) Run() {
 }
 
 // 每个工程中负责人的名单
-func (this *Timer) getPidDidUidMap() *map[uint64]*map[uint64]uint64 {
+func (this *Timer) getPidDidUidMap() *map[uint64]map[uint64]uint64 {
 	stmt, err := db.GetDb().Prepare(`SELECT pid FROM ` + config.Pm + `.pm_project WHERE is_del=0`)
 	db.CheckErr(err)
 	rows, err := stmt.Query()
 	db.CheckErr(err)
-	pidDidUidMap := make(map[uint64]*map[uint64]uint64)
+	pidDidUidMap := make(map[uint64]map[uint64]uint64)
 	for rows.Next() {
 		var pid uint64
 		rows.Scan(&pid)
-		pidDidUidMap[pid] = this.getDidUidMapByPid(pid)
+		pidDidUidMap[pid] = *this.getDidUidMapByPid(pid)
 	}
 	return &pidDidUidMap
 }
@@ -73,7 +73,7 @@ func (this *Timer) ProcessScore() bool {
 		var pid uint64
 		single := &ScoreNoticeSingle{}
 		rows.Scan(&single.Wid, &single.Lid, &single.Date, &single.Uid, &single.Mid, &single.Lname, &single.Did, &pid, &single.Mname, &single.Vid)
-		didUidMap := *pidDidUidMap[pid]
+		didUidMap := pidDidUidMap[pid]
 		if muid, ok := didUidMap[single.Did]; ok {
 			dataMap[muid] = append(dataMap[muid], single)
 		}

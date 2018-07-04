@@ -27,8 +27,37 @@
   /* word-break: break-all; */
 }
 .process .title{font-weight:bold;}
-.process .func{min-width:135px;max-width:135px;width:135px;font-weight:normal;padding:0px 10px 0px 10px;}
+.process .func{min-width:145px;max-width:145px;width:145px;font-weight:normal;padding:0px 0px 0px 10px;}
+.process .func .labelName{
+  /* margin-right: 20px; */
+  display: inline-block;
+  width: 100px;
+}
 .process .func .addNew{
+  /* position: absolute;
+  margin-left: 52px;
+  margin-top: -10px; */
+  width: 40px;
+  height: 40px;
+  line-height: 40px;
+  font-size: 24px;
+  /* font-weight: bold; */
+  border-top: none;
+  border-right: none;
+  border-bottom: none;
+  border-left: #000 solid 1px;
+  border-radius: 0;
+  background-color: #FFFFFF;
+  padding: 0px 0px 0px 0px;
+  z-index:100;
+  /* font-family: Arial, Helvetica, sans-serif; */
+  /* font-weight: normal; */
+
+}
+.process .func .addNew:hover{
+  background-color: #e0e0e0;
+}
+/* .process .func .addNew{
   position: absolute;
   margin-left: 68px;
   margin-top: 6px;
@@ -38,14 +67,12 @@
   line-height: 18px;
   font-size: 18px;
   font-weight: bold;
-  /* font-family: Arial, Helvetica, sans-serif; */
-  /* font-weight: normal; */
   color: #FFFFFF;
   background-color: rgba(0, 0, 0, 0.612);
   padding: 0px 0px 0px 0px;
   z-index:100;
 
-}
+} */
 .process .link{min-width:315px;max-width:315px;width:315px;font-weight:normal;}
 .process .linkParent{min-width:126px;max-width:126px;width:126px;font-weight:normal;}
 .process .linkChild{min-width:188px;max-width:188px;width:188px;font-weight:normal;}
