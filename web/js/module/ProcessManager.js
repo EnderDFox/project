@@ -333,8 +333,6 @@ var ProcessManagerClass = /** @class */ (function () {
             var lid = parseInt($(this).attr('lid'));
             ProcessPanel.SetWorkData(lid, this);
         });
-        //#
-        ProcessPanel.BindActions();
     };
     //编辑功能
     ProcessManagerClass.prototype.ModeEdit = function (data) {

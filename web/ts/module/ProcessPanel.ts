@@ -63,7 +63,7 @@ class ProcessPanelClass {
 				return false
 			}
 			this.ShowMenuMode(e.currentTarget as HTMLElement, e)
-		}).find('.linkMap').unbind().delegate('td', 'mousedown', (e: JQuery.Event): void | false => {
+		}).delegate('.linkMap td', 'mousedown', (e: JQuery.Event): void | false => {
 			e.stopPropagation()
 			//流程区域绑定
 			this.HideMenu()
@@ -74,24 +74,24 @@ class ProcessPanelClass {
 			}
 			var type = $(e.currentTarget).attr('type')
 			switch (type) {
-				case 'step':
-					this.ShowMenuStep(e.currentTarget as HTMLElement, e, User.IsWrite)
-					break
-				case 'duty':
-					if (!User.IsWrite) {
-						return false
-					}
-					this.ShowMenuUser(e.currentTarget as HTMLElement, e)
-					break
-				/* case 'link':
+					/* case 'link':
 					if (!User.IsWrite) {
 						return false
 					}
 					this.ShowMenuLink(e.currentTarget as HTMLElement, e)
 					break */
+				case 'duty':
+				if (!User.IsWrite) {
+					return false
+				}
+				this.ShowMenuUser(e.currentTarget as HTMLElement, e)
+				break
+				case 'step':
+					this.ShowMenuStep(e.currentTarget as HTMLElement, e, User.IsWrite)
+					break
 			}
 			//console.log('鼠标右键点击',type,navigator.platform)
-		}).delegate('td', 'mouseenter', (e: JQuery.Event): void | false => {
+		}).delegate('.linkMap td', 'mouseenter', (e: JQuery.Event): void | false => {
 			e.stopPropagation()
 			var grid: IWorkGrid = $(e.currentTarget).data('grid')
 			if (!grid || grid.wid == 0) {
@@ -113,10 +113,11 @@ class ProcessPanelClass {
 				var left = $(e.currentTarget).offset().left + $(e.currentTarget).width() + 2
 				$('#workTips').css({ top: top, left: left }).show().adjust(-5).html(info.join(''))
 			}
-		}).delegate('td', 'mouseleave', function (e) {
+		}).delegate('.linkMap td', 'mouseleave', function (e) {
 			e.stopPropagation()
 			$('#workTips').hide()
 		})
+		//#title 日期的事件
 		Main.Content.find('.title').unbind().delegate('td', 'mousedown', (e: JQuery.Event): void | false => {
 			e.stopPropagation()
 			//流程区域绑定

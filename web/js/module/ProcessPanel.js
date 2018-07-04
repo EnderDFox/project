@@ -65,7 +65,7 @@ var ProcessPanelClass = /** @class */ (function () {
                 return false;
             }
             _this.ShowMenuMode(e.currentTarget, e);
-        }).find('.linkMap').unbind().delegate('td', 'mousedown', function (e) {
+        }).delegate('.linkMap td', 'mousedown', function (e) {
             e.stopPropagation();
             //流程区域绑定
             _this.HideMenu();
@@ -76,24 +76,24 @@ var ProcessPanelClass = /** @class */ (function () {
             }
             var type = $(e.currentTarget).attr('type');
             switch (type) {
-                case 'step':
-                    _this.ShowMenuStep(e.currentTarget, e, User.IsWrite);
-                    break;
+                /* case 'link':
+                if (!User.IsWrite) {
+                    return false
+                }
+                this.ShowMenuLink(e.currentTarget as HTMLElement, e)
+                break */
                 case 'duty':
                     if (!User.IsWrite) {
                         return false;
                     }
                     _this.ShowMenuUser(e.currentTarget, e);
                     break;
-                /* case 'link':
-                    if (!User.IsWrite) {
-                        return false
-                    }
-                    this.ShowMenuLink(e.currentTarget as HTMLElement, e)
-                    break */
+                case 'step':
+                    _this.ShowMenuStep(e.currentTarget, e, User.IsWrite);
+                    break;
             }
             //console.log('鼠标右键点击',type,navigator.platform)
-        }).delegate('td', 'mouseenter', function (e) {
+        }).delegate('.linkMap td', 'mouseenter', function (e) {
             e.stopPropagation();
             var grid = $(e.currentTarget).data('grid');
             if (!grid || grid.wid == 0) {
@@ -115,10 +115,11 @@ var ProcessPanelClass = /** @class */ (function () {
                 var left = $(e.currentTarget).offset().left + $(e.currentTarget).width() + 2;
                 $('#workTips').css({ top: top, left: left }).show().adjust(-5).html(info.join(''));
             }
-        }).delegate('td', 'mouseleave', function (e) {
+        }).delegate('.linkMap td', 'mouseleave', function (e) {
             e.stopPropagation();
             $('#workTips').hide();
         });
+        //#title 日期的事件
         Main.Content.find('.title').unbind().delegate('td', 'mousedown', function (e) {
             e.stopPropagation();
             //流程区域绑定

@@ -320,8 +320,6 @@ class ProcessManagerClass {
 			var lid = parseInt($(this).attr('lid'))
 			ProcessPanel.SetWorkData(lid, this)
 		})
-		//#
-		ProcessPanel.BindActions()
 	}
 	//编辑功能
 	ModeEdit(data: ModeSingle) {
