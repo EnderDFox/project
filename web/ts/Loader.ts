@@ -97,7 +97,7 @@ class LoaderClass {
         // console.log("[debug]", str)
         if (str.indexOf('debugacc=') > -1) {
             str = str.split('debugacc=').pop().toString()
-            str = str.split('&').shift().toString()
+            str = str.split(/\&|\?/).shift().toString()
             account = str
         }
         var verify = $.md5(key + account)
@@ -109,7 +109,7 @@ class LoaderClass {
         var str = window.location.href.toLowerCase()
         if (str.indexOf('pid=') > -1) {
             str = str.split('pid=').pop().toString()
-            str = str.split('&').shift().toString()
+            str = str.split(/\&|\?/).shift().toString()
             User.Pid = parseInt(str)
         }else{
             User.Pid = PidFeild.AGAME
