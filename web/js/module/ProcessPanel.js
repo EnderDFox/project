@@ -285,6 +285,7 @@ var ProcessPanelClass = /** @class */ (function () {
             var data = {
                 // modeList:[],
                 modeList: ProcessData.Project.ModeList,
+                isWirte: User.IsWrite,
             };
             //组合thead
             var vue = new Vue({

@@ -1,6 +1,6 @@
-# 发布最新版 直接运行   sh /root/trunk/src/pm_beta/run.beta.sh
-# 仅更新web 加参数 web:  sh /root/trunk/src/pm_beta/run.beta.sh web
-# 更新到svn对应版本 加参数 r:  sh /root/trunk/src/pm_beta/run.beta.sh full r 379
+# 发布最新版 直接运行   sh /root/trunk/src/pm_beta/run.sh
+# 仅更新web 加参数 web:  sh /root/trunk/src/pm_beta/run.sh web
+# 更新到svn对应版本 加参数 r:  sh /root/trunk/src/pm_beta/run.sh full r 379
 
 proj_name="pm_beta"
 path_svn="/root/trunk"
