@@ -370,21 +370,10 @@ var ProcessManagerClass = /** @class */ (function () {
             if (index0 > -1 && index0 > -1) {
                 (_a = project.ModeList).splice.apply(_a, [index0, 1].concat(project.ModeList.splice(index1, 1, mode0)));
             }
-            /* //left
-            var A = $('#content .mode[mid="' + data.Swap[0] + '"]').parent()
-            // var AN = A.next()
-            var B = $('#content .mode[mid="' + data.Swap[1] + '"]').parent()
-            // var BN = B.next()
-            A.before(B)
-            // A.before(AN)
             //right
-            var A = $('#content .trModeRight[mid="' + data.Swap[0] + '"]')
-            // var AN = A.next()
-            var B = $('#content .trModeRight[mid="' + data.Swap[1] + '"]')
-            // var BN = B.next()
-            A.before(B)
-            // A.before(AN)
-            */
+            var A = $('#content .trModeRight[mid="' + data.Swap[0] + '"]');
+            var B = $('#content .trModeRight[mid="' + data.Swap[1] + '"]');
+            A.before(B);
         }
     };
     //归档处理
