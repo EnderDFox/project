@@ -1,0 +1,8 @@
+.manager .body,.foot {
+    margin-left: 20px;
+}
+.manager .btnSmall1 {
+    width: 30px;
+    height: 30px;
+    line-height: 30px;
+}

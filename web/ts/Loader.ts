@@ -14,7 +14,7 @@ class LoaderClass {
     //需要加载的css文件列表
     //     <link rel="stylesheet" href="css/common.css?v=v1.3.59" />
     CssList: ILoadGroup[] = [
-        { path: "", files: ['common', 'project'] }
+        { path: "", files: ['common', 'project', 'project1'] }
     ]
     //需要加载的js文件列表  jquery必须提前加载
     //< script src = "js/Loader1.js?v=v1.3.59" > </script>
@@ -28,7 +28,8 @@ class LoaderClass {
                 'CollateData', 'CollateManager', 'CollatePanel', 'CollateFilter',
                 'NoticeData', 'NoticeManager', 'NoticePanel',
                 'ProfileData', 'ProfileManager', 'ProfilePanel',
-                'TemplateManager', 'PopManager', 'UploadManager', 'VersionManager']
+                'TemplateManager', 'PopManager', 'UploadManager', 'VersionManager',
+                'ManagerManager']
         },
         {
             path: "tests", files: []
@@ -81,7 +82,7 @@ class LoaderClass {
         } else if (window.location.href.toLowerCase().indexOf('isdebug=false') > -1) {
             this.isDebug = false;
         } else {
-            var hostMap: any = { '192.168.118.132:8080':1, '192.168.50.191:8080': 1, 'localhost:8080': 1, '192.168.118.224:8080': 1, '192.168.120.236:8080': 1 }
+            var hostMap: any = { '192.168.118.132:8080': 1, '192.168.50.191:8080': 1, 'localhost:8080': 1, '192.168.118.224:8080': 1, '192.168.120.236:8080': 1 }
             if (hostMap[location.host]) {
                 this.isDebug = true;
             } else {
@@ -105,13 +106,13 @@ class LoaderClass {
         $.cookie("set", { duration: 0, name: 'Account', value: account })
         $.cookie("set", { duration: 0, name: 'Verify', value: verify })
     }
-    InitPid(){
+    InitPid() {
         var str = window.location.href.toLowerCase()
         if (str.indexOf('pid=') > -1) {
             str = str.split('pid=').pop().toString()
             str = str.split(/\&|\?/).shift().toString()
             User.Pid = parseInt(str)
-        }else{
+        } else {
             User.Pid = PidFeild.AGAME
         }
     }

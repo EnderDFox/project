@@ -86,8 +86,12 @@ interface UserSingle {
 
 interface DepartmentSingle {
     Did?: DidField
+    Pid?: PidFeild
     Fid?: DidField//上级部门
     Name?: string
+    //client
+    depth?: number
+    Children?: DepartmentSingle[]
 }
 
 interface DepartmentInfo {

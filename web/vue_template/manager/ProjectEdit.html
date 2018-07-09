@@ -1,0 +1,22 @@
+<div class="commonDialog manager" style="min-width:800px; ">
+    <div class="head">
+        <div class="title">项目-{{project?project.Name:'新项目'}}</div>
+        <div class="close" @click="onClose()">x</div>
+    </div>
+    <div class="body">
+        <input type="text" class="name ver" placeholder="项目名称" :value="newName">
+    </div>
+    <div class="body">
+        <hr/>
+        <div>
+            <span>部门</span>
+            <button class="cancel btnSmall1" title="增加部门">+</button>
+        </div>
+        <transition-group name="list-complete" tag="ul">
+            <DepartmentItemComponent class="body list-complete-item" v-for="dp,index in departmentList" :department="dp" :key="dp.Did" />
+        </transition-group>
+        <div class="foot">
+            <!-- <button class="confirm btnSmall3" @click="onSubmit()">保存</button> -->
+        </div>
+    </div>
+</div>

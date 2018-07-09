@@ -1,0 +1,17 @@
+<!-- 编辑模板-功能列表 -->
+<div class="commonDialog manager" style="min-width:400px; ">
+    <div class="head">
+        <div class="title">项目列表</div>
+        <div class="close" @click="onClose()">x</div>
+    </div>
+    <transition-group name="list-complete" tag="ul">
+        <li class="body list-complete-item" v-for="proj,index in projectList" :key="proj.Pid">
+            <span type="text" class="name" v-text="proj.Name"></span>
+            <button class="confirm btnSmall3 btnEdit" title="编辑" @click="onEdit($event,proj,index)">编辑</button>
+            <button class="cancel btnSmall1" title="删除" @click="onDel($event,proj,index)">X</button>
+        </li>
+    </transition-group>
+    <div class="foot">
+        <button class="confirm btnSmall3" @click="onAdd()">增加</button>
+    </div>
+</div>

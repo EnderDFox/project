@@ -11,7 +11,7 @@ var LoaderClass = /** @class */ (function () {
         //需要加载的css文件列表
         //     <link rel="stylesheet" href="css/common.css?v=v1.3.59" />
         this.CssList = [
-            { path: "", files: ['common', 'project'] }
+            { path: "", files: ['common', 'project', 'project1'] }
         ];
         //需要加载的js文件列表  jquery必须提前加载
         //< script src = "js/Loader1.js?v=v1.3.59" > </script>
@@ -25,7 +25,8 @@ var LoaderClass = /** @class */ (function () {
                     'CollateData', 'CollateManager', 'CollatePanel', 'CollateFilter',
                     'NoticeData', 'NoticeManager', 'NoticePanel',
                     'ProfileData', 'ProfileManager', 'ProfilePanel',
-                    'TemplateManager', 'PopManager', 'UploadManager', 'VersionManager']
+                    'TemplateManager', 'PopManager', 'UploadManager', 'VersionManager',
+                    'ManagerManager']
             },
             {
                 path: "tests", files: []
