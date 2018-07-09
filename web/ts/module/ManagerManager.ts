@@ -3,8 +3,8 @@
 class ManagerManagerClass {
     VuePath = "manager/"
     VueProjectList: CombinedVueInstance1<{ projectList: ProjectSingle[] }>
-    VueProjectSingle: CombinedVueInstance1<{ project: ProjectSingle, newName: string }>
-    VueDepartmentSingle: CombinedVueInstance1<{ department: DepartmentSingle, fullName: string, newName: string, allDepartmentList: DepartmentSingle[], positionList: any }>
+    VueProjectSingle: CombinedVueInstance1<{ project: ProjectSingle, newName: string, dpTree: DepartmentSingle[] }>
+    VueDepartmentSingle: CombinedVueInstance1<{ department: DepartmentSingle, fullName: string, newName: string, allDepartmentList: DepartmentSingle[], positionList: PositionSingle[] }>
     Show() {
         this.ShowProjectList()
     }
@@ -43,22 +43,25 @@ class ManagerManagerClass {
         })
     }
     ShowProjectSingle(proj: ProjectSingle) {
-        Loader.LoadVueTemplateList([`${this.VuePath}DepartmentSingle`, `${this.VuePath}ProjectEdit`], (tplList: string[]) => {
+        Loader.LoadVueTemplateList([`${this.VuePath}DepartmentItemComponent`, `${this.VuePath}ProjectEdit`], (tplList: string[]) => {
             //注册组件
             Vue.component('DepartmentItemComponent', {
                 template: tplList[0],
                 props: {
-                    department: Object
+                    dp: Object
                 },
                 data: function () {
                     return {}
                 },
                 methods: {
-
+                    onEdit: function (dp: DepartmentSingle) {
+                        // console.log("[debug,this is comp]",dp.Name,":[dp]")
+                        this.$emit('onEdit', dp)
+                    }
                 }
             })
             //
-            var departmentList: DepartmentSingle[] = [
+            var dpTree: DepartmentSingle[] = [
                 { Did: 1, Name: '策划', depth: 0, Children: [] },
                 {
                     Did: 2, Name: '美术', depth: 0, Children: [
@@ -80,7 +83,7 @@ class ManagerManagerClass {
                     template: tplList[1],
                     data: {
                         project: proj,
-                        departmentList: departmentList,
+                        dpTree: dpTree,
                         newName: proj ? proj.Name : '',
                     },
                     methods: {
@@ -90,7 +93,9 @@ class ManagerManagerClass {
                         onEditName: () => {
 
                         },
-                        onEdit: (e,dp:DepartmentSingle) => {
+                        // onEdit: (e, dp: DepartmentSingle) => {
+                        onEdit: (dp: DepartmentSingle) => {
+                            // console.log("[debug]",dp.Name,dp.Did)
                             this.ShowDepartmentSingle(dp)
                         },
                         onDel: (e, proj: ProjectSingle, index: int) => {
@@ -107,20 +112,28 @@ class ManagerManagerClass {
             $(vue.$el).show()
         })
     }
-    ShowDepartmentSingle(proj: ProjectSingle) {
-        Loader.LoadVueTemplate(this.VuePath + "DepartmentSingle", (tpl: string) => {
+    ShowDepartmentSingle(dp: DepartmentSingle) {
+        Loader.LoadVueTemplate(this.VuePath + "DepartmentEdit", (tpl: string) => {
+            var allDepartmentList: DepartmentSingle[] = []
             var vue = new Vue(
                 {
                     template: tpl,
                     data: {
-
+                        department: dp, fullName: "", newName: dp.Name,
+                        allDepartmentList: this.GetAllDepartmentList(this.VueProjectSingle.dpTree),
+                        positionList: [
+                            { Posid: 1, Did: 2, Name: '美术主管' },
+                            { Posid: 2, Did: 2, Name: 'UI' },
+                            { Posid: 3, Did: 2, Name: '原画' },
+                            { Posid: 4, Did: 2, Name: '角色' },
+                        ],
                     },
                     methods: {
                         onClose: function () {
                         },
-                        onEdit: (e, proj: ProjectSingle) => {
+                        onEdit: (e, pos: PositionSingle) => {
                         },
-                        onDel: (e, proj: ProjectSingle, index: int) => {
+                        onDel: (e, pos: PositionSingle, index: int) => {
                         },
                         onAdd: () => {
                         }
@@ -133,6 +146,18 @@ class ManagerManagerClass {
             Common.AlginCenterInWindow(vue.$el)
             $(vue.$el).show()
         })
+    }
+
+    GetAllDepartmentList(dpTree: DepartmentSingle[]): DepartmentSingle[] {
+        var rs: DepartmentSingle[] = []
+        for (var i = 0; i < dpTree.length; i++) {
+            var dp = dpTree[i]
+            rs.push(dp)
+            if (dp.Children.length > 0) {
+                rs = rs.concat(this.GetAllDepartmentList(dp.Children))
+            }
+        }
+        return rs;
     }
 }
 

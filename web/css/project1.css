@@ -1,6 +1,16 @@
-.manager .body,.foot {
+.manager ul {
+    padding-left: 0px;
+}
+
+.manager li {
+    margin-left: 10px;
+}
+
+.manager .body,
+.manager .foot {
     margin-left: 20px;
 }
+
 .manager .btnSmall1 {
     width: 30px;
     height: 30px;

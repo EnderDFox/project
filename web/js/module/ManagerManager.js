@@ -41,20 +41,25 @@ var ManagerManagerClass = /** @class */ (function () {
     };
     ManagerManagerClass.prototype.ShowProjectSingle = function (proj) {
         var _this = this;
-        Loader.LoadVueTemplateList([this.VuePath + "DepartmentSingle", this.VuePath + "ProjectEdit"], function (tplList) {
+        Loader.LoadVueTemplateList([this.VuePath + "DepartmentItemComponent", this.VuePath + "ProjectEdit"], function (tplList) {
             //注册组件
             Vue.component('DepartmentItemComponent', {
                 template: tplList[0],
                 props: {
-                    department: Object
+                    dp: Object
                 },
                 data: function () {
                     return {};
                 },
-                methods: {}
+                methods: {
+                    onEdit: function (dp) {
+                        // console.log("[debug,this is comp]",dp.Name,":[dp]")
+                        this.$emit('onEdit', dp);
+                    }
+                }
             });
             //
-            var departmentList = [
+            var dpTree = [
                 { Did: 1, Name: '策划', depth: 0, Children: [] },
                 {
                     Did: 2, Name: '美术', depth: 0, Children: [
@@ -75,7 +80,7 @@ var ManagerManagerClass = /** @class */ (function () {
                 template: tplList[1],
                 data: {
                     project: proj,
-                    departmentList: departmentList,
+                    dpTree: dpTree,
                     newName: proj ? proj.Name : '',
                 },
                 methods: {
@@ -84,7 +89,9 @@ var ManagerManagerClass = /** @class */ (function () {
                     },
                     onEditName: function () {
                     },
-                    onEdit: function (e, dp) {
+                    // onEdit: (e, dp: DepartmentSingle) => {
+                    onEdit: function (dp) {
+                        // console.log("[debug]",dp.Name,dp.Did)
                         _this.ShowDepartmentSingle(dp);
                     },
                     onDel: function (e, proj, index) {
@@ -100,18 +107,28 @@ var ManagerManagerClass = /** @class */ (function () {
             $(vue.$el).show();
         });
     };
-    ManagerManagerClass.prototype.ShowDepartmentSingle = function (proj) {
+    ManagerManagerClass.prototype.ShowDepartmentSingle = function (dp) {
         var _this = this;
-        Loader.LoadVueTemplate(this.VuePath + "DepartmentSingle", function (tpl) {
+        Loader.LoadVueTemplate(this.VuePath + "DepartmentEdit", function (tpl) {
+            var allDepartmentList = [];
             var vue = new Vue({
                 template: tpl,
-                data: {},
+                data: {
+                    department: dp, fullName: "", newName: dp.Name,
+                    allDepartmentList: _this.GetAllDepartmentList(_this.VueProjectSingle.dpTree),
+                    positionList: [
+                        { Posid: 1, Did: 2, Name: '美术主管' },
+                        { Posid: 2, Did: 2, Name: 'UI' },
+                        { Posid: 3, Did: 2, Name: '原画' },
+                        { Posid: 4, Did: 2, Name: '角色' },
+                    ],
+                },
                 methods: {
                     onClose: function () {
                     },
-                    onEdit: function (e, proj) {
+                    onEdit: function (e, pos) {
                     },
-                    onDel: function (e, proj, index) {
+                    onDel: function (e, pos, index) {
                     },
                     onAdd: function () {
                     }
@@ -123,6 +140,17 @@ var ManagerManagerClass = /** @class */ (function () {
             Common.AlginCenterInWindow(vue.$el);
             $(vue.$el).show();
         });
+    };
+    ManagerManagerClass.prototype.GetAllDepartmentList = function (dpTree) {
+        var rs = [];
+        for (var i = 0; i < dpTree.length; i++) {
+            var dp = dpTree[i];
+            rs.push(dp);
+            if (dp.Children.length > 0) {
+                rs = rs.concat(this.GetAllDepartmentList(dp.Children));
+            }
+        }
+        return rs;
     };
     return ManagerManagerClass;
 }());

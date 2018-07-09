@@ -94,6 +94,13 @@ interface DepartmentSingle {
     Children?: DepartmentSingle[]
 }
 
+interface PositionSingle {
+    Posid?: int
+    Did?: DidField
+    Name?: string
+    AuthorityList?:any[]
+}
+
 interface DepartmentInfo {
     info?: DepartmentSingle
     list?: DepartmentInfo[]//子部门

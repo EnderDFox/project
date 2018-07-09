@@ -13,7 +13,7 @@
             <button class="cancel btnSmall1" title="增加部门">+</button>
         </div>
         <transition-group name="list-complete" tag="ul">
-            <DepartmentItemComponent class="body list-complete-item" v-for="dp,index in departmentList" :department="dp" :key="dp.Did" />
+            <DepartmentItemComponent class="body list-complete-item" v-for="dp,index in dpTree" :dp="dp" :key="dp.Did" @onEdit="onEdit"/>
         </transition-group>
         <div class="foot">
             <!-- <button class="confirm btnSmall3" @click="onSubmit()">保存</button> -->
