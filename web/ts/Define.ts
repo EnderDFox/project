@@ -98,17 +98,17 @@ interface PositionSingle {
     Posid?: int
     Did?: DidField
     Name?: string
-    AuthorityList?:AuthoritySingle[]
+    AuthorityList?: AuthoritySingle[]
 }
-interface AuthorityModuleSingle{
-    Modid?:int
-    Name?:string
-    AuthorityList?:AuthoritySingle[]
+interface AuthorityModuleSingle {
+    Modid?: int
+    Name?: string
+    AuthorityList?: AuthoritySingle[]
 }
-interface AuthoritySingle{
-    Aid?:int
-    Modid?:int
-    Name?:string
+interface AuthoritySingle {
+    Aid?: int
+    Modid?: int
+    Name?: string
 }
 
 interface DepartmentInfo {
@@ -294,6 +294,13 @@ interface IDateItem {
 interface IWorkGrid extends IDateItem {
     lid?: number
     wid?: number
+}
+
+interface C2L_ProcessView {
+    BeginDate?: string
+    EndDate?: string
+    ModeStatus?: uint32[]
+    LinkStatus?: uint32[]
 }
 
 interface L2C_ProcessView {

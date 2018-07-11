@@ -60,11 +60,10 @@ type C2L_SessionLogin struct {
 }
 
 type C2L_ProcessView struct {
-	BeginDate string
-	EndDate   string
-	LinkUid   uint64
-	ModeName  string
-	LinkName  string
+	BeginDate  string
+	EndDate    string
+	ModeStatus []uint32
+	LinkStatus []uint32
 }
 
 type C2L_ProcessWorkStatus struct {
