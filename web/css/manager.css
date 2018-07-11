@@ -1,0 +1,18 @@
+/**/
+.list-complete-item_none {
+    transition: all 0s;
+  }
+.list-complete-item {
+    transition: all 0.4s;
+}
+.list-complete-enter{
+  opacity: 0;
+}
+
+.list-complete-leave-active {
+  position: absolute;
+}
+.list-complete-leave-to{
+  opacity: 0;
+  transition: all 0s;
+}

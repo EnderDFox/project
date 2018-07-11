@@ -20,12 +20,12 @@ class ManagerManagerClass {
         { Did: 4, Name: '前端', depth: 0, Children: [] },
     ]
     VueProjectList: CombinedVueInstance1<{ projectList: ProjectSingle[] }>
-    VueProjectSingle: CombinedVueInstance1<{ project: ProjectSingle, newName: string, dpTree: DepartmentSingle[] }>
+    VueProjectEdit: CombinedVueInstance1<{ project: ProjectSingle, newName: string, dpTree: DepartmentSingle[] }>
     VueDepartmentSingle: CombinedVueInstance1<{ department: DepartmentSingle, fullName: string, newName: string, allDepartmentList: DepartmentSingle[], positionList: PositionSingle[] }>
     Show() {
         this.ShowProjectList()
         // this.ShowPositionSingle({ Posid: 2, Did: 2, Name: 'UI' })
-        this.ShowUserList()
+        // this.ShowUserList()
     }
     ShowProjectList() {
         Loader.LoadVueTemplate(this.VuePath + "ProjectList", (tpl: string) => {
@@ -33,23 +33,37 @@ class ManagerManagerClass {
                 {
                     template: tpl,
                     data: {
-                        projectList: [
-                            { Pid: 1, Name: 'Amazing' },
-                            { Pid: 2, Name: 'Maxwell' },
-                        ],
+                        projectList: ManagerData.ProjectList,
                     },
                     methods: {
+                        onEditName: (e: Event, proj: ProjectSingle, index: number) => {
+                            var newName = (e.target as HTMLInputElement).value
+                            proj.Name = newName
+                        },
                         onClose: function () {
                             $(this.$el).hide()
                         },
-                        onEdit: (e, proj: ProjectSingle) => {
-                            this.ShowProjectSingle(proj)
+                        onEdit: (e: Event, proj: ProjectSingle, index: number) => {
+                            // console.log("[debug]",vue,":[vue]")
+                            $(this.VueProjectList.$el).hide()
+                            this.ShowProjectEdit(proj)
+                            /*   if (index > 0) {
+                                  var i1 = index - 1
+                                  var i2 = index
+                                  this.VueProjectList.projectList.splice(i1, 1, ...this.VueProjectList.projectList.splice(i2, 1, this.VueProjectList.projectList[i1]))
+                              } */
                         },
                         onDel: (e, proj: ProjectSingle, index: int) => {
                             this.VueProjectList.projectList.splice(index, 1)
                         },
                         onAdd: () => {
-                            this.ShowProjectSingle(null)
+                            // this.ShowProjectEdit(null)
+                            this.VueProjectList.projectList.push(
+                                {
+                                    Pid: this.VueProjectList.projectList[this.VueProjectList.projectList.length - 1].Pid + 1,
+                                    Name: `空${this.VueProjectList.projectList.length}`,
+                                }
+                            )
                         }
                     },
                 }
@@ -61,7 +75,7 @@ class ManagerManagerClass {
             $(vue.$el).show()
         })
     }
-    ShowProjectSingle(proj: ProjectSingle) {
+    ShowProjectEdit(proj: ProjectSingle) {
         Loader.LoadVueTemplateList([`${this.VuePath}DepartmentItemComponent`, `${this.VuePath}ProjectEdit`], (tplList: string[]) => {
             //注册组件
             Vue.component('DepartmentItemComponent', {
@@ -87,6 +101,7 @@ class ManagerManagerClass {
                         project: proj,
                         dpTree: this.dpTree,
                         newName: proj ? proj.Name : '',
+                        auth: ManagerData.MyAuth,
                     },
                     methods: {
                         onClose: function () {
@@ -94,6 +109,10 @@ class ManagerManagerClass {
                         },
                         onEditName: () => {
 
+                        },
+                        onEnterProjMg: () => {
+                            $(this.VueProjectEdit.$el).hide()
+                            this.ShowProjectList()
                         },
                         // onEdit: (e, dp: DepartmentSingle) => {
                         onEdit: (dp: DepartmentSingle) => {
@@ -107,10 +126,10 @@ class ManagerManagerClass {
                     },
                 }
             ).$mount()
-            this.VueProjectSingle = vue
+            this.VueProjectEdit = vue
             //#show
-            Common.InsertBeforeDynamicDom(vue.$el)
-            Common.AlginCenterInWindow(vue.$el)
+            Common.InsertIntoPageDom(vue.$el)
+            // Common.AlginCenterInWindow(vue.$el)
             $(vue.$el).show()
         })
     }
@@ -185,7 +204,7 @@ class ManagerManagerClass {
                         pos: pos, fullName: pos.Name, newName: pos.Name.toString(),
                         allDepartmentList: this.GetAllDepartmentList(this.dpTree),
                         showKind: 1,
-                        userList: Data.UserList.slice(0, 7),
+                        userList: ManagerData.UserList.slice(0, 7),
                         authorityModuleList: [
                             {
                                 Modid: 1, Name: '模块A', AuthorityList: [
@@ -262,7 +281,7 @@ class ManagerManagerClass {
                             { Pid: 1, Name: 'Amazing' },
                             { Pid: 2, Name: 'Maxwell' },
                         ],
-                        userList: Data.UserList,
+                        userList: ManagerData.UserList,
                         allDepartmentList: this.GetAllDepartmentList(this.dpTree),
                         positionList: [
                             { Posid: 1, Did: 2, Name: '美术主管' },

@@ -1,17 +1,51 @@
 <!-- 编辑模板-功能列表 -->
-<div class="commonDialog manager" style="min-width:400px; ">
-    <div class="head">
-        <div class="title">项目列表</div>
-        <div class="close" @click="onClose()">x</div>
-    </div>
-    <transition-group name="list-complete" tag="ul">
-        <li class="body list-complete-item" v-for="proj,index in projectList" :key="proj.Pid">
-            <span type="text" class="name" v-text="proj.Name"></span>
-            <button class="confirm btnSmall3 btnEdit" title="编辑" @click="onEdit($event,proj,index)">编辑</button>
-            <button class="cancel btnSmall1" title="删除" @click="onDel($event,proj,index)">X</button>
-        </li>
-    </transition-group>
-    <div class="foot">
-        <button class="confirm btnSmall3" @click="onAdd()">增加</button>
-    </div>
+<div>
+    <nav class="navbar navbar-default">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <span class="navbar-brand">项目管理</span>
+            </div>
+        </div>
+    </nav>
+    <table class="table table-hover">
+        <thead>
+            <thead>
+                <tr>
+                    <th>
+                        项目名称
+                    </th>
+                    <th>
+                        操作
+                    </th>
+                </tr>
+            </thead>
+        </thead>
+        <transition-group name="list-complete" tag="tbody">
+            <tr class="list-complete-item" v-for="proj,index in projectList" :key="proj.Pid">
+                <td>
+                    <input type="text" class="form-control" placeholder="Username" aria-describedby="basic-addon1" :value="proj.Name" @blur="onEditName($event,proj,index)"
+                        @keyup.enter="onEditName($event,proj,index)">
+                </td>
+                <td>
+                    <button class="btn btn-default" type="submit">
+                        <span class="glyphicon glyphicon-edit" aria-hidden="true" @click="onEdit($event,proj,index)"></span>
+                    </button>
+                    <button class="btn btn-default" type="submit">
+                        <span class="glyphicon glyphicon-remove" aria-hidden="true" @click="onDel($event,proj,index)"></span>
+                    </button>
+                </td>
+            </tr>
+            <tr key="0">
+                <td>
+                    <input type="text" class="form-control" placeholder="Username" aria-describedby="basic-addon1"> </td>
+                </td>
+                <td>
+                    <button class="btn btn-default" type="submit" @click="onAdd()">
+                        <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+                    </button>
+                </td>
+            </tr>
+        </transition-group>
+    </table>
+    <hr/>
 </div>

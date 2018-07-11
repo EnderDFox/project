@@ -28,8 +28,7 @@ class LoaderClass {
                 'CollateData', 'CollateManager', 'CollatePanel', 'CollateFilter',
                 'NoticeData', 'NoticeManager', 'NoticePanel',
                 'ProfileData', 'ProfileManager', 'ProfilePanel',
-                'TemplateManager', 'PopManager', 'UploadManager', 'VersionManager',
-                'ManagerManager']
+                'TemplateManager', 'PopManager', 'UploadManager', 'VersionManager']
         },
         {
             path: "tests", files: []
@@ -40,10 +39,28 @@ class LoaderClass {
     //加载状态
     IsComplete = false
     //初始化
-    Init(ver: string) {
-        this.Ver = ver
-        //加载脚本
-        this.LoadAll()
+    Init() {
+        Loader.CheckEnviroment()
+        if (Loader.isDebug) {
+            //开发阶段用随机数做版本号
+            this.Ver = Math.random().toString()
+            //加载脚本
+            this.LoadAll()
+        } else {
+            //正式版本读取 <script src="js/Loader.js?v=xxx"></script> 中的版本号
+            var scripts = window.document.head.getElementsByTagName('script')
+            var len = scripts.length
+            for (var i = 0; i < len; i++) {
+                var item = scripts[i];
+                if (item.src && item.src.indexOf('Loader.js') > -1) {
+                    this.Ver = item.src.split('v=')[1]
+                    //加载脚本
+                    this.LoadAll()
+                    return;
+                }
+            }
+            console.log("[fatal]", `没有找到<script src="js/Loader.js?v=xxx"></script>`);
+        }
     }
     //注册函数
     RegisterFunc() {
@@ -346,23 +363,3 @@ class LoaderClass {
 }
 //
 var Loader = new LoaderClass()
-//准备完毕
-window.onload = function () {
-    Loader.CheckEnviroment()
-    if (Loader.isDebug) {
-        //开发阶段用随机数做版本号
-        Loader.Init(Math.random().toString())
-    } else {
-        //正式版本读取 <script src="js/Loader.js?v=xxx"></script> 中的版本号
-        var scripts = this.document.head.getElementsByTagName('script')
-        var len = scripts.length
-        for (var i = 0; i < len; i++) {
-            var item = scripts[i];
-            if (item.src && item.src.indexOf('Loader.js') > -1) {
-                Loader.Init(item.src.split('v=')[1])
-                return;
-            }
-        }
-        console.log("[fatal]", `没有找到<script src="js/Loader.js?v=xxx"></script>`);
-    }
-}

@@ -640,7 +640,7 @@ func (this *Process) View(BeginDate, EndDate string, modeStatus, linkStatus []ui
 	log.Println(linkStatusSQL, ":[linkStatusSQL]")
 	//sql
 	stmt, err := db.GetDb().Prepare(`SELECT
-		t5.*,t_s.quality,t_s.efficiency,t_s.manner,t_s.info
+		t5.*,t_s.wid AS swid,t_s.quality,t_s.efficiency,t_s.manner,t_s.info
 	FROM
 		(
 			SELECT
@@ -684,25 +684,30 @@ func (this *Process) View(BeginDate, EndDate string, modeStatus, linkStatus []ui
 		linkSingle := &LinkSingle{}
 		workSingle := &WorkSingle{}
 		scoreSingle := &ScoreSingle{}
-		rows.Scan(&modeSingle.Mid, &modeSingle.Vid, &modeSingle.Name, &modeSingle.Color, &modeSingle.Did, &modeSingle.Status, &modeSingle.Sort, &linkSingle.Lid, &linkSingle.Name, &linkSingle.Uid, &linkSingle.Color, &linkSingle.Status, &linkSingle.Sort, &linkSingle.ParentLid, &workSingle.Wid, &workSingle.Date, &workSingle.Status, &workSingle.Tips, &workSingle.MinNum, &workSingle.MaxNum, &workSingle.Tag, &scoreSingle.Quality, &scoreSingle.Efficiency, &scoreSingle.Manner, &scoreSingle.Info)
+		rows.Scan(&modeSingle.Mid, &modeSingle.Vid, &modeSingle.Name, &modeSingle.Color, &modeSingle.Did, &modeSingle.Status, &modeSingle.Sort, &linkSingle.Lid, &linkSingle.Name, &linkSingle.Uid, &linkSingle.Color, &linkSingle.Status, &linkSingle.Sort, &linkSingle.ParentLid, &workSingle.Wid, &workSingle.Date, &workSingle.Status, &workSingle.Tips, &workSingle.MinNum, &workSingle.MaxNum, &workSingle.Tag, &scoreSingle.Wid, &scoreSingle.Quality, &scoreSingle.Efficiency, &scoreSingle.Manner, &scoreSingle.Info)
 		//
 		linkSingle.Mid = modeSingle.Mid
 		workSingle.Lid = linkSingle.Lid
-		scoreSingle.Wid = workSingle.Wid
 		//
 		if _, ok := midMap[modeSingle.Mid]; !ok {
 			midMap[modeSingle.Mid] = modeSingle.Mid
 			modeList = append(modeList, modeSingle)
 		}
-		if _, ok := lidMap[linkSingle.Lid]; !ok {
-			lidMap[linkSingle.Lid] = linkSingle.Lid
-			linkList = append(linkList, linkSingle)
+		if linkSingle.Lid > 0 {
+			if _, ok := lidMap[linkSingle.Lid]; !ok {
+				lidMap[linkSingle.Lid] = linkSingle.Lid
+				linkList = append(linkList, linkSingle)
+			}
 		}
-		if _, ok := widMap[workSingle.Wid]; !ok {
-			widMap[workSingle.Wid] = workSingle.Wid
-			workList = append(workList, workSingle)
+		if workSingle.Wid > 0 {
+			if _, ok := widMap[workSingle.Wid]; !ok {
+				widMap[workSingle.Wid] = workSingle.Wid
+				workList = append(workList, workSingle)
+			}
 		}
-		scoreList = append(scoreList, scoreSingle)
+		if scoreSingle.Wid > 0 {
+			scoreList = append(scoreList, scoreSingle)
+		}
 	}
 	//#L2C
 	data := &L2C_ProcessView{

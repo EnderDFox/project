@@ -98,17 +98,17 @@ interface PositionSingle {
     Posid?: int
     Did?: DidField
     Name?: string
-    AuthorityList?: AuthoritySingle[]
+    AuthorityList?:AuthoritySingle[]
 }
-interface AuthorityModuleSingle {
-    Modid?: int
-    Name?: string
-    AuthorityList?: AuthoritySingle[]
+interface AuthorityModuleSingle{
+    Modid?:int
+    Name?:string
+    AuthorityList?:AuthoritySingle[]
 }
-interface AuthoritySingle {
-    Aid?: int
-    Modid?: int
-    Name?: string
+interface AuthoritySingle{
+    Aid?:int
+    Modid?:int
+    Name?:string
 }
 
 interface DepartmentInfo {
@@ -382,4 +382,9 @@ interface L2C_ProcessPublishEdit {
 
 interface L2C_ProcessPublishDelete {
     DateLine?: string
+}
+
+
+enum Auth {
+    PROJECT_MANAGE = 1
 }
