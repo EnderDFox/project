@@ -1,25 +1,25 @@
 class ManagerDataClass {
     /**我的权限 */
-    MyAuth: { [key: number | string]: boolean } = {};
+    MyAuth: { [key: number]: boolean } = {};
     ProjectList: ProjectSingle[]
     UserList: UserSingle[]
     Init() {
         //#权限
         var urlParam = window.location.href.toLowerCase()
-        var authCode: number = 0
+        var authCodeArr: number[]
         // console.log("[debug]", str)
         if (urlParam.indexOf('auth=') > -1) {
             urlParam = urlParam.split('auth=').pop().toString()
             urlParam = urlParam.split(/\&|\?/).shift().toString()
-            authCode = parseInt(urlParam)
+            authCodeArr = urlParam.split(",").map<number>((item: string) => { return parseInt(item) })
+        } else {
+            authCodeArr = []
         }
         //
-        for (var key in Auth) {
-            if (parseInt(key).toString() == key) {//typeof(Auth.xxx) 竟然也是 string, 只能用这方法做了
-                var keyAsNum = parseInt(key)
-                console.log("[debug]", key, ":[key]")
-                this.MyAuth[key] = (authCode & keyAsNum) > 0
-                this.MyAuth[Auth[key]] = this.MyAuth[key]
+        for (var i = 0; i < authCodeArr.length; i++) {
+            var authCode = authCodeArr[i]
+            if (Auth[authCode]) {
+                this.MyAuth[authCode] = this.MyAuth[Auth[authCode]] = true
             }
         }
         //

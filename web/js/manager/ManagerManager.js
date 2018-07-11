@@ -102,7 +102,7 @@ var ManagerManagerClass = /** @class */ (function () {
             }).$mount();
             _this.VueProjectSingle = vue;
             //#show
-            Common.InsertBeforeDynamicDom(vue.$el);
+            Common.InsertIntoPageDom(vue.$el);
             // Common.AlginCenterInWindow(vue.$el)
             $(vue.$el).show();
         });
