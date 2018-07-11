@@ -5,6 +5,7 @@
     </div>
     <div class="body">
         <input type="text" class="name ver" placeholder="项目名称" :value="newName">
+        <button class="confirm btnSmall3 btnEdit" title="修改名称">修改名称</button>
     </div>
     <div class="body">
         <hr/>
@@ -13,10 +14,11 @@
             <button class="cancel btnSmall1" title="增加部门">+</button>
         </div>
         <transition-group name="list-complete" tag="ul">
-            <DepartmentItemComponent class="body list-complete-item" v-for="dp,index in dpTree" :dp="dp" :key="dp.Did" @onEdit="onEdit"/>
+            <DepartmentItemComponent class="body list-complete-item" v-for="dp,index in dpTree" :dp="dp" :key="dp.Did" @onEdit="onEdit"
+            />
         </transition-group>
-        <div class="foot">
-            <!-- <button class="confirm btnSmall3" @click="onSubmit()">保存</button> -->
-        </div>
+    </div>
+    <div class="foot">
+        <!-- <button class="confirm btnSmall3" @click="onSubmit()">保存</button> -->
     </div>
 </div>

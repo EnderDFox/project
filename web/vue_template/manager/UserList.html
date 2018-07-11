@@ -1,0 +1,28 @@
+<div class="commonDialog manager" style="min-width:500px; ">
+    <div class="head">
+        <div class="title">成员列表</div>
+        <div class="close" @click="onClose()">x</div>
+    </div>
+    <div class="body">
+        <div v-for="proj,index in projectList" :key="proj.Pid" style="display:inline-block;">
+            <input type="checkbox" :name="proj.Name" :value="proj.Pid" />
+            <span class="checkbox_name">{{proj.Name}}</span>
+        </div>
+    </div>
+    <div class="body" style="height: 300px;overflow-y: scroll;">
+        <div v-for="user,index in userList" :key="user.Uid">
+            <!-- <input type="checkbox" :name="user.Name" :value="user.Uid" /> -->
+            <span class="checkbox_name" style="display: inline-block;padding: 0px; width: 140px;">{{user.Name}}</span>
+            <span>部门</span>
+            <select>
+                <option value="0">无</option>
+                <option v-for="dm in allDepartmentList" style="padding-left: 40px;">{{departmentOption(dm)}}</option>
+            </select>
+            <span>职位</span>
+            <select>
+                <option value="0">无</option>
+                <option v-for="pos in positionList" style="padding-left: 40px;" :value="pos.Posid">{{pos.Name}}</option>
+            </select>
+        </div>
+    </div>
+</div>

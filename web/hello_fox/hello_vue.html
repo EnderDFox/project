@@ -6,6 +6,8 @@
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 	<script src="../js/lib/jquery-3.2.1.min.js"></script>
 	<script src="../js/lib/vue.js"></script>
+	<script src="protobuf/protobuf.js"></script>
+	<script src="protobuf/hellopbjs.proto.js"></script>
 	<style>
 		* {
 			/* box-sizing: content-box; */
@@ -121,7 +123,7 @@
 	</style>
 </head>
 
-<body>
+<body onload="onLoad()">
 	<div class="div1">
 		<input type="checkbox" placeholder="input here" />
 		<input type="text" placeholder="input here" />
@@ -172,6 +174,10 @@
 		<div class="typing_loader typing_loader7"></div>
 	</div>
 	<hr/>
+	<div id="hello_pb">
+		<span v-text="login.account"></span>
+		<span v-text="login.password"></span>
+	</div>
 </body>
 <script type="text/javascript">
 	new Vue({
@@ -217,6 +223,27 @@
 			]
 		}
 	}).$mount('#div2_vue')
+</script>
+<script type="text/javascript">
+	function init2(){
+		console.log("[info]",pb.hellopbjs.Login);
+		var login = new pb.hellopbjs.Login()
+		login.account = `acc0`
+		login.password = `pw0`
+		new Vue({
+			el:"#hello_pb",
+			data:{
+				login:login
+			},
+		})
+		setTimeout(() => {
+			login.account = `acc1`
+			login.password = `pw1`
+		}, 1000);
+	}
+	function onLoad(){
+		init2()
+	}
 </script>
 
 </html>

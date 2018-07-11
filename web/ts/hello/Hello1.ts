@@ -27,5 +27,18 @@ class Hello1{
         console.log("[debug] index:",index) //  [debug] index: 2
 
     }
+    func3():void{
+        var arr:number[] = []
+        for (var i = 0; i < 40; i++) {
+            arr.push(i+1)
+        }
+        console.log("[debug]",arr,`arr`)
+        var arr2:number[] = []
+        for (var i = 0; i < arr.length; i++) {
+            var item = arr[i]
+            arr2.splice(Math.round(Math.random()*arr2.length),0,item)
+        }
+        console.log("[debug]",arr2)
+    }
 }
 new Hello1()

@@ -98,7 +98,17 @@ interface PositionSingle {
     Posid?: int
     Did?: DidField
     Name?: string
-    AuthorityList?:any[]
+    AuthorityList?:AuthoritySingle[]
+}
+interface AuthorityModuleSingle{
+    Modid?:int
+    Name?:string
+    AuthorityList?:AuthoritySingle[]
+}
+interface AuthoritySingle{
+    Aid?:int
+    Modid?:int
+    Name?:string
 }
 
 interface DepartmentInfo {

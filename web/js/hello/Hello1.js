@@ -25,6 +25,19 @@ var Hello1 = /** @class */ (function () {
         });
         console.log("[debug] index:", index); //  [debug] index: 2
     };
+    Hello1.prototype.func3 = function () {
+        var arr = [];
+        for (var i = 0; i < 40; i++) {
+            arr.push(i + 1);
+        }
+        console.log("[debug]", arr, "arr");
+        var arr2 = [];
+        for (var i = 0; i < arr.length; i++) {
+            var item = arr[i];
+            arr2.splice(Math.round(Math.random() * arr2.length), 0, item);
+        }
+        console.log("[debug]", arr2);
+    };
     return Hello1;
 }());
 new Hello1();
