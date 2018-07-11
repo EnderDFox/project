@@ -138,11 +138,6 @@ var CommonClass = /** @class */ (function () {
         var dd = document.getElementById('dynamicDom');
         dd.parentNode.insertBefore(newDom, dd);
     };
-    /**将资源插入pageDom内 */
-    CommonClass.prototype.InsertIntoPageDom = function (newDom) {
-        var dd = document.getElementById('pageDom');
-        dd.appendChild(newDom);
-    };
     /**提示信息*/
     CommonClass.prototype.AlertFloatMsg = function (txt, e) {
         alert(txt);

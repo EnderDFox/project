@@ -64,8 +64,4 @@ var FieldName = /** @class */ (function () {
     FieldName.Tlid = "Tlid";
     return FieldName;
 }());
-var Auth;
-(function (Auth) {
-    Auth[Auth["PROJECT_MANAGE"] = 1] = "PROJECT_MANAGE";
-})(Auth || (Auth = {}));
 //# sourceMappingURL=Define.js.map

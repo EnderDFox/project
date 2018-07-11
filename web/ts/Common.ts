@@ -130,11 +130,6 @@ class CommonClass {
 		var dd = document.getElementById('dynamicDom')
 		dd.parentNode.insertBefore(newDom, dd)
 	}
-	/**将资源插入pageDom内 */
-	InsertIntoPageDom(newDom: HTMLElement): void {
-		var dd = document.getElementById('pageDom')
-		dd.appendChild(newDom)
-	}
 	/**提示信息*/
 	AlertFloatMsg(txt: string, e: MouseEvent): void {
 		alert(txt)
