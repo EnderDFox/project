@@ -1,11 +1,17 @@
+# 登录服务器
+#   ssh root@10.18.97.231 -p 22
+#   密码: 123456
+#---
 # 发布正式服   
 #   sh /root/trunk/src/run.sh pm_proj full r head
 # 发布正式服(仅web)   
 #   sh /root/trunk/src/run.sh pm_proj web r head
+#---
 # 发布beta服   
 #   sh /root/trunk/src/run.sh pm_beta full r head
 # 发布beta服(仅web)   
 #   sh /root/trunk/src/run.sh pm_beta web r head
+#---
 # 发布beta服(目标svn版本379)   
 #   sh /root/trunk/src/run.sh pm_beta full r 379
 
