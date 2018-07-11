@@ -32,6 +32,15 @@ func (this *Common) CreateDir(path string) {
 	} */
 }
 
+func (this *Common) Uint32ArrayJoin(arr []uint32, sep string) string {
+	var strArr []string
+	for _, v := range arr {
+		// strArr = append(strArr, strconv.FormatInt(int64, 10))
+		strArr = append(strArr, strconv.Itoa(int(v)))
+	}
+	return strings.Join(strArr, sep)
+}
+
 func (this *Common) StringArrayIndexOf(arr *[]string, val *string) int {
 	for i, v := range *arr {
 		if *val == v {

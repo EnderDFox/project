@@ -621,7 +621,104 @@ func (this *Process) GetScoreList() []*ScoreSingle {
 }
 
 //进度总览
-func (this *Process) View(BeginDate, EndDate string) bool {
+func (this *Process) View(BeginDate, EndDate string, modeStatus, linkStatus []uint32) bool {
+	//项目
+	project := this.GetProject()
+	var modeStatusSQL string
+	if len(modeStatus) > 0 {
+		modeStatusSQL = `AND status in (` + common.Uint32ArrayJoin(modeStatus, `,`) + `)`
+	} else {
+		modeStatusSQL = ``
+	}
+	log.Println(modeStatusSQL, ":[modeStatusSQL]")
+	var linkStatusSQL string
+	if len(linkStatus) > 0 {
+		linkStatusSQL = `AND t_l.status in (` + common.Uint32ArrayJoin(linkStatus, `,`) + `)`
+	} else {
+		linkStatusSQL = ``
+	}
+	log.Println(linkStatusSQL, ":[linkStatusSQL]")
+	//sql
+	stmt, err := db.GetDb().Prepare(`SELECT
+		t5.*,t_s.quality,t_s.efficiency,t_s.manner,t_s.info
+	FROM
+		(
+			SELECT
+				t3.*, t_w.wid,t_w.date,t_w.status,t_w.tips,t_w.min_num,t_w.max_num,t_w.tag
+			FROM
+				(
+					SELECT
+						t_m.*,t_l.lid,t_l.NAME AS lname,t_l.uid AS luid,t_l.color AS lcolor,t_l.status AS lstatus,t_l.sort AS lsort,t_l.parent_lid AS lparent_lid
+					FROM
+						(
+							SELECT
+								mid,vid,NAME AS mname,color AS mcolor,did AS mdid,status AS mstatus,sort AS msort
+							FROM ` + config.Pm + `.pm_mode WHERE
+								is_del=0 AND pid=?
+								` + modeStatusSQL + `
+						) AS t_m
+					LEFT JOIN ` + config.Pm + `.pm_link AS t_l ON t_m.mid = t_l.mid AND t_l.is_del=0 
+					` + linkStatusSQL + `
+					ORDER BY t_m.msort,t_l.sort
+				) AS t3
+			LEFT JOIN ` + config.Pm + `.pm_work AS t_w ON t3.lid = t_w.lid 
+			AND date >= ? AND date <= ?
+		) AS t5
+	LEFT JOIN ` + config.Pm + `.pm_work_score AS t_s ON t5.wid = t_s.wid`)
+	//
+	defer stmt.Close()
+	db.CheckErr(err)
+	rows, err := stmt.Query(this.owner.GetPid(), BeginDate, EndDate)
+	defer rows.Close()
+	db.CheckErr(err)
+	//
+	var modeList []*ModeSingle
+	var linkList []*LinkSingle
+	var workList []*WorkSingle
+	var scoreList []*ScoreSingle
+	midMap := make(map[uint64]uint64)
+	lidMap := make(map[uint64]uint64)
+	widMap := make(map[uint64]uint64)
+	for rows.Next() {
+		modeSingle := &ModeSingle{}
+		linkSingle := &LinkSingle{}
+		workSingle := &WorkSingle{}
+		scoreSingle := &ScoreSingle{}
+		rows.Scan(&modeSingle.Mid, &modeSingle.Vid, &modeSingle.Name, &modeSingle.Color, &modeSingle.Did, &modeSingle.Status, &modeSingle.Sort, &linkSingle.Lid, &linkSingle.Name, &linkSingle.Uid, &linkSingle.Color, &linkSingle.Status, &linkSingle.Sort, &linkSingle.ParentLid, &workSingle.Wid, &workSingle.Date, &workSingle.Status, &workSingle.Tips, &workSingle.MinNum, &workSingle.MaxNum, &workSingle.Tag, &scoreSingle.Quality, &scoreSingle.Efficiency, &scoreSingle.Manner, &scoreSingle.Info)
+		//
+		linkSingle.Mid = modeSingle.Mid
+		workSingle.Lid = linkSingle.Lid
+		scoreSingle.Wid = workSingle.Wid
+		//
+		if _, ok := midMap[modeSingle.Mid]; !ok {
+			midMap[modeSingle.Mid] = modeSingle.Mid
+			modeList = append(modeList, modeSingle)
+		}
+		if _, ok := lidMap[linkSingle.Lid]; !ok {
+			lidMap[linkSingle.Lid] = linkSingle.Lid
+			linkList = append(linkList, linkSingle)
+		}
+		if _, ok := widMap[workSingle.Wid]; !ok {
+			widMap[workSingle.Wid] = workSingle.Wid
+			workList = append(workList, workSingle)
+		}
+		scoreList = append(scoreList, scoreSingle)
+	}
+	//#L2C
+	data := &L2C_ProcessView{
+		ModeList:    modeList,
+		LinkList:    linkList,
+		WorkList:    workList,
+		ScoreList:   scoreList,
+		Project:     project,
+		VersionList: this.owner.Version().VersionList(),
+	}
+	this.owner.SendTo(L2C_PROCESS_VIEW, data)
+	return true
+}
+
+/* backup
+func (this *Process) View(BeginDate, EndDate string, modeStatus, linkStatus []uint32) bool {
 	//环节
 	linkList := this.GetLinkList()
 	//工作
@@ -642,4 +739,4 @@ func (this *Process) View(BeginDate, EndDate string) bool {
 	}
 	this.owner.SendTo(L2C_PROCESS_VIEW, data)
 	return true
-}
+} */

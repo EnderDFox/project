@@ -338,7 +338,6 @@ func (this *C2L_M_PROCESS_VIEW) execute(client *websocket.Conn, msg *Message) bo
 	if user == nil {
 		return false
 	}
-	log.Println("status:", param.ModeStatus, param.LinkStatus)
-	user.Process().View(param.BeginDate, param.EndDate)
+	user.Process().View(param.BeginDate, param.EndDate, param.ModeStatus, param.LinkStatus)
 	return true
 }
