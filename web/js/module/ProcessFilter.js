@@ -111,8 +111,10 @@ var ProcessFilterClass = /** @class */ (function () {
     //获取发送给服务器的数据
     ProcessFilterClass.prototype.GetSvrPack = function () {
         var param = {
-            'BeginDate': this.Pack.BeginDate,
-            'EndDate': this.Pack.EndDate
+            BeginDate: this.Pack.BeginDate,
+            EndDate: this.Pack.EndDate,
+            ModeStatus: this.Pack.ModeStatus,
+            LinkStatus: this.Pack.LinkStatus,
         };
         return param;
     };
