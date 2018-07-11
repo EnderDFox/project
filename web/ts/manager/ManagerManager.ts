@@ -33,23 +33,20 @@ class ManagerManagerClass {
                 {
                     template: tpl,
                     data: {
-                        projectList: [
-                            { Pid: 1, Name: 'Amazing' },
-                            { Pid: 2, Name: 'Maxwell' },
-                        ],
+                        projectList: ManagerData.ProjectList,
                     },
                     methods: {
                         onClose: function () {
                             $(this.$el).hide()
                         },
                         onEdit: (e, proj: ProjectSingle) => {
-                            this.ShowProjectSingle(proj)
+                            this.ShowProjectEdit(proj)
                         },
                         onDel: (e, proj: ProjectSingle, index: int) => {
                             this.VueProjectList.projectList.splice(index, 1)
                         },
                         onAdd: () => {
-                            this.ShowProjectSingle(null)
+                            this.ShowProjectEdit(null)
                         }
                     },
                 }
@@ -61,7 +58,7 @@ class ManagerManagerClass {
             $(vue.$el).show()
         })
     }
-    ShowProjectSingle(proj: ProjectSingle) {
+    ShowProjectEdit(proj: ProjectSingle) {
         Loader.LoadVueTemplateList([`${this.VuePath}DepartmentItemComponent`, `${this.VuePath}ProjectEdit`], (tplList: string[]) => {
             //注册组件
             Vue.component('DepartmentItemComponent', {
@@ -87,6 +84,7 @@ class ManagerManagerClass {
                         project: proj,
                         dpTree: this.dpTree,
                         newName: proj ? proj.Name : '',
+                        auth: ManagerData.MyAuth,
                     },
                     methods: {
                         onClose: function () {
@@ -110,7 +108,7 @@ class ManagerManagerClass {
             this.VueProjectSingle = vue
             //#show
             Common.InsertBeforeDynamicDom(vue.$el)
-            Common.AlginCenterInWindow(vue.$el)
+            // Common.AlginCenterInWindow(vue.$el)
             $(vue.$el).show()
         })
     }
@@ -185,7 +183,7 @@ class ManagerManagerClass {
                         pos: pos, fullName: pos.Name, newName: pos.Name.toString(),
                         allDepartmentList: this.GetAllDepartmentList(this.dpTree),
                         showKind: 1,
-                        userList: Data.UserList.slice(0, 7),
+                        userList: ManagerData.UserList.slice(0, 7),
                         authorityModuleList: [
                             {
                                 Modid: 1, Name: '模块A', AuthorityList: [
@@ -262,7 +260,7 @@ class ManagerManagerClass {
                             { Pid: 1, Name: 'Amazing' },
                             { Pid: 2, Name: 'Maxwell' },
                         ],
-                        userList: Data.UserList,
+                        userList: ManagerData.UserList,
                         allDepartmentList: this.GetAllDepartmentList(this.dpTree),
                         positionList: [
                             { Posid: 1, Did: 2, Name: '美术主管' },

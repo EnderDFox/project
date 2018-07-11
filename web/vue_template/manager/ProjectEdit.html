@@ -1,24 +1,44 @@
-<div class="commonDialog manager" style="min-width:800px; ">
-    <div class="head">
-        <div class="title">项目-{{project?project.Name:'新项目'}}</div>
-        <div class="close" @click="onClose()">x</div>
-    </div>
-    <div class="body">
-        <input type="text" class="name ver" placeholder="项目名称" :value="newName">
-        <button class="confirm btnSmall3 btnEdit" title="修改名称">修改名称</button>
-    </div>
-    <div class="body">
-        <hr/>
-        <div>
-            <span>部门</span>
-            <button class="cancel btnSmall1" title="增加部门">+</button>
+<nav class="navbar navbar-default">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header" v-if="!auth['PROJECT_MANAGE']">
+            <a class="navbar-brand" href="#">项目B</a>
         </div>
-        <transition-group name="list-complete" tag="ul">
-            <DepartmentItemComponent class="body list-complete-item" v-for="dp,index in dpTree" :dp="dp" :key="dp.Did" @onEdit="onEdit"
-            />
-        </transition-group>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            <ul class="nav navbar-nav">
+                <li class="dropdown" v-if="auth['PROJECT_MANAGE']">
+                    <a href="#" class="dropdown-toggle navbar-brand" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">项目A
+                        <span class="caret"></span>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <a href="#">项目A</a>
+                        </li>
+                        <li>
+                            <a href="#">项目B</a>
+                        </li>
+                        <li role="separator" class="divider"></li>
+                        <li>
+                            <a href="#">管理项目</a>
+                        </li>
+                    </ul>
+                </li>
+                <li class="active">
+                    <a href="#">人员
+                        <span class="sr-only">(current)</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#">部门</a>
+                </li>
+                <li>
+                    <a href="#">职位</a>
+                </li>
+            </ul>
+        </div>
+        <!-- /.navbar-collapse -->
     </div>
-    <div class="foot">
-        <!-- <button class="confirm btnSmall3" @click="onSubmit()">保存</button> -->
-    </div>
-</div>
+    <!-- /.container-fluid -->
+</nav>

@@ -376,3 +376,8 @@ interface L2C_ProcessPublishEdit {
 interface L2C_ProcessPublishDelete {
     DateLine?: string
 }
+
+
+enum Auth {
+    PROJECT_MANAGE = 1
+}
