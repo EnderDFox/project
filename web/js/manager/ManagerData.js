@@ -102,7 +102,7 @@ var ManagerDataClass = /** @class */ (function () {
             },
             {
                 Did: 3, Name: '后端', Depth: 0, Children: [], PositionList: [
-                    { Posid: 300, Did: 2, Name: '前端' },
+                    { Posid: 300, Did: 2, Name: '后端' },
                     { Posid: 301, Did: 2, Name: '后端主管' },
                 ]
             },
@@ -140,6 +140,10 @@ var ManagerDataClass = /** @class */ (function () {
             var dp = dpTree[i];
             if (fid > -1) {
                 dp.Fid = fid;
+                dp.PositionList.every(function (pos) {
+                    pos.AuthorityList = [];
+                    return true;
+                });
             }
             rs.push(dp);
             if (dp.Children.length > 0) {
@@ -161,6 +165,14 @@ var ManagerDataClass = /** @class */ (function () {
             }
         }
         return false;
+    };
+    ManagerDataClass.prototype.GetDepartmentFullNameArr = function (dp) {
+        var rs = [];
+        while (dp) {
+            rs.unshift(dp.Name);
+            dp = this.DepartmentDict[dp.Fid];
+        }
+        return rs;
     };
     return ManagerDataClass;
 }());

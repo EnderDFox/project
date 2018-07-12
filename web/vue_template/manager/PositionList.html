@@ -1,0 +1,81 @@
+<div>
+    <!-- <div v-html="dpFullName(dp)">
+    </div> -->
+    <table class="table">
+        <thead>
+            <tr>
+                <th style="width: 50px;vertical-align: middle;">
+                    部门:
+                </th>
+                <th>
+                    <div class="dropdown">
+                        <button class="btn btn-default dropdown-toggle" type="button" :id="'ddmPosList'" data-toggle="dropdown" aria-haspopup="true"
+                            aria-expanded="true">
+                            {{dp.Name}}
+                            <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu" :aria-labelledby="'ddmPosList'">
+
+                            <li v-for="parentDp in allDepartmentList" :key="parentDp.Did">
+                                <a @click="onEditParentDp(dp,parentDp)">{{departmentOption(parentDp)}}</a>
+                            </li>
+                            <li role="separator " class="divider "></li>
+                        </ul>
+                    </div>
+                </th>
+            </tr>
+        </thead>
+    </table>
+    <!--  -->
+    <table class="table table-hover">
+        <thead>
+            <thead>
+                <tr>
+                    <th style="width: 300px;">职位名称</th>
+                    <th style="width: 160px;">编辑权限</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <transition-group name="list-complete" tag="tbody">
+                <tr class="list-complete-item" v-for="pos,index in dp.PositionList" :key="pos.Posid">
+                    <td>
+                        <input type="text" class="form-control" style="display: inline-block;width: auto;" placeholder="空" aria-describedby="basic-addon1"
+                            :value="pos.Name" @blur="onEditName($event,pos,index)" @keyup.enter="onEditName($event,pos,index)">
+                    </td>
+                    <td>
+                        <button class="btn btn-default " type="submit " @click="onEditAuth(pos,index)
+                            " title="编辑权限 ">
+                            <span class="glyphicon glyphicon-pencil" aria-hidden="true ">
+                                权限({{pos.AuthorityList.length}})
+                            </span>
+                        </button>
+                    </td>
+                    <td>
+                        <button class="btn btn-default " type="submit" @click="onSortDown(pos,index)" :class="{'disabled':!CheckSortDown(pos,index)}">
+                            <span class="glyphicon glyphicon-arrow-down " aria-hidden="true "></span>
+                        </button>
+                        <button class="btn btn-default " type="submit " @click="onSortUp(pos,index) " :class="{'disabled':!CheckSortUp(pos,index)}">
+                            <span class="glyphicon glyphicon-arrow-up " aria-hidden="true "></span>
+                        </button>
+                        <button class="btn btn-default " type="submit ">
+                            <span class="glyphicon glyphicon-remove " aria-hidden="true " @click="onDel($event,pos,index) "></span>
+                        </button>
+                    </td>
+                </tr>
+                <tr :key="0">
+                    <td>
+                        <input type="text " class="form-control " placeholder="输入新职位名称 " aria-describedby="basic-addon1 " v-model.trim="newName"
+                            @keyup.enter="onAdd()" />
+                    </td>
+                    <td>
+                    </td>
+                    <td>
+                        <button class="btn btn-default " type="submit" @click="onAdd() ">
+                            <span class="glyphicon glyphicon-plus " aria-hidden="true "></span>
+                        </button>
+                    </td>
+                </tr>
+            </transition-group>
+        </thead>
+    </table>
+</div>

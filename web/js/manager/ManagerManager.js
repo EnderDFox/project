@@ -48,8 +48,9 @@ var ManagerManagerClass = /** @class */ (function () {
                         // this.ShowProjectEdit(null)
                         _this.VueProjectList.projectList.push({
                             Pid: _this.VueProjectList.projectList[_this.VueProjectList.projectList.length - 1].Pid + 1,
-                            Name: _this.VueProjectList.newName,
+                            Name: _this.VueProjectList.newName.toString(),
                         });
+                        _this.VueProjectList.newName = '';
                     }
                 },
             }).$mount();
@@ -61,26 +62,9 @@ var ManagerManagerClass = /** @class */ (function () {
     };
     ManagerManagerClass.prototype.ShowProjectEdit = function (proj) {
         var _this = this;
-        Loader.LoadVueTemplateList([this.VuePath + "DepartmentItemComponent", this.VuePath + "ProjectEdit"], function (tplList) {
-            //注册组件
-            Vue.component('DepartmentItemComponent', {
-                template: tplList[0],
-                props: {
-                    dp: Object
-                },
-                data: function () {
-                    return {};
-                },
-                methods: {
-                    onEdit: function (dp) {
-                        // console.log("[debug,this is comp]",dp.Name,":[dp]")
-                        this.$emit('onEdit', dp);
-                    }
-                }
-            });
-            //
+        Loader.LoadVueTemplateList([this.VuePath + "ProjectEdit"], function (tplList) {
             var vue = new Vue({
-                template: tplList[1],
+                template: tplList[0],
                 data: {
                     project: proj,
                     projectList: ManagerData.ProjectList,
@@ -140,26 +124,13 @@ var ManagerManagerClass = /** @class */ (function () {
                         var dp = ManagerData.DepartmentDict[did];
                         return dp ? dp.Name : '选择上级部门';
                     },
-                    departmentOption: function (dp) {
-                        if (dp.Depth == 0) {
-                            return dp.Name;
-                        }
-                        else {
-                            var rs = '';
-                            for (var i = 0; i < dp.Depth; i++) {
-                                rs += ' -';
-                            }
-                            // rs += '└';
-                            rs += dp.Name;
-                            return rs;
-                        }
-                    },
+                    departmentOption: _this.DepartmentOption.bind(_this),
                     onEditName: function (e, dp, i0) {
                         var newName = e.target.value;
                         dp.Name = newName;
                     },
                     onEditPosition: function (dp, i0) {
-                        _this.ShowPositionEdit(dp);
+                        _this.ShowPositionList(dp);
                     },
                     CheckShowEditParentDp: _this.CheckShowEditParentDp.bind(_this),
                     onEditParentDp: function (dp, parentDp) {
@@ -251,11 +222,12 @@ var ManagerManagerClass = /** @class */ (function () {
                     },
                     onAdd: function () {
                         var dp = {
-                            Did: _this.NewDepartmentUuid, Name: _this.VueDepartmentList.newName, Depth: 0, Children: [], PositionList: [
-                                { Posid: _this.NewPositionUuid, Did: _this.NewDepartmentUuid, Name: _this.VueDepartmentList.newName },
+                            Did: _this.NewDepartmentUuid, Name: _this.VueDepartmentList.newName.toString(), Depth: 0, Children: [], PositionList: [
+                                { Posid: _this.NewPositionUuid, Did: _this.NewDepartmentUuid, Name: _this.VueDepartmentList.newName.toString(), AuthorityList: [] },
                             ],
                             Fid: 0,
                         };
+                        _this.VueDepartmentList.newName = '';
                         _this.NewDepartmentUuid++;
                         _this.NewPositionUuid++;
                         ManagerData.DepartmentDict[dp.Did] = dp;
@@ -265,7 +237,7 @@ var ManagerManagerClass = /** @class */ (function () {
                     onAddChild: function (parentDp, i0) {
                         var dp = {
                             Did: _this.NewDepartmentUuid, Name: "", Depth: parentDp.Depth + 1, Children: [], PositionList: [
-                                { Posid: _this.NewPositionUuid, Did: _this.NewDepartmentUuid, Name: "" },
+                                { Posid: _this.NewPositionUuid, Did: _this.NewDepartmentUuid, Name: "", AuthorityList: [] },
                             ],
                             Fid: parentDp.Did
                         };
@@ -283,6 +255,20 @@ var ManagerManagerClass = /** @class */ (function () {
             Common.InsertIntoDom(vue.$el, '#projectEditContent');
             $(vue.$el).show();
         });
+    };
+    ManagerManagerClass.prototype.DepartmentOption = function (dp) {
+        if (dp.Depth == 0) {
+            return dp.Name;
+        }
+        else {
+            var rs = '';
+            for (var i = 0; i < dp.Depth; i++) {
+                rs += '-';
+            }
+            // rs += '└';
+            rs += dp.Name;
+            return rs;
+        }
     };
     ManagerManagerClass.prototype.CheckSortDown = function (dp, i0) {
         var children;
@@ -324,50 +310,71 @@ var ManagerManagerClass = /** @class */ (function () {
         }
         return true;
     };
-    ManagerManagerClass.prototype.ShowPositionEdit = function (pos) {
+    ManagerManagerClass.prototype.ShowPositionList = function (dp) {
         var _this = this;
-        Loader.LoadVueTemplate(this.VuePath + "PositionEdit", function (tpl) {
+        Loader.LoadVueTemplate(this.VuePath + "PositionList", function (tpl) {
             var vue = new Vue({
                 template: tpl,
                 data: {
-                    pos: pos, fullName: pos.Name,
+                    dp: dp,
                     newName: "",
                     allDepartmentList: ManagerData.DepartmentList,
-                    showKind: 1,
-                    userList: ManagerData.UserList.slice(0, 7),
                     authorityModuleList: ManagerData.AuthorityModuleList,
                 },
                 methods: {
-                    departmentOption: function (dp) {
-                        if (dp.Depth == 0) {
-                            return dp.Name;
-                        }
-                        else {
-                            var rs = '';
-                            for (var i = 0; i < dp.Depth; i++) {
-                                rs += '-';
+                    dpFullName: function (dp) {
+                        var rs = [];
+                        var parentDp = dp;
+                        while (parentDp) {
+                            if (parentDp.Did == dp.Did) {
+                                rs.unshift("<li class=\"active\">" + parentDp.Name + "</li>");
                             }
-                            // rs += '└';
-                            rs += dp.Name;
-                            return rs;
+                            else {
+                                rs.unshift("<li>" + parentDp.Name + "</li>");
+                            }
+                            parentDp = ManagerData.DepartmentDict[parentDp.Fid];
+                        }
+                        return "<ol class=\"breadcrumb\">\n                                        " + rs.join("") + "\n                                    </ol>";
+                    },
+                    departmentOption: _this.DepartmentOption.bind(_this),
+                    onEditParentDp: function (dp, parentDp) {
+                        _this.ShowPositionList(parentDp);
+                    },
+                    onEditName: function (e, pos, index) {
+                        var newName = e.target.value;
+                        pos.Name = newName;
+                    },
+                    onEditAuth: function (pos, index) {
+                    },
+                    CheckSortDown: function (pos, index) {
+                        return index < dp.PositionList.length - 1;
+                    },
+                    CheckSortUp: function (pos, index) {
+                        return index > 0;
+                    },
+                    onSortDown: function (pos, index) {
+                        if (index < dp.PositionList.length - 1) {
+                            dp.PositionList.splice(index + 1, 0, dp.PositionList.splice(index, 1)[0]);
                         }
                     },
-                    onClose: function () {
-                        $(this.$el).hide();
-                    },
-                    onEdit: function (e, pos) {
-                        _this.ShowPositionEdit(pos);
+                    onSortUp: function (pos, index) {
+                        if (index > 0) {
+                            dp.PositionList.splice(index - 1, 0, dp.PositionList.splice(index, 1)[0]);
+                        }
                     },
                     onDel: function (e, pos, index) {
+                        dp.PositionList.splice(index, 1);
                     },
                     onAdd: function () {
-                    }
+                        var pos = { Posid: _this.NewPositionUuid++, Did: dp.Did, Name: _this.VuePositionList.newName.toString(), AuthorityList: [] };
+                        _this.VuePositionList.newName = '';
+                        dp.PositionList.push(pos);
+                    },
                 },
             }).$mount();
-            _this.VuePositionEdit = vue;
+            _this.VuePositionList = vue;
             //#show
             Common.InsertIntoDom(vue.$el, '#projectEditContent');
-            $(vue.$el).show();
         });
     };
     ManagerManagerClass.prototype.ShowUserList = function (proj) {
@@ -390,9 +397,14 @@ var ManagerManagerClass = /** @class */ (function () {
                     ShowPosName: function (did, posid) {
                         var dp = ManagerData.DepartmentDict[did];
                         if (dp) {
-                            var pos = ArrayUtil.FindOfAttr(dp.PositionList, FieldName.Posid, posid);
-                            console.log("[debug]", posid, ":[posid]", pos, ":[pos]");
-                            return pos ? pos.Name : '--';
+                            if (posid > 0) {
+                                var pos = ArrayUtil.FindOfAttr(dp.PositionList, FieldName.Posid, posid);
+                                // console.log("[debug]", posid, ":[posid]", pos, ":[pos]")
+                                return pos ? pos.Name : '--';
+                            }
+                            else {
+                                return '空';
+                            }
                         }
                         else {
                             return '空';
@@ -417,20 +429,7 @@ var ManagerManagerClass = /** @class */ (function () {
                             return [];
                         }
                     },
-                    departmentOption: function (dp) {
-                        if (dp.Depth == 0) {
-                            return dp.Name;
-                        }
-                        else {
-                            var rs = '';
-                            for (var i = 0; i < dp.Depth; i++) {
-                                rs += '-';
-                            }
-                            // rs += '└';
-                            rs += dp.Name;
-                            return rs;
-                        }
-                    },
+                    departmentOption: _this.DepartmentOption.bind(_this),
                     onDpChange: function (user, dp) {
                         user.Did = dp.Did;
                         if (dp.PositionList.length > 0) {

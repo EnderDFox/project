@@ -39,7 +39,8 @@
                 <td>
                 </td>
                 <td>
-                    <input type="text" class="form-control" placeholder="输入新项目名称" aria-describedby="basic-addon1" v-model.trim="newName" />
+                    <input type="text" class="form-control" placeholder="输入新项目名称" aria-describedby="basic-addon1" v-model.trim="newName" @keyup.enter="onAdd()"
+                    />
                 </td>
                 <td>
                     <button class="btn btn-default" type="submit" @click="onAdd()">

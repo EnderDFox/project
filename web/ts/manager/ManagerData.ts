@@ -107,7 +107,7 @@ class ManagerDataClass {
             },
             {
                 Did: 3, Name: '后端', Depth: 0, Children: [], PositionList: [
-                    { Posid: 300, Did: 2, Name: '前端' },
+                    { Posid: 300, Did: 2, Name: '后端' },
                     { Posid: 301, Did: 2, Name: '后端主管' },
                 ]
             },
@@ -144,6 +144,10 @@ class ManagerDataClass {
             var dp = dpTree[i]
             if (fid > -1) {
                 dp.Fid = fid;
+                dp.PositionList.every((pos: PositionSingle) => {
+                    pos.AuthorityList = []
+                    return true
+                })
             }
             rs.push(dp)
             if (dp.Children.length > 0) {
@@ -164,6 +168,14 @@ class ManagerDataClass {
             }
         }
         return false
+    }
+    GetDepartmentFullNameArr(dp: DepartmentSingle): string[] {
+        var rs: string[] = []
+        while (dp) {
+            rs.unshift(dp.Name)
+            dp = this.DepartmentDict[dp.Fid]
+        }
+        return rs
     }
 }
 var ManagerData = new ManagerDataClass()

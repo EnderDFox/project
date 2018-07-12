@@ -12,7 +12,7 @@ class ManagerManagerClass {
     VueDepartmentList: CombinedVueInstance1<{ allDepartmentList: DepartmentSingle[], newName: string }>
     NewDepartmentUuid = 100001
     NewPositionUuid = 200001
-    VuePositionEdit: CombinedVueInstance1<{ newName: string }>
+    VuePositionList: CombinedVueInstance1<{ newName: string }>
     Show() {
         // this.ShowPositionSingle({ Posid: 2, Did: 2, Name: 'UI' })
         // this.ShowUserList()
@@ -52,9 +52,10 @@ class ManagerManagerClass {
                             this.VueProjectList.projectList.push(
                                 {
                                     Pid: this.VueProjectList.projectList[this.VueProjectList.projectList.length - 1].Pid + 1,
-                                    Name: this.VueProjectList.newName,
+                                    Name: this.VueProjectList.newName.toString(),
                                 }
                             )
+                            this.VueProjectList.newName = ''
                         }
                     },
                 }
@@ -66,27 +67,10 @@ class ManagerManagerClass {
         })
     }
     ShowProjectEdit(proj: ProjectSingle) {
-        Loader.LoadVueTemplateList([`${this.VuePath}DepartmentItemComponent`, `${this.VuePath}ProjectEdit`], (tplList: string[]) => {
-            //注册组件
-            Vue.component('DepartmentItemComponent', {
-                template: tplList[0],
-                props: {
-                    dp: Object
-                },
-                data: function () {
-                    return {}
-                },
-                methods: {
-                    onEdit: function (dp: DepartmentSingle) {
-                        // console.log("[debug,this is comp]",dp.Name,":[dp]")
-                        this.$emit('onEdit', dp)
-                    }
-                }
-            })
-            //
+        Loader.LoadVueTemplateList([`${this.VuePath}ProjectEdit`], (tplList: string[]) => {
             var vue = new Vue(
                 {
-                    template: tplList[1],
+                    template: tplList[0],
                     data: {
                         project: proj,
                         projectList: ManagerData.ProjectList,
@@ -147,25 +131,13 @@ class ManagerManagerClass {
                             var dp = ManagerData.DepartmentDict[did]
                             return dp ? dp.Name : '选择上级部门'
                         },
-                        departmentOption: (dp: DepartmentSingle) => {
-                            if (dp.Depth == 0) {
-                                return dp.Name
-                            } else {
-                                var rs: string = ''
-                                for (var i = 0; i < dp.Depth; i++) {
-                                    rs += ' -'
-                                }
-                                // rs += '└';
-                                rs += dp.Name
-                                return rs
-                            }
-                        },
+                        departmentOption: this.DepartmentOption.bind(this),
                         onEditName: (e: Event, dp: DepartmentSingle, i0: int) => {
                             var newName = (e.target as HTMLInputElement).value
                             dp.Name = newName
                         },
                         onEditPosition: (dp: DepartmentSingle, i0: int) => {
-                            this.ShowPositionEdit(dp)
+                            this.ShowPositionList(dp)
                         },
                         CheckShowEditParentDp: this.CheckShowEditParentDp.bind(this),
                         onEditParentDp: (dp: DepartmentSingle, parentDp: DepartmentSingle) => {
@@ -255,11 +227,12 @@ class ManagerManagerClass {
                         },
                         onAdd: () => {
                             var dp: DepartmentSingle = {
-                                Did: this.NewDepartmentUuid, Name: this.VueDepartmentList.newName, Depth: 0, Children: [], PositionList: [
-                                    { Posid: this.NewPositionUuid, Did: this.NewDepartmentUuid, Name: this.VueDepartmentList.newName },//给一个默认的职位
+                                Did: this.NewDepartmentUuid, Name: this.VueDepartmentList.newName.toString(), Depth: 0, Children: [], PositionList: [
+                                    { Posid: this.NewPositionUuid, Did: this.NewDepartmentUuid, Name: this.VueDepartmentList.newName.toString(), AuthorityList: [] },//给一个默认的职位
                                 ],
                                 Fid: 0,
                             }
+                            this.VueDepartmentList.newName = ''
                             this.NewDepartmentUuid++
                             this.NewPositionUuid++
                             ManagerData.DepartmentDict[dp.Did] = dp
@@ -269,7 +242,7 @@ class ManagerManagerClass {
                         onAddChild: (parentDp: DepartmentSingle, i0: int) => {
                             var dp: DepartmentSingle = {
                                 Did: this.NewDepartmentUuid, Name: ``, Depth: parentDp.Depth + 1, Children: [], PositionList: [
-                                    { Posid: this.NewPositionUuid, Did: this.NewDepartmentUuid, Name: `` },//给一个默认的职位
+                                    { Posid: this.NewPositionUuid, Did: this.NewDepartmentUuid, Name: ``, AuthorityList: [] },//给一个默认的职位
                                 ],
                                 Fid: parentDp.Did
                             }
@@ -288,6 +261,19 @@ class ManagerManagerClass {
             Common.InsertIntoDom(vue.$el, '#projectEditContent')
             $(vue.$el).show()
         })
+    }
+    DepartmentOption(dp: DepartmentSingle) {
+        if (dp.Depth == 0) {
+            return dp.Name
+        } else {
+            var rs: string = ''
+            for (var i = 0; i < dp.Depth; i++) {
+                rs += '-'
+            }
+            // rs += '└';
+            rs += dp.Name
+            return rs
+        }
     }
     CheckSortDown(dp: DepartmentSingle, i0: int) {
         var children: DepartmentSingle[]
@@ -327,50 +313,75 @@ class ManagerManagerClass {
         }
         return true
     }
-    ShowPositionEdit(pos: PositionSingle) {
-        Loader.LoadVueTemplate(this.VuePath + "PositionEdit", (tpl: string) => {
+    ShowPositionList(dp: DepartmentSingle) {
+        Loader.LoadVueTemplate(this.VuePath + "PositionList", (tpl: string) => {
             var vue = new Vue(
                 {
                     template: tpl,
                     data: {
-                        pos: pos, fullName: pos.Name,
+                        dp: dp,
                         newName: ``,
                         allDepartmentList: ManagerData.DepartmentList,
-                        showKind: 1,
-                        userList: ManagerData.UserList.slice(0, 7),
                         authorityModuleList: ManagerData.AuthorityModuleList,
                     },
                     methods: {
-                        departmentOption: (dp: DepartmentSingle) => {
-                            if (dp.Depth == 0) {
-                                return dp.Name
-                            } else {
-                                var rs: string = ''
-                                for (var i = 0; i < dp.Depth; i++) {
-                                    rs += '-'
+                        dpFullName: (dp: DepartmentSingle) => {
+                            var rs: string[] = []
+                            var parentDp = dp
+                            while (parentDp) {
+                                if (parentDp.Did == dp.Did) {
+                                    rs.unshift(`<li class="active">${parentDp.Name}</li>`)
+                                } else {
+                                    rs.unshift(`<li>${parentDp.Name}</li>`)
                                 }
-                                // rs += '└';
-                                rs += dp.Name
-                                return rs
+                                parentDp = ManagerData.DepartmentDict[parentDp.Fid]
+                            }
+                            return `<ol class="breadcrumb">
+                                        ${rs.join(``)}
+                                    </ol>`
+                        },
+                        departmentOption: this.DepartmentOption.bind(this),
+                        onEditParentDp: (dp: DepartmentSingle, parentDp: DepartmentSingle) => {
+                            this.ShowPositionList(parentDp)
+                        },
+                        onEditName: (e: Event, pos: PositionSingle, index: number) => {
+                            var newName = (e.target as HTMLInputElement).value
+                            pos.Name = newName
+                        },
+                        onEditAuth: (pos: PositionSingle, index: number) => {
+                            
+                        },
+                        CheckSortDown: (pos: PositionSingle, index: int) => {
+                            return index < dp.PositionList.length - 1
+                        },
+                        CheckSortUp: (pos: PositionSingle, index: int) => {
+                            return index > 0
+
+                        },
+                        onSortDown: (pos: PositionSingle, index: int) => {
+                            if (index < dp.PositionList.length - 1) {
+                                dp.PositionList.splice(index + 1, 0, dp.PositionList.splice(index, 1)[0])
                             }
                         },
-                        onClose: function () {
-                            $(this.$el).hide()
-                        },
-                        onEdit: (e, pos: PositionSingle) => {
-                            this.ShowPositionEdit(pos)
+                        onSortUp: (pos: PositionSingle, index: int) => {
+                            if (index > 0) {
+                                dp.PositionList.splice(index - 1, 0, dp.PositionList.splice(index, 1)[0])
+                            }
                         },
                         onDel: (e, pos: PositionSingle, index: int) => {
+                            dp.PositionList.splice(index, 1)
                         },
                         onAdd: () => {
-                        }
+                            var pos: PositionSingle = { Posid: this.NewPositionUuid++, Did: dp.Did, Name: this.VuePositionList.newName.toString(), AuthorityList: [] }
+                            this.VuePositionList.newName = ''
+                            dp.PositionList.push(pos)
+                        },
                     },
                 }
             ).$mount()
-            this.VuePositionEdit = vue
+            this.VuePositionList = vue
             //#show
             Common.InsertIntoDom(vue.$el, '#projectEditContent')
-            $(vue.$el).show()
         })
     }
     ShowUserList(proj: ProjectSingle) {
@@ -393,9 +404,13 @@ class ManagerManagerClass {
                         ShowPosName: (did: number, posid: number): string => {
                             var dp = ManagerData.DepartmentDict[did]
                             if (dp) {
-                                var pos: PositionSingle = ArrayUtil.FindOfAttr(dp.PositionList, FieldName.Posid, posid) as PositionSingle
-                                console.log("[debug]", posid, ":[posid]", pos, ":[pos]")
-                                return pos ? pos.Name : '--'
+                                if(posid>0){
+                                    var pos: PositionSingle = ArrayUtil.FindOfAttr(dp.PositionList, FieldName.Posid, posid) as PositionSingle
+                                    // console.log("[debug]", posid, ":[posid]", pos, ":[pos]")
+                                    return pos ? pos.Name : '--'
+                                }else{
+                                    return '空'
+                                }
                             } else {
                                 return '空'
                             }
@@ -418,19 +433,7 @@ class ManagerManagerClass {
                                 return []
                             }
                         },
-                        departmentOption: (dp: DepartmentSingle) => {
-                            if (dp.Depth == 0) {
-                                return dp.Name
-                            } else {
-                                var rs: string = ''
-                                for (var i = 0; i < dp.Depth; i++) {
-                                    rs += '-'
-                                }
-                                // rs += '└';
-                                rs += dp.Name
-                                return rs
-                            }
-                        },
+                        departmentOption: this.DepartmentOption.bind(this),
                         onDpChange: (user: UserSingle, dp: DepartmentSingle) => {
                             user.Did = dp.Did
                             if (dp.PositionList.length > 0) {

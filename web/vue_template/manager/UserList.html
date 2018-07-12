@@ -43,9 +43,6 @@
                                 <span class="caret"></span>
                             </button>
                             <ul class="dropdown-menu" :aria-labelledby="'ddmUserListDid'+index">
-                                <li>
-                                    <a @click="user.Posid=0">空</a>
-                                </li>
                                 <li v-for="pos in GetPosList(user.Did)" :key="pos.Posid">
                                     <a @click="user.Posid=pos.Posid">{{pos.Name}}</a>
                                 </li>
