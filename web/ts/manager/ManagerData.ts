@@ -33,34 +33,35 @@ class ManagerDataClass {
         this.AuthorityModuleList = [
             {
                 Modid: 1, Name: '模块A', AuthorityList: [
-                    { Aid: 101, Name: '权限A1' },
-                    { Aid: 102, Name: '权限A2' },
-                    { Aid: 103, Name: '权限A3' },
-                    { Aid: 104, Name: '权限A4' },
-                    { Aid: 105, Name: '权限A5' },
-                    { Aid: 106, Name: '权限A6' },
-                    { Aid: 107, Name: '权限A7' },
-                    { Aid: 108, Name: '权限A8' },
-                    { Aid: 109, Name: '权限A9' },
-                    { Aid: 110, Name: '权限A10' },
+                    { Authid: 101, Name: '权限A1' },
+                    { Authid: 102, Name: '权限A2' },
+                    { Authid: 103, Name: '权限A3' },
+                    { Authid: 104, Name: '权限A4' },
+                    { Authid: 105, Name: '权限A5' },
+                    { Authid: 106, Name: '权限A6' },
+                    { Authid: 107, Name: '权限A7' },
+                    { Authid: 108, Name: '权限A8' },
+                    { Authid: 109, Name: '权限A9' },
+                    { Authid: 110, Name: '权限A10' },
                 ]
             },
             {
                 Modid: 2, Name: '模块B', AuthorityList: [
-                    { Aid: 21, Name: '权限B1' },
-                    { Aid: 22, Name: '权限B2' },
+                    { Authid: 21, Name: '权限B1' },
+                    { Authid: 22, Name: '权限B2' },
                 ]
             },
             {
                 Modid: 3, Name: '模块C', AuthorityList: [
-                    { Aid: 31, Name: '权限C1' },
-                    { Aid: 32, Name: '权限C2' },
-                    { Aid: 33, Name: '权限C3' },
-                    { Aid: 34, Name: '权限C4' },
-                    { Aid: 35, Name: '权限C5' },
+                    { Authid: 31, Name: '权限C1' },
+                    { Authid: 32, Name: '权限C2' },
+                    { Authid: 33, Name: '权限C3' },
+                    { Authid: 34, Name: '权限C4' },
+                    { Authid: 35, Name: '权限C5' },
                 ]
             },
         ]
+        this.InitAuthorityModuleList()
         //#project
         this.ProjectList = [
             { Pid: 1, Name: '项目A' },
@@ -123,6 +124,18 @@ class ManagerDataClass {
         this.InitAllDepartmentDict()
         this.DepartmentList = []
         this.GetAllDepartmentList(this.DepartmentTree, 0, this.DepartmentList)
+    }
+
+    InitAuthorityModuleList() {
+        var amList = this.AuthorityModuleList
+        for (var i = 0; i < amList.length; i++) {
+            var am = amList[i]
+            am.CheckedChange = false
+            for (var j = 0; j < am.AuthorityList.length; j++) {
+                var auth = am.AuthorityList[j]
+                auth.CheckedChange = false
+            }
+        }
     }
 
     InitAllDepartmentDict(dpTree: DepartmentSingle[] = null) {

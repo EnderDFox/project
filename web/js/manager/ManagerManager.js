@@ -9,6 +9,7 @@ var ManagerManagerClass = /** @class */ (function () {
         this.VuePath = "manager/";
         this.NewDepartmentUuid = 100001;
         this.NewPositionUuid = 200001;
+        /**职位 - 权限列表 */
     }
     ManagerManagerClass.prototype.Show = function () {
         // this.ShowPositionSingle({ Posid: 2, Did: 2, Name: 'UI' })
@@ -253,7 +254,8 @@ var ManagerManagerClass = /** @class */ (function () {
             _this.VueDepartmentList = vue;
             //#show
             Common.InsertIntoDom(vue.$el, '#projectEditContent');
-            $(vue.$el).show();
+            //TODO:
+            _this.ShowPositionList(ManagerData.DepartmentList[0]);
         });
     };
     ManagerManagerClass.prototype.DepartmentOption = function (dp) {
@@ -319,7 +321,6 @@ var ManagerManagerClass = /** @class */ (function () {
                     dp: dp,
                     newName: "",
                     allDepartmentList: ManagerData.DepartmentList,
-                    authorityModuleList: ManagerData.AuthorityModuleList,
                 },
                 methods: {
                     dpFullName: function (dp) {
@@ -345,6 +346,7 @@ var ManagerManagerClass = /** @class */ (function () {
                         pos.Name = newName;
                     },
                     onEditAuth: function (pos, index) {
+                        _this.ShowAuthList(pos);
                     },
                     CheckSortDown: function (pos, index) {
                         return index < dp.PositionList.length - 1;
@@ -375,6 +377,84 @@ var ManagerManagerClass = /** @class */ (function () {
             _this.VuePositionList = vue;
             //#show
             Common.InsertIntoDom(vue.$el, '#projectEditContent');
+        });
+    };
+    ManagerManagerClass.prototype.ShowAuthList = function (pos) {
+        var _this = this;
+        Loader.LoadVueTemplate(this.VuePath + "AuthList", function (tpl) {
+            var selectedAuthDict = {};
+            for (var i = 0; i < pos.AuthorityList.length; i++) {
+                var auth = pos.AuthorityList[i];
+                selectedAuthDict[auth.Authid] = auth;
+            }
+            var _checkModChecked = function (_, mod) {
+                // console.log("[debug]", '_checkAllModSelected')
+                for (var i = 0; i < mod.AuthorityList.length; i++) {
+                    var auth = mod.AuthorityList[i];
+                    if (!selectedAuthDict[auth.Authid]) {
+                        return false;
+                    }
+                }
+                return true;
+            };
+            var vue = new Vue({
+                template: tpl,
+                data: {
+                    pos: pos,
+                    authorityModuleList: ManagerData.AuthorityModuleList,
+                    checkedChange: false,
+                },
+                methods: {
+                    checkModChecked: _checkModChecked.bind(_this),
+                    checkAuthChecked: function (_, auth) {
+                        // console.log("[debug] checkAuthSelected", auth.Authid, selectedAuthDict[auth.Authid])
+                        return selectedAuthDict[auth.Authid] != null;
+                    },
+                    onSwitchMod: function (mod) {
+                        var allSelected = _checkModChecked(null, mod);
+                        for (var i = 0; i < mod.AuthorityList.length; i++) {
+                            var auth = mod.AuthorityList[i];
+                            if (allSelected) {
+                                delete selectedAuthDict[auth.Authid];
+                            }
+                            else {
+                                selectedAuthDict[auth.Authid] = auth;
+                            }
+                        }
+                        _this.VueAuthList.checkedChange = !_this.VueAuthList.checkedChange;
+                    },
+                    onSwitchAuth: function (e, auth) {
+                        if (selectedAuthDict[auth.Authid]) {
+                            delete selectedAuthDict[auth.Authid];
+                        }
+                        else {
+                            selectedAuthDict[auth.Authid] = auth;
+                        }
+                        // auth.CheckedChange = !auth.CheckedChange
+                        _this.VueAuthList.checkedChange = !_this.VueAuthList.checkedChange;
+                    },
+                    onSave: function () {
+                        pos.AuthorityList.splice(0, pos.AuthorityList.length);
+                        for (var authIdStr in selectedAuthDict) {
+                            pos.AuthorityList.push(selectedAuthDict[authIdStr]);
+                        }
+                    },
+                    onReset: function () {
+                        for (var authIdStr in selectedAuthDict) {
+                            delete selectedAuthDict[authIdStr];
+                        }
+                        for (var i = 0; i < pos.AuthorityList.length; i++) {
+                            var auth = pos.AuthorityList[i];
+                            selectedAuthDict[auth.Authid] = auth;
+                        }
+                        _this.VueAuthList.checkedChange = !_this.VueAuthList.checkedChange;
+                    },
+                },
+            }).$mount();
+            _this.VueAuthList = vue;
+            // $(vue.$el).alert('close');
+            Common.InsertBeforeDynamicDom(vue.$el);
+            Common.AlginCenterInWindow(vue.$el);
         });
     };
     ManagerManagerClass.prototype.ShowUserList = function (proj) {

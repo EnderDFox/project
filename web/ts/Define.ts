@@ -109,11 +109,15 @@ interface AuthorityModuleSingle {
     Modid?: int
     Name?: string
     AuthorityList?: AuthoritySingle[]
+    //client
+    CheckedChange?:boolean
 }
 interface AuthoritySingle {
-    Aid?: int
+    Authid?: int
     Modid?: int
     Name?: string
+    //client
+    CheckedChange?:boolean
 }
 
 interface DepartmentInfo {

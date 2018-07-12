@@ -1,0 +1,78 @@
+<!--   <div class="alert panel panel-primary" role="alert" style="position: absolute;"></div>
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">×</span>
+        </button>
+        <div class="panel-heading">Panel heading without title</div>
+        <div class="panel-body">
+            Panel content
+        </div>
+    </div> -->
+<div class="alert alert-info alert-dismissible fade in" role="alert" style="position: absolute;">
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">×</span>
+    </button>
+    <h4>编辑权限</h4>
+    <p style="background-color:#FFFFFF; ">
+        <table class="table table-hover table-bordered">
+            <thead>
+                <tr>
+                    <th style="width: 100px;">模块</th>
+                    <th style="width: 160px;">权限</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr v-for="am,index in authorityModuleList" :key="am.Modid">
+                    <td>
+                        <div class="checkbox">
+                            <label>
+                                <input type="checkbox" :name="am.Name" :value="am.Modid" :key="am.Modid" :checked="checkModChecked(checkedChange,am)" @click="onSwitchMod(am)" /> {{am.Name}}
+                            </label>
+                        </div>
+                    </td>
+                    <td>
+                        <div v-for="auth,index in am.AuthorityList" :key="auth.Authid" style="display:inline-block;">
+                            <div class="checkbox">
+                                <label>
+                                    <input type="checkbox" :name="auth.Name" :value="auth.Uid" :checked="checkAuthChecked(checkedChange,auth)" @click="onSwitchAuth($event,auth)" > {{auth.Name}}
+                                </label>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </p>
+    <p>
+        <button type="button" class="btn btn-info" @click="onSave()">保存</button>
+        <button type="button" class="btn btn-default"  @click="onReset()">还原</button>
+    </p>
+</div>
+<!-- <div style="position: absolute;">
+    <div class="head">
+        <div class="title">职位</div>
+        <div class="close" @click="onClose()">x</div>
+    </div>
+    <div class="body">
+        <hr/>
+        <div>
+            <table cellspacing="0">
+                <tr v-for="am,index in authorityModuleList" :key="am.Modid">
+                    <td style="width: 80px;border: 1px solid #cacaca;">
+                        <input type="checkbox" :name="am.Name" :value="am.Modid" :key="am.Modid" />
+                        <span class="checkbox_name">{{am.Name}}</span>
+                    </td>
+                    <td style="width: 460px;border: 1px solid #cacaca;">
+                        <div v-for="auth,index in am.AuthorityList" :key="auth.Authid" style="display:inline-block;">
+                            <input type="checkbox" :name="auth.Name" :value="auth.Uid" />
+                            <span class="checkbox_name">{{auth.Name}}</span>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+            <button class="confirm btnSmall3 btnEdit">保存</button>
+            <button class="confirm btnSmall3 btnEdit">还原</button>
+        </div>
+    </div>
+    <div class="foot">
+</div>
+</div> -->

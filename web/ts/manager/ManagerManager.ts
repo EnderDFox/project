@@ -13,6 +13,7 @@ class ManagerManagerClass {
     NewDepartmentUuid = 100001
     NewPositionUuid = 200001
     VuePositionList: CombinedVueInstance1<{ newName: string }>
+    VueAuthList: CombinedVueInstance1<{ checkedChange: boolean }>
     Show() {
         // this.ShowPositionSingle({ Posid: 2, Did: 2, Name: 'UI' })
         // this.ShowUserList()
@@ -259,7 +260,8 @@ class ManagerManagerClass {
             this.VueDepartmentList = vue
             //#show
             Common.InsertIntoDom(vue.$el, '#projectEditContent')
-            $(vue.$el).show()
+            //TODO:
+            this.ShowPositionList(ManagerData.DepartmentList[0])
         })
     }
     DepartmentOption(dp: DepartmentSingle) {
@@ -322,7 +324,6 @@ class ManagerManagerClass {
                         dp: dp,
                         newName: ``,
                         allDepartmentList: ManagerData.DepartmentList,
-                        authorityModuleList: ManagerData.AuthorityModuleList,
                     },
                     methods: {
                         dpFullName: (dp: DepartmentSingle) => {
@@ -349,7 +350,7 @@ class ManagerManagerClass {
                             pos.Name = newName
                         },
                         onEditAuth: (pos: PositionSingle, index: number) => {
-                            
+                            this.ShowAuthList(pos)
                         },
                         CheckSortDown: (pos: PositionSingle, index: int) => {
                             return index < dp.PositionList.length - 1
@@ -384,6 +385,81 @@ class ManagerManagerClass {
             Common.InsertIntoDom(vue.$el, '#projectEditContent')
         })
     }
+    ShowAuthList(pos: PositionSingle) {
+        Loader.LoadVueTemplate(this.VuePath + "AuthList", (tpl: string) => {
+            var selectedAuthDict: { [key: number]: AuthoritySingle } = {};
+            for (var i = 0; i < pos.AuthorityList.length; i++) {
+                var auth: AuthoritySingle = pos.AuthorityList[i]
+                selectedAuthDict[auth.Authid] = auth
+            }
+            var _checkModChecked = (_, mod: AuthorityModuleSingle): boolean => {
+                // console.log("[debug]", '_checkAllModSelected')
+                for (var i = 0; i < mod.AuthorityList.length; i++) {
+                    var auth = mod.AuthorityList[i]
+                    if (!selectedAuthDict[auth.Authid]) {
+                        return false
+                    }
+                }
+                return true
+            }
+            var vue = new Vue({
+                template: tpl,
+                data: {
+                    pos: pos,
+                    authorityModuleList: ManagerData.AuthorityModuleList,
+                    checkedChange: false,//为了让check函数被触发
+                },
+                methods: {
+                    checkModChecked: _checkModChecked.bind(this),
+                    checkAuthChecked: (_, auth: AuthoritySingle): boolean => {
+                        // console.log("[debug] checkAuthSelected", auth.Authid, selectedAuthDict[auth.Authid])
+                        return selectedAuthDict[auth.Authid] != null
+                    },
+                    onSwitchMod: (mod: AuthorityModuleSingle) => {
+                        var allSelected = _checkModChecked(null, mod)
+                        for (var i = 0; i < mod.AuthorityList.length; i++) {
+                            var auth = mod.AuthorityList[i]
+                            if (allSelected) {
+                                delete selectedAuthDict[auth.Authid]
+                            } else {
+                                selectedAuthDict[auth.Authid] = auth
+                            }
+                        }
+                        this.VueAuthList.checkedChange = !this.VueAuthList.checkedChange
+                    },
+                    onSwitchAuth: (e: Event, auth: AuthoritySingle) => {
+                        if (selectedAuthDict[auth.Authid]) {
+                            delete selectedAuthDict[auth.Authid]
+                        } else {
+                            selectedAuthDict[auth.Authid] = auth
+                        }
+                        // auth.CheckedChange = !auth.CheckedChange
+                        this.VueAuthList.checkedChange = !this.VueAuthList.checkedChange
+                    },
+                    onSave: () => {
+                        pos.AuthorityList.splice(0, pos.AuthorityList.length)
+                        for (var authIdStr in selectedAuthDict) {
+                            pos.AuthorityList.push(selectedAuthDict[authIdStr])
+                        }
+                    },
+                    onReset: () => {
+                        for (var authIdStr in selectedAuthDict) {
+                            delete selectedAuthDict[authIdStr]
+                        }
+                        for (var i = 0; i < pos.AuthorityList.length; i++) {
+                            var auth: AuthoritySingle = pos.AuthorityList[i]
+                            selectedAuthDict[auth.Authid] = auth
+                        }
+                        this.VueAuthList.checkedChange = !this.VueAuthList.checkedChange
+                    },
+                },
+            }).$mount()
+            this.VueAuthList = vue
+            // $(vue.$el).alert('close');
+            Common.InsertBeforeDynamicDom(vue.$el)
+            Common.AlginCenterInWindow(vue.$el)
+        })
+    }
     ShowUserList(proj: ProjectSingle) {
         this.VueProjectEdit.currPage = ProjectEditPage.User
         Loader.LoadVueTemplate(this.VuePath + "UserList", (tpl: string) => {
@@ -404,11 +480,11 @@ class ManagerManagerClass {
                         ShowPosName: (did: number, posid: number): string => {
                             var dp = ManagerData.DepartmentDict[did]
                             if (dp) {
-                                if(posid>0){
+                                if (posid > 0) {
                                     var pos: PositionSingle = ArrayUtil.FindOfAttr(dp.PositionList, FieldName.Posid, posid) as PositionSingle
                                     // console.log("[debug]", posid, ":[posid]", pos, ":[pos]")
                                     return pos ? pos.Name : '--'
-                                }else{
+                                } else {
                                     return '空'
                                 }
                             } else {
@@ -466,6 +542,8 @@ class ManagerManagerClass {
             $(vue.$el).show()
         })
     }
+    /**职位 - 权限列表 */
+
 }
 
 var ManagerManager = new ManagerManagerClass()
