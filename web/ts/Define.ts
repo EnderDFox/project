@@ -386,5 +386,5 @@ interface L2C_ProcessPublishDelete {
 
 
 enum Auth {
-    PROJECT_MANAGE = 1
+    PROJECT_LIST = 1
 }

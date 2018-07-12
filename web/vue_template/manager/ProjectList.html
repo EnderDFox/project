@@ -11,6 +11,7 @@
         <thead>
             <thead>
                 <tr>
+                    <th style="width: 30px;">PID</th>
                     <th>
                         项目名称
                     </th>
@@ -22,6 +23,9 @@
         </thead>
         <transition-group name="list-complete" tag="tbody">
             <tr class="list-complete-item" v-for="proj,index in projectList" :key="proj.Pid">
+                <td class="td_id">
+                    {{proj.Pid}}
+                </td>
                 <td>
                     <input type="text" class="form-control" placeholder="Username" aria-describedby="basic-addon1" :value="proj.Name" @blur="onEditName($event,proj,index)"
                         @keyup.enter="onEditName($event,proj,index)">
@@ -36,6 +40,8 @@
                 </td>
             </tr>
             <tr key="0">
+                <td>
+                </td>
                 <td>
                     <input type="text" class="form-control" placeholder="Username" aria-describedby="basic-addon1"> </td>
                 </td>

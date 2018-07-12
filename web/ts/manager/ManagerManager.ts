@@ -1,4 +1,8 @@
 /** 管理项目 部门 职位 权限 */
+enum ProjectEditPage {
+    User = 1,
+    Department = 2,
+}
 
 class ManagerManagerClass {
     VuePath = "manager/"
@@ -20,7 +24,8 @@ class ManagerManagerClass {
         { Did: 4, Name: '前端', depth: 0, Children: [] },
     ]
     VueProjectList: CombinedVueInstance1<{ projectList: ProjectSingle[] }>
-    VueProjectEdit: CombinedVueInstance1<{ project: ProjectSingle, newName: string, dpTree: DepartmentSingle[] }>
+    VueProjectEdit: CombinedVueInstance1<{ project: ProjectSingle, newName: string, dpTree: DepartmentSingle[], currPage: ProjectEditPage }>
+    VueUserList: CombinedVueInstance1<{}>
     VueDepartmentSingle: CombinedVueInstance1<{ department: DepartmentSingle, fullName: string, newName: string, allDepartmentList: DepartmentSingle[], positionList: PositionSingle[] }>
     Show() {
         this.ShowProjectList()
@@ -70,8 +75,7 @@ class ManagerManagerClass {
             ).$mount()
             this.VueProjectList = vue
             //#show
-            Common.InsertBeforeDynamicDom(vue.$el)
-            Common.AlginCenterInWindow(vue.$el)
+            Common.InsertIntoPageDom(vue.$el)
             $(vue.$el).show()
         })
     }
@@ -99,20 +103,33 @@ class ManagerManagerClass {
                     template: tplList[1],
                     data: {
                         project: proj,
+                        projectList: ManagerData.ProjectList,
                         dpTree: this.dpTree,
                         newName: proj ? proj.Name : '',
                         auth: ManagerData.MyAuth,
+                        currPage: ProjectEditPage.User,
                     },
                     methods: {
                         onClose: function () {
                             $(this.$el).hide()
                         },
-                        onEditName: () => {
-
+                        onEditProj: (e, proj: ProjectSingle, index: number) => {
+                            this.ShowProjectEdit(proj)
                         },
                         onEnterProjMg: () => {
                             $(this.VueProjectEdit.$el).hide()
                             this.ShowProjectList()
+                        },
+                        onSelectPage: (page: ProjectEditPage) => {
+                            this.VueProjectEdit.currPage = page;
+                            switch (page) {
+                                case ProjectEditPage.User:
+                                    this.ShowUserList(this.VueProjectEdit.project)
+                                    break;
+                                    case ProjectEditPage.Department:
+                                    this.ShowDepartmentList(this.VueProjectEdit.project)
+                                    break;
+                            }
                         },
                         // onEdit: (e, dp: DepartmentSingle) => {
                         onEdit: (dp: DepartmentSingle) => {
@@ -129,9 +146,10 @@ class ManagerManagerClass {
             this.VueProjectEdit = vue
             //#show
             Common.InsertIntoPageDom(vue.$el)
-            // Common.AlginCenterInWindow(vue.$el)
             $(vue.$el).show()
         })
+    }
+    ShowDepartmentList(proj:ProjectSingle) {
     }
     ShowDepartmentSingle(dp: DepartmentSingle) {
         Loader.LoadVueTemplate(this.VuePath + "DepartmentEdit", (tpl: string) => {
@@ -271,16 +289,12 @@ class ManagerManagerClass {
             $(vue.$el).show()
         })
     }
-    ShowUserList() {
+    ShowUserList(proj:ProjectSingle) {
         Loader.LoadVueTemplate(this.VuePath + "UserList", (tpl: string) => {
             var vue = new Vue(
                 {
                     template: tpl,
                     data: {
-                        projectList: [
-                            { Pid: 1, Name: 'Amazing' },
-                            { Pid: 2, Name: 'Maxwell' },
-                        ],
                         userList: ManagerData.UserList,
                         allDepartmentList: this.GetAllDepartmentList(this.dpTree),
                         positionList: [
@@ -314,10 +328,9 @@ class ManagerManagerClass {
                     },
                 }
             ).$mount()
-            // this.VueDepartmentSingle = vue
+            this.VueUserList = vue
             //#show
-            Common.InsertBeforeDynamicDom(vue.$el)
-            Common.AlginCenterInWindow(vue.$el)
+            Common.InsertIntoDom(vue.$el,'#projectEditContent')
             $(vue.$el).show()
         })
     }

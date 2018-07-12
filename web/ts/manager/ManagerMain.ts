@@ -2,8 +2,11 @@ class ManagerMainClass {
     Init(): void {
         ManagerData.Init()
         //
-        ManagerManager.ShowProjectList()
-        // ManagerManager.ShowProjectEdit(ManagerData.ProjectList[0])
+        if(ManagerData.MyAuth[Auth.PROJECT_LIST]){
+            ManagerManager.ShowProjectList()
+        }else{
+            ManagerManager.ShowProjectEdit(ManagerData.ProjectList[0])//没有项目管理权限
+        }
     }
 }
 var ManagerMain = new ManagerMainClass()

@@ -1,45 +1,43 @@
-<nav class="navbar navbar-default">
-    <div class="container-fluid">
-        <!-- Brand and toggle get grouped for better mobile display -->
-        <!-- <div class="navbar-header" v-if="!auth['PROJECT_MANAGE']">
+<div>
+    <nav class="navbar navbar-default">
+        <div class="container-fluid">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <!-- <div class="navbar-header" v-if="!auth['PROJECT_LIST']">
             <a class="navbar-brand" href="#">项目B</a>
         </div> -->
 
-        <!-- Collect the nav links, forms, and other content for toggling -->
-        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-            <ul class="nav navbar-nav">
-                <li class="dropdown">
-                    <a class="dropdown-toggle navbar-brand" :data-toggle="auth['PROJECT_MANAGE']?'dropdown':'label'" :style="{'cursor':
-                    auth['PROJECT_MANAGE']?'pointer':'default'}" role="button" aria-haspopup="true" aria-expanded="false">项目A
-                        <span class="caret" v-if="auth['PROJECT_MANAGE']"></span>
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li>
-                            <a href="#">项目A</a>
-                        </li>
-                        <li>
-                            <a href="#">项目B</a>
-                        </li>
-                        <li role="separator" class="divider"></li>
-                        <li>
-                            <a @click="onEnterProjMg()"><span class="glyphicon glyphicon-tasks" aria-hidden="true"></span> 管理项目</a>
-                        </li>
-                    </ul>
-                </li>
-                <li class="active">
-                    <a href="#">人员
-                        <span class="sr-only">(current)</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="#">部门</a>
-                </li>
-                <li>
-                    <a href="#">职位</a>
-                </li>
-            </ul>
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav">
+                    <li class="dropdown">
+                        <a class="dropdown-toggle navbar-brand" :data-toggle="auth['PROJECT_LIST']?'dropdown':'label'" :style="{'cursor':
+                    auth['PROJECT_LIST']?'pointer':'default'}" role="button" aria-haspopup="true" aria-expanded="false">{{project.Name}}
+                            <span class="caret" v-if="auth['PROJECT_LIST']"></span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li v-for="proj,index in projectList" :key="proj.Pid">
+                                <a @click="onEditProj($event,proj,index)">{{proj.Name}}</a>
+                            </li>
+                            <li role="separator" class="divider"></li>
+                            <li>
+                                <a @click="onEnterProjMg()">
+                                    <span class="glyphicon glyphicon-tasks" aria-hidden="true"></span> 管理项目</a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li :class="{'active':currPage==1}">
+                        <a @click="onSelectPage(1)">人员
+
+                        </a>
+                    </li>
+                    <li :class="{'active':currPage==2}">
+                        <a @click="onSelectPage(2)">部门
+                        </a>
+                    </li>
+                </ul>
+            </div>
         </div>
-        <!-- /.navbar-collapse -->
+    </nav>
+    <div id="projectEditContent">
     </div>
-    <!-- /.container-fluid -->
-</nav>
+</div>

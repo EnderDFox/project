@@ -81,7 +81,7 @@ var CommonClass = /** @class */ (function () {
         return false;
     };
     CommonClass.prototype.Warning = function () {
-        var _a, _b, _c;
+        var _a, _b, _d;
         var args = [];
         for (var _i = 0; _i < arguments.length; _i++) {
             args[_i] = arguments[_i];
@@ -99,7 +99,7 @@ var CommonClass = /** @class */ (function () {
                 _b = [args[0], args[1]], func = _b[0], txt = _b[1];
             }
             else {
-                _c = [args[0], args[1]], evt = _c[0], txt = _c[1];
+                _d = [args[0], args[1]], evt = _d[0], txt = _d[1];
             }
         }
         else if (args.length == 1) {
@@ -139,8 +139,14 @@ var CommonClass = /** @class */ (function () {
         dd.parentNode.insertBefore(newDom, dd);
     };
     /**将资源插入pageDom内 */
+    CommonClass.prototype.InsertIntoDom = function (newDom, container) {
+        var _c = typeof (container) == 'string' ? $(container).get(0) : container;
+        _c.innerHTML = '';
+        _c.appendChild(newDom);
+    };
     CommonClass.prototype.InsertIntoPageDom = function (newDom) {
         var dd = document.getElementById('pageDom');
+        dd.innerHTML = ''; //清空先
         dd.appendChild(newDom);
     };
     /**提示信息*/

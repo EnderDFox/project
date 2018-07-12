@@ -131,8 +131,14 @@ class CommonClass {
 		dd.parentNode.insertBefore(newDom, dd)
 	}
 	/**将资源插入pageDom内 */
+	InsertIntoDom(newDom: HTMLElement,container:string|HTMLElement): void {
+		var _c:HTMLElement = typeof(container)=='string'?$(container).get(0):container as HTMLElement;
+		_c.innerHTML = ''
+		_c.appendChild(newDom)
+	}
 	InsertIntoPageDom(newDom: HTMLElement): void {
 		var dd = document.getElementById('pageDom')
+		dd.innerHTML = ''//清空先
 		dd.appendChild(newDom)
 	}
 	/**提示信息*/
