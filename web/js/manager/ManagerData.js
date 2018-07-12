@@ -23,8 +23,39 @@ var ManagerDataClass = /** @class */ (function () {
                 this.MyAuth[authCode] = this.MyAuth[Auth[authCode]] = true;
             }
         }
-        //
         Object.freeze(this.MyAuth);
+        //#
+        this.AuthorityModuleList = [
+            {
+                Modid: 1, Name: '模块A', AuthorityList: [
+                    { Aid: 101, Name: '权限A1' },
+                    { Aid: 102, Name: '权限A2' },
+                    { Aid: 103, Name: '权限A3' },
+                    { Aid: 104, Name: '权限A4' },
+                    { Aid: 105, Name: '权限A5' },
+                    { Aid: 106, Name: '权限A6' },
+                    { Aid: 107, Name: '权限A7' },
+                    { Aid: 108, Name: '权限A8' },
+                    { Aid: 109, Name: '权限A9' },
+                    { Aid: 110, Name: '权限A10' },
+                ]
+            },
+            {
+                Modid: 2, Name: '模块B', AuthorityList: [
+                    { Aid: 21, Name: '权限B1' },
+                    { Aid: 22, Name: '权限B2' },
+                ]
+            },
+            {
+                Modid: 3, Name: '模块C', AuthorityList: [
+                    { Aid: 31, Name: '权限C1' },
+                    { Aid: 32, Name: '权限C2' },
+                    { Aid: 33, Name: '权限C3' },
+                    { Aid: 34, Name: '权限C4' },
+                    { Aid: 35, Name: '权限C5' },
+                ]
+            },
+        ];
         //#project
         this.ProjectList = [
             { Pid: 1, Name: '项目A' },
@@ -85,6 +116,8 @@ var ManagerDataClass = /** @class */ (function () {
         //
         this.DepartmentDict = {};
         this.InitAllDepartmentDict();
+        this.DepartmentList = [];
+        this.GetAllDepartmentList(this.DepartmentTree, 0, this.DepartmentList);
     };
     ManagerDataClass.prototype.InitAllDepartmentDict = function (dpTree) {
         if (dpTree === void 0) { dpTree = null; }
@@ -97,11 +130,12 @@ var ManagerDataClass = /** @class */ (function () {
             }
         }
     };
-    ManagerDataClass.prototype.GetAllDepartmentList = function (dpTree, fid) {
-        if (dpTree === void 0) { dpTree = null; }
-        if (fid === void 0) { fid = 0; }
-        dpTree ? null : dpTree = this.DepartmentTree;
-        var rs = [];
+    ManagerDataClass.prototype.RefreshAllDepartmentList = function () {
+        this.DepartmentList.splice(0, this.DepartmentList.length);
+        this.GetAllDepartmentList(this.DepartmentTree, 0, this.DepartmentList);
+    };
+    ManagerDataClass.prototype.GetAllDepartmentList = function (dpTree, fid, rs) {
+        if (rs === void 0) { rs = []; }
         for (var i = 0; i < dpTree.length; i++) {
             var dp = dpTree[i];
             if (fid > -1) {
@@ -109,7 +143,7 @@ var ManagerDataClass = /** @class */ (function () {
             }
             rs.push(dp);
             if (dp.Children.length > 0) {
-                rs = rs.concat(this.GetAllDepartmentList(dp.Children, dp.Did));
+                this.GetAllDepartmentList(dp.Children, dp.Did, rs);
             }
         }
         return rs;

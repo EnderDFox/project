@@ -7,6 +7,8 @@ var ProjectEditPage;
 var ManagerManagerClass = /** @class */ (function () {
     function ManagerManagerClass() {
         this.VuePath = "manager/";
+        this.NewDepartmentUuid = 100001;
+        this.NewPositionUuid = 200001;
     }
     ManagerManagerClass.prototype.Show = function () {
         // this.ShowPositionSingle({ Posid: 2, Did: 2, Name: 'UI' })
@@ -18,6 +20,7 @@ var ManagerManagerClass = /** @class */ (function () {
             var vue = new Vue({
                 template: tpl,
                 data: {
+                    newName: '',
                     projectList: ManagerData.ProjectList,
                 },
                 methods: {
@@ -45,7 +48,7 @@ var ManagerManagerClass = /** @class */ (function () {
                         // this.ShowProjectEdit(null)
                         _this.VueProjectList.projectList.push({
                             Pid: _this.VueProjectList.projectList[_this.VueProjectList.projectList.length - 1].Pid + 1,
-                            Name: "\u7A7A" + _this.VueProjectList.projectList.length,
+                            Name: _this.VueProjectList.newName,
                         });
                     }
                 },
@@ -108,11 +111,6 @@ var ManagerManagerClass = /** @class */ (function () {
                                 break;
                         }
                     },
-                    // onEdit: (e, dp: DepartmentSingle) => {
-                    onEdit: function (dp) {
-                        // console.log("[debug]",dp.Name,dp.Did)
-                        _this.ShowDepartmentSingle(dp);
-                    },
                     onDel: function (e, proj, index) {
                     },
                     onSubmit: function () {
@@ -134,8 +132,8 @@ var ManagerManagerClass = /** @class */ (function () {
             var vue = new Vue({
                 template: tpl,
                 data: {
-                    allDepartmentList: ManagerData.GetAllDepartmentList(),
-                    newDpName: '',
+                    allDepartmentList: ManagerData.DepartmentList,
+                    newName: '',
                 },
                 methods: {
                     ShowParentDpName: function (did) {
@@ -156,56 +154,127 @@ var ManagerManagerClass = /** @class */ (function () {
                             return rs;
                         }
                     },
-                    onEditName: function () {
+                    onEditName: function (e, dp, i0) {
+                        var newName = e.target.value;
+                        dp.Name = newName;
                     },
-                    CheckShowEditParentDp: function (dp, parentDp) {
-                        if (dp.Did == parentDp.Did) {
-                            return false;
-                        }
-                        if (dp.Fid == parentDp.Did) {
-                            return false;
-                        }
-                        if (ManagerData.IsDepartmentChild(dp, parentDp)) {
-                            return false;
-                        }
-                        return true;
+                    onEditPosition: function (dp, i0) {
+                        _this.ShowPositionEdit(dp);
                     },
+                    CheckShowEditParentDp: _this.CheckShowEditParentDp.bind(_this),
                     onEditParentDp: function (dp, parentDp) {
+                        if (parentDp == null) {
+                            if (dp.Fid == 0) {
+                                return; //已经是顶级职位了
+                            }
+                        }
+                        if (!_this.CheckShowEditParentDp(dp, parentDp)) {
+                            return;
+                        }
                         var currParentDp = ManagerData.DepartmentDict[dp.Fid];
                         if (currParentDp != null) {
                             ArrayUtil.RemoveByAttr(currParentDp.Children, FieldName.Did, dp.Did);
                         }
+                        var allDpList = _this.VueDepartmentList.allDepartmentList;
                         if (parentDp == null) {
                             //顶级部门
                             dp.Fid = 0;
                             dp.Depth = 0;
-                            var i0 = ArrayUtil.IndexOfAttr(_this.VueDepartmentList.allDepartmentList, FieldName.Did, dp.Did);
-                            _this.VueDepartmentList.allDepartmentList.splice(i0, 1)[0];
-                            _this.VueDepartmentList.allDepartmentList.push(dp);
+                            var i0 = ArrayUtil.IndexOfAttr(allDpList, FieldName.Did, dp.Did);
+                            allDpList.splice(i0, 1)[0];
+                            allDpList.push(dp);
                         }
                         else {
                             dp.Fid = parentDp.Did;
                             dp.Depth = parentDp.Depth + 1;
                             parentDp.Children.push(dp);
                             //
-                            var i0 = ArrayUtil.IndexOfAttr(_this.VueDepartmentList.allDepartmentList, FieldName.Did, dp.Did);
-                            _this.VueDepartmentList.allDepartmentList.splice(i0, 1)[0];
-                            var i1 = ArrayUtil.IndexOfAttr(_this.VueDepartmentList.allDepartmentList, FieldName.Did, parentDp.Did);
+                            var i0 = ArrayUtil.IndexOfAttr(allDpList, FieldName.Did, dp.Did);
+                            allDpList.splice(i0, 1)[0];
+                            var i1 = ArrayUtil.IndexOfAttr(allDpList, FieldName.Did, parentDp.Did);
                             var allChildrenLen = ManagerData.GetAllDepartmentList(parentDp.Children, -1).length;
-                            _this.VueDepartmentList.allDepartmentList.splice(i1 + allChildrenLen, 0, dp);
+                            allDpList.splice(i1 + allChildrenLen, 0, dp);
                         }
                     },
-                    onDel: function (e, user, index) {
-                        proj.UserList.splice(index, 1);
-                        _this.VueUserList.otherUserList = ArrayUtil.SubByAttr(ManagerData.UserList, proj.UserList, FieldName.Uid);
+                    CheckSortDown: _this.CheckSortDown.bind(_this),
+                    CheckSortUp: _this.CheckSortUp.bind(_this),
+                    onSortDown: function (e, dp, i0) {
+                        if (!_this.CheckSortDown(dp, i0)) {
+                            return;
+                        }
+                        var children;
+                        if (dp.Fid) {
+                            children = ManagerData.DepartmentDict[dp.Fid].Children;
+                        }
+                        else {
+                            children = ManagerData.DepartmentTree;
+                        }
+                        var childIndex = ArrayUtil.IndexOfAttr(children, FieldName.Did, dp.Did);
+                        var brother = children[childIndex + 1];
+                        children.splice(childIndex, 1);
+                        children.splice(childIndex + 1, 0, dp);
+                        //
+                        ManagerData.RefreshAllDepartmentList();
+                        // var allDpList = this.VueDepartmentList.allDepartmentList
+                        // var i1 = ArrayUtil.IndexOfAttr(allDpList, FieldName.Did, brother.Did)
+                        // allDpList.splice(i1, 0, allDpList.splice(i0, 1)[0])
+                    },
+                    onSortUp: function (e, dp, i0) {
+                        if (!_this.CheckSortUp(dp, i0)) {
+                            return;
+                        }
+                        var children;
+                        if (dp.Fid) {
+                            children = ManagerData.DepartmentDict[dp.Fid].Children;
+                        }
+                        else {
+                            children = ManagerData.DepartmentTree;
+                        }
+                        var childIndex = ArrayUtil.IndexOfAttr(children, FieldName.Did, dp.Did);
+                        children.splice(childIndex, 1);
+                        children.splice(childIndex - 1, 0, dp);
+                        //
+                        ManagerData.RefreshAllDepartmentList();
+                    },
+                    onDel: function (e, dp, i0) {
+                        var children;
+                        if (dp.Fid) {
+                            children = ManagerData.DepartmentDict[dp.Fid].Children;
+                        }
+                        else {
+                            children = ManagerData.DepartmentTree;
+                        }
+                        var childIndex = ArrayUtil.IndexOfAttr(children, FieldName.Did, dp.Did);
+                        children.splice(childIndex, 1);
+                        //
+                        ManagerData.RefreshAllDepartmentList();
                     },
                     onAdd: function () {
-                        var newUser = ArrayUtil.FindOfAttr(_this.VueUserList.otherUserList, FieldName.Uid, _this.VueUserList.newUserUid);
-                        if (newUser) {
-                            proj.UserList.push(newUser);
-                            _this.VueUserList.newUserUid = 0;
-                            _this.VueUserList.otherUserList = ArrayUtil.SubByAttr(ManagerData.UserList, proj.UserList, FieldName.Uid);
-                        }
+                        var dp = {
+                            Did: _this.NewDepartmentUuid, Name: _this.VueDepartmentList.newName, Depth: 0, Children: [], PositionList: [
+                                { Posid: _this.NewPositionUuid, Did: _this.NewDepartmentUuid, Name: _this.VueDepartmentList.newName },
+                            ],
+                            Fid: 0,
+                        };
+                        _this.NewDepartmentUuid++;
+                        _this.NewPositionUuid++;
+                        ManagerData.DepartmentDict[dp.Did] = dp;
+                        ManagerData.DepartmentTree.push(dp);
+                        ManagerData.DepartmentList.push(dp);
+                    },
+                    onAddChild: function (parentDp, i0) {
+                        var dp = {
+                            Did: _this.NewDepartmentUuid, Name: "", Depth: parentDp.Depth + 1, Children: [], PositionList: [
+                                { Posid: _this.NewPositionUuid, Did: _this.NewDepartmentUuid, Name: "" },
+                            ],
+                            Fid: parentDp.Did
+                        };
+                        _this.NewDepartmentUuid++;
+                        _this.NewPositionUuid++;
+                        ManagerData.DepartmentDict[dp.Did] = dp;
+                        parentDp.Children.push(dp);
+                        var allDpList = _this.VueDepartmentList.allDepartmentList;
+                        allDpList.splice(i0 + ManagerData.GetAllDepartmentList(parentDp.Children, -1).length, 0, dp);
                     },
                 },
             }).$mount();
@@ -215,95 +284,58 @@ var ManagerManagerClass = /** @class */ (function () {
             $(vue.$el).show();
         });
     };
-    ManagerManagerClass.prototype.ShowDepartmentSingle = function (dp) {
-        var _this = this;
-        Loader.LoadVueTemplate(this.VuePath + "DepartmentEdit", function (tpl) {
-            var vue = new Vue({
-                template: tpl,
-                data: {
-                    department: dp, fullName: dp.Name, newName: dp.Name,
-                    allDepartmentList: ManagerData.GetAllDepartmentList(),
-                    positionList: [
-                        { Posid: 1, Did: 2, Name: '美术主管' },
-                        { Posid: 2, Did: 2, Name: 'UI' },
-                        { Posid: 3, Did: 2, Name: '原画' },
-                        { Posid: 4, Did: 2, Name: '角色' },
-                    ],
-                },
-                methods: {
-                    departmentOption: function (dp) {
-                        if (dp.Depth == 0) {
-                            return dp.Name;
-                        }
-                        else {
-                            var rs = '';
-                            for (var i = 0; i < dp.Depth; i++) {
-                                rs += '-';
-                            }
-                            // rs += '└';
-                            rs += dp.Name;
-                            return rs;
-                        }
-                    },
-                    onClose: function () {
-                    },
-                    onEdit: function (e, pos) {
-                        _this.ShowPositionSingle(pos);
-                    },
-                    onDel: function (e, pos, index) {
-                    },
-                    onAdd: function () {
-                    }
-                },
-            }).$mount();
-            _this.VueDepartmentSingle = vue;
-            //#show
-            Common.InsertBeforeDynamicDom(vue.$el);
-            Common.AlginCenterInWindow(vue.$el);
-            $(vue.$el).show();
-        });
+    ManagerManagerClass.prototype.CheckSortDown = function (dp, i0) {
+        var children;
+        if (dp.Fid) {
+            children = ManagerData.DepartmentDict[dp.Fid].Children;
+        }
+        else {
+            children = ManagerData.DepartmentTree;
+        }
+        var childIndex = ArrayUtil.IndexOfAttr(children, FieldName.Did, dp.Did);
+        if (childIndex < children.length - 1) {
+            return true;
+        }
+        return false;
     };
-    ManagerManagerClass.prototype.ShowPositionSingle = function (pos) {
+    ManagerManagerClass.prototype.CheckSortUp = function (dp, i0) {
+        var children;
+        if (dp.Fid) {
+            children = ManagerData.DepartmentDict[dp.Fid].Children;
+        }
+        else {
+            children = ManagerData.DepartmentTree;
+        }
+        var childIndex = ArrayUtil.IndexOfAttr(children, FieldName.Did, dp.Did);
+        if (childIndex > 0) {
+            return true;
+        }
+        return false;
+    };
+    ManagerManagerClass.prototype.CheckShowEditParentDp = function (dp, parentDp) {
+        if (dp.Did == parentDp.Did) {
+            return false;
+        }
+        if (dp.Fid == parentDp.Did) {
+            return false;
+        }
+        if (ManagerData.IsDepartmentChild(dp, parentDp)) {
+            return false;
+        }
+        return true;
+    };
+    ManagerManagerClass.prototype.ShowPositionEdit = function (pos) {
         var _this = this;
         Loader.LoadVueTemplate(this.VuePath + "PositionEdit", function (tpl) {
             var vue = new Vue({
                 template: tpl,
                 data: {
-                    pos: pos, fullName: pos.Name, newName: pos.Name.toString(),
-                    allDepartmentList: ManagerData.GetAllDepartmentList(),
+                    pos: pos, fullName: pos.Name,
+                    newName: "",
+                    allDepartmentList: ManagerData.DepartmentList,
                     showKind: 1,
                     userList: ManagerData.UserList.slice(0, 7),
-                    authorityModuleList: [
-                        {
-                            Modid: 1, Name: '模块A', AuthorityList: [
-                                { Aid: 101, Name: '权限A1' },
-                                { Aid: 102, Name: '权限A2' },
-                                { Aid: 103, Name: '权限A3' },
-                                { Aid: 104, Name: '权限A4' },
-                                { Aid: 105, Name: '权限A5' },
-                                { Aid: 106, Name: '权限A6' },
-                                { Aid: 107, Name: '权限A7' },
-                                { Aid: 108, Name: '权限A8' },
-                                { Aid: 109, Name: '权限A9' },
-                                { Aid: 110, Name: '权限A10' },
-                            ]
-                        },
-                        {
-                            Modid: 2, Name: '模块B', AuthorityList: [
-                                { Aid: 21, Name: '权限B1' },
-                                { Aid: 22, Name: '权限B2' },
-                            ]
-                        },
-                        {
-                            Modid: 3, Name: '模块C', AuthorityList: [
-                                { Aid: 31, Name: '权限C1' },
-                                { Aid: 32, Name: '权限C2' },
-                                { Aid: 33, Name: '权限C3' },
-                                { Aid: 34, Name: '权限C4' },
-                                { Aid: 35, Name: '权限C5' },
-                            ]
-                        },
-                    ]
+                    authorityModuleList: ManagerData.AuthorityModuleList,
                 },
                 methods: {
                     departmentOption: function (dp) {
@@ -324,7 +356,7 @@ var ManagerManagerClass = /** @class */ (function () {
                         $(this.$el).hide();
                     },
                     onEdit: function (e, pos) {
-                        _this.ShowPositionSingle(pos);
+                        _this.ShowPositionEdit(pos);
                     },
                     onDel: function (e, pos, index) {
                     },
@@ -332,10 +364,9 @@ var ManagerManagerClass = /** @class */ (function () {
                     }
                 },
             }).$mount();
-            // this.VueDepartmentSingle = vue
+            _this.VuePositionEdit = vue;
             //#show
-            Common.InsertBeforeDynamicDom(vue.$el);
-            Common.AlginCenterInWindow(vue.$el);
+            Common.InsertIntoDom(vue.$el, '#projectEditContent');
             $(vue.$el).show();
         });
     };
@@ -348,7 +379,7 @@ var ManagerManagerClass = /** @class */ (function () {
                 data: {
                     otherUserList: ArrayUtil.SubByAttr(ManagerData.UserList, proj.UserList, FieldName.Uid),
                     userList: proj.UserList,
-                    allDepartmentList: ManagerData.GetAllDepartmentList(),
+                    allDepartmentList: ManagerData.DepartmentList,
                     newUserUid: 0,
                 },
                 methods: {

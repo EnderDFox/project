@@ -23,7 +23,7 @@
                     {{proj.Pid}}
                 </td>
                 <td>
-                    <input type="text" class="form-control" placeholder="Username" aria-describedby="basic-addon1" :value="proj.Name" @blur="onEditName($event,proj,index)"
+                    <input type="text" class="form-control" placeholder="空" aria-describedby="basic-addon1" :value="proj.Name" @blur="onEditName($event,proj,index)"
                         @keyup.enter="onEditName($event,proj,index)">
                 </td>
                 <td>
@@ -39,7 +39,7 @@
                 <td>
                 </td>
                 <td>
-                    <input type="text" class="form-control" placeholder="输入新项目名称" aria-describedby="basic-addon1" />
+                    <input type="text" class="form-control" placeholder="输入新项目名称" aria-describedby="basic-addon1" v-model.trim="newName" />
                 </td>
                 <td>
                     <button class="btn btn-default" type="submit" @click="onAdd()">

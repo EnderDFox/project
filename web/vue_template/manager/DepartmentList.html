@@ -4,7 +4,8 @@
             <thead>
                 <tr>
                     <th style="width: 300px;">部门名称</th>
-                    <th>迁移</th>
+                    <th style="width: 160px;">迁移</th>
+                    <th style="width: 160px;">编辑职位</th>
                     <th>操作</th>
                 </tr>
             </thead>
@@ -24,40 +25,43 @@
                             </button>
                             <ul class="dropdown-menu" :aria-labelledby="'ddmDpListDid'+index">
 
-                                <li v-for="parentDp in allDepartmentList" :key="parentDp.Did" :class="{'disabled':!CheckShowEditParentDp(dp,parentDp)} ">
-                                    <a @click="onEditParentDp(dp,parentDp) ">{{departmentOption(parentDp)}}</a>
+                                <li v-for="parentDp in allDepartmentList" :key="parentDp.Did" :class="{'disabled':!CheckShowEditParentDp(dp,parentDp)}">
+                                    <a @click="onEditParentDp(dp,parentDp)">{{departmentOption(parentDp)}}</a>
                                 </li>
                                 <li role="separator " class="divider "></li>
                                 <li :class="{'disabled':dp.Fid==0}">
-                                    <a @click=" onEditParentDp(dp,null) " >作为顶级部门</a>
+                                    <a @click=" onEditParentDp(dp,null)">作为顶级部门</a>
                                 </li>
                             </ul>
                         </div>
                     </td>
                     <td>
-                        <button class="btn btn-default " type="submit " @click="onEditPosition($event,dp,index)
-                                    " title="编辑职位 ">
-                            <span class="glyphicon glyphicon-pencil " aria-hidden="true ">
-                                职位({{99}})
+                        <button class="btn btn-default " type="submit " @click="onEditPosition(dp,index)
+                        " title="编辑职位 ">
+                            <span class="glyphicon glyphicon-pencil" aria-hidden="true ">
+                                职位({{dp.PositionList.length}})
                             </span>
                         </button>
-                        <button class="btn btn-default " type="submit " @click="onSortDown($event,dp,index) ">
+                    </td>
+                    <td>
+                        <button class="btn btn-default " type="submit" @click="onSortDown($event,dp,index)" :class="{'disabled':!CheckSortDown(dp,index)}">
                             <span class="glyphicon glyphicon-arrow-down " aria-hidden="true "></span>
                         </button>
-                        <button class="btn btn-default " type="submit " @click="onSortUp($event,dp,index) ">
+                        <button class="btn btn-default " type="submit " @click="onSortUp($event,dp,index) " :class="{'disabled':!CheckSortUp(dp,index)}">
                             <span class="glyphicon glyphicon-arrow-up " aria-hidden="true "></span>
                         </button>
                         <button class="btn btn-default " type="submit ">
                             <span class="glyphicon glyphicon-remove " aria-hidden="true " @click="onDel($event,dp,index) "></span>
                         </button>
-                        <button class="btn btn-default " type="submit " @click="onAdd() " title="增加子部门 ">
+                        <button class="btn btn-default " type="submit " @click="onAddChild(dp,index) " title="增加子部门 ">
                             <span class="glyphicon glyphicon-plus-sign " aria-hidden="true "></span>
                         </button>
                     </td>
                 </tr>
-                <tr :key="0 ">
+                <tr :key="0">
                     <td>
-                        <input type="text " class="form-control " placeholder="输入新部门名称 " aria-describedby="basic-addon1 " />
+                        <input type="text " class="form-control " placeholder="输入新部门名称 " aria-describedby="basic-addon1 " v-model.trim="newName"
+                        />
                     </td>
                     <td>
                     </td>
