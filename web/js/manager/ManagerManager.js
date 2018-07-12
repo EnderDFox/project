@@ -9,7 +9,6 @@ var ManagerManagerClass = /** @class */ (function () {
         this.VuePath = "manager/";
     }
     ManagerManagerClass.prototype.Show = function () {
-        this.ShowProjectList();
         // this.ShowPositionSingle({ Posid: 2, Did: 2, Name: 'UI' })
         // this.ShowUserList()
     };
@@ -124,11 +123,97 @@ var ManagerManagerClass = /** @class */ (function () {
             //#show
             Common.InsertIntoPageDom(vue.$el);
             $(vue.$el).show();
-            _this.ShowUserList(_this.VueProjectEdit.project);
+            // this.ShowUserList(this.VueProjectEdit.project)
+            _this.ShowDepartmentList(_this.VueProjectEdit.project);
         });
     };
     ManagerManagerClass.prototype.ShowDepartmentList = function (proj) {
+        var _this = this;
         this.VueProjectEdit.currPage = ProjectEditPage.Department;
+        Loader.LoadVueTemplate(this.VuePath + "DepartmentList", function (tpl) {
+            var vue = new Vue({
+                template: tpl,
+                data: {
+                    allDepartmentList: ManagerData.GetAllDepartmentList(),
+                    newDpName: '',
+                },
+                methods: {
+                    ShowParentDpName: function (did) {
+                        var dp = ManagerData.DepartmentDict[did];
+                        return dp ? dp.Name : '选择上级部门';
+                    },
+                    departmentOption: function (dp) {
+                        if (dp.Depth == 0) {
+                            return dp.Name;
+                        }
+                        else {
+                            var rs = '';
+                            for (var i = 0; i < dp.Depth; i++) {
+                                rs += ' -';
+                            }
+                            // rs += '└';
+                            rs += dp.Name;
+                            return rs;
+                        }
+                    },
+                    onEditName: function () {
+                    },
+                    CheckShowEditParentDp: function (dp, parentDp) {
+                        if (dp.Did == parentDp.Did) {
+                            return false;
+                        }
+                        if (dp.Fid == parentDp.Did) {
+                            return false;
+                        }
+                        if (ManagerData.IsDepartmentChild(dp, parentDp)) {
+                            return false;
+                        }
+                        return true;
+                    },
+                    onEditParentDp: function (dp, parentDp) {
+                        var currParentDp = ManagerData.DepartmentDict[dp.Fid];
+                        if (currParentDp != null) {
+                            ArrayUtil.RemoveByAttr(currParentDp.Children, FieldName.Did, dp.Did);
+                        }
+                        if (parentDp == null) {
+                            //顶级部门
+                            dp.Fid = 0;
+                            dp.Depth = 0;
+                            var i0 = ArrayUtil.IndexOfAttr(_this.VueDepartmentList.allDepartmentList, FieldName.Did, dp.Did);
+                            _this.VueDepartmentList.allDepartmentList.splice(i0, 1)[0];
+                            _this.VueDepartmentList.allDepartmentList.push(dp);
+                        }
+                        else {
+                            dp.Fid = parentDp.Did;
+                            dp.Depth = parentDp.Depth + 1;
+                            parentDp.Children.push(dp);
+                            //
+                            var i0 = ArrayUtil.IndexOfAttr(_this.VueDepartmentList.allDepartmentList, FieldName.Did, dp.Did);
+                            _this.VueDepartmentList.allDepartmentList.splice(i0, 1)[0];
+                            var i1 = ArrayUtil.IndexOfAttr(_this.VueDepartmentList.allDepartmentList, FieldName.Did, parentDp.Did);
+                            var allChildrenLen = ManagerData.GetAllDepartmentList(parentDp.Children, -1).length;
+                            _this.VueDepartmentList.allDepartmentList.splice(i1 + allChildrenLen, 0, dp);
+                        }
+                    },
+                    onDel: function (e, user, index) {
+                        proj.UserList.splice(index, 1);
+                        _this.VueUserList.otherUserList = ArrayUtil.SubByAttr(ManagerData.UserList, proj.UserList, FieldName.Uid);
+                    },
+                    onAdd: function () {
+                        var newUser = ArrayUtil.FindOfAttr(_this.VueUserList.otherUserList, FieldName.Uid, _this.VueUserList.newUserUid);
+                        if (newUser) {
+                            proj.UserList.push(newUser);
+                            _this.VueUserList.newUserUid = 0;
+                            _this.VueUserList.otherUserList = ArrayUtil.SubByAttr(ManagerData.UserList, proj.UserList, FieldName.Uid);
+                        }
+                    },
+                },
+            }).$mount();
+            _this.VueDepartmentList = vue;
+            //#show
+            Common.InsertIntoDom(vue.$el, '#projectEditContent');
+            $(vue.$el).show();
+        });
     };
     ManagerManagerClass.prototype.ShowDepartmentSingle = function (dp) {
         var _this = this;
@@ -147,12 +232,12 @@ var ManagerManagerClass = /** @class */ (function () {
                 },
                 methods: {
                     departmentOption: function (dp) {
-                        if (dp.depth == 0) {
+                        if (dp.Depth == 0) {
                             return dp.Name;
                         }
                         else {
                             var rs = '';
-                            for (var i = 0; i < dp.depth; i++) {
+                            for (var i = 0; i < dp.Depth; i++) {
                                 rs += '-';
                             }
                             // rs += '└';
@@ -222,12 +307,12 @@ var ManagerManagerClass = /** @class */ (function () {
                 },
                 methods: {
                     departmentOption: function (dp) {
-                        if (dp.depth == 0) {
+                        if (dp.Depth == 0) {
                             return dp.Name;
                         }
                         else {
                             var rs = '';
-                            for (var i = 0; i < dp.depth; i++) {
+                            for (var i = 0; i < dp.Depth; i++) {
                                 rs += '-';
                             }
                             // rs += '└';
@@ -302,12 +387,12 @@ var ManagerManagerClass = /** @class */ (function () {
                         }
                     },
                     departmentOption: function (dp) {
-                        if (dp.depth == 0) {
+                        if (dp.Depth == 0) {
                             return dp.Name;
                         }
                         else {
                             var rs = '';
-                            for (var i = 0; i < dp.depth; i++) {
+                            for (var i = 0; i < dp.Depth; i++) {
                                 rs += '-';
                             }
                             // rs += '└';
@@ -316,7 +401,6 @@ var ManagerManagerClass = /** @class */ (function () {
                         }
                     },
                     onDpChange: function (user, dp) {
-                        console.log("[debug]", dp, ":[dp]");
                         user.Did = dp.Did;
                         if (dp.PositionList.length > 0) {
                             user.Posid = dp.PositionList[0].Posid;

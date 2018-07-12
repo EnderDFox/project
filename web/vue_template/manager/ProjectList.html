@@ -28,7 +28,7 @@
                 </td>
                 <td>
                     <button class="btn btn-default" type="submit">
-                        <span class="glyphicon glyphicon-edit" aria-hidden="true" @click="onEdit($event,proj,index)"></span>
+                        <span class="glyphicon glyphicon-pencil" aria-hidden="true" @click="onEdit($event,proj,index)"></span>
                     </button>
                     <button class="btn btn-default" type="submit">
                         <span class="glyphicon glyphicon-remove" aria-hidden="true" @click="onDel($event,proj,index)"></span>
@@ -39,7 +39,7 @@
                 <td>
                 </td>
                 <td>
-                    <input type="text" class="form-control" placeholder="Username" aria-describedby="basic-addon1"> </td>
+                    <input type="text" class="form-control" placeholder="输入新项目名称" aria-describedby="basic-addon1" />
                 </td>
                 <td>
                     <button class="btn btn-default" type="submit" @click="onAdd()">

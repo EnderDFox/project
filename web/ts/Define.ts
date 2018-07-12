@@ -62,6 +62,7 @@ enum LinkStatusField {
 //# const
 
 class FieldName {
+    static Did = "Did"
     static Uid = "Uid"
     static Mid = "Mid"
     static Lid = "Lid"
@@ -93,7 +94,7 @@ interface DepartmentSingle {
     Fid?: DidField//上级部门
     Name?: string
     //client
-    depth?: number
+    Depth?: number
     Children?: DepartmentSingle[]
     PositionList?:PositionSingle[]
 }

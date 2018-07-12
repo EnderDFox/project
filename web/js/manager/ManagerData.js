@@ -45,38 +45,38 @@ var ManagerDataClass = /** @class */ (function () {
         //#department
         this.DepartmentTree = [
             {
-                Did: 1, Name: '策划', depth: 0, Children: [], PositionList: [
+                Did: 1, Name: '策划', Depth: 0, Children: [], PositionList: [
                     { Posid: 100, Did: 2, Name: '策划' },
                     { Posid: 101, Did: 2, Name: '策划主管' },
                 ]
             },
             {
-                Did: 2, Name: '美术', depth: 0, PositionList: [
+                Did: 2, Name: '美术', Depth: 0, PositionList: [
                     { Posid: 201, Did: 2, Name: '美术主管' },
                 ], Children: [
-                    { Did: 21, Name: 'UI', depth: 1, Children: [], PositionList: [{ Posid: 2102, Did: 2, Name: 'UI' },] },
+                    { Did: 21, Name: 'UI', Depth: 1, Children: [], PositionList: [{ Posid: 2102, Did: 2, Name: 'UI' },] },
                     {
-                        Did: 22, Name: '3D', depth: 1, Children: [], PositionList: [
+                        Did: 22, Name: '3D', Depth: 1, Children: [], PositionList: [
                             { Posid: 2200, Did: 2, Name: '3D' },
                             { Posid: 2201, Did: 2, Name: '3D主管' },
                         ]
                     },
                     {
-                        Did: 23, Name: '原画', depth: 1, PositionList: [{ Posid: 301, Did: 2, Name: '原画主管' }], Children: [
-                            { Did: 231, Name: '角色原画', depth: 2, Children: [], PositionList: [{ Posid: 23100, Did: 2, Name: '角色原画' },] },
-                            { Did: 232, Name: '场景原画', depth: 2, Children: [], PositionList: [{ Posid: 23200, Did: 2, Name: '场景原画' },] },
+                        Did: 23, Name: '原画', Depth: 1, PositionList: [{ Posid: 301, Did: 2, Name: '原画主管' }], Children: [
+                            { Did: 231, Name: '角色原画', Depth: 2, Children: [], PositionList: [{ Posid: 23100, Did: 2, Name: '角色原画' },] },
+                            { Did: 232, Name: '场景原画', Depth: 2, Children: [], PositionList: [{ Posid: 23200, Did: 2, Name: '场景原画' },] },
                         ],
                     },
                 ],
             },
             {
-                Did: 3, Name: '后端', depth: 0, Children: [], PositionList: [
+                Did: 3, Name: '后端', Depth: 0, Children: [], PositionList: [
                     { Posid: 300, Did: 2, Name: '前端' },
                     { Posid: 301, Did: 2, Name: '后端主管' },
                 ]
             },
             {
-                Did: 4, Name: '前端', depth: 0, Children: [], PositionList: [
+                Did: 4, Name: '前端', Depth: 0, Children: [], PositionList: [
                     { Posid: 400, Did: 2, Name: '前端' },
                     { Posid: 401, Did: 2, Name: '前端主管' },
                 ]
@@ -97,18 +97,36 @@ var ManagerDataClass = /** @class */ (function () {
             }
         }
     };
-    ManagerDataClass.prototype.GetAllDepartmentList = function (dpTree) {
+    ManagerDataClass.prototype.GetAllDepartmentList = function (dpTree, fid) {
         if (dpTree === void 0) { dpTree = null; }
+        if (fid === void 0) { fid = 0; }
         dpTree ? null : dpTree = this.DepartmentTree;
         var rs = [];
         for (var i = 0; i < dpTree.length; i++) {
             var dp = dpTree[i];
+            if (fid > -1) {
+                dp.Fid = fid;
+            }
             rs.push(dp);
             if (dp.Children.length > 0) {
-                rs = rs.concat(this.GetAllDepartmentList(dp.Children));
+                rs = rs.concat(this.GetAllDepartmentList(dp.Children, dp.Did));
             }
         }
         return rs;
+    };
+    /**检测dp1是否是dp0的子孙dp */
+    ManagerDataClass.prototype.IsDepartmentChild = function (dp0, dp1) {
+        for (var i = 0; i < dp0.Children.length; i++) {
+            if (dp0.Children[i].Did == dp1.Did) {
+                return true;
+            }
+            else {
+                if (ManagerData.IsDepartmentChild(dp0.Children[i], dp1)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     };
     return ManagerDataClass;
 }());

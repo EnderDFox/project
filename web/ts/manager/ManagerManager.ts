@@ -9,9 +9,9 @@ class ManagerManagerClass {
     VueProjectList: CombinedVueInstance1<{ projectList: ProjectSingle[] }>
     VueProjectEdit: CombinedVueInstance1<{ project: ProjectSingle, newName: string, dpTree: DepartmentSingle[], currPage: ProjectEditPage }>
     VueUserList: CombinedVueInstance1<{ otherUserList: UserSingle[], newUserUid: number }>
+    VueDepartmentList: CombinedVueInstance1<{ allDepartmentList: DepartmentSingle[], newDpName: string }>
     VueDepartmentSingle: CombinedVueInstance1<{ department: DepartmentSingle, fullName: string, newName: string, allDepartmentList: DepartmentSingle[], positionList: PositionSingle[] }>
     Show() {
-        this.ShowProjectList()
         // this.ShowPositionSingle({ Posid: 2, Did: 2, Name: 'UI' })
         // this.ShowUserList()
     }
@@ -130,11 +130,98 @@ class ManagerManagerClass {
             //#show
             Common.InsertIntoPageDom(vue.$el)
             $(vue.$el).show()
-            this.ShowUserList(this.VueProjectEdit.project)
+            // this.ShowUserList(this.VueProjectEdit.project)
+            this.ShowDepartmentList(this.VueProjectEdit.project)
         })
     }
     ShowDepartmentList(proj: ProjectSingle) {
         this.VueProjectEdit.currPage = ProjectEditPage.Department
+        Loader.LoadVueTemplate(this.VuePath + "DepartmentList", (tpl: string) => {
+            var vue = new Vue(
+                {
+                    template: tpl,
+                    data: {
+                        allDepartmentList: ManagerData.GetAllDepartmentList(),
+                        newDpName: '',
+                    },
+                    methods: {
+                        ShowParentDpName: (did: number): string => {
+                            var dp = ManagerData.DepartmentDict[did]
+                            return dp ? dp.Name : '选择上级部门'
+                        },
+                        departmentOption: (dp: DepartmentSingle) => {
+                            if (dp.Depth == 0) {
+                                return dp.Name
+                            } else {
+                                var rs: string = ''
+                                for (var i = 0; i < dp.Depth; i++) {
+                                    rs += ' -'
+                                }
+                                // rs += '└';
+                                rs += dp.Name
+                                return rs
+                            }
+                        },
+                        onEditName: () => {
+
+                        },
+                        CheckShowEditParentDp: (dp: DepartmentSingle, parentDp: DepartmentSingle) => {
+                            if (dp.Did == parentDp.Did) {
+                                return false
+                            }
+                            if (dp.Fid == parentDp.Did) {
+                                return false
+                            }
+                            if (ManagerData.IsDepartmentChild(dp, parentDp)) {
+                                return false
+                            }
+                            return true
+                        },
+                        onEditParentDp: (dp: DepartmentSingle, parentDp: DepartmentSingle) => {
+                            var currParentDp = ManagerData.DepartmentDict[dp.Fid]
+                            if (currParentDp != null) {
+                                ArrayUtil.RemoveByAttr(currParentDp.Children, FieldName.Did, dp.Did)
+
+                            }
+                            if (parentDp == null) {
+                                //顶级部门
+                                dp.Fid = 0
+                                dp.Depth = 0
+                                var i0 = ArrayUtil.IndexOfAttr(this.VueDepartmentList.allDepartmentList, FieldName.Did, dp.Did)
+                                this.VueDepartmentList.allDepartmentList.splice(i0, 1)[0]
+                                this.VueDepartmentList.allDepartmentList.push(dp)
+                            } else {
+                                dp.Fid = parentDp.Did
+                                dp.Depth = parentDp.Depth + 1
+                                parentDp.Children.push(dp)
+                                //
+                                var i0 = ArrayUtil.IndexOfAttr(this.VueDepartmentList.allDepartmentList, FieldName.Did, dp.Did)
+                                this.VueDepartmentList.allDepartmentList.splice(i0, 1)[0]
+                                var i1 = ArrayUtil.IndexOfAttr(this.VueDepartmentList.allDepartmentList, FieldName.Did, parentDp.Did)
+                                var allChildrenLen = ManagerData.GetAllDepartmentList(parentDp.Children, -1).length
+                                this.VueDepartmentList.allDepartmentList.splice(i1 + allChildrenLen, 0, dp)
+                            }
+                        },
+                        onDel: (e, user: UserSingle, index: int) => {
+                            proj.UserList.splice(index, 1)
+                            this.VueUserList.otherUserList = ArrayUtil.SubByAttr(ManagerData.UserList, proj.UserList, FieldName.Uid)
+                        },
+                        onAdd: () => {
+                            var newUser: UserSingle = ArrayUtil.FindOfAttr<PositionSingle>(this.VueUserList.otherUserList, FieldName.Uid, this.VueUserList.newUserUid)
+                            if (newUser) {
+                                proj.UserList.push(newUser)
+                                this.VueUserList.newUserUid = 0
+                                this.VueUserList.otherUserList = ArrayUtil.SubByAttr(ManagerData.UserList, proj.UserList, FieldName.Uid)
+                            }
+                        },
+                    },
+                }
+            ).$mount()
+            this.VueDepartmentList = vue
+            //#show
+            Common.InsertIntoDom(vue.$el, '#projectEditContent')
+            $(vue.$el).show()
+        })
     }
     ShowDepartmentSingle(dp: DepartmentSingle) {
         Loader.LoadVueTemplate(this.VuePath + "DepartmentEdit", (tpl: string) => {
@@ -153,11 +240,11 @@ class ManagerManagerClass {
                     },
                     methods: {
                         departmentOption: (dp: DepartmentSingle) => {
-                            if (dp.depth == 0) {
+                            if (dp.Depth == 0) {
                                 return dp.Name
                             } else {
                                 var rs: string = ''
-                                for (var i = 0; i < dp.depth; i++) {
+                                for (var i = 0; i < dp.Depth; i++) {
                                     rs += '-'
                                 }
                                 // rs += '└';
@@ -229,11 +316,11 @@ class ManagerManagerClass {
                     },
                     methods: {
                         departmentOption: (dp: DepartmentSingle) => {
-                            if (dp.depth == 0) {
+                            if (dp.Depth == 0) {
                                 return dp.Name
                             } else {
                                 var rs: string = ''
-                                for (var i = 0; i < dp.depth; i++) {
+                                for (var i = 0; i < dp.Depth; i++) {
                                     rs += '-'
                                 }
                                 // rs += '└';
@@ -307,11 +394,11 @@ class ManagerManagerClass {
                             }
                         },
                         departmentOption: (dp: DepartmentSingle) => {
-                            if (dp.depth == 0) {
+                            if (dp.Depth == 0) {
                                 return dp.Name
                             } else {
                                 var rs: string = ''
-                                for (var i = 0; i < dp.depth; i++) {
+                                for (var i = 0; i < dp.Depth; i++) {
                                     rs += '-'
                                 }
                                 // rs += '└';
@@ -320,7 +407,6 @@ class ManagerManagerClass {
                             }
                         },
                         onDpChange: (user: UserSingle, dp: DepartmentSingle) => {
-                            console.log("[debug]", dp, ":[dp]")
                             user.Did = dp.Did
                             if (dp.PositionList.length > 0) {
                                 user.Posid = dp.PositionList[0].Posid
