@@ -226,6 +226,18 @@ var ArrayUtil = /** @class */ (function () {
         }
         return index;
     };
+    /**用一个数组减去另一个数组 */
+    ArrayUtil.SubByAttr = function (arr0, arr1, key) {
+        var rs = [];
+        for (var i = 0; i < arr0.length; i++) {
+            var item0 = arr0[i];
+            var index0 = ArrayUtil.IndexOfAttr(arr1, key, item0[key]);
+            if (index0 == -1) {
+                rs.push(item0);
+            }
+        }
+        return rs;
+    };
     return ArrayUtil;
 }());
 //# sourceMappingURL=Common.js.map

@@ -77,16 +77,16 @@ class CommonClass {
 		return false
 	}
 	/**警告提示*/
-	Warning(dom: HTMLElement|JQuery<HTMLElement>, evt: JQuery.Event | MouseEvent, func: Function, txt: string): void;
+	Warning(dom: HTMLElement | JQuery<HTMLElement>, evt: JQuery.Event | MouseEvent, func: Function, txt: string): void;
 	Warning(evt: JQuery.Event | MouseEvent, func: Function, txt: string): void;
 	Warning(evt: JQuery.Event | MouseEvent, txt: string): void;
 	Warning(func: Function, txt: string): void;
 	Warning(txt: string): void;
 	Warning(...args): void {
-		var dom:HTMLElement|JQuery<HTMLElement>,evt: JQuery.Event | MouseEvent, func: Function, txt: string
+		var dom: HTMLElement | JQuery<HTMLElement>, evt: JQuery.Event | MouseEvent, func: Function, txt: string
 		if (args.length == 4) {
 			dom = $(args[0] as HTMLElement);//TODO:Ldom也没用上呢
-			[evt, func, txt] = args.slice(1,4)
+			[evt, func, txt] = args.slice(1, 4)
 		} else if (args.length == 3) {
 			[evt, func, txt] = args
 		} else if (args.length == 2) {
@@ -119,11 +119,11 @@ class CommonClass {
 		})
 	}
 	/**在window内居中 */
-	AlginCenterInWindow(dom:HTMLElement|JQuery<HTMLElement>){
+	AlginCenterInWindow(dom: HTMLElement | JQuery<HTMLElement>) {
 		var $dom = $(dom)
 		var winLeft = $(window).scrollLeft()
-        var winTop = $(window).scrollTop()
-		$dom.xy(winLeft + $(window).innerWidth()/2-$dom.width()/2, winTop + $(window).innerHeight()/2-$dom.height()/2)
+		var winTop = $(window).scrollTop()
+		$dom.xy(winLeft + $(window).innerWidth() / 2 - $dom.width() / 2, winTop + $(window).innerHeight() / 2 - $dom.height() / 2)
 	}
 	/**在#dynamicDom前插入newDom*/
 	InsertBeforeDynamicDom(newDom: HTMLElement): void {
@@ -131,8 +131,8 @@ class CommonClass {
 		dd.parentNode.insertBefore(newDom, dd)
 	}
 	/**将资源插入pageDom内 */
-	InsertIntoDom(newDom: HTMLElement,container:string|HTMLElement): void {
-		var _c:HTMLElement = typeof(container)=='string'?$(container).get(0):container as HTMLElement;
+	InsertIntoDom(newDom: HTMLElement, container: string | HTMLElement): void {
+		var _c: HTMLElement = typeof (container) == 'string' ? $(container).get(0) : container as HTMLElement;
 		_c.innerHTML = ''
 		_c.appendChild(newDom)
 	}
@@ -221,5 +221,17 @@ class ArrayUtil {
 			arr.splice(index, 1)
 		}
 		return index
+	}
+	/**用一个数组减去另一个数组 */
+	static SubByAttr<T>(arr0: T[], arr1: T[], key: string): T[] {
+		var rs:T[] = []
+		for (var i = 0; i < arr0.length; i++) {
+			var item0 = arr0[i]
+			var index0 = ArrayUtil.IndexOfAttr(arr1, key, item0[key])
+			if(index0==-1){
+				rs.push(item0)
+			}
+		}
+		return rs
 	}
 }

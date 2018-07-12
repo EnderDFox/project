@@ -58,10 +58,12 @@ var LinkStatusField;
 var FieldName = /** @class */ (function () {
     function FieldName() {
     }
+    FieldName.Uid = "Uid";
     FieldName.Mid = "Mid";
     FieldName.Lid = "Lid";
     FieldName.Tmid = "Tmid";
     FieldName.Tlid = "Tlid";
+    FieldName.Posid = "Posid";
     return FieldName;
 }());
 var Auth;

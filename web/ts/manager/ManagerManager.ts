@@ -6,26 +6,9 @@ enum ProjectEditPage {
 
 class ManagerManagerClass {
     VuePath = "manager/"
-    dpTree: DepartmentSingle[] = [
-        { Did: 1, Name: '策划', depth: 0, Children: [] },
-        {
-            Did: 2, Name: '美术', depth: 0, Children: [
-                { Did: 21, Name: 'UI', depth: 1, Children: [] },
-                { Did: 22, Name: '3D', depth: 1, Children: [] },
-                {
-                    Did: 23, Name: '原画', depth: 1, Children: [
-                        { Did: 231, Name: '角色原画', depth: 2, Children: [] },
-                        { Did: 232, Name: '场景原画', depth: 2, Children: [] },
-                    ],
-                },
-            ],
-        },
-        { Did: 3, Name: '后端', depth: 0, Children: [] },
-        { Did: 4, Name: '前端', depth: 0, Children: [] },
-    ]
     VueProjectList: CombinedVueInstance1<{ projectList: ProjectSingle[] }>
     VueProjectEdit: CombinedVueInstance1<{ project: ProjectSingle, newName: string, dpTree: DepartmentSingle[], currPage: ProjectEditPage }>
-    VueUserList: CombinedVueInstance1<{}>
+    VueUserList: CombinedVueInstance1<{ otherUserList: UserSingle[], newUserUid: number }>
     VueDepartmentSingle: CombinedVueInstance1<{ department: DepartmentSingle, fullName: string, newName: string, allDepartmentList: DepartmentSingle[], positionList: PositionSingle[] }>
     Show() {
         this.ShowProjectList()
@@ -104,7 +87,7 @@ class ManagerManagerClass {
                     data: {
                         project: proj,
                         projectList: ManagerData.ProjectList,
-                        dpTree: this.dpTree,
+                        dpTree: ManagerData.DepartmentTree,
                         newName: proj ? proj.Name : '',
                         auth: ManagerData.MyAuth,
                         currPage: ProjectEditPage.User,
@@ -126,7 +109,7 @@ class ManagerManagerClass {
                                 case ProjectEditPage.User:
                                     this.ShowUserList(this.VueProjectEdit.project)
                                     break;
-                                    case ProjectEditPage.Department:
+                                case ProjectEditPage.Department:
                                     this.ShowDepartmentList(this.VueProjectEdit.project)
                                     break;
                             }
@@ -147,9 +130,11 @@ class ManagerManagerClass {
             //#show
             Common.InsertIntoPageDom(vue.$el)
             $(vue.$el).show()
+            this.ShowUserList(this.VueProjectEdit.project)
         })
     }
-    ShowDepartmentList(proj:ProjectSingle) {
+    ShowDepartmentList(proj: ProjectSingle) {
+        this.VueProjectEdit.currPage = ProjectEditPage.Department
     }
     ShowDepartmentSingle(dp: DepartmentSingle) {
         Loader.LoadVueTemplate(this.VuePath + "DepartmentEdit", (tpl: string) => {
@@ -158,7 +143,7 @@ class ManagerManagerClass {
                     template: tpl,
                     data: {
                         department: dp, fullName: dp.Name, newName: dp.Name,
-                        allDepartmentList: this.GetAllDepartmentList(this.dpTree),
+                        allDepartmentList: ManagerData.GetAllDepartmentList(),
                         positionList: [
                             { Posid: 1, Did: 2, Name: '美术主管' },
                             { Posid: 2, Did: 2, Name: 'UI' },
@@ -180,8 +165,7 @@ class ManagerManagerClass {
                                 return rs
                             }
                         },
-                        onClose: function () {
-                            $(this.$el).hide()
+                        onClose: () => {
                         },
                         onEdit: (e, pos: PositionSingle) => {
                             this.ShowPositionSingle(pos)
@@ -201,18 +185,6 @@ class ManagerManagerClass {
         })
     }
 
-    GetAllDepartmentList(dpTree: DepartmentSingle[]): DepartmentSingle[] {
-        var rs: DepartmentSingle[] = []
-        for (var i = 0; i < dpTree.length; i++) {
-            var dp = dpTree[i]
-            rs.push(dp)
-            if (dp.Children.length > 0) {
-                rs = rs.concat(this.GetAllDepartmentList(dp.Children))
-            }
-        }
-        return rs;
-    }
-
     ShowPositionSingle(pos: PositionSingle) {
         Loader.LoadVueTemplate(this.VuePath + "PositionEdit", (tpl: string) => {
             var vue = new Vue(
@@ -220,7 +192,7 @@ class ManagerManagerClass {
                     template: tpl,
                     data: {
                         pos: pos, fullName: pos.Name, newName: pos.Name.toString(),
-                        allDepartmentList: this.GetAllDepartmentList(this.dpTree),
+                        allDepartmentList: ManagerData.GetAllDepartmentList(),
                         showKind: 1,
                         userList: ManagerData.UserList.slice(0, 7),
                         authorityModuleList: [
@@ -289,22 +261,51 @@ class ManagerManagerClass {
             $(vue.$el).show()
         })
     }
-    ShowUserList(proj:ProjectSingle) {
+    ShowUserList(proj: ProjectSingle) {
+        this.VueProjectEdit.currPage = ProjectEditPage.User
         Loader.LoadVueTemplate(this.VuePath + "UserList", (tpl: string) => {
             var vue = new Vue(
                 {
                     template: tpl,
                     data: {
-                        userList: ManagerData.UserList,
-                        allDepartmentList: this.GetAllDepartmentList(this.dpTree),
-                        positionList: [
-                            { Posid: 1, Did: 2, Name: '美术主管' },
-                            { Posid: 2, Did: 2, Name: 'UI' },
-                            { Posid: 3, Did: 2, Name: '原画' },
-                            { Posid: 4, Did: 2, Name: '角色' },
-                        ],
+                        otherUserList: ArrayUtil.SubByAttr(ManagerData.UserList, proj.UserList, FieldName.Uid),
+                        userList: proj.UserList,
+                        allDepartmentList: ManagerData.GetAllDepartmentList(),
+                        newUserUid: 0,
                     },
                     methods: {
+                        ShowDpName: (did: number): string => {
+                            var dp = ManagerData.DepartmentDict[did]
+                            return dp ? dp.Name : '空'
+                        },
+                        ShowPosName: (did: number, posid: number): string => {
+                            var dp = ManagerData.DepartmentDict[did]
+                            if (dp) {
+                                var pos: PositionSingle = ArrayUtil.FindOfAttr(dp.PositionList, FieldName.Posid, posid) as PositionSingle
+                                console.log("[debug]", posid, ":[posid]", pos, ":[pos]")
+                                return pos ? pos.Name : '--'
+                            } else {
+                                return '空'
+                            }
+                        },
+                        ShowUserName: function (uid: number): string {
+                            this.newUserUid = uid
+                            if (uid) {
+                                var user: UserSingle = ArrayUtil.FindOfAttr(this.otherUserList, FieldName.Uid, uid) as PositionSingle
+                                if (user) {
+                                    return user.Name
+                                }
+                            }
+                            return '选择新成员'
+                        },
+                        GetPosList: (did: number): PositionSingle[] => {
+                            var dp = ManagerData.DepartmentDict[did]
+                            if (dp) {
+                                return dp.PositionList;
+                            } else {
+                                return []
+                            }
+                        },
                         departmentOption: (dp: DepartmentSingle) => {
                             if (dp.depth == 0) {
                                 return dp.Name
@@ -318,19 +319,36 @@ class ManagerManagerClass {
                                 return rs
                             }
                         },
+                        onDpChange: (user: UserSingle, dp: DepartmentSingle) => {
+                            console.log("[debug]", dp, ":[dp]")
+                            user.Did = dp.Did
+                            if (dp.PositionList.length > 0) {
+                                user.Posid = dp.PositionList[0].Posid
+                            } else {
+                                user.Posid = 0
+                            }
+                        },
                         onClose: function () {
                             $(this.$el).hide()
                         },
-                        onDel: (e, pos: PositionSingle, index: int) => {
+                        onDel: (e, user: UserSingle, index: int) => {
+                            proj.UserList.splice(index, 1)
+                            this.VueUserList.otherUserList = ArrayUtil.SubByAttr(ManagerData.UserList, proj.UserList, FieldName.Uid)
                         },
                         onAdd: () => {
-                        }
+                            var newUser: UserSingle = ArrayUtil.FindOfAttr<PositionSingle>(this.VueUserList.otherUserList, FieldName.Uid, this.VueUserList.newUserUid)
+                            if (newUser) {
+                                proj.UserList.push(newUser)
+                                this.VueUserList.newUserUid = 0
+                                this.VueUserList.otherUserList = ArrayUtil.SubByAttr(ManagerData.UserList, proj.UserList, FieldName.Uid)
+                            }
+                        },
                     },
                 }
             ).$mount()
             this.VueUserList = vue
             //#show
-            Common.InsertIntoDom(vue.$el,'#projectEditContent')
+            Common.InsertIntoDom(vue.$el, '#projectEditContent')
             $(vue.$el).show()
         })
     }

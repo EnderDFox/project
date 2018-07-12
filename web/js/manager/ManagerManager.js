@@ -7,23 +7,6 @@ var ProjectEditPage;
 var ManagerManagerClass = /** @class */ (function () {
     function ManagerManagerClass() {
         this.VuePath = "manager/";
-        this.dpTree = [
-            { Did: 1, Name: '策划', depth: 0, Children: [] },
-            {
-                Did: 2, Name: '美术', depth: 0, Children: [
-                    { Did: 21, Name: 'UI', depth: 1, Children: [] },
-                    { Did: 22, Name: '3D', depth: 1, Children: [] },
-                    {
-                        Did: 23, Name: '原画', depth: 1, Children: [
-                            { Did: 231, Name: '角色原画', depth: 2, Children: [] },
-                            { Did: 232, Name: '场景原画', depth: 2, Children: [] },
-                        ],
-                    },
-                ],
-            },
-            { Did: 3, Name: '后端', depth: 0, Children: [] },
-            { Did: 4, Name: '前端', depth: 0, Children: [] },
-        ];
     }
     ManagerManagerClass.prototype.Show = function () {
         this.ShowProjectList();
@@ -99,7 +82,7 @@ var ManagerManagerClass = /** @class */ (function () {
                 data: {
                     project: proj,
                     projectList: ManagerData.ProjectList,
-                    dpTree: _this.dpTree,
+                    dpTree: ManagerData.DepartmentTree,
                     newName: proj ? proj.Name : '',
                     auth: ManagerData.MyAuth,
                     currPage: ProjectEditPage.User,
@@ -141,9 +124,11 @@ var ManagerManagerClass = /** @class */ (function () {
             //#show
             Common.InsertIntoPageDom(vue.$el);
             $(vue.$el).show();
+            _this.ShowUserList(_this.VueProjectEdit.project);
         });
     };
     ManagerManagerClass.prototype.ShowDepartmentList = function (proj) {
+        this.VueProjectEdit.currPage = ProjectEditPage.Department;
     };
     ManagerManagerClass.prototype.ShowDepartmentSingle = function (dp) {
         var _this = this;
@@ -152,7 +137,7 @@ var ManagerManagerClass = /** @class */ (function () {
                 template: tpl,
                 data: {
                     department: dp, fullName: dp.Name, newName: dp.Name,
-                    allDepartmentList: _this.GetAllDepartmentList(_this.dpTree),
+                    allDepartmentList: ManagerData.GetAllDepartmentList(),
                     positionList: [
                         { Posid: 1, Did: 2, Name: '美术主管' },
                         { Posid: 2, Did: 2, Name: 'UI' },
@@ -176,7 +161,6 @@ var ManagerManagerClass = /** @class */ (function () {
                         }
                     },
                     onClose: function () {
-                        $(this.$el).hide();
                     },
                     onEdit: function (e, pos) {
                         _this.ShowPositionSingle(pos);
@@ -194,17 +178,6 @@ var ManagerManagerClass = /** @class */ (function () {
             $(vue.$el).show();
         });
     };
-    ManagerManagerClass.prototype.GetAllDepartmentList = function (dpTree) {
-        var rs = [];
-        for (var i = 0; i < dpTree.length; i++) {
-            var dp = dpTree[i];
-            rs.push(dp);
-            if (dp.Children.length > 0) {
-                rs = rs.concat(this.GetAllDepartmentList(dp.Children));
-            }
-        }
-        return rs;
-    };
     ManagerManagerClass.prototype.ShowPositionSingle = function (pos) {
         var _this = this;
         Loader.LoadVueTemplate(this.VuePath + "PositionEdit", function (tpl) {
@@ -212,7 +185,7 @@ var ManagerManagerClass = /** @class */ (function () {
                 template: tpl,
                 data: {
                     pos: pos, fullName: pos.Name, newName: pos.Name.toString(),
-                    allDepartmentList: _this.GetAllDepartmentList(_this.dpTree),
+                    allDepartmentList: ManagerData.GetAllDepartmentList(),
                     showKind: 1,
                     userList: ManagerData.UserList.slice(0, 7),
                     authorityModuleList: [
@@ -283,20 +256,51 @@ var ManagerManagerClass = /** @class */ (function () {
     };
     ManagerManagerClass.prototype.ShowUserList = function (proj) {
         var _this = this;
+        this.VueProjectEdit.currPage = ProjectEditPage.User;
         Loader.LoadVueTemplate(this.VuePath + "UserList", function (tpl) {
             var vue = new Vue({
                 template: tpl,
                 data: {
-                    userList: ManagerData.UserList,
-                    allDepartmentList: _this.GetAllDepartmentList(_this.dpTree),
-                    positionList: [
-                        { Posid: 1, Did: 2, Name: '美术主管' },
-                        { Posid: 2, Did: 2, Name: 'UI' },
-                        { Posid: 3, Did: 2, Name: '原画' },
-                        { Posid: 4, Did: 2, Name: '角色' },
-                    ],
+                    otherUserList: ArrayUtil.SubByAttr(ManagerData.UserList, proj.UserList, FieldName.Uid),
+                    userList: proj.UserList,
+                    allDepartmentList: ManagerData.GetAllDepartmentList(),
+                    newUserUid: 0,
                 },
                 methods: {
+                    ShowDpName: function (did) {
+                        var dp = ManagerData.DepartmentDict[did];
+                        return dp ? dp.Name : '空';
+                    },
+                    ShowPosName: function (did, posid) {
+                        var dp = ManagerData.DepartmentDict[did];
+                        if (dp) {
+                            var pos = ArrayUtil.FindOfAttr(dp.PositionList, FieldName.Posid, posid);
+                            console.log("[debug]", posid, ":[posid]", pos, ":[pos]");
+                            return pos ? pos.Name : '--';
+                        }
+                        else {
+                            return '空';
+                        }
+                    },
+                    ShowUserName: function (uid) {
+                        this.newUserUid = uid;
+                        if (uid) {
+                            var user = ArrayUtil.FindOfAttr(this.otherUserList, FieldName.Uid, uid);
+                            if (user) {
+                                return user.Name;
+                            }
+                        }
+                        return '选择新成员';
+                    },
+                    GetPosList: function (did) {
+                        var dp = ManagerData.DepartmentDict[did];
+                        if (dp) {
+                            return dp.PositionList;
+                        }
+                        else {
+                            return [];
+                        }
+                    },
                     departmentOption: function (dp) {
                         if (dp.depth == 0) {
                             return dp.Name;
@@ -311,13 +315,31 @@ var ManagerManagerClass = /** @class */ (function () {
                             return rs;
                         }
                     },
+                    onDpChange: function (user, dp) {
+                        console.log("[debug]", dp, ":[dp]");
+                        user.Did = dp.Did;
+                        if (dp.PositionList.length > 0) {
+                            user.Posid = dp.PositionList[0].Posid;
+                        }
+                        else {
+                            user.Posid = 0;
+                        }
+                    },
                     onClose: function () {
                         $(this.$el).hide();
                     },
-                    onDel: function (e, pos, index) {
+                    onDel: function (e, user, index) {
+                        proj.UserList.splice(index, 1);
+                        _this.VueUserList.otherUserList = ArrayUtil.SubByAttr(ManagerData.UserList, proj.UserList, FieldName.Uid);
                     },
                     onAdd: function () {
-                    }
+                        var newUser = ArrayUtil.FindOfAttr(_this.VueUserList.otherUserList, FieldName.Uid, _this.VueUserList.newUserUid);
+                        if (newUser) {
+                            proj.UserList.push(newUser);
+                            _this.VueUserList.newUserUid = 0;
+                            _this.VueUserList.otherUserList = ArrayUtil.SubByAttr(ManagerData.UserList, proj.UserList, FieldName.Uid);
+                        }
+                    },
                 },
             }).$mount();
             _this.VueUserList = vue;

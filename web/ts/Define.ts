@@ -62,10 +62,12 @@ enum LinkStatusField {
 //# const
 
 class FieldName {
+    static Uid = "Uid"
     static Mid = "Mid"
     static Lid = "Lid"
     static Tmid = "Tmid"
     static Tlid = "Tlid"
+    static Posid = "Posid"
 }
 
 
@@ -77,8 +79,9 @@ interface IXY {
 
 interface UserSingle {
     Uid?: number
-    Did?: DidField
     Pid?: PidFeild
+    Did?: DidField
+    Posid?: DidField
     Name?: string
     IsDel?: number
     IsHide?: number
@@ -92,23 +95,24 @@ interface DepartmentSingle {
     //client
     depth?: number
     Children?: DepartmentSingle[]
+    PositionList?:PositionSingle[]
 }
 
 interface PositionSingle {
     Posid?: int
     Did?: DidField
     Name?: string
-    AuthorityList?:AuthoritySingle[]
+    AuthorityList?: AuthoritySingle[]
 }
-interface AuthorityModuleSingle{
-    Modid?:int
-    Name?:string
-    AuthorityList?:AuthoritySingle[]
+interface AuthorityModuleSingle {
+    Modid?: int
+    Name?: string
+    AuthorityList?: AuthoritySingle[]
 }
-interface AuthoritySingle{
-    Aid?:int
-    Modid?:int
-    Name?:string
+interface AuthoritySingle {
+    Aid?: int
+    Modid?: int
+    Name?: string
 }
 
 interface DepartmentInfo {
@@ -122,6 +126,7 @@ interface ProjectSingle {
     Name?: string
     //client cache data
     ModeList?: ModeSingle[]
+    UserList?:UserSingle[]
 }
 
 interface ModeSingle {

@@ -1,17 +1,95 @@
 <div class="commonDialog manager" style="min-width:500px; ">
-    <div class="head">
-        <div class="title">成员列表</div>
-        <div class="close" @click="onClose()">x</div>
-    </div>
-    <div class="body">
-        <div v-for="proj,index in projectList" :key="proj.Pid" style="display:inline-block;">
-            <input type="checkbox" :name="proj.Name" :value="proj.Pid" />
-            <span class="checkbox_name">{{proj.Name}}</span>
-        </div>
-    </div>
-    <div class="body" style="height: 300px;overflow-y: scroll;">
+    <table class="table table-hover">
+        <thead>
+            <thead>
+                <tr>
+                    <th style="width: 30px;">UID</th>
+                    <th style="width: 150px;">成员</th>
+                    <th otherUser style="width: 130px;">部门</th>
+                    <th otherUser style="width: 130px;">职位</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <transition-group name="list-complete" tag="tbody">
+                <tr class="list-complete-item" v-for="user,index in userList" :key="user.Uid">
+                    <td class="td_id">
+                        {{user.Uid}}
+                    </td>
+                    <td class="text_middle">
+                        {{user.Name}}
+                    </td>
+                    <td>
+                        <div class="dropdown">
+                            <button class="btn btn-default dropdown-toggle" type="button" :id="'ddmUserListDid'+index" data-toggle="dropdown" aria-haspopup="true"
+                                aria-expanded="true">
+                                {{ShowDpName(user.Did)}}
+                                <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu" :aria-labelledby="'ddmUserListDid'+index">
+                                <li>
+                                    <a @click="user.Did=0">空</a>
+                                </li>
+                                <li v-for="dp in allDepartmentList" :key="dp.Did">
+                                    <a @click="onDpChange(user,dp)">{{departmentOption(dp)}}</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="dropdown">
+                            <button class="btn btn-default dropdown-toggle" type="button" :id="'ddmUserListPos'+index" data-toggle="dropdown" aria-haspopup="true"
+                                aria-expanded="true">
+                                {{ShowPosName(user.Did,user.Posid)}}
+                                <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu" :aria-labelledby="'ddmUserListDid'+index">
+                                <li>
+                                    <a @click="user.Posid=0">空</a>
+                                </li>
+                                <li v-for="pos in GetPosList(user.Did)" :key="pos.Posid">
+                                    <a @click="user.Posid=pos.Posid">{{pos.Name}}</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </td>
+                    <td>
+                        <button class="btn btn-default" type="submit">
+                            <span class="glyphicon glyphicon-remove" aria-hidden="true" @click="onDel($event,user,index)"></span>
+                        </button>
+                    </td>
+                </tr>
+                <tr :key="0">
+                    <td>
+                    </td>
+                    <td>
+                        <div class="dropdown">
+                            <button class="btn btn-default dropdown-toggle" type="button" id="ddmUserListNewUser" data-toggle="dropdown" aria-haspopup="true"
+                                aria-expanded="true">
+                                {{ShowUserName(newUserUid)}}
+                                <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="ddmUserListNewUser">
+                                <li v-for="otherUser,otherUserIndex in otherUserList" :key="otherUser.Uid">
+                                    <a @click="newUserUid=otherUser.Uid">{{otherUser.Name}}</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </td>
+                    <td>
+                    </td>
+                    <td>
+                    </td>
+                    <td>
+                        <button class="btn btn-default" type="submit" @click="onAdd()">
+                            <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+                        </button>
+                    </td>
+                </tr>
+            </transition-group>
+        </thead>
+    </table>
+    <!-- <div class="body" style="height: 300px;overflow-y: scroll;">
         <div v-for="user,index in userList" :key="user.Uid">
-            <!-- <input type="checkbox" :name="user.Name" :value="user.Uid" /> -->
             <span class="checkbox_name" style="display: inline-block;padding: 0px; width: 140px;">{{user.Name}}</span>
             <span>部门</span>
             <select>
@@ -24,5 +102,5 @@
                 <option v-for="pos in positionList" style="padding-left: 40px;" :value="pos.Posid">{{pos.Name}}</option>
             </select>
         </div>
-    </div>
+    </div> -->
 </div>
