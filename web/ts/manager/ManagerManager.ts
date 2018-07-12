@@ -457,7 +457,7 @@ class ManagerManagerClass {
             this.VueAuthList = vue
             // $(vue.$el).alert('close');
             Common.InsertBeforeDynamicDom(vue.$el)
-            Common.AlginCenterInWindow(vue.$el)
+            Common.AlginCenterInWindow($('#authListPanel'))
         })
     }
     ShowUserList(proj: ProjectSingle) {

@@ -454,7 +454,7 @@ var ManagerManagerClass = /** @class */ (function () {
             _this.VueAuthList = vue;
             // $(vue.$el).alert('close');
             Common.InsertBeforeDynamicDom(vue.$el);
-            Common.AlginCenterInWindow(vue.$el);
+            Common.AlginCenterInWindow($('#authListPanel'));
         });
     };
     ManagerManagerClass.prototype.ShowUserList = function (proj) {

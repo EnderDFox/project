@@ -129,8 +129,10 @@ var CommonClass = /** @class */ (function () {
     /**在window内居中 */
     CommonClass.prototype.AlginCenterInWindow = function (dom) {
         var $dom = $(dom);
+        console.log("[debug]", $dom.length);
         var winLeft = $(window).scrollLeft();
         var winTop = $(window).scrollTop();
+        $dom.css('position', 'absolute');
         $dom.xy(winLeft + $(window).innerWidth() / 2 - $dom.width() / 2, winTop + $(window).innerHeight() / 2 - $dom.height() / 2);
     };
     /**在#dynamicDom前插入newDom*/
