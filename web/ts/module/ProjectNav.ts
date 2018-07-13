@@ -126,7 +126,7 @@ class ProjectNavClass {
             plan.find('.test_fox').show().on('click', function (e) {
                 // WSConn.sendMsg(C2L.C2L_TEST_1, {})
                 // UploadManager.ShowUploadWork(e.currentTarget,101)
-                ManagerManager.Show()
+                // ManagerManager.Show()
             })
         }
     }

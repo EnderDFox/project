@@ -18,7 +18,7 @@ var LoaderClass = /** @class */ (function () {
         this.JsList = [
             { path: "", files: ['Define', 'JQueryExtend', 'Protocol', 'Config', 'WSConn', 'Commond', 'Common', 'DateTime', 'Templet', 'Data', 'Main'] },
             { path: "lib", files: ['vue', 'Echarts.min', 'Cookie', 'jquery.md5'] },
-            { path: "common", files: ['PrototypeExtend'] },
+            { path: "common", files: ['PrototypeExtend', 'VueManager'] },
             {
                 path: "module", files: ['User', 'ProjectNav', 'FileManager',
                     'ProcessData', 'ProcessManager', 'ProcessPanel', 'ProcessFilter',
@@ -140,7 +140,10 @@ var LoaderClass = /** @class */ (function () {
         }
     };
     //脚本加载完毕
-    LoaderClass.prototype.ScriptComplete = function () {
+    LoaderClass.prototype.OnLoadJsCssComplete = function () {
+        VueManager.Init(this.OnInitVueComplete);
+    };
+    LoaderClass.prototype.OnInitVueComplete = function () {
         //调试
         if (this.isDebug) {
             this.InitForDebug();
@@ -160,7 +163,7 @@ var LoaderClass = /** @class */ (function () {
             this.loadSingleCss(path + v, function () {
                 _this.LoadFileSum--;
                 if (_this.LoadFileSum == 0) {
-                    _this.ScriptComplete();
+                    _this.OnLoadJsCssComplete();
                 }
             });
         }
@@ -175,7 +178,7 @@ var LoaderClass = /** @class */ (function () {
                 _this.LoadFileSum--;
                 if (_this.LoadFileSum == 0) {
                     //脚本加载完毕
-                    _this.ScriptComplete();
+                    _this.OnLoadJsCssComplete();
                 }
             });
             //方法2 这样无法断点  浏览器console中显示的位置也是VM的位置

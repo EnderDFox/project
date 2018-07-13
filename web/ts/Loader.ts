@@ -21,7 +21,7 @@ class LoaderClass {
     JsList: ILoadGroup[] = [
         { path: "", files: ['Define', 'JQueryExtend', 'Protocol', 'Config', 'WSConn', 'Commond', 'Common', 'DateTime', 'Templet', 'Data', 'Main'] },
         { path: "lib", files: ['vue', 'Echarts.min', 'Cookie', 'jquery.md5'] },
-        { path: "common", files: ['PrototypeExtend'] },
+        { path: "common", files: ['PrototypeExtend','VueManager'] },
         {
             path: "module", files: ['User', 'ProjectNav', 'FileManager',
                 'ProcessData', 'ProcessManager', 'ProcessPanel', 'ProcessFilter',
@@ -134,7 +134,10 @@ class LoaderClass {
         }
     }
     //脚本加载完毕
-    ScriptComplete() {
+    private OnLoadJsCssComplete() {
+        VueManager.Init(this.OnInitVueComplete)
+    }
+    private OnInitVueComplete() {
         //调试
         if (this.isDebug) {
             this.InitForDebug()
@@ -153,7 +156,7 @@ class LoaderClass {
             this.loadSingleCss(path + v, () => {
                 this.LoadFileSum--
                 if (this.LoadFileSum == 0) {
-                    this.ScriptComplete()
+                    this.OnLoadJsCssComplete()
                 }
             })
         }
@@ -167,7 +170,7 @@ class LoaderClass {
                 this.LoadFileSum--
                 if (this.LoadFileSum == 0) {
                     //脚本加载完毕
-                    this.ScriptComplete()
+                    this.OnLoadJsCssComplete()
                 }
             })
             //方法2 这样无法断点  浏览器console中显示的位置也是VM的位置

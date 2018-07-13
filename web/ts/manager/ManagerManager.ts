@@ -14,10 +14,6 @@ class ManagerManagerClass {
     NewPositionUuid = 200001
     VuePositionList: CombinedVueInstance1<{ newName: string }>
     VueAuthList: CombinedVueInstance1<{ checkedChange: boolean }>
-    Show() {
-        // this.ShowPositionSingle({ Posid: 2, Did: 2, Name: 'UI' })
-        // this.ShowUserList()
-    }
     ShowProjectList() {
         Loader.LoadVueTemplate(this.VuePath + "ProjectList", (tpl: string) => {
             var vue = new Vue(
@@ -181,16 +177,11 @@ class ManagerManagerClass {
                             if (!this.CheckSortDown(dp, i0)) {
                                 return
                             }
-                            var children: DepartmentSingle[]
-                            if (dp.Fid) {
-                                children = ManagerData.DepartmentDict[dp.Fid].Children
-                            } else {
-                                children = ManagerData.DepartmentTree
-                            }
-                            var childIndex = ArrayUtil.IndexOfAttr(children, FieldName.Did, dp.Did)
-                            var brother = children[childIndex + 1]
-                            children.splice(childIndex, 1)
-                            children.splice(childIndex + 1, 0, dp)
+                            var brothers: DepartmentSingle[] = ManagerData.GetBrotherDepartmentList(dp)
+                            var brotherIndex = ArrayUtil.IndexOfAttr(brothers, FieldName.Did, dp.Did)
+                            var brother = brothers[brotherIndex + 1]
+                            brothers.splice(brotherIndex, 1)
+                            brothers.splice(brotherIndex + 1, 0, dp)
                             //
                             ManagerData.RefreshAllDepartmentList()
                             // var allDpList = this.VueDepartmentList.allDepartmentList
@@ -201,28 +192,19 @@ class ManagerManagerClass {
                             if (!this.CheckSortUp(dp, i0)) {
                                 return
                             }
-                            var children: DepartmentSingle[]
-                            if (dp.Fid) {
-                                children = ManagerData.DepartmentDict[dp.Fid].Children
-                            } else {
-                                children = ManagerData.DepartmentTree
-                            }
-                            var childIndex = ArrayUtil.IndexOfAttr(children, FieldName.Did, dp.Did)
-                            children.splice(childIndex, 1)
-                            children.splice(childIndex - 1, 0, dp)
+                            var brothers: DepartmentSingle[] = ManagerData.GetBrotherDepartmentList(dp)
+                            var brotherIndex = ArrayUtil.IndexOfAttr(brothers, FieldName.Did, dp.Did)
+                            brothers.splice(brotherIndex, 1)
+                            brothers.splice(brotherIndex - 1, 0, dp)
                             //
                             ManagerData.RefreshAllDepartmentList()
                         },
                         onDel: (e, dp: DepartmentSingle, i0: int) => {
-                            var children: DepartmentSingle[]
-                            if (dp.Fid) {
-                                children = ManagerData.DepartmentDict[dp.Fid].Children
-                            } else {
-                                children = ManagerData.DepartmentTree
-                            }
-                            var childIndex = ArrayUtil.IndexOfAttr(children, FieldName.Did, dp.Did)
-                            children.splice(childIndex, 1)
+                            var brothers: DepartmentSingle[] = ManagerData.GetBrotherDepartmentList(dp)
+                            var brotherIndex = ArrayUtil.IndexOfAttr(brothers, FieldName.Did, dp.Did)
+                            brothers.splice(brotherIndex, 1)
                             //
+                            delete ManagerData.DepartmentDict[dp.Did]
                             ManagerData.RefreshAllDepartmentList()
 
                         },
@@ -260,8 +242,8 @@ class ManagerManagerClass {
             this.VueDepartmentList = vue
             //#show
             Common.InsertIntoDom(vue.$el, '#projectEditContent')
-            //TODO:
-            this.ShowPositionList(ManagerData.DepartmentList[0])
+            //TEST
+            // this.ShowPositionList(ManagerData.DepartmentList[0])
         })
     }
     DepartmentOption(dp: DepartmentSingle) {
@@ -278,27 +260,17 @@ class ManagerManagerClass {
         }
     }
     CheckSortDown(dp: DepartmentSingle, i0: int) {
-        var children: DepartmentSingle[]
-        if (dp.Fid) {
-            children = ManagerData.DepartmentDict[dp.Fid].Children
-        } else {
-            children = ManagerData.DepartmentTree
-        }
-        var childIndex = ArrayUtil.IndexOfAttr(children, FieldName.Did, dp.Did)
-        if (childIndex < children.length - 1) {
+        var brothers: DepartmentSingle[] = ManagerData.GetBrotherDepartmentList(dp)
+        var brotherIndex = ArrayUtil.IndexOfAttr(brothers, FieldName.Did, dp.Did)
+        if (brotherIndex < brothers.length - 1) {
             return true
         }
         return false
     }
     CheckSortUp(dp: DepartmentSingle, i0: int) {
-        var children: DepartmentSingle[]
-        if (dp.Fid) {
-            children = ManagerData.DepartmentDict[dp.Fid].Children
-        } else {
-            children = ManagerData.DepartmentTree
-        }
-        var childIndex = ArrayUtil.IndexOfAttr(children, FieldName.Did, dp.Did)
-        if (childIndex > 0) {
+        var brothers: DepartmentSingle[] = ManagerData.GetBrotherDepartmentList(dp)
+        var brotherIndex = ArrayUtil.IndexOfAttr(brothers, FieldName.Did, dp.Did)
+        if (brotherIndex > 0) {
             return true
         }
         return false
@@ -457,7 +429,7 @@ class ManagerManagerClass {
             this.VueAuthList = vue
             // $(vue.$el).alert('close');
             Common.InsertBeforeDynamicDom(vue.$el)
-            Common.AlginCenterInWindow($('#authListPanel'))
+            Common.AlginCenterInWindow($(vue.$el).find('.popup_content'))
         })
     }
     ShowUserList(proj: ProjectSingle) {

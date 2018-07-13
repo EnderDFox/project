@@ -50,10 +50,10 @@
                         <button class="btn btn-default " type="submit " @click="onSortUp($event,dp,index) " :class="{'disabled':!CheckSortUp(dp,index)}">
                             <span class="glyphicon glyphicon-arrow-up " aria-hidden="true "></span>
                         </button>
-                        <button class="btn btn-default " type="submit ">
-                            <span class="glyphicon glyphicon-remove " aria-hidden="true " @click="onDel($event,dp,index) "></span>
+                        <button class="btn btn-default " type="submit " @click="onDel($event,dp,index)">
+                            <span class="glyphicon glyphicon-remove " aria-hidden="true "></span>
                         </button>
-                        <button class="btn btn-default " type="submit " @click="onAddChild(dp,index) " title="增加子部门 ">
+                        <button class="btn btn-default " type="submit " @click="onAddChild(dp,index)" title="增加子部门 ">
                             <span class="glyphicon glyphicon-plus-sign " aria-hidden="true "></span>
                         </button>
                     </td>

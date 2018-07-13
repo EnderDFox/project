@@ -2,6 +2,9 @@ var ManagerMainClass = /** @class */ (function () {
     function ManagerMainClass() {
     }
     ManagerMainClass.prototype.Init = function () {
+        VueManager.Init(this.OnInitVueCpl);
+    };
+    ManagerMainClass.prototype.OnInitVueCpl = function () {
         ManagerData.Init();
         //
         if (ManagerData.MyAuth[Auth.PROJECT_LIST]) {

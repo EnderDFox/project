@@ -11,10 +11,6 @@ var ManagerManagerClass = /** @class */ (function () {
         this.NewPositionUuid = 200001;
         /**职位 - 权限列表 */
     }
-    ManagerManagerClass.prototype.Show = function () {
-        // this.ShowPositionSingle({ Posid: 2, Did: 2, Name: 'UI' })
-        // this.ShowUserList()
-    };
     ManagerManagerClass.prototype.ShowProjectList = function () {
         var _this = this;
         Loader.LoadVueTemplate(this.VuePath + "ProjectList", function (tpl) {
@@ -174,17 +170,11 @@ var ManagerManagerClass = /** @class */ (function () {
                         if (!_this.CheckSortDown(dp, i0)) {
                             return;
                         }
-                        var children;
-                        if (dp.Fid) {
-                            children = ManagerData.DepartmentDict[dp.Fid].Children;
-                        }
-                        else {
-                            children = ManagerData.DepartmentTree;
-                        }
-                        var childIndex = ArrayUtil.IndexOfAttr(children, FieldName.Did, dp.Did);
-                        var brother = children[childIndex + 1];
-                        children.splice(childIndex, 1);
-                        children.splice(childIndex + 1, 0, dp);
+                        var brothers = ManagerData.GetBrotherDepartmentList(dp);
+                        var brotherIndex = ArrayUtil.IndexOfAttr(brothers, FieldName.Did, dp.Did);
+                        var brother = brothers[brotherIndex + 1];
+                        brothers.splice(brotherIndex, 1);
+                        brothers.splice(brotherIndex + 1, 0, dp);
                         //
                         ManagerData.RefreshAllDepartmentList();
                         // var allDpList = this.VueDepartmentList.allDepartmentList
@@ -195,30 +185,19 @@ var ManagerManagerClass = /** @class */ (function () {
                         if (!_this.CheckSortUp(dp, i0)) {
                             return;
                         }
-                        var children;
-                        if (dp.Fid) {
-                            children = ManagerData.DepartmentDict[dp.Fid].Children;
-                        }
-                        else {
-                            children = ManagerData.DepartmentTree;
-                        }
-                        var childIndex = ArrayUtil.IndexOfAttr(children, FieldName.Did, dp.Did);
-                        children.splice(childIndex, 1);
-                        children.splice(childIndex - 1, 0, dp);
+                        var brothers = ManagerData.GetBrotherDepartmentList(dp);
+                        var brotherIndex = ArrayUtil.IndexOfAttr(brothers, FieldName.Did, dp.Did);
+                        brothers.splice(brotherIndex, 1);
+                        brothers.splice(brotherIndex - 1, 0, dp);
                         //
                         ManagerData.RefreshAllDepartmentList();
                     },
                     onDel: function (e, dp, i0) {
-                        var children;
-                        if (dp.Fid) {
-                            children = ManagerData.DepartmentDict[dp.Fid].Children;
-                        }
-                        else {
-                            children = ManagerData.DepartmentTree;
-                        }
-                        var childIndex = ArrayUtil.IndexOfAttr(children, FieldName.Did, dp.Did);
-                        children.splice(childIndex, 1);
+                        var brothers = ManagerData.GetBrotherDepartmentList(dp);
+                        var brotherIndex = ArrayUtil.IndexOfAttr(brothers, FieldName.Did, dp.Did);
+                        brothers.splice(brotherIndex, 1);
                         //
+                        delete ManagerData.DepartmentDict[dp.Did];
                         ManagerData.RefreshAllDepartmentList();
                     },
                     onAdd: function () {
@@ -254,8 +233,8 @@ var ManagerManagerClass = /** @class */ (function () {
             _this.VueDepartmentList = vue;
             //#show
             Common.InsertIntoDom(vue.$el, '#projectEditContent');
-            //TODO:
-            _this.ShowPositionList(ManagerData.DepartmentList[0]);
+            //TEST
+            // this.ShowPositionList(ManagerData.DepartmentList[0])
         });
     };
     ManagerManagerClass.prototype.DepartmentOption = function (dp) {
@@ -273,29 +252,17 @@ var ManagerManagerClass = /** @class */ (function () {
         }
     };
     ManagerManagerClass.prototype.CheckSortDown = function (dp, i0) {
-        var children;
-        if (dp.Fid) {
-            children = ManagerData.DepartmentDict[dp.Fid].Children;
-        }
-        else {
-            children = ManagerData.DepartmentTree;
-        }
-        var childIndex = ArrayUtil.IndexOfAttr(children, FieldName.Did, dp.Did);
-        if (childIndex < children.length - 1) {
+        var brothers = ManagerData.GetBrotherDepartmentList(dp);
+        var brotherIndex = ArrayUtil.IndexOfAttr(brothers, FieldName.Did, dp.Did);
+        if (brotherIndex < brothers.length - 1) {
             return true;
         }
         return false;
     };
     ManagerManagerClass.prototype.CheckSortUp = function (dp, i0) {
-        var children;
-        if (dp.Fid) {
-            children = ManagerData.DepartmentDict[dp.Fid].Children;
-        }
-        else {
-            children = ManagerData.DepartmentTree;
-        }
-        var childIndex = ArrayUtil.IndexOfAttr(children, FieldName.Did, dp.Did);
-        if (childIndex > 0) {
+        var brothers = ManagerData.GetBrotherDepartmentList(dp);
+        var brotherIndex = ArrayUtil.IndexOfAttr(brothers, FieldName.Did, dp.Did);
+        if (brotherIndex > 0) {
             return true;
         }
         return false;
@@ -454,7 +421,7 @@ var ManagerManagerClass = /** @class */ (function () {
             _this.VueAuthList = vue;
             // $(vue.$el).alert('close');
             Common.InsertBeforeDynamicDom(vue.$el);
-            Common.AlginCenterInWindow($('#authListPanel'));
+            Common.AlginCenterInWindow($(vue.$el).find('.popup_content'));
         });
     };
     ManagerManagerClass.prototype.ShowUserList = function (proj) {

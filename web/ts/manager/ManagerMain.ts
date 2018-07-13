@@ -1,5 +1,8 @@
 class ManagerMainClass {
     Init(): void {
+        VueManager.Init(this.OnInitVueCpl)
+    }
+    private OnInitVueCpl(){
         ManagerData.Init()
         //
         if(ManagerData.MyAuth[Auth.PROJECT_LIST]){

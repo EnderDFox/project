@@ -146,6 +146,7 @@ var ManagerDataClass = /** @class */ (function () {
         this.DepartmentList.splice(0, this.DepartmentList.length);
         this.GetAllDepartmentList(this.DepartmentTree, 0, this.DepartmentList);
     };
+    /**把一个 部门list和每个子孙部门一起合并为一个大list */
     ManagerDataClass.prototype.GetAllDepartmentList = function (dpTree, fid, rs) {
         if (rs === void 0) { rs = []; }
         for (var i = 0; i < dpTree.length; i++) {
@@ -185,6 +186,15 @@ var ManagerDataClass = /** @class */ (function () {
             dp = this.DepartmentDict[dp.Fid];
         }
         return rs;
+    };
+    /**得到一个 部门的兄弟部门数组 */
+    ManagerDataClass.prototype.GetBrotherDepartmentList = function (dp) {
+        if (dp.Fid) {
+            return ManagerData.DepartmentDict[dp.Fid].Children;
+        }
+        else { //顶级部门
+            return ManagerData.DepartmentTree;
+        }
     };
     return ManagerDataClass;
 }());
