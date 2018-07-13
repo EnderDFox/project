@@ -58,6 +58,9 @@ var ManagerManagerClass = /** @class */ (function () {
                     currUser: ManagerData.CurrUser,
                 },
                 methods: {
+                    GetDateStr: function (timeStamp) {
+                        return Common.TimeStamp2DateStr(timeStamp);
+                    },
                     GetProjMaster: function (proj) {
                         if (proj.MasterUid > 0) {
                             return ManagerData.UserDict[proj.MasterUid].Name;
@@ -115,7 +118,7 @@ var ManagerManagerClass = /** @class */ (function () {
                     onDel: function (e, proj, index) {
                         Common.ConfirmDelete(function () {
                             _this.VueProjectList.projectList.splice(index, 1);
-                        });
+                        }, "\u5373\u5C06\u5220\u9664\u9879\u76EE \"" + proj.Name + "\"");
                     },
                     onAdd: function () {
                         var newName = _this.VueProjectList.newName.toString().trim();
@@ -131,6 +134,7 @@ var ManagerManagerClass = /** @class */ (function () {
                             Pid: ManagerData.ProjectList[_this.VueProjectList.projectList.length - 1].Pid + 1,
                             Name: _this.VueProjectList.newName.toString(),
                             MasterUid: 0, UserList: [],
+                            CreateTime: new Date().getTime(),
                         });
                         _this.VueProjectList.newName = '';
                     }
@@ -201,12 +205,9 @@ var ManagerManagerClass = /** @class */ (function () {
                 data: {
                     allDepartmentList: ManagerData.DepartmentList,
                     newName: '',
+                    auth: ManagerData.MyAuth,
                 },
                 methods: {
-                    ShowParentDpName: function (did) {
-                        var dp = ManagerData.DepartmentDict[did];
-                        return dp ? dp.Name : '选择上级部门';
-                    },
                     departmentOption: _this.DepartmentOption.bind(_this),
                     onEditName: function (e, dp, i0) {
                         var newName = e.target.value;
@@ -278,13 +279,15 @@ var ManagerManagerClass = /** @class */ (function () {
                         //
                         ManagerData.RefreshAllDepartmentList();
                     },
-                    onDel: function (e, dp, i0) {
-                        var brothers = ManagerData.GetBrotherDepartmentList(dp);
-                        var brotherIndex = ArrayUtil.IndexOfAttr(brothers, FieldName.Did, dp.Did);
-                        brothers.splice(brotherIndex, 1);
-                        //
-                        delete ManagerData.DepartmentDict[dp.Did];
-                        ManagerData.RefreshAllDepartmentList();
+                    onDel: function (dp, i0) {
+                        Common.ConfirmDelete(function () {
+                            var brothers = ManagerData.GetBrotherDepartmentList(dp);
+                            var brotherIndex = ArrayUtil.IndexOfAttr(brothers, FieldName.Did, dp.Did);
+                            brothers.splice(brotherIndex, 1);
+                            //
+                            delete ManagerData.DepartmentDict[dp.Did];
+                            ManagerData.RefreshAllDepartmentList();
+                        }, "\u5373\u5C06\u5220\u9664\u90E8\u95E8 \"dp\" \u53CA\u5176\u5B50\u90E8\u95E8<br/>\n                            \u8BE5\u90E8\u95E8\u6781\u5176\u5B50\u90E8\u95E8\u7684\u6240\u6709\u804C\u4F4D\u90FD\u5C06\u88AB\u5220\u9664");
                     },
                     onAdd: function () {
                         var dp = {

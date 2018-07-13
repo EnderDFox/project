@@ -9,8 +9,9 @@
                     <th style="width: 300px;">项目名称</th>
                     <th class="-text-center" style="width: 150px;" title="负责人拥有该项目所有的管理权限">负责人</th>
                     <th class="text-center" style="width: 150px;">成员数量</th>
-                    <th style="width: 300px;">操作</th>
-                    <th></th>
+                    <th style="width: 300px;">管理</th>
+                    <th>删除</th>
+                    <th>创建时间</th>
                 </tr>
             </thead>
         </thead>
@@ -57,6 +58,9 @@
                         <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
                     </button>
                 </td>
+                <td>
+                    {{GetDateStr(proj.CreateTime)}}
+                </td>
             </tr>
             <tr key="0" v-if="auth['PROJECT_LIST']">
                 <td>
@@ -69,6 +73,8 @@
                     <button class="btn btn-default" type="submit" title="增加新项目" @click="onAdd()">
                         <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
                     </button>
+                </td>
+                <td>
                 </td>
                 <td>
                 </td>

@@ -21,6 +21,15 @@ var CommonClass = /** @class */ (function () {
         date.setDate(date.getDate() + offsetDay);
         return Common.FmtDate(date);
     };
+    /**
+     * 获取当前时间偏移后的 Date
+     * @param Day 偏移天数
+     */
+    CommonClass.prototype.GetOffsetDate = function (offset) {
+        var date = new Date();
+        date.setDate(date.getDate() + offset.Day);
+        return date;
+    };
     /**本周周几*/
     CommonClass.prototype.GetDayDate = function (to) {
         var date = new Date();

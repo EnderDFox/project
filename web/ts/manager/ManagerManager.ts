@@ -60,6 +60,9 @@ class ManagerManagerClass {
                         currUser: ManagerData.CurrUser,
                     },
                     methods: {
+                        GetDateStr:(timeStamp:number):string=>{
+                            return Common.TimeStamp2DateStr(timeStamp)
+                        },
                         GetProjMaster: (proj: ProjectSingle): string => {
                             if (proj.MasterUid > 0) {
                                 return ManagerData.UserDict[proj.MasterUid].Name
@@ -115,7 +118,7 @@ class ManagerManagerClass {
                         onDel: (e, proj: ProjectSingle, index: int) => {
                             Common.ConfirmDelete(() => {
                                 this.VueProjectList.projectList.splice(index, 1)
-                            })
+                            }, `即将删除项目 "${proj.Name}"`)
                         },
                         onAdd: () => {
                             var newName: string = this.VueProjectList.newName.toString().trim()
@@ -132,6 +135,7 @@ class ManagerManagerClass {
                                     Pid: ManagerData.ProjectList[this.VueProjectList.projectList.length - 1].Pid + 1,
                                     Name: this.VueProjectList.newName.toString(),
                                     MasterUid: 0, UserList: [],
+                                    CreateTime: new Date().getTime(),
                                 }
                             )
                             this.VueProjectList.newName = ''
@@ -205,12 +209,9 @@ class ManagerManagerClass {
                     data: {
                         allDepartmentList: ManagerData.DepartmentList,
                         newName: '',
+                        auth: ManagerData.MyAuth,
                     },
                     methods: {
-                        ShowParentDpName: (did: number): string => {
-                            var dp = ManagerData.DepartmentDict[did]
-                            return dp ? dp.Name : '选择上级部门'
-                        },
                         departmentOption: this.DepartmentOption.bind(this),
                         onEditName: (e: Event, dp: DepartmentSingle, i0: int) => {
                             var newName = (e.target as HTMLInputElement).value
@@ -282,14 +283,16 @@ class ManagerManagerClass {
                             //
                             ManagerData.RefreshAllDepartmentList()
                         },
-                        onDel: (e, dp: DepartmentSingle, i0: int) => {
-                            var brothers: DepartmentSingle[] = ManagerData.GetBrotherDepartmentList(dp)
-                            var brotherIndex = ArrayUtil.IndexOfAttr(brothers, FieldName.Did, dp.Did)
-                            brothers.splice(brotherIndex, 1)
-                            //
-                            delete ManagerData.DepartmentDict[dp.Did]
-                            ManagerData.RefreshAllDepartmentList()
-
+                        onDel: (dp: DepartmentSingle, i0: int) => {
+                            Common.ConfirmDelete(() => {
+                                var brothers: DepartmentSingle[] = ManagerData.GetBrotherDepartmentList(dp)
+                                var brotherIndex = ArrayUtil.IndexOfAttr(brothers, FieldName.Did, dp.Did)
+                                brothers.splice(brotherIndex, 1)
+                                //
+                                delete ManagerData.DepartmentDict[dp.Did]
+                                ManagerData.RefreshAllDepartmentList()
+                            }, `即将删除部门 "dp" 及其子部门<br/>
+                            该部门极其子部门的所有职位都将被删除`)
                         },
                         onAdd: () => {
                             var dp: DepartmentSingle = {

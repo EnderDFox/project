@@ -18,10 +18,18 @@
                     </ul>
                 </li>
                 <li :class="{'active':currPage==2}" style="margin-left: 100px;">
-                    <a @click="onShowPage(2)">部门</a>
+                    <a @click="onShowPage(2)">
+                        <span class="glyphicon glyphicon-th-list" aria-hidden="true">
+                            部门
+                        </span>
+                    </a>
                 </li>
                 <li :class="{'active':currPage==1}">
-                    <a @click="onShowPage(1)">成员</a>
+                    <a @click="onShowPage(1)">
+                        <span class="glyphicon glyphicon-user" aria-hidden="true">
+                            成员
+                        </span>
+                    </a>
                 </li>
             </ul>
         </div>

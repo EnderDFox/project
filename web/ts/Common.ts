@@ -27,6 +27,15 @@ class CommonClass {
 		date.setDate(date.getDate() + offsetDay)
 		return Common.FmtDate(date)
 	}
+	/**
+	 * 获取当前时间偏移后的 Date
+	 * @param Day 偏移天数
+	 */
+	GetOffsetDate(offset:{Day: number}): Date {
+		var date = new Date()
+		date.setDate(date.getDate() + offset.Day)
+		return date
+	}
 	/**本周周几*/
 	GetDayDate(to: number): string {
 		var date = new Date()

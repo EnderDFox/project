@@ -132,6 +132,7 @@ interface ProjectSingle {
     Name?: string
     //负责人id
     MasterUid?:number   
+    CreateTime:number
     //client cache data
     ModeList?: ModeSingle[]
     UserList?:UserSingle[]

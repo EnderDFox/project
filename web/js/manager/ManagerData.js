@@ -73,9 +73,9 @@ var ManagerDataClass = /** @class */ (function () {
         this.InitAuthorityModuleList();
         //#project
         this.ProjectList = [
-            { Pid: 1, Name: '项目A', MasterUid: 3, UserList: [] },
-            { Pid: 2, Name: '项目B', MasterUid: 0, UserList: [] },
-            { Pid: 3, Name: '项目C', MasterUid: 0, UserList: [] },
+            { Pid: 1, Name: '项目A', MasterUid: 3, UserList: [], CreateTime: Common.GetOffsetDate({ Day: -33 }).getTime() },
+            { Pid: 2, Name: '项目B', MasterUid: 0, UserList: [], CreateTime: Common.GetOffsetDate({ Day: -22 }).getTime() },
+            { Pid: 3, Name: '项目C', MasterUid: 0, UserList: [], CreateTime: Common.GetOffsetDate({ Day: -11 }).getTime() },
         ];
         //#user
         this.UserList = [];
