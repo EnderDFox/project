@@ -1,0 +1,19 @@
+<!-- 编辑模板-功能列表 -->
+<div class="commonDialog editTplMode" id="editTplModeList">
+    <div class="head">
+        <div class="title">编辑模板-功能列表&nbsp;&nbsp;({{modes.length}}/5)</div>
+        <div class="close">x</div>
+    </div>
+    <transition-group name="list-complete" tag="ul">
+        <li class="body list-complete-item" v-for="mode in modes" :key="mode.Tmid">
+            <input type="text" class="ver" :class="{'listOpenBorder':mode.Tmid==showTmid}" placeholder="空" :value="mode.Name" :id="'editTplModeList_'+mode.Tmid+'_name'" @blur="onEditName($event,mode.Tmid)"
+                @keyup.enter="onEditName($event,mode.Tmid)" />
+            <button class="confirm btnSmall3 btnEdit" :class="{'listOpenBorder':mode.Tmid==showTmid,'listOpenBg':mode.Tmid==showTmid}" title="编辑功能内流程列表" v-on:click="onEdit($event,mode.Tmid)">编辑({{mode.Links.length}})</button>
+            <button class="cancel btnSmall1" title="删除" @click="onDel($event,mode.Tmid)">X</button>
+        </li>
+    </transition-group>
+    <div class="body" v-if="modes.length<10">
+        <input type="text" class="ver" placeholder="新功能名称" v-model="newName" @keyup.enter="onAdd" />
+        <button class="confirm btnSmall3" @click="onAdd">增加</button>
+    </div>
+</div>

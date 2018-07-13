@@ -1,0 +1,25 @@
+<!-- 编辑模板-功能中的流程列表 -->
+<div class="commonDialog editTplMode editTplModeDetail" id="editTplModeDetail" :style="{'min-width':parentLink!=null?'400px':'525px','width':parentLink!=null?'400px':'525px'}">
+    <div class="head">
+        <div class="title">编辑模板-{{parentLink!=null?mode.Name:'子流程'}}</div>
+        <div class="close" @click="onClose($event)">x</div>
+    </div>
+    <transition-group name="list-complete" tag="ul" :class="[linkList.length<=10?'scroll_y_hidden':'scroll_y_auto']">
+        <li class="body list-complete-item" v-for="(link,index) in linkList" :key="link.Tlid">
+            <input type="text " class="ver" :class="{'listOpenBorder':link.Tlid==showTlid}" placeholder="空 " :value="link.Name " :id=" 'editTplModeDetail_'+link.Tlid+'_name' " @blur="onEditName($event,link) " @keyup.enter="onEditName($event,link) " />
+            <button class="confirm btnSmall2 btnDid " title="修改负责人所属的部门 " @click="onChangeDid($event,link.Tlid) ">{{link.Did|didName}}</button>
+            <button v-if="parentLink==null" class="confirm btnSmall2 btnEditChildren " @click="onEditChildren($event,link)" :class="{'listOpenBorder':link.Tlid==showTlid,'listOpenBg':link.Tlid==showTlid}">子流程({{link.Children?link.Children.length:0}})</button>
+            <button :class="{'confirm':true, 'btnSmall1':true, 'button-disabled':index==0} " title="排序上移 " @click="onSortUp($event,link,index) "
+                :disabled="index==0">↑</button>
+            <button :class="{'confirm':true, 'btnSmall1':true, 'button-disabled':index>=(linkList.length-1)}" title="排序下移" @click="onSortDown($event,link,index)"
+                :disabled="index>=(linkList.length-1)">↓</button>
+            <button class="confirm btnSmall1" title="删除" @click="onDel($event,link)">X</button>
+            <button v-if="parentLink==null" class="confirm 'btnSmall1 btnDid" title="复制" @click="onClone($event,link)">复制</button>
+        </li>
+    </transition-group>
+    <div class="body" v-if="linkList.length<50">
+        <input type="text" class="ver" placeholder="新流程名称" v-model="newName" @keyup.enter="onAdd" />
+        <button class="confirm btnSmall2 btnDid" @click="onChangeDid($event,-1)">{{newDid|didName}}</button>
+        <button class="confirm btnSmall3" @click="onAdd">增加</button>
+    </div>
+</div>

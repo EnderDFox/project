@@ -1,0 +1,8 @@
+<ul class="fileBox" style="padding: 0px;" :wid="wid">
+    <!-- 不设置wid, 修改items竟然不刷新 -->
+    <li v-for="(item,index) in items" :key="item.tempId" :class="['file',{border_dashed:item.state==0||item.state==1,border_solid:item.state==2||item.state==3}]" >
+        <!-- :style="{visibility:item.state==3?'visible':'hidden'}"> //改成了 没有数据或空数据 也显示附件框 所以这里先注释掉-->
+        <img v-if="item.state==3 || item.state==2" class="img" :src="item.src" style="cursor: pointer;" :title="item.Name" alt=" " @click="onImageClick(index)"/>
+        <!-- <img v-show="item.state==2" class="img" :src="item.src" /> -->
+    </li>
+</ul>

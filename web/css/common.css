@@ -1,0 +1,182 @@
+/*==========================================================通用==========================================================*/
+/*box-sizing:border-box;*/
+/*全局设置*/
+body,html{font-size:15px;font-family:微软雅黑;color:#222222;margin:0px;padding:0px; overflow:scroll;}
+button{border:1px solid #abadb3;background:#f9f9f9;width:75px;height:30px;line-height:28px;cursor:pointer;border-radius:3px; font-size: 15px;}
+button:hover{border:1px solid #0078d7;background:#e5f1fb;}
+input{border:1px solid #abadb3;font-family:微软雅黑;border-radius:3px;font-size: 15px;}
+input:hover{border:1px solid #0078d7;}
+textarea{border:1px solid #abadb3;font-size:15px;font-family:微软雅黑;overflow:auto;resize:none;border-radius:3px;}
+textarea:hover{border:1px solid #abadb3;}
+select{border:1px solid #abadb3;font-family:微软雅黑;border-radius:1px;cursor:pointer;}
+select:hover{border:1px solid #0078d7;}
+input:focus,textarea:focus,button:focus{outline:none;}
+::-ms-clear,::-ms-reveal{display:none;}
+/*select::-ms-expand{display:none;}*/
+.clear{clear:both;}
+
+/*功能导航*/
+.commonNav{position:fixed;z-index:11;border-bottom:1px solid #e8e8e8;display:flex;display:-webkit-flex;border-top:1px solid #e8e8e8;width:100%;height:33px;line-height:33px;top:0px;left:0px;background:#ffffff;-webkit-transform:translateZ(0);-moz-transform:translateZ(0);-ms-transform:translateZ(0);-o-transform:translateZ(0);transform:translateZ(0);}
+.commonNav .user{width:5%;display:flex;display:-webkit-flex;margin-left:10px;}
+.commonNav .user div{margin-left:5px;white-space: nowrap;}
+.commonNav .user .umsgs{color:#ff0000;font-weight:bold;cursor:pointer;}
+.commonNav .head{text-align:center;width:20%;justify-content:center;-webkit-justify-content:center;display:flex;display:-webkit-flex;}
+.commonNav .head .on,.commonNav .head li:hover{background:#3da8f5;color:#fff;font-size:16px;font-weight:bold;}
+.commonNav .body{text-align:center;width:60%;justify-content:center;-webkit-justify-content:center;display:flex;display:-webkit-flex;}
+.commonNav .foot{width:20%;justify-content:center;-webkit-justify-content:center;display:flex;display:-webkit-flex;}
+.commonNav .menu,.commonNav .tools{margin:0px;padding:0px;}
+.commonNav .menu li{list-style:none;cursor:pointer;float:left;width:70px;}
+.commonNav .tools li{list-style:none;cursor:pointer;float:left;width:60px;}
+.commonNav .menu li:hover,.commonNav .menu .on{background:#e8e8e8;font-size:16px;font-weight:bold;}
+.commonNav .foot li:hover{color:#3da8f5;}
+
+/*加载内容*/
+.commonLoading{position:fixed;height:3px;line-height:3px;z-index:600;display:flex;display:-webkit-flex;width:100%;top:35px;-webkit-transform:translateZ(0);-moz-transform:translateZ(0);-ms-transform:translateZ(0);-o-transform:translateZ(0);transform:translateZ(0);}
+.commonLoading .bar{background:#0d7e68;width:0%;}
+
+
+/*内容位置*/
+.commonBody{/*margin-top:70px;*/position:absolute;top:0px;display:inline-table;/*box-shadow:0px 0px 5px #333333;*/}
+
+/*======单项css*/
+.float_left{
+    float: left;
+}
+
+.display_inline_block{
+    display: inline-block;
+}
+
+.no-mp{
+    padding: 0px 0px 0px 0px;
+    margin: 0px 0px 0px 0px;
+}
+
+.no-mbp{
+    border: 0px;
+    padding: 0px 0px 0px 0px;
+    margin: 0px 0px 0px 0px;
+}
+/* li 不显示 列表样式 */
+.list-style-type-none{
+    list-style-type:none;
+}
+
+.font_bold{
+    font-weight:bold;
+}
+/* 鼠标样式 */
+.cursor_none{
+    cursor:none;
+}
+.cursor_pointer{
+    cursor:pointer;
+}
+/* 文本不可以被选择 */
+.user_select_none{
+    user-select: none;
+}
+/* 不可见 彻底不占位 */
+.hidden{
+    display: none;
+}
+/* 不可见 还占位 */
+.visible_false{
+    visibility: hidden;
+}
+/*边框*/
+/* 实线 */
+.border_solid{
+    border-style: solid !important;
+}
+/* 虚线 */
+.border_dashed{
+    border-style: dashed !important;
+}
+
+/*内容滑动*/
+/*.commonScroll{overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;overflow-scrolling:touch;}*/
+.scroll_x_auto{overflow-x: auto !important;}
+.scroll_x_hidden{overflow-x: hidden !important;}
+.scroll_y_auto{overflow-y: auto !important;}
+.scroll_y_hidden{overflow-y: hidden !important;}
+/*======*/
+
+/*迷你格子*/
+.commonMini{position:absolute;background: transparent;border:2px solid #217346;/*box-sizing:border-box;*/display:none;left:0px;top:0px;/*background:#000;opacity:0.2;*/}
+/* .commonMini div{background:#000;opacity:1;height:50%;width:50%;color:red;} */
+
+/*通用菜单*/
+.commonMenu{position:absolute;z-index:205;border-radius:3px;min-width:175px;width:175px;box-shadow:3px 3px 10px #333333;background:#fff;border:0px solid #c6c6c6;display:none;}
+.commonMenu .row{color:#5e5e5e;font-size:13px;cursor:pointer;float:left;width:175px;}
+.commonMenu .row:hover{background:#DDEBF7;border-radius:3px;}
+.commonMenu .row div{float:left;}
+.commonMenu .ico{min-width:30px;width:30px;height:30px;line-height:30px;}
+.commonMenu .txt{min-width:130px;width:130px;height:30px;line-height:30px;}
+.commonMenu .dev{height:30px;line-height:30px;height:30px;line-height:30px;}
+.commonMenu .arrow-right{border-top:4px solid transparent;border-bottom:4px solid transparent;border-left:5px solid #777777;margin:0px auto;position:relative;top:50%;-webkit-transform:translateY(-50%);-moz-transform:translateY(-50%);-ms-transform:translateY(-50%);-o-transform:translateY(-50%);transform:translateY(-50%);}
+.commonMenu .spread{margin-left:10px;border-radius:3px;box-shadow:3px 3px 10px #333333;border:0px solid #c6c6c6;min-width:175px;width:175px;position:absolute;background:#fff;display:none;}
+.commonMenu .extends:hover > .dev > .spread{display:block;} 
+
+/*通用插件*/
+.commonMenu .pluginColor{margin-left:10px;box-shadow:3px 3px 10px #333333;min-width:99px;width:99px;padding-bottom:3px;padding-right:3px;position:absolute;border:0px solid red;background:#fff;display:none;}
+.commonMenu .pluginColor div{height:30px;line-height:30px;min-width:30px;width:30px;margin-left:3px;margin-top:3px;box-sizing:border-box;}
+.commonMenu .pluginColor div:hover{box-sizing:border-box;-webkit-box-sizing:border-box;border:2px solid #ff0000;}
+
+/*插件颜色*/
+.none{background:#ffffff;box-sizing:border-box;-webkit-box-sizing:border-box;border:1px solid #000;}
+.bg_0{background:#ffffff;}
+.bg_1{background:#e7e6e6;}
+.bg_2{background:#44546a;}
+.bg_3{background:#5b9bd5;}
+.bg_4{background:#ed7d31;}
+.bg_5{background:#a5a5a5;}
+.bg_6{background:#ffc000;}
+.bg_7{background:#4472c4;}
+.bg_8{background:#70ad47;}
+.bg_no{background: transparent;}
+.border_no{border: transparent;}
+
+/*通用弹窗*/
+.commonDialog{position:absolute;z-index:100;margin:0px;padding:0px 0px 10px 0px;box-shadow:3px 3px 10px #333333;min-width:300px;width:300px;background:#f0f0f0;display:none;border-radius:5px;}
+.commonDialog li{list-style:none;}
+.commonDialog .head{min-height:35px;height:35px;line-height:35px;background:#fff;border-radius:3px 3px 0px 0px;}
+.commonDialog .title{float:left;margin-left:15px;font-size:14px;min-height:35px;height:35px;line-height:35px;}
+.commonDialog .close{float:right;cursor:pointer;width:40px;text-align:center;font-size:16px;min-height:35px;height:35px;line-height:35px;}
+.commonDialog .close:hover{background:#f0f0f0;border-radius:0px 3px 0px 0px;}
+.commonDialog .row{min-height:30px;height:30px;line-height:30px;}
+.commonDialog .buttons{min-height:40px;height:40px;line-height:40px;text-align:right;margin-right:15px;}
+.commonDialog .foot{clear:both;}
+/*
+.commonDialog .confirm{background:#34495E;color:#fff;}
+.commonDialog .cancel{background:#BDC3C7;color:#fff;}
+*/
+/*警告提示*/
+.commonWarning .tips{height:60px;line-height:25px;background:#fff;padding:20px;color:#ff0000;margin:20px 20px 15px 20px;border:1px solid #abadb3;border-radius:3px;}
+/*==========================================================空间==========================================================*/
+
+/*日历空间*/
+.dateTime{z-index:2000;border-radius:5px;position:absolute;box-shadow:3px 3px 10px #333333;background:#fff;border:0px solid #c6c6c6;width:295px;min-width:295px;max-width:288px;text-align:center;display:none;}
+.dateTime .days,.dateTime .head,.dateTime .week{width:295px;min-width:295px;max-width:295px;float:left;}
+.dateTime .days{font-size:14px;cursor:pointer;}
+.dateTime .days .notin{color:#9a9a9a;}
+.dateTime .week{font-weight:bold;}
+.dateTime .left,.dateTime .title,.dateTime .right,.dateTime .days div,.dateTime .week div{height:35px;min-height:35px;line-height:35px;float:left;}
+.dateTime .left,.dateTime .right{width:86px;min-width:86px;cursor:pointer;height:40px;min-height:40px;}
+.dateTime .title{width:123px;min-width:123px;font-size:16px;font-weight:bold;height:40px;min-height:40px;line-height:40px;}
+.dateTime .days div,.dateTime .week div{width:40px;min-width:40px;border-radius:3px;margin:1px;}
+.dateTime .days div:hover,.dateTime .left:hover,.dateTime .right:hover{background:#c6c6c6;}
+.dateTime .left{border-radius:5px 0px 0px 0px;}
+.dateTime .right{border-radius:0px 5px 0px 0px;}
+.dateTime .arrow-right,.dateTime .arrow-left{border-top:9px solid transparent;border-bottom:9px solid transparent;position:relative;top:50%;-webkit-transform:translateY(-50%);-moz-transform:translateY(-50%);-ms-transform:translateY(-50%);-o-transform:translateY(-50%);transform:translateY(-50%);}
+.dateTime .arrow-right{margin:0px auto auto 35px;border-left:15px solid #777777;}
+.dateTime .arrow-left{margin:0px 35px auto auto;border-right:15px solid #777777;}
+.dateTime .range{background:#5b9bd5;font-weight:bold;}
+.dateTime .today{background:#ffff00;font-weight:bold;}
+
+
+/*通用效果*/
+.button-disabled{background: #BBBBBB;}
+.button-disabled:hover{background: #BBBBBB;border-color: #BBBBBB;}
+.text-overflow-hide{white-space: nowrap;text-overflow: ellipsis;overflow: hidden;}
+.font_color_black3{color: #333333;}

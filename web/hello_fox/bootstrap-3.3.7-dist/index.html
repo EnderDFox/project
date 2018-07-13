@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
+  <title>Bootstrap 101 Template</title>
+
+  <!-- Bootstrap -->
+  <link href="../../css/bootstrap.css" rel="stylesheet">
+  <!-- <link href="css/docs.css" rel="stylesheet"> -->
+
+  <style>
+    * {
+      /* outline: 1px solid #19ff19; */
+    }
+
+    .pow_2 {
+      /* display:none; */
+    }
+
+    .pow_2 ul {
+      /* margin-left: 0.3em; */
+    }
+
+    .pow_2 li {
+      font-style: italic;
+      padding: 4px;
+    }
+
+    .pow_2 li span {
+      font-style: normal;
+      font-weight: bold;
+      font-size: 16px;
+    }
+
+    .common_size{
+      height: 100px;
+      line-height: 100px;
+      text-align: left;
+      vertical-align: middle;
+    }
+
+    .regexp li {
+      padding: 4px;
+    }
+
+    .regexp li span:first-child {
+      display: inline-block;
+      width: 60px;
+      text-align: center;
+      font-weight: bold;
+      font-size: 125%;
+      border-right: 2px solid #bbbbbb;
+      margin-right: 4px;
+    }
+
+    .regexp_eg{
+      margin-top: -70px;
+    }
+
+    .regexp_eg li span:nth-child(2) {
+      font-weight: bold;
+      font-size: 125%;
+      margin-left: 12px;
+    }
+
+    .regexp_eg li span:nth-child(4) {
+      font-weight: bold;
+      font-size: 125%;
+      margin-left: 32px;
+    }
+  </style>
+
+</head>
+
+<body onload="onload()">
+  <section class="col-sm-6 pow_2">
+    <ul class="list-group" style="float: left;width: 11.2em;">
+      <li class="list-group-item">pow(2,
+        <span>1</span> ) =
+        <span>2</span>
+      </li>
+      <li class="list-group-item">pow(2,
+        <span>2</span> ) =
+        <span>4</span>
+      </li>
+      <li class="list-group-item">pow(2,
+        <span>3</span> ) =
+        <span>8</span>
+      </li>
+      <li class="list-group-item">pow(2,
+        <span>4</span> ) =
+        <span>16</span>
+      </li>
+      <li class="list-group-item">pow(2,
+        <span>5</span> ) =
+        <span>32</span>
+      </li>
+      <li class="list-group-item">pow(2,
+        <span>6</span> ) =
+        <span>64</span>
+      </li>
+      <li class="list-group-item">pow(2,
+        <span>7</span> ) =
+        <span>128</span>
+      </li>
+      <li class="list-group-item">pow(2,
+        <span>8</span> ) =
+        <span>256</span>
+      </li>
+      <li class="list-group-item">pow(2,
+        <span>9</span> ) =
+        <span>512</span>
+      </li>
+      <li class="list-group-item">pow(2,
+        <span>10</span> ) =
+        <span>1024</span>
+      </li>
+      <li class="list-group-item">pow(2,
+        <span>11</span> ) =
+        <span>2048</span>
+      </li>
+      <li class="list-group-item">pow(2,
+        <span>12</span> ) =
+        <span>4096</span>
+      </li>
+      <li class="list-group-item">pow(2,
+        <span>13</span> ) =
+        <span>8192</span>
+      </li>
+      <li class="list-group-item">pow(2,
+        <span>14</span> ) =
+        <span>16384</span>
+      </li>
+      <li class="list-group-item">pow(2,
+        <span>15</span> ) =
+        <span>32768</span>
+      </li>
+      <li class="list-group-item">pow(2,
+        <span>16</span> ) =
+        <span>65536</span>
+      </li>
+    </ul>
+    <ul class="list-group" style="float: left;width: 14em;">
+      <li class="list-group-item">pow(2,
+        <span>17</span> ) =
+        <span>131072</span>
+      </li>
+      <li class="list-group-item">pow(2,
+        <span>18</span> ) =
+        <span>262144</span>
+      </li>
+      <li class="list-group-item">pow(2,
+        <span>19</span> ) =
+        <span>524288</span>
+      </li>
+      <li class="list-group-item">pow(2,
+        <span>20</span> ) =
+        <span>1048576</span>
+      </li>
+      <li class="list-group-item">pow(2,
+        <span>21</span> ) =
+        <span>2097152</span>
+      </li>
+      <li class="list-group-item">pow(2,
+        <span>22</span> ) =
+        <span>4194304</span>
+      </li>
+      <li class="list-group-item">pow(2,
+        <span>23</span> ) =
+        <span>8388608</span>
+      </li>
+      <li class="list-group-item">pow(2,
+        <span>24</span> ) =
+        <span>16777216</span>
+      </li>
+      <li class="list-group-item">pow(2,
+        <span>25</span> ) =
+        <span>33554432</span>
+      </li>
+      <li class="list-group-item">pow(2,
+        <span>26</span> ) =
+        <span>67108864</span>
+      </li>
+      <li class="list-group-item">pow(2,
+        <span>27</span> ) =
+        <span>134217728</span>
+      </li>
+      <li class="list-group-item">pow(2,
+        <span>28</span> ) =
+        <span>268435456</span>
+      </li>
+      <li class="list-group-item">pow(2,
+        <span>29</span> ) =
+        <span>536870912</span>
+      </li>
+      <li class="list-group-item">pow(2,
+        <span>30</span> ) =
+        <span>1073741824</span>
+      </li>
+      <li class="list-group-item">pow(2,
+        <span>31</span> ) =
+        <span>2147483648</span>
+      </li>
+      <li class="list-group-item">pow(2,
+        <span>32</span> ) =
+        <span>4294967296</span>
+      </li>
+    </ul>
+  </section>
+  <section class="col-sm-6 common_size">
+    A4: 210毫米×297毫米 1050x1485 (1:1.4143) (0.7071:1)
+  </section>
+  <section class="col-sm-6">
+    <img src="../image/黄金比例.png" />
+  </section>
+  <hr style="clear: both;" />
+  <section class="col-sm-6 regexp">
+    <h3>正则表达式</h3>
+    <ul class="list-group" style="float: left;">
+      <li class="list-group-item">
+        <h4>定位符</h4>
+      </li>
+      <li class="list-group-item">
+        <span>^</span>
+        <span>行首</span>
+      </li>
+      <li class="list-group-item">
+        <span>$</span>
+        <span>行尾;Multiline=true,也匹配\n或\r之前的位置</span>
+      </li>
+      <li class="list-group-item">
+        <span>\b</span>
+        <span>单词边界,例:`er\b`能匹配`never`的`er`,不能匹配`verb`的</span>
+      </li>
+      <li class="list-group-item">
+        <span>\B</span>
+        <span>非单词边界,例:`er\b`能匹配`verb`的`er`,不能匹配`never`的</span>
+      </li>
+      <li class="list-group-item">
+        <h4>限定符</h4>
+      </li>
+      <li class="list-group-item">
+        <span>*</span>
+        <span>匹配任意次</span>
+      </li>
+      <li class="list-group-item">
+        <span>+</span>
+        <span>匹配大于等价于1次</span>
+      </li>
+      <li class="list-group-item">
+        <span>?</span>
+        <span>匹配0或1次</span>
+      </li>
+      <li class="list-group-item">
+        <span>{n}</span>
+        <span>匹配n次</span>
+      </li>
+      <li class="list-group-item">
+        <span>{n,}</span>
+        <span>匹配至少n次</span>
+      </li>
+      <li class="list-group-item">
+        <span>{n,m}</span>
+        <span>匹配最少n,最多m次</span>
+      </li>
+      <li class="list-group-item">
+        <span>?</span>
+        <span>在限制符后,则为非贪婪模式</span>
+      </li>
+    </ul>
+  </section>
+  <section class="col-sm-6 regexp" style="margin-top: -134px;">
+    <ul class="list-group" style="float: left;">
+      <li class="list-group-item">
+        <h4>匹配符</h4>
+      </li>
+      <li class="list-group-item">
+        <span>.</span>
+        <span>\r\n外的任意单个字符</span>
+      </li>
+      <li class="list-group-item">
+        <span>x|y</span>
+        <span>匹配x或y</span>
+      </li>
+      <li class="list-group-item">
+        <span>[xyz]</span>
+        <span>匹配包含的任意一个字符</span>
+      </li>
+      <li class="list-group-item">
+        <span>[^xyz]</span>
+        <span>匹配未包含的任意字符</span>
+      </li>
+      <li class="list-group-item">
+        <span>[a-z]</span>
+        <span>匹配范围内的任意字符</span>
+      </li>
+      <li class="list-group-item">
+        <span>[^a-z]</span>
+        <span>匹配不再范围内的任意字符</span>
+      </li>
+      <li class="list-group-item">
+        <span>\d</span>
+        <span>数字;等价于[0-9]</span>
+      </li>
+      <li class="list-group-item">
+        <span>\D</span>
+        <span>非数字;等价于[^0-9]</span>
+      </li>
+      <li class="list-group-item">
+        <span>\s</span>
+        <span>任何不可见字符，包括空格、制表符、换页符等;等价于[ \f\n\r\t\v]</span>
+      </li>
+      <li class="list-group-item">
+        <span>\S</span>
+        <span>任何可见字符;等价于[^ \f\n\r\t\v]</span>
+      </li>
+      <li class="list-group-item">
+        <span>\w</span>
+        <span>包括下划线的任何单词字符;类似但不等价于[A-Za-z0-9_]</span>
+      </li>
+      <li class="list-group-item">
+        <span>\W</span>
+        <span>匹配任何非单词字符;等价于[^A-Za-z0-9_]</span>
+      </li>
+      <li class="list-group-item">
+        <span>\</span>
+        <span>转义符</span>
+      </li>
+      <li class="list-group-item">
+        <span>\f</span>
+        <span>换页符</span>
+      </li>
+      <li class="list-group-item">
+        <span>\n</span>
+        <span>换行符</span>
+      </li>
+      <li class="list-group-item">
+        <span>\r</span>
+        <span>回车符</span>
+      </li>
+      <li class="list-group-item">
+        <span>\t</span>
+        <span>制表符;等价于\x09和\cI</span>
+      </li>
+      <li class="list-group-item">
+        <span>\v</span>
+        <span>垂直制表符;等价于\x0b和\cK</span>
+      </li>
+    </ul>
+  </section>
+  <section class="col-sm-10 regexp_eg">
+    <h3>常用示例</h3>
+    <ul class="list-group" style="float: left;">
+      <li class="list-group-item">
+        <span>匹配任何字符,不包括换行</span>
+        <span>.*?</span>
+      </li>
+      <li class="list-group-item">
+        <span>匹配任何字符,包括换行</span>
+        <span>[\w\W]*?</span>
+      </li>
+      <li class="list-group-item">
+        <span>用户名</span>
+        <span>/^[a-z0-9_-]{3,16}$/</span>
+      </li>
+      <li class="list-group-item">
+        <span>密码</span>
+        <span>/^[a-z0-9_-]{6,18}$/</span>
+      </li>
+      <li class="list-group-item">
+        <span>十六进制值</span>
+        <span>/^#?([a-f0-9]{6}|[a-f0-9]{3})$/</span>
+      </li>
+      <li class="list-group-item">
+        <span>电子邮箱</span>
+        <span>/^([a-z0-9_\.-]+)@([\da-z\.-]+)\.([a-z\.]{2,6})$/</span>
+        <br/>
+        <span>/^[a-z\d]+(\.[a-z\d]+)*@([\da-z](-[\da-z])?)+(\.{1,2}[a-z]+)+$/</span>
+      </li>
+      <li class="list-group-item">
+        <span>URL</span>
+        <span>/^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/</span>
+      </li>
+      <li class="list-group-item">
+        <span>IP地址</span>
+        <span>/((2[0-4]\d|25[0-5]|[01]?\d\d?)\.){3}(2[0-4]\d|25[0-5]|[01]?\d\d?)/</span>
+        <br/>
+        <span>/^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/</span>
+      </li>
+      <li class="list-group-item">
+        <span>HTML标签</span>
+        <span>/^&lt;([a-z]+)([^&lt;]+)*(?:&gt;(.*)&lt;\/\1&gt;|\s+\/&gt;)$/</span>
+      </li>
+      <li class="list-group-item">
+        <span>删除代码\\注释</span>
+        <span>(?&lt;!http:|\S)//.*$</span>
+      </li>
+      <li class="list-group-item">
+        <span>Unicode编码中的汉字范围</span>
+        <span>/^[\u2E80-\u9FFF]+$/</span>
+      </li>
+    </ul>
+  </section>
+
+  <!-- <hr style="clear: both;" />
+
+  <h1>你好，世界！</h1>
+  <h2>h2</h2>
+  <h3>h3</h3>
+  <h4>h4</h4>
+  <h5>h5</h5>
+  <h6>h6</h6>
+
+  <div class="alert alert-warning alert-dismissible" role="alert">
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+      <span aria-hidden="true">&times;</span>
+    </button>
+    <strong>Warning!</strong> Better check yourself, you're not looking too good.
+  </div>
+
+  <div class="progress">
+    <div class="progress-bar" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: 1%;">
+      60%
+    </div>
+  </div>
+
+  <button type="button" class="btn btn-default" aria-label="Left Align">
+    <span class="glyphicon glyphicon-align-left" aria-hidden="true"></span>
+  </button>
+
+  <button type="button" class="btn btn-default btn-lg">
+    <span class="glyphicon glyphicon-star" aria-hidden="true"></span> Star
+  </button>
+
+  <button>
+    <span class="glyphicon glyphicon-align-left"></span>
+  </button>
+
+  <button class="glyphicon glyphicon-star">
+  </button>
+
+  For example,
+  <pre><code>
+    <section></section>
+  </code></pre> should be wrapped as inline.
+
+  <pre><code></code></pre>
+
+  <pre><figure class=".pre-scrollable"><code>
+      <p>Using mustaches: {{ rawHtml }}</p>
+      <p>Using v-html directive: <span v-html="rawHtml"></span></p>
+      class FirstManagerClass{
+          firstVar:number = 'This is first var'
+          firstFunc(){
+              console.log('firstVar:':firstVar)
+          }
+      }
+      var FirstManager = new FirstManagerClass()
+      
+      // 创建构造器
+      var Profile = Vue.extend({
+        template: '<p>{{firstName}} {{lastName}} aka {{alias}}</p>',
+        data: function () {
+          return {
+            firstName: 'Walter',
+            lastName: 'White',
+            alias: 'Heisenberg'
+          }
+        }
+      })
+      // 创建 Profile 实例，并挂载到一个元素上;
+      new Profile().$mount('#mount-point')
+  </code></figure></pre> -->
+
+
+  <!-- jQuery (Bootstrap 的所有 JavaScript 插件都依赖 jQuery，所以必须放在前边) -->
+  <!-- <script src="https://cdn.bootcss.com/jquery/1.12.4/jquery.min.js"></script> -->
+  <script src="../../js/lib/jquery-3.2.1.min.js"></script>
+  <!-- 加载 Bootstrap 的所有 JavaScript 插件;你也可以根据需要只加载单个插件; -->
+  <script src="../../js/lib/bootstrap.js"></script>
+</body>
+
+<script>
+  function onload() {
+    $('code').each(function (index, elem) {
+      $(elem).text($(elem).html())
+    })
+  }
+</script>
+
+</html>

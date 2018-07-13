@@ -1,0 +1,23 @@
+<!-- 编辑模板-功能列表 -->
+<div class="commonDialog editTplMode editVersion editVersionList">
+    <div class="head">
+        <div class="title">编辑版本-列表&nbsp;&nbsp;</div>
+        <div class="close" @click="onClose()">x</div>
+    </div>
+    <transition-group name="list-complete" tag="ul">
+        <li class="body list-complete-item" v-for="item,index in versions" :key="item.Vid" v-if="index<ListShowMax">
+            <input type="text" class="name ver"  :class="{'listOpenBorder':item.Vid==showVid}" placeholder="空" :value="item.Ver" @blur="onEditVer($event,item,index)" @keyup.enter="onEditVer($event,item,index)">
+            <input type="text" class="name"  :class="{'listOpenBorder':item.Vid==showVid}" placeholder="空" :value="item.Name" @blur="onEditName($event,item,index)" @keyup.enter="onEditName($event,item,index)">
+            <button class="confirm btnSmall3 btnEdit"  :class="{'listOpenBorder':item.Vid==showVid,'listOpenBg':item.Vid==showVid}" title="编辑版本内容" @click="onEdit($event,item,index)">编辑</button>
+            <button :class="{ 'confirm':true, 'btnSmall1':true, 'button-disabled':index==0} " title="排序上移 " @click="onSortUp($event,item,index) "
+                :disabled="index==0 ">↑</button>
+            <button :class="{ 'confirm':true, 'btnSmall1':true, 'button-disabled':index>=(versions-1)}" title="排序下移" @click="onSortDown($event,item,index)" :disabled="index>=(versions.length-1)">↓</button>
+            <button class="cancel btnSmall1" title="删除" @click="onDel($event,item,index)">X</button>
+        </li>
+    </transition-group>
+    <div class="body">
+        <input type="text" class="name ver" placeholder="新版本号" v-model="newVer" @keyup.enter="onAddVer(true)" @blur="onAddVer(false)">
+        <input type="text" id="editVersionList_newName" class="name" placeholder="新版本名称" v-model="newName" @keyup.enter="onAdd()">
+        <button class="confirm btnSmall3" @click="onAdd()">增加</button>
+    </div>
+</div>

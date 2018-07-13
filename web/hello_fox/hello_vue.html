@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title>Demo</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<script src="../js/lib/jquery-3.2.1.min.js"></script>
+	<script src="../js/lib/vue.js"></script>
+	<script src="protobuf/protobuf.js"></script>
+	<script src="protobuf/hellopbjs.proto.js"></script>
+	<style>
+		* {
+			/* box-sizing: content-box; */
+			font-size: 18px;
+			background-color: rgb(209, 209, 209);
+		}
+
+		.div1 {
+			/* float: left; */
+			display: inline-block;
+			border: 1px solid #00FF66;
+			vertical-align: middle;
+			height: 80px;
+			line-height: 80px;
+		}
+
+		/* .div2 {} */
+
+		input {
+			height: 30px;
+			line-height: 30px;
+			border: 1px solid rgb(39, 39, 39);
+			margin: 0px;
+			padding: 4px;
+			vertical-align: middle;
+			background-color: sandybrown;
+		}
+
+		button {
+			width: 32px;
+			height: 32px;
+			line-height: 32px;
+			border: 1px solid springgreen;
+			margin: 0px;
+			padding: 4px;
+			vertical-align: middle;
+			color: rgb(245, 22, 234);
+		}
+
+		hr {
+			clear: left;
+		}
+
+		.list-complete-item {
+			transition: all 1s;
+			display: inline-block;
+			margin-right: 10px;
+		}
+
+		.list-complete-enter,
+		.list-complete-leave-to
+		/* .list-complete-leave-active for below version 2.1.8 */
+
+			{
+			opacity: 0;
+			transform: translateY(30px);
+		}
+
+		.list-complete-leave-active {
+			position: absolute;
+		}
+
+		.typing_loader {
+			display: inline-block;
+			width: 20px;
+			height: 20px;
+			border-radius: 50%;
+			position: relative;
+			background-color: rgb(16, 255, 68, 0.0);
+		}
+
+		.typing_loader1 {
+			animation: typing 1.5s 0s linear infinite alternate;
+		}
+
+		.typing_loader2 {
+			animation: typing 1.5s 0.5s linear infinite alternate;
+		}
+
+		.typing_loader3 {
+			animation: typing 1.5s 1s linear infinite alternate;
+		}
+
+		.typing_loader4 {
+			animation: typing 1.5s 1.5s linear infinite alternate;
+		}
+
+		.typing_loader5 {
+			animation: typing 1.5s 2s linear infinite alternate;
+		}
+
+		.typing_loader6 {
+			animation: typing 1.5s 2.5s linear infinite alternate;
+		}
+
+		.typing_loader7 {
+			animation: typing 1.5s 3s linear infinite alternate;
+		}
+
+		@keyframes typing {
+			0% {
+				background-color: rgba(16, 255, 68, 0.0);
+			}
+			50% {
+				background-color: rgba(16, 255, 68, 1);
+			}
+		}
+
+		hr:before {
+			/* content: "台词："; */
+			background: blue;
+		}
+	</style>
+</head>
+
+<body onload="onLoad()">
+	<div class="div1">
+		<input type="checkbox" placeholder="input here" />
+		<input type="text" placeholder="input here" />
+		<button>btn1</button>
+		<span>一些文字而已</span>
+	</div>
+	<hr/>
+	<div class="div2">
+		<div class="div1">
+			一
+		</div>
+		<div class="div1">
+			二
+		</div>
+		<div class="div1">
+			三
+		</div>
+	</div>
+
+
+	<hr/>
+	<div id="d1">
+		<hr/>
+	</div>
+	<div id="list-complete-demo" class="demo">
+		<button v-on:click="shuffle">Shuffle</button>
+		<button v-on:click="add">Add</button>
+		<button v-on:click="remove">Remove</button>
+		<transition-group name="list-complete" tag="p">
+			<span v-for="item in items" v-bind:key="item" class="list-complete-item">
+				{{ item }}
+			</span>
+		</transition-group>
+	</div>
+	<hr/>
+	<div class="div2" id="div2_vue">
+		<div class="div1" v-for="item in items" v-text="item">
+		</div>
+	</div>
+	<hr/>
+	<div class="span" style="text-align: center">
+		<div class="typing_loader typing_loader1"></div>
+		<div class="typing_loader typing_loader2"></div>
+		<div class="typing_loader typing_loader3"></div>
+		<div class="typing_loader typing_loader4"></div>
+		<div class="typing_loader typing_loader5"></div>
+		<div class="typing_loader typing_loader6"></div>
+		<div class="typing_loader typing_loader7"></div>
+	</div>
+	<hr/>
+	<div id="hello_pb">
+		<span v-text="login.account"></span>
+		<span v-text="login.password"></span>
+	</div>
+</body>
+<script type="text/javascript">
+	new Vue({
+		data: {
+			items: [1, 2, 3, 4, 5, 6, 7, 8, 9],
+			nextNum: 10
+		},
+		methods: {
+			randomIndex: function () {
+				return Math.floor(Math.random() * this.items.length)
+			},
+			add: function () {
+				this.items.splice(this.randomIndex(), 0, this.nextNum++)
+			},
+			remove: function () {
+				this.items.splice(this.randomIndex(), 1)
+			},
+			shuffle: function () {
+				var temp = this.items[2]
+				this.items[2] = this.items[4]
+				this.items[4] = temp
+				this.items = this.items;
+				this.items.splice(this.randomIndex(), 0)
+				//   this.items = _.shuffle(this.items)
+			}
+		}
+	}).$mount('#list-complete-demo')
+	console.log("[debug]", new Date().getTime(), "<-Time");
+	var count = 3
+	var doNextTick = function () {
+		count--;
+		if (count > 0) {
+			Vue.nextTick(doNextTick)
+		}
+		console.log("[debug]", new Date().getTime(), "<-Time");
+	}
+	Vue.nextTick(doNextTick);
+
+	new Vue({
+		data: {
+			items: [
+				'一', '二', '三'
+			]
+		}
+	}).$mount('#div2_vue')
+</script>
+<script type="text/javascript">
+	function init2(){
+		console.log("[info]",pb.hellopbjs.Login);
+		var login = new pb.hellopbjs.Login()
+		login.account = `acc0`
+		login.password = `pw0`
+		new Vue({
+			el:"#hello_pb",
+			data:{
+				login:login
+			},
+		})
+		setTimeout(() => {
+			login.account = `acc1`
+			login.password = `pw1`
+		}, 1000);
+	}
+	function onLoad(){
+		init2()
+	}
+</script>
+
+</html>

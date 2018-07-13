@@ -1,0 +1,37 @@
+<popup panel-heading="编辑权限">
+    <p style="background-color:#FFFFFF; ">
+        <table class="table table-hover table-bordered">
+            <thead>
+                <tr>
+                    <th style="width: 100px;">模块</th>
+                    <th style="width: 160px;">权限</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr v-for="am,index in authorityModuleList" :key="am.Modid">
+                    <td>
+                        <div class="checkbox">
+                            <label>
+                                <input type="checkbox" :name="am.Name" :value="am.Modid" :key="am.Modid" :checked="checkModChecked(checkedChange,am)" @click="onSwitchMod(am)"
+                                /> {{am.Name}}
+                            </label>
+                        </div>
+                    </td>
+                    <td>
+                        <div v-for="auth,index in am.AuthorityList" :key="auth.Authid" style="display:inline-block;">
+                            <div class="checkbox">
+                                <label>
+                                    <input type="checkbox" :name="auth.Name" :value="auth.Uid" :checked="checkAuthChecked(checkedChange,auth)" @click="onSwitchAuth($event,auth)"> {{auth.Name}}
+                                </label>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </p>
+    <p>
+        <button type="button" class="btn btn-info" @click="onSave()">保存</button>
+        <button type="button" class="btn btn-default" @click="onReset()">还原</button>
+    </p>
+</popup>

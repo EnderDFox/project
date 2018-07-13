@@ -1,0 +1,69 @@
+<div>
+    <div class="lockTop freeze" id="freezeTitleLeft">
+        <table class="process" id="tableTitleLeft">
+            <thead>
+                <tr>
+                    <td colspan="3" class="tools">功能列表</td>
+                </tr>
+                <tr>
+                    <td class="func">
+                        <span class="labelName">功能</span>
+                        <button v-show="isWirte" class="addNew" title="添加新功能">+</button>
+                    </td>
+                    <td class="link">流程</td>
+                    <td class="duty">负责人</td>
+                </tr>
+            </thead>
+        </table>
+    </div>
+    <div class="lockTop freeze" id="freezeTitleRight" style="margin-left: 603px;">
+        <table class="process" id="tableTitleRight">
+        </table>
+    </div>
+    <div class="processLockBody freeze" id="freezeBodyLeft" style="margin-top: 127px;">
+        <table class="process" id="tableBodyLeft">
+            <tbody>
+                <tr v-for="mode,index in modeList" class="trModeLeft" :mid="mode.Mid" style="border-bottom: solid 4px #002060;">
+                    <td :class="['mode bg_'+mode.Color]" :mid="mode.Mid" v-html="GetModeName(mode)">
+                    </td>
+                    <td colspan="2">
+                        <table class="linkMap">
+                            <tr v-for="link,index in mode.LinkList" class="trLink" :lid="link.Lid">
+                                <td>
+                                    <!-- 有子流程 -->
+                                    <table v-if="link.Children && link.Children.length>0" class="linkChildTable">
+                                        <tr v-for="linkChild,index in link.Children">
+                                            <td v-if="index==0" :rowspan="link.Children.length" class="linkParent" :class="['bg_'+link.Color]" type="link" v-html="GetLinkName(link)"
+                                                :lid="link.Lid" @contextmenu="onLinkName($event,mode,link)">
+                                            </td>
+                                            <td class="linkChild" :class="['bg_'+linkChild.Color]" type="link" v-html="GetLinkName(linkChild)" :lid="linkChild.Lid" @contextmenu="onLinkName($event,mode,linkChild,true)">
+                                            </td>
+                                            <td class="duty" type="duty" v-html="GetLinkUserName(linkChild)" :lid="linkChild.Lid">
+                                            </td>
+                                        </tr>
+                                    </table>
+                                    <!-- 没有子流程 -->
+                                    <table v-else>
+                                        <tr>
+                                            <td class="link" :class="['bg_'+link.Color]" type="link" v-html="GetLinkName(link)" :lid="link.Lid" @contextmenu="onLinkName($event,mode,link)">
+                                            </td>
+                                            <td class="duty" type="duty" v-html="GetLinkUserName(link)" :lid="link.Lid">
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+                <!--   <tr class="space">
+                    <td colspan="3"></td>
+                </tr> -->
+            </tbody>
+        </table>
+    </div>
+    <div class="processLockBody" id="freezeBodyRight" style="margin-left: 603px;margin-top: 127px;">
+        <table class="process" id="tableBodyRight">
+        </table>
+    </div>
+</div>

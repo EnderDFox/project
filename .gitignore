@@ -1,0 +1,14 @@
+/.idea
+/.svn
+*.map
+/web/tsconfig.json.help
+/web/upload
+web/tests_fox/image/img3.jpg
+web/tests_fox/image/img2.jpg
+/src/github.com
+/src/golang.org
+/src/pm/debug
+/pkg/
+run
+/bin/
+*.exe
