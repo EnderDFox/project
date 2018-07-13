@@ -36,12 +36,12 @@ echo "Create "$bin_pm_web
     mkdir $bin_pm_web
 fi
 
-\cp -rf $path_svn"/web/index.html" $bin_pm_web
-\cp -rf $path_svn"/web/mdv.html" $bin_pm_web
+\cp -rf $path_svn"/web/"*.html $bin_pm_web
 \cp -rf $path_svn"/web/favicon.ico" $bin_pm_web
 \cp -rf $path_svn"/web/更新日志.md" $bin_pm_web
 \cp -rf $path_svn"/web/css" $bin_pm_web
 \cp -rf $path_svn"/web/js" $bin_pm_web
+\cp -rf $path_svn"/web/fonts" $bin_pm_web
 \cp -rf $path_svn"/web/vue_template" $bin_pm_web
 \cp -rf $path_svn"/src/pm/"*.go ./
 
