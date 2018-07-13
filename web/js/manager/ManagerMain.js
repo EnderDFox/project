@@ -12,7 +12,7 @@ var ManagerMainClass = /** @class */ (function () {
             Common.ShowNoAccountPage();
         }
         else {
-            ManagerManager.ShowProjectList();
+            ManagerManager.Init();
         }
     };
     return ManagerMainClass;

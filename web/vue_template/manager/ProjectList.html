@@ -1,12 +1,6 @@
 <!-- 编辑模板-功能列表 -->
 <div>
-    <nav class="navbar navbar-default">
-        <div class="container-fluid">
-            <div class="navbar-header">
-                <span class="navbar-brand">全部项目</span>
-            </div>
-        </div>
-    </nav>
+    <navbar-comp :currUser="currUser" isProjList="1"></navbar-comp>
     <table class="table table-hover" v-if="projectList.length>0">
         <thead>
             <thead>
@@ -26,7 +20,7 @@
                     {{proj.Pid}}
                 </td>
                 <td>
-                    <input type="text" class="form-control" placeholder="空" aria-describedby="basic-addon1" :disabled="!auth['PROJECT_EDIT']"
+                    <input type="text" class="form-control" placeholder="" aria-describedby="basic-addon1" :disabled="!auth['PROJECT_EDIT']"
                         :value="proj.Name" @blur="onEditName($event,proj,index)" @keyup.enter="onEditName($event,proj,index)">
                 </td>
                 <td class="-text-center text-middle">
@@ -42,8 +36,8 @@
                             </li>
                         </ul>
                     </div>
-                    <span class="text-danger" title="该项目内还没有成员,需要先用[成员管理]增加成员" v-else>请先用
-                        <button class="btn btn-default btn-xs" type="submit" title="成员管理" @click="onEdit($event,proj,index)">
+                    <span class="text-danger" title="该项目内还没有成员,需要先用 成员管理 增加成员" v-else>请先用
+                        <button class="btn btn-default btn-xs" type="submit" title="成员管理" @click="onShowUserList(proj,index)">
                             <span class="glyphicon glyphicon-user" aria-hidden="true"></span>
                         </button>增加成员</span>
                 </td>
@@ -51,11 +45,11 @@
                     {{GetProjUserCount(proj)}}
                 </td>
                 <td>
-                    <button class="btn btn-default" type="submit" title="成员管理" @click="onEdit($event,proj,index)">
-                        <span class="glyphicon glyphicon-user" aria-hidden="true"></span>
-                    </button>
-                    <button class="btn btn-default" type="submit" title="部门管理" @click="onEdit($event,proj,index)">
+                    <button class="btn btn-default" type="submit" title="部门管理" @click="onShowDepartmentList(proj,index)">
                         <span class="glyphicon glyphicon-th-list" aria-hidden="true"></span>
+                    </button>
+                    <button class="btn btn-default" type="submit" title="成员管理" @click="onShowUserList(proj,index)">
+                        <span class="glyphicon glyphicon-user" aria-hidden="true"></span>
                     </button>
                 </td>
                 <td>

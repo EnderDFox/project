@@ -1,0 +1,12 @@
+<nav class="navbar navbar-default">
+    <div class="container-fluid">
+        <div class="navbar-header" :role="isProjList=='1'?'':'button'" @click="$emit('onShowProjList')">
+            <span class="navbar-brand">全部项目</span>
+        </div>
+        <slot></slot>
+        <div class="navbar-header navbar-right">
+            <span class="navbar-text" style="font-weight: bold;">当前用户:</span>
+            <span class="navbar-text" >{{currUser.Name}}</span>
+        </div>
+    </div>
+</nav>

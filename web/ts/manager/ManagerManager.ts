@@ -14,6 +14,23 @@ class ManagerManagerClass {
     NewPositionUuid = 200001
     VuePositionList: CombinedVueInstance1<{ newName: string }>
     VueAuthList: CombinedVueInstance1<{ checkedChange: boolean }>
+    Init() {
+        this.InitVue(this.ShowProjectList.bind(this))
+    }
+    InitVue(cb: () => void) {
+        Loader.LoadVueTemplateList([`${this.VuePath}NavbarComp`], (tplList: string[]) => {
+            //注册组件
+            Vue.component('navbar-comp', {
+                template: tplList[0],
+                props: {
+                    isProjList: String,
+                    currUser: Object,
+                },
+            })
+            //#
+            cb()
+        })
+    }
     ShowProjectList() {
         //
         Loader.LoadVueTemplate(this.VuePath + "ProjectList", (tpl: string) => {
@@ -39,7 +56,8 @@ class ManagerManagerClass {
                     data: {
                         newName: '',
                         auth: ManagerData.MyAuth,
-                        projectList: projList
+                        projectList: projList,
+                        currUser: ManagerData.CurrUser,
                     },
                     methods: {
                         GetProjMaster: (proj: ProjectSingle): string => {
@@ -52,8 +70,9 @@ class ManagerManagerClass {
                         OnEditMaster: (proj: ProjectSingle, user: UserSingle) => {
                             if (proj.MasterUid == ManagerData.CurrUser.Uid && !ManagerData.MyAuth[Auth.PROJECT_LIST]) {
                                 //是这个项目的负责人,并且不是超管
-                                Common.AlertConfirmWarning(`要将'负责人'修改为'${user.Name}'吗?`, `你是这个项目现在的负责人 <br/>如果修改负责人,你将失去这个项目的管理权限`, () => {
+                                Common.ConfirmWarning(`你是这个项目现在的负责人 <br/>如果修改负责人,你将失去这个项目的管理权限`, `要将'负责人'修改为'${user.Name}'吗?`, () => {
                                     proj.MasterUid = user.Uid
+                                    ManagerData.RemoveMyAuth(Auth.PROJECT_EDIT)
                                 })
                             } else {
                                 proj.MasterUid = user.Uid
@@ -71,33 +90,48 @@ class ManagerManagerClass {
                             return userNameArr.join(`,`)
                         },
                         onEditName: (e: Event, proj: ProjectSingle, index: number) => {
-                            var newName = (e.target as HTMLInputElement).value
-                            proj.Name = newName
+                            var newName = (e.target as HTMLInputElement).value.trim()
+                            if (!newName) {
+                                (e.target as HTMLInputElement).value = proj.Name
+                                return
+                            }
+                            if (newName != proj.Name) {
+                                if (ManagerData.ProjectList.IndexOfAttr(FieldName.Name, newName) > -1) {
+                                    Common.AlertError(`项目名称 ${newName} 已经存在`);
+                                    (e.target as HTMLInputElement).value = proj.Name;
+                                    return
+                                }
+                                proj.Name = newName
+                            }
                         },
-                        onClose: function () {
-                            $(this.$el).hide()
+                        onClose: () => {
                         },
-                        onEdit: (e: Event, proj: ProjectSingle, index: number) => {
-                            // console.log("[debug]",vue,":[vue]")
-                            $(this.VueProjectList.$el).hide()
-                            this.ShowProjectEdit(proj)
-                            /*   if (index > 0) {
-                                  var i1 = index - 1
-                                  var i2 = index
-                                  this.VueProjectList.projectList.splice(i1, 1, ...this.VueProjectList.projectList.splice(i2, 1, this.VueProjectList.projectList[i1]))
-                              } */
+                        onShowUserList: (proj: ProjectSingle, index: number) => {
+                            this.ShowProjectEdit(proj, ProjectEditPage.User)
+                        },
+                        onShowDepartmentList: (proj: ProjectSingle, index: number) => {
+                            this.ShowProjectEdit(proj, ProjectEditPage.Department)
                         },
                         onDel: (e, proj: ProjectSingle, index: int) => {
-                            Common.AlertDelete(() => {
+                            Common.ConfirmDelete(() => {
                                 this.VueProjectList.projectList.splice(index, 1)
                             })
                         },
                         onAdd: () => {
-                            // this.ShowProjectEdit(null)
-                            this.VueProjectList.projectList.push(
+                            var newName: string = this.VueProjectList.newName.toString().trim()
+                            if (!newName) {
+                                Common.AlertError(`项目名称 ${newName} 不可以为空`)
+                                return
+                            }
+                            if (ManagerData.ProjectList.IndexOfAttr(FieldName.Name, newName) > -1) {
+                                Common.AlertError(`项目名称 ${newName} 已经存在`)
+                                return
+                            }
+                            ManagerData.ProjectList.push(
                                 {
-                                    Pid: this.VueProjectList.projectList[this.VueProjectList.projectList.length - 1].Pid + 1,
+                                    Pid: ManagerData.ProjectList[this.VueProjectList.projectList.length - 1].Pid + 1,
                                     Name: this.VueProjectList.newName.toString(),
+                                    MasterUid: 0, UserList: [],
                                 }
                             )
                             this.VueProjectList.newName = ''
@@ -110,40 +144,34 @@ class ManagerManagerClass {
             Common.InsertIntoPageDom(vue.$el)
         })
     }
-    ShowProjectEdit(proj: ProjectSingle) {
+    ShowProjectEdit(proj: ProjectSingle, currPage: ProjectEditPage) {
         Loader.LoadVueTemplateList([`${this.VuePath}ProjectEdit`], (tplList: string[]) => {
             var vue = new Vue(
                 {
                     template: tplList[0],
                     data: {
                         project: proj,
-                        projectList: ManagerData.ProjectList,
+                        projectList: this.VueProjectList.projectList,
                         dpTree: ManagerData.DepartmentTree,
                         newName: proj ? proj.Name : '',
                         auth: ManagerData.MyAuth,
-                        currPage: ProjectEditPage.User,
+                        currPage: currPage,
+                        currUser: ManagerData.CurrUser,
                     },
                     methods: {
                         onClose: function () {
                             $(this.$el).hide()
                         },
-                        onEditProj: (e, proj: ProjectSingle, index: number) => {
-                            this.ShowProjectEdit(proj)
+                        onShowProj: (proj: ProjectSingle, index: number) => {
+                            this.ShowProjectEdit(proj, this.VueProjectEdit.currPage)
                         },
-                        onEnterProjMg: () => {
+                        onShowProjList: () => {
                             $(this.VueProjectEdit.$el).hide()
                             this.ShowProjectList()
                         },
-                        onSelectPage: (page: ProjectEditPage) => {
+                        onShowPage: (page: ProjectEditPage) => {
                             this.VueProjectEdit.currPage = page;
-                            switch (page) {
-                                case ProjectEditPage.User:
-                                    this.ShowUserList(this.VueProjectEdit.project)
-                                    break;
-                                case ProjectEditPage.Department:
-                                    this.ShowDepartmentList(this.VueProjectEdit.project)
-                                    break;
-                            }
+                            this.ShowProjectEditPage(this.VueProjectEdit.currPage)
                         },
                         onDel: (e, proj: ProjectSingle, index: int) => {
                         },
@@ -155,9 +183,18 @@ class ManagerManagerClass {
             this.VueProjectEdit = vue
             //#show
             Common.InsertIntoPageDom(vue.$el)
-            // this.ShowUserList(this.VueProjectEdit.project)
-            this.ShowDepartmentList(this.VueProjectEdit.project)
+            this.ShowProjectEditPage(this.VueProjectEdit.currPage)
         })
+    }
+    ShowProjectEditPage(currPage: ProjectEditPage) {
+        switch (currPage) {
+            case ProjectEditPage.User:
+                this.ShowUserList(this.VueProjectEdit.project)
+                break;
+            case ProjectEditPage.Department:
+                this.ShowDepartmentList(this.VueProjectEdit.project)
+                break;
+        }
     }
     ShowDepartmentList(proj: ProjectSingle) {
         this.VueProjectEdit.currPage = ProjectEditPage.Department

@@ -69,6 +69,7 @@ class FieldName {
     static Tmid = "Tmid"
     static Tlid = "Tlid"
     static Posid = "Posid"
+    static Name = "Name"
 }
 
 

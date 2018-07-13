@@ -75,6 +75,7 @@ var ManagerDataClass = /** @class */ (function () {
         this.ProjectList = [
             { Pid: 1, Name: '项目A', MasterUid: 3, UserList: [] },
             { Pid: 2, Name: '项目B', MasterUid: 0, UserList: [] },
+            { Pid: 3, Name: '项目C', MasterUid: 0, UserList: [] },
         ];
         //#user
         this.UserList = [];
@@ -88,13 +89,8 @@ var ManagerDataClass = /** @class */ (function () {
         this.UserList.push(user);
         this.UserDict[user.Uid] = user;
         //#
-        for (var i = 0; i < this.ProjectList.length; i++) {
-            var proj = this.ProjectList[i];
-            proj.UserList = [];
-            if (i > 0)
-                break;
-            proj.UserList.push.apply(proj.UserList, this.UserList.slice(0 + i * 10, 10 + i * 10));
-        }
+        this.ProjectList[0].UserList.push.apply(this.ProjectList[0].UserList, this.UserList.slice(0, 10));
+        this.ProjectList[2].UserList.push.apply(this.ProjectList[2].UserList, this.UserList.slice(5, 12));
         //#department
         this.DepartmentTree = [
             /* {

@@ -9,11 +9,7 @@ var VueManagerClass = /** @class */ (function () {
                 props: {
                     theme: String,
                     panelHeading: String,
-                },
-                data: function () {
-                    return {};
-                },
-                methods: {}
+                }
             });
             //#
             cb();

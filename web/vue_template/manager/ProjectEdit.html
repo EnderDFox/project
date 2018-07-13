@@ -1,46 +1,31 @@
 <div>
-    <nav class="navbar navbar-default">
-        <div class="container-fluid">
-            <!-- Brand and toggle get grouped for better mobile display -->
-            <!-- <div class="navbar-header" v-if="!auth['PROJECT_LIST']">
-            <a class="navbar-brand" href="#">项目B</a>
-        </div> -->
-
-            <!-- Collect the nav links, forms, and other content for toggling -->
-            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-                <ul class="nav navbar-nav">
-                    <li class="dropdown">
-                        <a class="dropdown-toggle navbar-brand" :data-toggle="auth['PROJECT_LIST']?'dropdown':'label'" :style="{'cursor':
-                    auth['PROJECT_LIST']?'pointer':'default'}" role="button" aria-haspopup="true" aria-expanded="false">{{project.Name}}
-                            <span class="caret" v-if="auth['PROJECT_LIST']"></span>
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li v-for="proj,index in projectList" :key="proj.Pid">
-                                <a @click="onEditProj($event,proj,index)">{{proj.Name}}</a>
-                            </li>
-                            <li role="separator" class="divider"></li>
-                            <li>
-                                <a @click="onEnterProjMg()">
-                                    <span>
-                                        管理全部项目
-                                    </span>
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
-                    <li :class="{'active':currPage==1}">
-                        <a @click="onSelectPage(1)">人员
-
-                        </a>
-                    </li>
-                    <li :class="{'active':currPage==2}">
-                        <a @click="onSelectPage(2)">部门
-                        </a>
-                    </li>
-                </ul>
-            </div>
+    <navbar-comp :currUser="currUser" isProjList="0" @onShowProjList="onShowProjList()">
+        <!-- <div class="collapse navbar-collapse"> -->
+        <div>
+            <ul class="nav navbar-nav">
+                <li class="navbar-text" style="margin-left: 0px;">
+                    <span>/</span>
+                </li>
+                <li class="dropdown">
+                    <a class="dropdown-toggle navbar-brand" :data-toggle="projectList.length>1?'dropdown':'label'" :style="{'cursor':
+                    projectList.length>1?'pointer':'default'}" role="button" aria-haspopup="true" aria-expanded="false">{{project.Name}}
+                        <span class="caret" v-if="projectList.length>1"></span>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li v-for="proj,index in projectList" :key="proj.Pid">
+                            <a @click="onShowProj(proj,index)">{{proj.Name}}</a>
+                        </li>
+                    </ul>
+                </li>
+                <li :class="{'active':currPage==2}" style="margin-left: 100px;">
+                    <a @click="onShowPage(2)">部门</a>
+                </li>
+                <li :class="{'active':currPage==1}">
+                    <a @click="onShowPage(1)">成员</a>
+                </li>
+            </ul>
         </div>
-    </nav>
+    </navbar-comp>
     <div id="projectEditContent">
     </div>
 </div>
