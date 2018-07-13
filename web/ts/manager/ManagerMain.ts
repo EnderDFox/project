@@ -1,14 +1,15 @@
 class ManagerMainClass {
     Init(): void {
+        Common.InitUrlParams()
         VueManager.Init(this.OnInitVueCpl)
     }
     private OnInitVueCpl(){
         ManagerData.Init()
         //
-        if(ManagerData.MyAuth[Auth.PROJECT_LIST]){
-            ManagerManager.ShowProjectList()
+        if(ManagerData.CurrUser==null){
+            Common.ShowNoAccountPage()
         }else{
-            ManagerManager.ShowProjectEdit(ManagerData.ProjectList[0])//没有项目管理权限
+            ManagerManager.ShowProjectList()
         }
     }
 }

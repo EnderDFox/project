@@ -17,7 +17,7 @@ a {
     font-weight: bold;
 }
 
-.text_middle {
+.text-middle {
     vertical-align: middle !important;
     /* 没有important优先级不够 真奇怪 */
 }

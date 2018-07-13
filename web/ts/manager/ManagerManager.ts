@@ -6,7 +6,7 @@ enum ProjectEditPage {
 
 class ManagerManagerClass {
     VuePath = "manager/"
-    VueProjectList: CombinedVueInstance1<{ projectList: ProjectSingle[], newName: string }>
+    VueProjectList: CombinedVueInstance1<{ auth: { [key: number]: boolean }, projectList: ProjectSingle[], newName: string }>
     VueProjectEdit: CombinedVueInstance1<{ project: ProjectSingle, newName: string, dpTree: DepartmentSingle[], currPage: ProjectEditPage }>
     VueUserList: CombinedVueInstance1<{ otherUserList: UserSingle[], newUserUid: number }>
     VueDepartmentList: CombinedVueInstance1<{ allDepartmentList: DepartmentSingle[], newName: string }>
@@ -15,15 +15,61 @@ class ManagerManagerClass {
     VuePositionList: CombinedVueInstance1<{ newName: string }>
     VueAuthList: CombinedVueInstance1<{ checkedChange: boolean }>
     ShowProjectList() {
+        //
         Loader.LoadVueTemplate(this.VuePath + "ProjectList", (tpl: string) => {
+            var projList: ProjectSingle[];
+            if (ManagerData.MyAuth[Auth.PROJECT_LIST]) {
+                projList = ManagerData.ProjectList
+            } else {
+                //只看自己所处的项目
+                projList = []
+                for (var i = 0; i < ManagerData.ProjectList.length; i++) {
+                    var proj = ManagerData.ProjectList[i]
+                    if (proj.UserList.IndexOfAttr(FieldName.Uid, ManagerData.CurrUser.Uid) > -1) {
+                        projList.push(proj)
+                        if (proj.MasterUid == ManagerData.CurrUser.Uid) {
+                            ManagerData.AddMyAuth(Auth.PROJECT_EDIT)
+                        }
+                    }
+                }
+            }
             var vue = new Vue(
                 {
                     template: tpl,
                     data: {
                         newName: '',
-                        projectList: ManagerData.ProjectList,
+                        auth: ManagerData.MyAuth,
+                        projectList: projList
                     },
                     methods: {
+                        GetProjMaster: (proj: ProjectSingle): string => {
+                            if (proj.MasterUid > 0) {
+                                return ManagerData.UserDict[proj.MasterUid].Name
+                            } else {
+                                return '空'
+                            }
+                        },
+                        OnEditMaster: (proj: ProjectSingle, user: UserSingle) => {
+                            if (proj.MasterUid == ManagerData.CurrUser.Uid && !ManagerData.MyAuth[Auth.PROJECT_LIST]) {
+                                //是这个项目的负责人,并且不是超管
+                                Common.AlertConfirmWarning(`要将'负责人'修改为'${user.Name}'吗?`, `你是这个项目现在的负责人 <br/>如果修改负责人,你将失去这个项目的管理权限`, () => {
+                                    proj.MasterUid = user.Uid
+                                })
+                            } else {
+                                proj.MasterUid = user.Uid
+                            }
+                        },
+                        GetProjUserCount: (proj: ProjectSingle): number => {
+                            return proj.UserList.length
+                        },
+                        GetProjUserCountTitle: (proj: ProjectSingle): string => {
+                            var userNameArr: string[] = []
+                            for (var i = 0; i < proj.UserList.length; i++) {
+                                var user = proj.UserList[i]
+                                userNameArr.push(user.Name)
+                            }
+                            return userNameArr.join(`,`)
+                        },
                         onEditName: (e: Event, proj: ProjectSingle, index: number) => {
                             var newName = (e.target as HTMLInputElement).value
                             proj.Name = newName
@@ -42,7 +88,9 @@ class ManagerManagerClass {
                               } */
                         },
                         onDel: (e, proj: ProjectSingle, index: int) => {
-                            this.VueProjectList.projectList.splice(index, 1)
+                            Common.AlertDelete(() => {
+                                this.VueProjectList.projectList.splice(index, 1)
+                            })
                         },
                         onAdd: () => {
                             // this.ShowProjectEdit(null)
@@ -60,7 +108,6 @@ class ManagerManagerClass {
             this.VueProjectList = vue
             //#show
             Common.InsertIntoPageDom(vue.$el)
-            $(vue.$el).show()
         })
     }
     ShowProjectEdit(proj: ProjectSingle) {
@@ -108,7 +155,6 @@ class ManagerManagerClass {
             this.VueProjectEdit = vue
             //#show
             Common.InsertIntoPageDom(vue.$el)
-            $(vue.$el).show()
             // this.ShowUserList(this.VueProjectEdit.project)
             this.ShowDepartmentList(this.VueProjectEdit.project)
         })
@@ -428,8 +474,7 @@ class ManagerManagerClass {
             }).$mount()
             this.VueAuthList = vue
             // $(vue.$el).alert('close');
-            Common.InsertBeforeDynamicDom(vue.$el)
-            Common.AlginCenterInWindow($(vue.$el).find('.popup_content'))
+            Common.Popup($(vue.$el))
         })
     }
     ShowUserList(proj: ProjectSingle) {
@@ -511,7 +556,6 @@ class ManagerManagerClass {
             this.VueUserList = vue
             //#show
             Common.InsertIntoDom(vue.$el, '#projectEditContent')
-            $(vue.$el).show()
         })
     }
     /**职位 - 权限列表 */

@@ -44,10 +44,10 @@
                         </button>
                     </td>
                     <td>
-                        <button class="btn btn-default " type="submit" @click="onSortDown($event,dp,index)" :class="{'disabled':!CheckSortDown(dp,index)}">
+                        <button class="btn btn-default " type="submit" @click="onSortDown($event,dp,index)" disabled="!CheckSortDown(dp,index)}">
                             <span class="glyphicon glyphicon-arrow-down " aria-hidden="true "></span>
                         </button>
-                        <button class="btn btn-default " type="submit " @click="onSortUp($event,dp,index) " :class="{'disabled':!CheckSortUp(dp,index)}">
+                        <button class="btn btn-default " type="submit " @click="onSortUp($event,dp,index) " disabled="!CheckSortUp(dp,index)}">
                             <span class="glyphicon glyphicon-arrow-up " aria-hidden="true "></span>
                         </button>
                         <button class="btn btn-default " type="submit " @click="onDel($event,dp,index)">

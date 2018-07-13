@@ -3,6 +3,9 @@
 //------Array扩展
 interface Array<T> {
     findIndex(predicateFn: (item: T, index?: number, arr?: T[]) => boolean, thisArg?: any): number
+    IndexOfAttr(key: string, value: any): number
+    FindOfAttr<T>(key: string, value: any): T
+    RemoveByAttr(key: string, value: any): number
 }
 //------Date扩展
 interface Date {

@@ -13,14 +13,63 @@ var ManagerManagerClass = /** @class */ (function () {
     }
     ManagerManagerClass.prototype.ShowProjectList = function () {
         var _this = this;
+        //
         Loader.LoadVueTemplate(this.VuePath + "ProjectList", function (tpl) {
+            var projList;
+            if (ManagerData.MyAuth[Auth.PROJECT_LIST]) {
+                projList = ManagerData.ProjectList;
+            }
+            else {
+                //只看自己所处的项目
+                projList = [];
+                for (var i = 0; i < ManagerData.ProjectList.length; i++) {
+                    var proj = ManagerData.ProjectList[i];
+                    if (proj.UserList.IndexOfAttr(FieldName.Uid, ManagerData.CurrUser.Uid) > -1) {
+                        projList.push(proj);
+                        if (proj.MasterUid == ManagerData.CurrUser.Uid) {
+                            ManagerData.AddMyAuth(Auth.PROJECT_EDIT);
+                        }
+                    }
+                }
+            }
             var vue = new Vue({
                 template: tpl,
                 data: {
                     newName: '',
-                    projectList: ManagerData.ProjectList,
+                    auth: ManagerData.MyAuth,
+                    projectList: projList
                 },
                 methods: {
+                    GetProjMaster: function (proj) {
+                        if (proj.MasterUid > 0) {
+                            return ManagerData.UserDict[proj.MasterUid].Name;
+                        }
+                        else {
+                            return '空';
+                        }
+                    },
+                    OnEditMaster: function (proj, user) {
+                        if (proj.MasterUid == ManagerData.CurrUser.Uid && !ManagerData.MyAuth[Auth.PROJECT_LIST]) {
+                            //是这个项目的负责人,并且不是超管
+                            Common.AlertConfirmWarning("\u8981\u5C06'\u8D1F\u8D23\u4EBA'\u4FEE\u6539\u4E3A'" + user.Name + "'\u5417?", "\u4F60\u662F\u8FD9\u4E2A\u9879\u76EE\u73B0\u5728\u7684\u8D1F\u8D23\u4EBA <br/>\u5982\u679C\u4FEE\u6539\u8D1F\u8D23\u4EBA,\u4F60\u5C06\u5931\u53BB\u8FD9\u4E2A\u9879\u76EE\u7684\u7BA1\u7406\u6743\u9650", function () {
+                                proj.MasterUid = user.Uid;
+                            });
+                        }
+                        else {
+                            proj.MasterUid = user.Uid;
+                        }
+                    },
+                    GetProjUserCount: function (proj) {
+                        return proj.UserList.length;
+                    },
+                    GetProjUserCountTitle: function (proj) {
+                        var userNameArr = [];
+                        for (var i = 0; i < proj.UserList.length; i++) {
+                            var user = proj.UserList[i];
+                            userNameArr.push(user.Name);
+                        }
+                        return userNameArr.join(",");
+                    },
                     onEditName: function (e, proj, index) {
                         var newName = e.target.value;
                         proj.Name = newName;
@@ -39,7 +88,9 @@ var ManagerManagerClass = /** @class */ (function () {
                           } */
                     },
                     onDel: function (e, proj, index) {
-                        _this.VueProjectList.projectList.splice(index, 1);
+                        Common.AlertDelete(function () {
+                            _this.VueProjectList.projectList.splice(index, 1);
+                        });
                     },
                     onAdd: function () {
                         // this.ShowProjectEdit(null)
@@ -54,7 +105,6 @@ var ManagerManagerClass = /** @class */ (function () {
             _this.VueProjectList = vue;
             //#show
             Common.InsertIntoPageDom(vue.$el);
-            $(vue.$el).show();
         });
     };
     ManagerManagerClass.prototype.ShowProjectEdit = function (proj) {
@@ -101,7 +151,6 @@ var ManagerManagerClass = /** @class */ (function () {
             _this.VueProjectEdit = vue;
             //#show
             Common.InsertIntoPageDom(vue.$el);
-            $(vue.$el).show();
             // this.ShowUserList(this.VueProjectEdit.project)
             _this.ShowDepartmentList(_this.VueProjectEdit.project);
         });
@@ -420,8 +469,7 @@ var ManagerManagerClass = /** @class */ (function () {
             }).$mount();
             _this.VueAuthList = vue;
             // $(vue.$el).alert('close');
-            Common.InsertBeforeDynamicDom(vue.$el);
-            Common.AlginCenterInWindow($(vue.$el).find('.popup_content'));
+            Common.Popup($(vue.$el));
         });
     };
     ManagerManagerClass.prototype.ShowUserList = function (proj) {
@@ -506,7 +554,6 @@ var ManagerManagerClass = /** @class */ (function () {
             _this.VueUserList = vue;
             //#show
             Common.InsertIntoDom(vue.$el, '#projectEditContent');
-            $(vue.$el).show();
         });
     };
     return ManagerManagerClass;

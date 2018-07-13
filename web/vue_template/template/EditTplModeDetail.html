@@ -10,7 +10,7 @@
             <button class="confirm btnSmall2 btnDid " title="修改负责人所属的部门 " @click="onChangeDid($event,link.Tlid) ">{{link.Did|didName}}</button>
             <button v-if="parentLink==null" class="confirm btnSmall2 btnEditChildren " @click="onEditChildren($event,link)" :class="{'listOpenBorder':link.Tlid==showTlid,'listOpenBg':link.Tlid==showTlid}">子流程({{link.Children?link.Children.length:0}})</button>
             <button :class="{'confirm':true, 'btnSmall1':true, 'button-disabled':index==0} " title="排序上移 " @click="onSortUp($event,link,index) "
-                :disabled="index==0 ">↑</button>
+                :disabled="index==0">↑</button>
             <button :class="{'confirm':true, 'btnSmall1':true, 'button-disabled':index>=(linkList.length-1)}" title="排序下移" @click="onSortDown($event,link,index)"
                 :disabled="index>=(linkList.length-1)">↓</button>
             <button class="confirm btnSmall1" title="删除" @click="onDel($event,link)">X</button>

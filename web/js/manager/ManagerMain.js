@@ -2,16 +2,17 @@ var ManagerMainClass = /** @class */ (function () {
     function ManagerMainClass() {
     }
     ManagerMainClass.prototype.Init = function () {
+        Common.InitUrlParams();
         VueManager.Init(this.OnInitVueCpl);
     };
     ManagerMainClass.prototype.OnInitVueCpl = function () {
         ManagerData.Init();
         //
-        if (ManagerData.MyAuth[Auth.PROJECT_LIST]) {
-            ManagerManager.ShowProjectList();
+        if (ManagerData.CurrUser == null) {
+            Common.ShowNoAccountPage();
         }
         else {
-            ManagerManager.ShowProjectEdit(ManagerData.ProjectList[0]); //没有项目管理权限
+            ManagerManager.ShowProjectList();
         }
     };
     return ManagerMainClass;

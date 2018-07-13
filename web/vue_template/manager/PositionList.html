@@ -50,10 +50,10 @@
                     </button>
                 </td>
                 <td>
-                    <button class="btn btn-default " type="submit" @click="onSortDown(pos,index)" :class="{'disabled':!CheckSortDown(pos,index)}">
+                    <button class="btn btn-default " type="submit" @click="onSortDown(pos,index)" disabled="!CheckSortDown(pos,index)">
                         <span class="glyphicon glyphicon-arrow-down " aria-hidden="true "></span>
                     </button>
-                    <button class="btn btn-default " type="submit" @click="onSortUp(pos,index) " :class="{'disabled':!CheckSortUp(pos,index)}">
+                    <button class="btn btn-default " type="submit" @click="onSortUp(pos,index) " disabled="!CheckSortUp(pos,index)">
                         <span class="glyphicon glyphicon-arrow-up " aria-hidden="true "></span>
                     </button>
                     <button class="btn btn-default " type="submit">

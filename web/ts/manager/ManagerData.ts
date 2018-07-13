@@ -1,8 +1,10 @@
 class ManagerDataClass {
+    CurrUser: UserSingle
     /**我的权限 */
     MyAuth: { [key: number]: boolean } = {};
     ProjectList: ProjectSingle[]
     UserList: UserSingle[]
+    UserDict: { [key: number]: UserSingle };
     DepartmentTree: DepartmentSingle[]
     /**all department list */
     DepartmentList: DepartmentSingle[]
@@ -10,25 +12,41 @@ class ManagerDataClass {
     //
     AuthorityModuleList: AuthorityModuleSingle[]
     Init() {
-        //#权限
-        var urlParam = window.location.href.toLowerCase()
-        var authCodeArr: number[]
+        /* var authCodeArr: number[]
         // console.log("[debug]", str)
-        if (urlParam.indexOf('auth=') > -1) {
-            urlParam = urlParam.split('auth=').pop().toString()
-            urlParam = urlParam.split(/\&|\?/).shift().toString()
-            authCodeArr = urlParam.split(",").map<number>((item: string) => { return parseInt(item) })
+        if (Common.UrlParamDict['auth']) {
+            authCodeArr = Common.UrlParamDict['auth'].split(",").map<number>((item: string) => { return parseInt(item) })
         } else {
             authCodeArr = []
-        }
+        } 
         //
         for (var i = 0; i < authCodeArr.length; i++) {
             var authCode = authCodeArr[i]
             if (Auth[authCode]) {
                 this.MyAuth[authCode] = this.MyAuth[Auth[authCode]] = true
             }
+        }*/
+
+        //
+        this.InitSimulateData()
+        //
+        var uid = Number(Common.UrlParamDict['uid'])
+        if (isNaN(uid)) {
+            uid = 0
         }
-        Object.freeze(this.MyAuth)
+        //#权限
+        switch (uid) {
+            case 0:
+                uid = 999999//超级管理员id
+                this.AddMyAuth(Auth.PROJECT_LIST)
+                this.AddMyAuth(Auth.PROJECT_EDIT)
+                break;
+        }
+        //
+        this.CurrUser = this.UserDict[uid]
+    }
+    /**初始化虚拟数据 */
+    private InitSimulateData() {
         //#
         this.AuthorityModuleList = [
             {
@@ -52,35 +70,47 @@ class ManagerDataClass {
                 ]
             },
             {
-                Modid: 3, Name: '模块C', AuthorityList: [
-                    { Authid: 31, Name: '权限C1' },
-                    { Authid: 32, Name: '权限C2' },
-                    { Authid: 33, Name: '权限C3' },
-                    { Authid: 34, Name: '权限C4' },
-                    { Authid: 35, Name: '权限C5' },
+                Modid: 3, Name: '所属部门管理', AuthorityList: [
+                    { Authid: 31, Name: '成员管理' },
+                    { Authid: 32, Name: '职位管理' },
+                    { Authid: 33, Name: '子部门管理' },
+                    { Authid: 34, Name: '功能管理' },
+                    { Authid: 35, Name: '工作管理' },
                 ]
             },
         ]
         this.InitAuthorityModuleList()
         //#project
         this.ProjectList = [
-            { Pid: 1, Name: '项目A' },
-            { Pid: 2, Name: '项目B' },
+            { Pid: 1, Name: '项目A', MasterUid: 3, UserList: [] },
+            { Pid: 2, Name: '项目B', MasterUid: 0, UserList: [] },
         ]
         //#user
         this.UserList = []
-        for (var i = 0; i < 12; i++) {
-            this.UserList.push({ Uid: i + 1, Name: `用户${String.fromCharCode(65 + i)}`, Did: 0, Posid: 0 })
+        this.UserDict = {}
+        for (var i = 0; i < 27; i++) {
+            var user: UserSingle = { Uid: i + 1, Name: `用户${String.fromCharCode(65 + i)}`, Did: 0, Posid: 0 }
+            this.UserList.push(user)
+            this.UserDict[user.Uid] = user
         }
+        var user: UserSingle = { Uid: 999999, Name: "admin", Did: 0, Posid: 0 }
+        this.UserList.push(user)
+        this.UserDict[user.Uid] = user
         //#
         for (var i = 0; i < this.ProjectList.length; i++) {
             var proj: ProjectSingle = this.ProjectList[i]
             proj.UserList = []
-            proj.UserList.push(this.UserList[3])
-            proj.UserList.push(this.UserList[5])
+            if (i > 0) break;
+            proj.UserList.push.apply(proj.UserList, this.UserList.slice(0 + i * 10, 10 + i * 10))
         }
         //#department
         this.DepartmentTree = [
+            /* {
+                Did: -1, Name: '项目管理', Depth: 0, Children: [], PositionList: [
+                    { Posid: 0, Did: -1, Name: '制作人' },
+                    { Posid: 1, Did: -1, Name: '产品经理' },
+                ]
+            }, */
             {
                 Did: 1, Name: '策划', Depth: 0, Children: [], PositionList: [
                     { Posid: 100, Did: 2, Name: '策划' },
@@ -198,6 +228,15 @@ class ManagerDataClass {
         } else {//顶级部门
             return ManagerData.DepartmentTree
         }
+    }
+    AddMyAuth(auth: Auth) {
+        this.MyAuth[auth] = this.MyAuth[Auth[auth]] = true
+        // Object.freeze(this.MyAuth)
+        // Object.freeze(this.MyAuth[Auth.PROJECT_LIST])
+        // Object.freeze(this.MyAuth[Auth[Auth.PROJECT_LIST])
+    }
+    RemoveMyAuth(auth: Auth) {
+        this.MyAuth[auth] = this.MyAuth[Auth[auth]] = false
     }
 }
 var ManagerData = new ManagerDataClass()

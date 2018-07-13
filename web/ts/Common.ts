@@ -1,4 +1,13 @@
 //通用类
+interface IAlertArg {
+	Title?: string
+	Content?: string
+	CallbackOk?: () => void
+	Theme?: string
+	BtnOkLabel?: string
+	BtnCancelLabel?: string
+	ShowBtnCancel?: boolean
+}
 class CommonClass {
 	/**格式化时间 格式化为 yyyy-MM-dd 格式 */
 	FmtDate(date: Date): string {
@@ -121,16 +130,16 @@ class CommonClass {
 	/**在window内居中 */
 	AlginCenterInWindow(dom: HTMLElement | JQuery<HTMLElement>) {
 		var $dom = $(dom)
-		console.log("[debug]",$dom.length)
 		var winLeft = $(window).scrollLeft()
 		var winTop = $(window).scrollTop()
 		$dom.css('position', 'absolute')
 		$dom.xy(winLeft + $(window).innerWidth() / 2 - $dom.width() / 2, winTop + $(window).innerHeight() / 2 - $dom.height() / 2)
 	}
 	/**在#dynamicDom前插入newDom*/
-	InsertBeforeDynamicDom(newDom: HTMLElement): void {
+	InsertBeforeDynamicDom(dom: HTMLElement | JQuery<HTMLElement>) {
+		var $dom = $(dom)
 		var dd = document.getElementById('dynamicDom')
-		dd.parentNode.insertBefore(newDom, dd)
+		dd.parentNode.insertBefore($dom.get(0), dd)
 	}
 	/**将资源插入pageDom内 */
 	InsertIntoDom(newDom: HTMLElement, container: string | HTMLElement): void {
@@ -138,10 +147,11 @@ class CommonClass {
 		_c.innerHTML = ''
 		_c.appendChild(newDom)
 	}
-	InsertIntoPageDom(newDom: HTMLElement): void {
+	InsertIntoPageDom(dom: HTMLElement | JQuery<HTMLElement>) {
+		var $dom = $(dom)
 		var dd = document.getElementById('pageDom')
 		dd.innerHTML = ''//清空先
-		dd.appendChild(newDom)
+		dd.appendChild($dom.get(0))
 	}
 	/**提示信息*/
 	AlertFloatMsg(txt: string, e: MouseEvent): void {
@@ -185,6 +195,131 @@ class CommonClass {
 			$(this.VuePullDownMenu.$el).hide()
 		}
 	}
+	/**popup */
+	Popup(dom: HTMLElement | JQuery<HTMLElement>) {
+		var $dom = $(dom)
+		Common.InsertBeforeDynamicDom($dom)
+		this.AlginCenterInWindow($dom.find('.popup_content'))
+	}
+	/**删除确认 */
+	VueAlert: CombinedVueInstance1<IAlertArg>
+	Alert(title: string)
+	Alert(title: string, content: string)
+	Alert(title: string, content: string, callbackOk: () => void)
+	Alert(arg: IAlertArg)
+	Alert(...args) {
+		var arg: IAlertArg = {
+			Title: "",
+			Content: "",
+			Theme: "primary",
+			BtnOkLabel: `确定`,
+			BtnCancelLabel: `取消`,
+			ShowBtnCancel: true,
+		}
+		if (args.length > 1) {
+			arg.Title = args[0]
+			if (args.length > 2) {
+				arg.Content = args[1]
+				if (args.length > 3) {
+					arg.CallbackOk = args[2]
+					if (args.length > 3) {
+						arg.Theme = args[3]
+					}
+				}
+			}
+		} else {
+			if (typeof (args[0]) == 'string') {
+				arg.Title = args[0]
+			} else {
+				for (var key in args[0]) {
+					arg[key] = args[0][key]
+				}
+			}
+		}
+		if (arg.Title.trim() == "") {
+			arg.Title = "&nbsp;"
+		}
+		//
+		if (this.VueAlert) {
+			$(this.VueAlert.$el).remove()
+			this.VueAlert = null;
+		}
+		this.VueAlert = new Vue({
+			template: Loader.VueTemplateLoadedDict[`${Common.VuePath}Alert`],
+			data: {
+				arg: arg,
+			},
+			methods: {
+				OnOk: () => {
+					if (arg.CallbackOk) {
+						arg.CallbackOk()
+					}
+					$(this.VueAlert.$el).remove()
+					this.VueAlert = null;
+				},
+				OnClose: () => {
+					$(this.VueAlert.$el).remove()
+					this.VueAlert = null;
+				},
+			}
+		}).$mount()
+		this.Popup(this.VueAlert.$el)
+	}
+	AlertDelete(callbackOk: () => void, content: string = "") {
+		var arg: IAlertArg = {
+			Title: "确定删除吗?",
+			Content: content,
+			CallbackOk: callbackOk,
+			Theme: "danger",
+		}
+		this.Alert(arg)
+	}
+	AlertWarning(title: string = "", content: string = "") {
+		var arg: IAlertArg = {
+			Title: title,
+			Content: content,
+			Theme: "warning",
+			BtnOkLabel: "好的",
+			ShowBtnCancel: false,
+		}
+		this.Alert(arg)
+	}
+	AlertConfirmWarning(title: string = "", content: string = "", callbackOk: () => void) {
+		var arg: IAlertArg = {
+			Title: title,
+			Content: content,
+			Theme: "warning",
+			CallbackOk: callbackOk,
+		}
+		this.Alert(arg)
+	}
+	ShowNoAccountPage() {
+		Loader.LoadVueTemplate(`${Common.VuePath}NoAccount`, (tpl: string) => {
+			$('body').append(new Vue({ template: tpl }).$mount().$el)
+		})
+
+	}
+	//#解析网址参数
+	UrlParamDict: { [key: string]: string };
+	InitUrlParams() {
+		this.UrlParamDict = {}
+		var str = window.location.href.toLowerCase()
+		var index0 = str.indexOf('?')
+		if (index0 > -1) {
+			str = str.substring(index0 + 1, str.length)
+			console.log("[debug]", str, ":[str]")
+			var sp = str.split(/\&|\?/)
+			for (var i = 0; i < sp.length; i++) {
+				var spi = sp[i]
+				var equrlIndex = spi.indexOf('=')
+				if (equrlIndex > 0)//如果=在第一个也不能要
+					var key = spi.substring(0, equrlIndex)
+				var val = spi.substring(equrlIndex + 1, spi.length)
+				console.log("[debug]", key, ":[key]", val, ":[val]")
+				this.UrlParamDict[key.toLowerCase()] = val
+			}
+		}
+	}
 }
 var Common = new CommonClass()
 
@@ -226,11 +361,11 @@ class ArrayUtil {
 	}
 	/**用一个数组减去另一个数组 */
 	static SubByAttr<T>(arr0: T[], arr1: T[], key: string): T[] {
-		var rs:T[] = []
+		var rs: T[] = []
 		for (var i = 0; i < arr0.length; i++) {
 			var item0 = arr0[i]
 			var index0 = ArrayUtil.IndexOfAttr(arr1, key, item0[key])
-			if(index0==-1){
+			if (index0 == -1) {
 				rs.push(item0)
 			}
 		}

@@ -1,4 +1,3 @@
-//通用类
 var CommonClass = /** @class */ (function () {
     function CommonClass() {
         //## Vue
@@ -129,16 +128,16 @@ var CommonClass = /** @class */ (function () {
     /**在window内居中 */
     CommonClass.prototype.AlginCenterInWindow = function (dom) {
         var $dom = $(dom);
-        console.log("[debug]", $dom.length);
         var winLeft = $(window).scrollLeft();
         var winTop = $(window).scrollTop();
         $dom.css('position', 'absolute');
         $dom.xy(winLeft + $(window).innerWidth() / 2 - $dom.width() / 2, winTop + $(window).innerHeight() / 2 - $dom.height() / 2);
     };
     /**在#dynamicDom前插入newDom*/
-    CommonClass.prototype.InsertBeforeDynamicDom = function (newDom) {
+    CommonClass.prototype.InsertBeforeDynamicDom = function (dom) {
+        var $dom = $(dom);
         var dd = document.getElementById('dynamicDom');
-        dd.parentNode.insertBefore(newDom, dd);
+        dd.parentNode.insertBefore($dom.get(0), dd);
     };
     /**将资源插入pageDom内 */
     CommonClass.prototype.InsertIntoDom = function (newDom, container) {
@@ -146,10 +145,11 @@ var CommonClass = /** @class */ (function () {
         _c.innerHTML = '';
         _c.appendChild(newDom);
     };
-    CommonClass.prototype.InsertIntoPageDom = function (newDom) {
+    CommonClass.prototype.InsertIntoPageDom = function (dom) {
+        var $dom = $(dom);
         var dd = document.getElementById('pageDom');
         dd.innerHTML = ''; //清空先
-        dd.appendChild(newDom);
+        dd.appendChild($dom.get(0));
     };
     /**提示信息*/
     CommonClass.prototype.AlertFloatMsg = function (txt, e) {
@@ -190,6 +190,134 @@ var CommonClass = /** @class */ (function () {
     CommonClass.prototype.HidePullDownMenu = function () {
         if (this.VuePullDownMenu) {
             $(this.VuePullDownMenu.$el).hide();
+        }
+    };
+    /**popup */
+    CommonClass.prototype.Popup = function (dom) {
+        var $dom = $(dom);
+        Common.InsertBeforeDynamicDom($dom);
+        this.AlginCenterInWindow($dom.find('.popup_content'));
+    };
+    CommonClass.prototype.Alert = function () {
+        var _this = this;
+        var args = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            args[_i] = arguments[_i];
+        }
+        var arg = {
+            Title: "",
+            Content: "",
+            Theme: "primary",
+            BtnOkLabel: "\u786E\u5B9A",
+            BtnCancelLabel: "\u53D6\u6D88",
+            ShowBtnCancel: true,
+        };
+        if (args.length > 1) {
+            arg.Title = args[0];
+            if (args.length > 2) {
+                arg.Content = args[1];
+                if (args.length > 3) {
+                    arg.CallbackOk = args[2];
+                    if (args.length > 3) {
+                        arg.Theme = args[3];
+                    }
+                }
+            }
+        }
+        else {
+            if (typeof (args[0]) == 'string') {
+                arg.Title = args[0];
+            }
+            else {
+                for (var key in args[0]) {
+                    arg[key] = args[0][key];
+                }
+            }
+        }
+        if (arg.Title.trim() == "") {
+            arg.Title = "&nbsp;";
+        }
+        //
+        if (this.VueAlert) {
+            $(this.VueAlert.$el).remove();
+            this.VueAlert = null;
+        }
+        this.VueAlert = new Vue({
+            template: Loader.VueTemplateLoadedDict[Common.VuePath + "Alert"],
+            data: {
+                arg: arg,
+            },
+            methods: {
+                OnOk: function () {
+                    if (arg.CallbackOk) {
+                        arg.CallbackOk();
+                    }
+                    $(_this.VueAlert.$el).remove();
+                    _this.VueAlert = null;
+                },
+                OnClose: function () {
+                    $(_this.VueAlert.$el).remove();
+                    _this.VueAlert = null;
+                },
+            }
+        }).$mount();
+        this.Popup(this.VueAlert.$el);
+    };
+    CommonClass.prototype.AlertDelete = function (callbackOk, content) {
+        if (content === void 0) { content = ""; }
+        var arg = {
+            Title: "确定删除吗?",
+            Content: content,
+            CallbackOk: callbackOk,
+            Theme: "danger",
+        };
+        this.Alert(arg);
+    };
+    CommonClass.prototype.AlertWarning = function (title, content) {
+        if (title === void 0) { title = ""; }
+        if (content === void 0) { content = ""; }
+        var arg = {
+            Title: title,
+            Content: content,
+            Theme: "warning",
+            BtnOkLabel: "好的",
+            ShowBtnCancel: false,
+        };
+        this.Alert(arg);
+    };
+    CommonClass.prototype.AlertConfirmWarning = function (title, content, callbackOk) {
+        if (title === void 0) { title = ""; }
+        if (content === void 0) { content = ""; }
+        var arg = {
+            Title: title,
+            Content: content,
+            Theme: "warning",
+            CallbackOk: callbackOk,
+        };
+        this.Alert(arg);
+    };
+    CommonClass.prototype.ShowNoAccountPage = function () {
+        Loader.LoadVueTemplate(Common.VuePath + "NoAccount", function (tpl) {
+            $('body').append(new Vue({ template: tpl }).$mount().$el);
+        });
+    };
+    CommonClass.prototype.InitUrlParams = function () {
+        this.UrlParamDict = {};
+        var str = window.location.href.toLowerCase();
+        var index0 = str.indexOf('?');
+        if (index0 > -1) {
+            str = str.substring(index0 + 1, str.length);
+            console.log("[debug]", str, ":[str]");
+            var sp = str.split(/\&|\?/);
+            for (var i = 0; i < sp.length; i++) {
+                var spi = sp[i];
+                var equrlIndex = spi.indexOf('=');
+                if (equrlIndex > 0) //如果=在第一个也不能要
+                    var key = spi.substring(0, equrlIndex);
+                var val = spi.substring(equrlIndex + 1, spi.length);
+                console.log("[debug]", key, ":[key]", val, ":[val]");
+                this.UrlParamDict[key.toLowerCase()] = val;
+            }
         }
     };
     return CommonClass;

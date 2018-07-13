@@ -129,6 +129,8 @@ interface DepartmentInfo {
 interface ProjectSingle {
     Pid?: number
     Name?: string
+    //负责人id
+    MasterUid?:number   
     //client cache data
     ModeList?: ModeSingle[]
     UserList?:UserSingle[]
@@ -396,5 +398,6 @@ interface L2C_ProcessPublishDelete {
 
 
 enum Auth {
-    PROJECT_LIST = 1
+    PROJECT_LIST = 1,
+    PROJECT_EDIT = 2,
 }

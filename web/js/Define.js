@@ -70,5 +70,6 @@ var FieldName = /** @class */ (function () {
 var Auth;
 (function (Auth) {
     Auth[Auth["PROJECT_LIST"] = 1] = "PROJECT_LIST";
+    Auth[Auth["PROJECT_EDIT"] = 2] = "PROJECT_EDIT";
 })(Auth || (Auth = {}));
 //# sourceMappingURL=Define.js.map
