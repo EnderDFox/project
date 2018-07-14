@@ -27,6 +27,15 @@ class CommonClass {
 		date.setDate(date.getDate() + offsetDay)
 		return Common.FmtDate(date)
 	}
+	/**
+	 * 获取当前时间偏移后的 Date
+	 * @param Day 偏移天数
+	 */
+	GetOffsetDate(offset:{Day: number}): Date {
+		var date = new Date()
+		date.setDate(date.getDate() + offset.Day)
+		return date
+	}
 	/**本周周几*/
 	GetDayDate(to: number): string {
 		var date = new Date()
@@ -203,12 +212,8 @@ class CommonClass {
 	}
 	/**删除确认 */
 	VueAlert: CombinedVueInstance1<IAlertArg>
-	Alert(title: string)
-	Alert(title: string, content: string)
-	Alert(title: string, content: string, callbackOk: () => void)
-	Alert(arg: IAlertArg)
-	Alert(...args) {
-		var arg: IAlertArg = {
+	Alert(arg: IAlertArg) {
+		var _arg: IAlertArg = {
 			Title: "",
 			Content: "",
 			Theme: "primary",
@@ -216,28 +221,11 @@ class CommonClass {
 			BtnCancelLabel: `取消`,
 			ShowBtnCancel: true,
 		}
-		if (args.length > 1) {
-			arg.Title = args[0]
-			if (args.length > 2) {
-				arg.Content = args[1]
-				if (args.length > 3) {
-					arg.CallbackOk = args[2]
-					if (args.length > 3) {
-						arg.Theme = args[3]
-					}
-				}
-			}
-		} else {
-			if (typeof (args[0]) == 'string') {
-				arg.Title = args[0]
-			} else {
-				for (var key in args[0]) {
-					arg[key] = args[0][key]
-				}
-			}
+		for (var key in arg) {
+			_arg[key] = arg[key]
 		}
-		if (arg.Title.trim() == "") {
-			arg.Title = "&nbsp;"
+		if (_arg.Title.trim() == "") {
+			_arg.Title = "&nbsp;"
 		}
 		//
 		if (this.VueAlert) {
@@ -247,12 +235,12 @@ class CommonClass {
 		this.VueAlert = new Vue({
 			template: Loader.VueTemplateLoadedDict[`${Common.VuePath}Alert`],
 			data: {
-				arg: arg,
+				arg: _arg,
 			},
 			methods: {
 				OnOk: () => {
-					if (arg.CallbackOk) {
-						arg.CallbackOk()
+					if (_arg.CallbackOk) {
+						_arg.CallbackOk()
 					}
 					$(this.VueAlert.$el).remove()
 					this.VueAlert = null;
@@ -265,7 +253,7 @@ class CommonClass {
 		}).$mount()
 		this.Popup(this.VueAlert.$el)
 	}
-	AlertDelete(callbackOk: () => void, content: string = "") {
+	ConfirmDelete(callbackOk: () => void, content: string = "") {
 		var arg: IAlertArg = {
 			Title: "确定删除吗?",
 			Content: content,
@@ -274,7 +262,17 @@ class CommonClass {
 		}
 		this.Alert(arg)
 	}
-	AlertWarning(title: string = "", content: string = "") {
+	AlertError(content: string = "", title: string = "错误") {
+		var arg: IAlertArg = {
+			Title: title,
+			Content: content,
+			Theme: "danger",
+			BtnOkLabel: "好的",
+			ShowBtnCancel: false,
+		}
+		this.Alert(arg)
+	}
+	AlertWarning(content: string = "", title: string = "警告") {
 		var arg: IAlertArg = {
 			Title: title,
 			Content: content,
@@ -284,7 +282,7 @@ class CommonClass {
 		}
 		this.Alert(arg)
 	}
-	AlertConfirmWarning(title: string = "", content: string = "", callbackOk: () => void) {
+	ConfirmWarning(content: string = "", title: string = "", callbackOk: () => void) {
 		var arg: IAlertArg = {
 			Title: title,
 			Content: content,

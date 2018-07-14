@@ -65,6 +65,7 @@ var FieldName = /** @class */ (function () {
     FieldName.Tmid = "Tmid";
     FieldName.Tlid = "Tlid";
     FieldName.Posid = "Posid";
+    FieldName.Name = "Name";
     return FieldName;
 }());
 var Auth;

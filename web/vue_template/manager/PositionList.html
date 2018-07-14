@@ -31,8 +31,8 @@
         <thead>
             <tr>
                 <th style="width: 300px;">职位名称</th>
-                <th style="width: 160px;">编辑权限</th>
-                <th>操作</th>
+                <th style="width: 160px;">权限</th>
+                <th>删除</th>
             </tr>
         </thead>
         <transition-group name="list-complete" tag="tbody">
@@ -44,8 +44,8 @@
                 <td>
                     <button class="btn btn-default " type="submit " @click="onEditAuth(pos,index)
                             " title="编辑权限 ">
-                        <span class="glyphicon glyphicon-pencil" aria-hidden="true ">
-                            权限({{pos.AuthorityList.length}})
+                        <span class="glyphicon glyphicon-briefcase" aria-hidden="true " :title="'该职位已有权限x'+pos.AuthorityList.length">
+                            (x{{pos.AuthorityList.length}})
                         </span>
                     </button>
                 </td>

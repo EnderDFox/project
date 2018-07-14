@@ -21,6 +21,15 @@ var CommonClass = /** @class */ (function () {
         date.setDate(date.getDate() + offsetDay);
         return Common.FmtDate(date);
     };
+    /**
+     * 获取当前时间偏移后的 Date
+     * @param Day 偏移天数
+     */
+    CommonClass.prototype.GetOffsetDate = function (offset) {
+        var date = new Date();
+        date.setDate(date.getDate() + offset.Day);
+        return date;
+    };
     /**本周周几*/
     CommonClass.prototype.GetDayDate = function (to) {
         var date = new Date();
@@ -80,11 +89,11 @@ var CommonClass = /** @class */ (function () {
         return false;
     };
     CommonClass.prototype.Warning = function () {
-        var _a, _b, _d;
         var args = [];
         for (var _i = 0; _i < arguments.length; _i++) {
             args[_i] = arguments[_i];
         }
+        var _a, _b, _d;
         var dom, evt, func, txt;
         if (args.length == 4) {
             dom = $(args[0]); //TODO:Ldom也没用上呢
@@ -198,13 +207,9 @@ var CommonClass = /** @class */ (function () {
         Common.InsertBeforeDynamicDom($dom);
         this.AlginCenterInWindow($dom.find('.popup_content'));
     };
-    CommonClass.prototype.Alert = function () {
+    CommonClass.prototype.Alert = function (arg) {
         var _this = this;
-        var args = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            args[_i] = arguments[_i];
-        }
-        var arg = {
+        var _arg = {
             Title: "",
             Content: "",
             Theme: "primary",
@@ -212,30 +217,11 @@ var CommonClass = /** @class */ (function () {
             BtnCancelLabel: "\u53D6\u6D88",
             ShowBtnCancel: true,
         };
-        if (args.length > 1) {
-            arg.Title = args[0];
-            if (args.length > 2) {
-                arg.Content = args[1];
-                if (args.length > 3) {
-                    arg.CallbackOk = args[2];
-                    if (args.length > 3) {
-                        arg.Theme = args[3];
-                    }
-                }
-            }
+        for (var key in arg) {
+            _arg[key] = arg[key];
         }
-        else {
-            if (typeof (args[0]) == 'string') {
-                arg.Title = args[0];
-            }
-            else {
-                for (var key in args[0]) {
-                    arg[key] = args[0][key];
-                }
-            }
-        }
-        if (arg.Title.trim() == "") {
-            arg.Title = "&nbsp;";
+        if (_arg.Title.trim() == "") {
+            _arg.Title = "&nbsp;";
         }
         //
         if (this.VueAlert) {
@@ -245,12 +231,12 @@ var CommonClass = /** @class */ (function () {
         this.VueAlert = new Vue({
             template: Loader.VueTemplateLoadedDict[Common.VuePath + "Alert"],
             data: {
-                arg: arg,
+                arg: _arg,
             },
             methods: {
                 OnOk: function () {
-                    if (arg.CallbackOk) {
-                        arg.CallbackOk();
+                    if (_arg.CallbackOk) {
+                        _arg.CallbackOk();
                     }
                     $(_this.VueAlert.$el).remove();
                     _this.VueAlert = null;
@@ -263,7 +249,7 @@ var CommonClass = /** @class */ (function () {
         }).$mount();
         this.Popup(this.VueAlert.$el);
     };
-    CommonClass.prototype.AlertDelete = function (callbackOk, content) {
+    CommonClass.prototype.ConfirmDelete = function (callbackOk, content) {
         if (content === void 0) { content = ""; }
         var arg = {
             Title: "确定删除吗?",
@@ -273,9 +259,21 @@ var CommonClass = /** @class */ (function () {
         };
         this.Alert(arg);
     };
-    CommonClass.prototype.AlertWarning = function (title, content) {
-        if (title === void 0) { title = ""; }
+    CommonClass.prototype.AlertError = function (content, title) {
         if (content === void 0) { content = ""; }
+        if (title === void 0) { title = "错误"; }
+        var arg = {
+            Title: title,
+            Content: content,
+            Theme: "danger",
+            BtnOkLabel: "好的",
+            ShowBtnCancel: false,
+        };
+        this.Alert(arg);
+    };
+    CommonClass.prototype.AlertWarning = function (content, title) {
+        if (content === void 0) { content = ""; }
+        if (title === void 0) { title = "警告"; }
         var arg = {
             Title: title,
             Content: content,
@@ -285,9 +283,9 @@ var CommonClass = /** @class */ (function () {
         };
         this.Alert(arg);
     };
-    CommonClass.prototype.AlertConfirmWarning = function (title, content, callbackOk) {
-        if (title === void 0) { title = ""; }
+    CommonClass.prototype.ConfirmWarning = function (content, title, callbackOk) {
         if (content === void 0) { content = ""; }
+        if (title === void 0) { title = ""; }
         var arg = {
             Title: title,
             Content: content,

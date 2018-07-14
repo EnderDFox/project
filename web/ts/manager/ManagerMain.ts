@@ -9,7 +9,7 @@ class ManagerMainClass {
         if(ManagerData.CurrUser==null){
             Common.ShowNoAccountPage()
         }else{
-            ManagerManager.ShowProjectList()
+            ManagerManager.Init()
         }
     }
 }

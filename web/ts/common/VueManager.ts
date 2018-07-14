@@ -1,5 +1,5 @@
 class VueManagerClass {
-    Init(cb: Function) {
+    Init(cb: ()=>void) {
         Loader.LoadVueTemplateList([`${Common.VuePath}Popup`, `${Common.VuePath}Alert`], (tplList: string[]) => {
             //注册组件
             Vue.component('popup', {
@@ -7,11 +7,6 @@ class VueManagerClass {
                 props: {
                     theme: String,
                     panelHeading: String,
-                },
-                data: function () {
-                    return {}
-                },
-                methods: {
                 }
             })
             //#
