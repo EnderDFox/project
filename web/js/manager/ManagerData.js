@@ -80,7 +80,7 @@ var ManagerDataClass = /** @class */ (function () {
         //#user
         this.UserList = [];
         this.UserDict = {};
-        for (var i = 0; i < 27; i++) {
+        for (var i = 0; i < 26; i++) {
             var user = { Uid: i + 1, Name: "\u7528\u6237" + String.fromCharCode(65 + i), Did: 0, Posid: 0 };
             this.UserList.push(user);
             this.UserDict[user.Uid] = user;

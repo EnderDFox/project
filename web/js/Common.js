@@ -135,10 +135,15 @@ var CommonClass = /** @class */ (function () {
         });
     };
     /**在window内居中 */
-    CommonClass.prototype.AlginCenterInWindow = function (dom) {
+    CommonClass.prototype.AlginCenterInWindow = function (dom, useScorll) {
+        if (useScorll === void 0) { useScorll = true; }
         var $dom = $(dom);
-        var winLeft = $(window).scrollLeft();
-        var winTop = $(window).scrollTop();
+        var winLeft = 0;
+        var winTop = 0;
+        if (useScorll) {
+            winLeft = $(window).scrollLeft();
+            winTop = $(window).scrollTop();
+        }
         $dom.css('position', 'absolute');
         $dom.xy(winLeft + $(window).innerWidth() / 2 - $dom.width() / 2, winTop + $(window).innerHeight() / 2 - $dom.height() / 2);
     };
@@ -201,11 +206,11 @@ var CommonClass = /** @class */ (function () {
             $(this.VuePullDownMenu.$el).hide();
         }
     };
-    /**popup */
+    /**popup of bootstrap3 */
     CommonClass.prototype.Popup = function (dom) {
         var $dom = $(dom);
         Common.InsertBeforeDynamicDom($dom);
-        this.AlginCenterInWindow($dom.find('.popup_content'));
+        this.AlginCenterInWindow($dom.find('.popup_content'), false);
     };
     CommonClass.prototype.Alert = function (arg) {
         var _this = this;
@@ -321,6 +326,22 @@ var CommonClass = /** @class */ (function () {
     return CommonClass;
 }());
 var Common = new CommonClass();
+var StringUtil = /** @class */ (function () {
+    function StringUtil() {
+    }
+    /**val中是否包含 keyArr 中的某一个值, 如果有,返回该值在val中的位置*/
+    StringUtil.IndexOfKeyArr = function (val, keyArr) {
+        for (var i = 0; i < keyArr.length; i++) {
+            var key = keyArr[i];
+            var index = val.indexOf(key);
+            if (index > -1) {
+                return index;
+            }
+        }
+        return -1;
+    };
+    return StringUtil;
+}());
 //
 var ArrayUtil = /** @class */ (function () {
     function ArrayUtil() {

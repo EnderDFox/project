@@ -14,6 +14,7 @@ class ManagerManagerClass {
     NewPositionUuid = 200001
     VuePositionList: CombinedVueInstance1<{ newName: string }>
     VueAuthList: CombinedVueInstance1<{ checkedChange: boolean }>
+    VueSelectUser: CombinedVueInstance1<{ checkedChange: boolean, filterText: string }>
     Init() {
         this.InitVue(this.ShowProjectList.bind(this))
     }
@@ -476,16 +477,16 @@ class ManagerManagerClass {
     }
     ShowAuthList(pos: PositionSingle) {
         Loader.LoadVueTemplate(this.VuePath + "AuthList", (tpl: string) => {
-            var selectedAuthDict: { [key: number]: AuthoritySingle } = {};
+            var checkedDict: { [key: number]: AuthoritySingle } = {};
             for (var i = 0; i < pos.AuthorityList.length; i++) {
                 var auth: AuthoritySingle = pos.AuthorityList[i]
-                selectedAuthDict[auth.Authid] = auth
+                checkedDict[auth.Authid] = auth
             }
             var _checkModChecked = (_, mod: AuthorityModuleSingle): boolean => {
                 // console.log("[debug]", '_checkAllModSelected')
                 for (var i = 0; i < mod.AuthorityList.length; i++) {
                     var auth = mod.AuthorityList[i]
-                    if (!selectedAuthDict[auth.Authid]) {
+                    if (!checkedDict[auth.Authid]) {
                         return false
                     }
                 }
@@ -503,44 +504,44 @@ class ManagerManagerClass {
                     checkModChecked: _checkModChecked.bind(this),
                     checkAuthChecked: (_, auth: AuthoritySingle): boolean => {
                         // console.log("[debug] checkAuthSelected", auth.Authid, selectedAuthDict[auth.Authid])
-                        return selectedAuthDict[auth.Authid] != null
+                        return checkedDict[auth.Authid] != null
                     },
                     onSwitchMod: (mod: AuthorityModuleSingle) => {
                         var allSelected = _checkModChecked(null, mod)
                         for (var i = 0; i < mod.AuthorityList.length; i++) {
                             var auth = mod.AuthorityList[i]
                             if (allSelected) {
-                                delete selectedAuthDict[auth.Authid]
+                                delete checkedDict[auth.Authid]
                             } else {
-                                selectedAuthDict[auth.Authid] = auth
+                                checkedDict[auth.Authid] = auth
                             }
                         }
                         this.VueAuthList.checkedChange = !this.VueAuthList.checkedChange
                     },
                     onSwitchAuth: (e: Event, auth: AuthoritySingle) => {
-                        if (selectedAuthDict[auth.Authid]) {
-                            delete selectedAuthDict[auth.Authid]
+                        if (checkedDict[auth.Authid]) {
+                            delete checkedDict[auth.Authid]
                         } else {
-                            selectedAuthDict[auth.Authid] = auth
+                            checkedDict[auth.Authid] = auth
                         }
                         // auth.CheckedChange = !auth.CheckedChange
                         this.VueAuthList.checkedChange = !this.VueAuthList.checkedChange
                     },
                     onSave: () => {
                         pos.AuthorityList.splice(0, pos.AuthorityList.length)
-                        for (var authIdStr in selectedAuthDict) {
-                            pos.AuthorityList.push(selectedAuthDict[authIdStr])
+                        for (var authIdStr in checkedDict) {
+                            pos.AuthorityList.push(checkedDict[authIdStr])
                         }
                         this.VueAuthList.$el.remove()
                         this.VueAuthList = null
                     },
                     onReset: () => {
-                        for (var authIdStr in selectedAuthDict) {
-                            delete selectedAuthDict[authIdStr]
+                        for (var authIdStr in checkedDict) {
+                            delete checkedDict[authIdStr]
                         }
                         for (var i = 0; i < pos.AuthorityList.length; i++) {
                             var auth: AuthoritySingle = pos.AuthorityList[i]
-                            selectedAuthDict[auth.Authid] = auth
+                            checkedDict[auth.Authid] = auth
                         }
                         this.VueAuthList.checkedChange = !this.VueAuthList.checkedChange
                     }
@@ -572,18 +573,19 @@ class ManagerManagerClass {
                             var dict: { [key: number]: boolean } = {};
                             if (filterText) {
                                 var _filterText = filterText.toLowerCase().trim()
+                                var _filterTextSp = _filterText.split(/[\s\,]/g)
                                 rs.every((user: UserSingle): boolean => {
-                                    if (user.Name.toLowerCase().indexOf(_filterText) > -1) {
+                                    if (StringUtil.IndexOfKeyArr(user.Name.toLowerCase(), _filterTextSp) > -1) {
                                         dict[user.Uid] = true
                                     } else {
                                         if (user.Did) {
                                             var dept: DepartmentSingle = ManagerData.DepartmentDict[user.Did]
-                                            if (dept.Name.toLowerCase().indexOf(_filterText) > -1) {
+                                            if (StringUtil.IndexOfKeyArr(dept.Name.toLowerCase(), _filterTextSp) > -1) {
                                                 dict[user.Uid] = true
                                             } else {
                                                 for (var i = 0; i < dept.PositionList.length; i++) {
                                                     var posn = dept.PositionList[i]
-                                                    if (posn.Posid == user.Posid && posn.Name.toLowerCase().indexOf(_filterText) > -1) {
+                                                    if (posn.Posid == user.Posid && StringUtil.IndexOfKeyArr(posn.Name.toLowerCase(), _filterTextSp) > -1) {
                                                         dict[user.Uid] = true
                                                         break;
                                                     }
@@ -667,6 +669,9 @@ class ManagerManagerClass {
                                 this.VueUserList.otherUserList = ArrayUtil.SubByAttr(ManagerData.UserList, proj.UserList, FieldName.Uid)
                             }, `即将删除成员 "${user.Name}"`)
                         },
+                        onAddSelect: () => {
+                            this.ShowSelectUser(proj, ArrayUtil.SubByAttr(ManagerData.UserList, proj.UserList, FieldName.Uid))
+                        },
                         onAdd: () => {
                             var newUser: UserSingle = ArrayUtil.FindOfAttr<PositionSingle>(this.VueUserList.otherUserList, FieldName.Uid, this.VueUserList.newUserUid)
                             if (newUser) {
@@ -683,8 +688,85 @@ class ManagerManagerClass {
             Common.InsertIntoDom(vue.$el, '#projectEditContent')
         })
     }
-    /**职位 - 权限列表 */
-
+    /**选择 用户 */
+    ShowSelectUser(proj: ProjectSingle, userList: UserSingle[]) {
+        if (userList.length == 0) {
+            Common.AlertWarning('所有用户都已经被添加到了这个项目中')
+            return
+        }
+        Loader.LoadVueTemplate(this.VuePath + "SelectUser", (tpl: string) => {
+            var checkedDict: { [key: number]: UserSingle } = {};
+            var _GetFilterList = (userList: UserSingle[], filterText: string): UserSingle[] => {
+                var _filterText = filterText.toLowerCase().trim()
+                if (_filterText) {
+                    var _filterTextSp = _filterText.split(/[\s\,]/g)
+                    return userList.filter((user: UserSingle) => {
+                        if (checkedDict[user.Uid]) {
+                            return true
+                        }
+                        return StringUtil.IndexOfKeyArr(user.Name.toLowerCase(), _filterTextSp) > -1
+                    })
+                } else {
+                    return userList
+                }
+            }
+            var vue = new Vue({
+                template: tpl,
+                data: {
+                    userList: userList,
+                    checkedChange: false,//为了让check函数被触发,
+                    auth: ManagerData.MyAuth,
+                    filterText: '',
+                },
+                methods: {
+                    GetFilterList: _GetFilterList.bind(this),
+                    checkChecked: (_, user: UserSingle) => {
+                        return checkedDict[user.Uid] != null
+                    },
+                    onChangeChecked: (user: UserSingle) => {
+                        if (checkedDict[user.Uid]) {
+                            delete checkedDict[user.Uid]
+                        } else {
+                            checkedDict[user.Uid] = user
+                        }
+                        this.VueSelectUser.checkedChange = !this.VueSelectUser.checkedChange
+                    },
+                    OnCheckedAll: () => {
+                        var _userList: UserSingle[] = _GetFilterList(userList, this.VueSelectUser.filterText)
+                        var isAllCheck: boolean = true
+                        for (var i = 0; i < _userList.length; i++) {
+                            var user: UserSingle = _userList[i]
+                            if (!checkedDict[user.Uid]) {
+                                isAllCheck = false
+                                break;
+                            }
+                        }
+                        for (var i = 0; i < _userList.length; i++) {
+                            var user: UserSingle = _userList[i]
+                            if (isAllCheck) {
+                                delete checkedDict[user.Uid]
+                            } else {
+                                checkedDict[user.Uid] = user
+                            }
+                        }
+                        this.VueSelectUser.checkedChange = !this.VueSelectUser.checkedChange
+                    },
+                    onOk: () => {
+                        for (var i = 0; i < userList.length; i++) {
+                            var user: UserSingle = userList[i]
+                            if (checkedDict[user.Uid]) {
+                                proj.UserList.push(user)
+                            }
+                        }
+                        $(this.VueSelectUser.$el).remove()
+                    }
+                },
+            }).$mount()
+            this.VueSelectUser = vue
+            // $(vue.$el).alert('close');
+            Common.Popup($(vue.$el))
+        })
+    }
 }
 
 var ManagerManager = new ManagerManagerClass()

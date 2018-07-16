@@ -1,17 +1,18 @@
 <div class="commonDialog manager" style="min-width:500px; ">
     <nav class="navbar navbar-default">
         <div class="navbar-form navbar-left col-lg-6">
-            <button class="btn btn-default" type="button" :title="'返回职位:'+backPosn.Name" @click="OnBackPosn()" v-if="backPosn.Name">
+            <button class="btn btn-default" type="button" :title="'返回职位:'+backPosn.Name" @click="OnBackPosn()" v-if="backPosn">
                 <span class="glyphicon glyphicon-arrow-left"></span>
             </button>
             <div class="input-group">
-                <input type="text" class="form-control" placeholder="筛选" v-model="filterText">
+                <input type="text" class="form-control" placeholder="筛选" v-model.trim="filterText" title="按照'成员/部门/职位'名称进行筛选 \n优先显示符合条件的成员">
                 <span class="input-group-btn">
-                    <button class="btn btn-default" type="button" title="按照'成员/部门/职位'名称进行筛选 \n优先显示符合条件的成员">
-                        <span class="glyphicon glyphicon-search"></span>
+                    <button class="btn btn-default" type="button"  @click="filterText=''">
+                        <span class="glyphicon glyphicon-remove-sign"></span>
                     </button>
                 </span>
             </div>
+            <div style="clear: both;color: #BBBBBB"><small>多个筛选关键字可以用'空格'或'逗号'分割</small></div>
         </div>
         <!-- /.col-lg-6 -->
     </nav>
@@ -84,7 +85,12 @@
                     <td>
                     </td>
                     <td>
-                        <div class="dropdown">
+                        <button class="btn btn-default" type="button" @click="onAddSelect()">
+                            <span class="glyphicon glyphicon-plus" aria-hidden="true">
+                                增加新成员
+                            </span>
+                        </button>
+                        <!-- <div class="dropdown">
                             <button class="btn btn-default dropdown-toggle" type="button" id="ddmUserListNewUser" data-toggle="dropdown" aria-haspopup="true"
                                 aria-expanded="true">
                                 {{ShowUserName(newUserUid)}}
@@ -95,12 +101,12 @@
                                     <a @click="newUserUid=otherUser.Uid">{{otherUser.Name}}</a>
                                 </li>
                             </ul>
-                        </div>
+                        </div> -->
                     </td>
                     <td>
-                        <button class="btn btn-default" type="button" @click="onAdd()">
+                        <!-- <button class="btn btn-default" type="button" @click="onAdd()">
                             <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
-                        </button>
+                        </button> -->
                     </td>
                     <td>
                     </td>

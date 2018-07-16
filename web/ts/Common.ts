@@ -31,7 +31,7 @@ class CommonClass {
 	 * 获取当前时间偏移后的 Date
 	 * @param Day 偏移天数
 	 */
-	GetOffsetDate(offset:{Day: number}): Date {
+	GetOffsetDate(offset: { Day: number }): Date {
 		var date = new Date()
 		date.setDate(date.getDate() + offset.Day)
 		return date
@@ -137,10 +137,14 @@ class CommonClass {
 		})
 	}
 	/**在window内居中 */
-	AlginCenterInWindow(dom: HTMLElement | JQuery<HTMLElement>) {
+	AlginCenterInWindow(dom: HTMLElement | JQuery<HTMLElement>, useScorll: boolean = true) {
 		var $dom = $(dom)
-		var winLeft = $(window).scrollLeft()
-		var winTop = $(window).scrollTop()
+		var winLeft = 0
+		var winTop = 0
+		if (useScorll) {
+			winLeft = $(window).scrollLeft()
+			winTop = $(window).scrollTop()
+		}
 		$dom.css('position', 'absolute')
 		$dom.xy(winLeft + $(window).innerWidth() / 2 - $dom.width() / 2, winTop + $(window).innerHeight() / 2 - $dom.height() / 2)
 	}
@@ -204,11 +208,11 @@ class CommonClass {
 			$(this.VuePullDownMenu.$el).hide()
 		}
 	}
-	/**popup */
+	/**popup of bootstrap3 */
 	Popup(dom: HTMLElement | JQuery<HTMLElement>) {
 		var $dom = $(dom)
 		Common.InsertBeforeDynamicDom($dom)
-		this.AlginCenterInWindow($dom.find('.popup_content'))
+		this.AlginCenterInWindow($dom.find('.popup_content'), false)
 	}
 	/**删除确认 */
 	VueAlert: CombinedVueInstance1<IAlertArg>
@@ -325,6 +329,20 @@ interface IPullDownMenuItem {
 	Key: number | string
 	Label: string
 	Data?: any
+}
+
+class StringUtil{
+	/**val中是否包含 keyArr 中的某一个值, 如果有,返回该值在val中的位置*/
+	static IndexOfKeyArr(val:string, keyArr:string[]):number{
+		for (var i = 0; i < keyArr.length; i++) {
+			var key = keyArr[i]
+			var index = val.indexOf(key)
+			if(index>-1){
+				return index
+			}
+		}
+		return -1
+	}
 }
 //
 class ArrayUtil {
