@@ -163,21 +163,23 @@ var ManagerManagerClass = /** @class */ (function () {
                     onClose: function () {
                         $(this.$el).hide();
                     },
-                    onShowProj: function (proj, index) {
-                        _this.ShowProjectEdit(proj, _this.VueProjectEdit.currPage);
-                    },
                     onShowProjList: function () {
                         $(_this.VueProjectEdit.$el).hide();
                         _this.ShowProjectList();
+                    },
+                    onShowCurrProj: function () {
+                        if (_this.VueProjectEdit.projectList.length == 1) {
+                            //仅在只有一个项目 可以用, 多个项目就是下拉列表了
+                            _this.ShowProjectEdit(_this.VueProjectEdit.project, ProjectEditPage.Department);
+                        }
+                    },
+                    onShowProj: function (proj, index) {
+                        _this.ShowProjectEdit(proj, _this.VueProjectEdit.currPage);
                     },
                     onShowPage: function (page) {
                         _this.VueProjectEdit.currPage = page;
                         _this.ShowProjectEditPage(_this.VueProjectEdit.currPage);
                     },
-                    onDel: function (e, proj, index) {
-                    },
-                    onSubmit: function () {
-                    }
                 },
             }).$mount();
             _this.VueProjectEdit = vue;
@@ -287,7 +289,7 @@ var ManagerManagerClass = /** @class */ (function () {
                             //
                             delete ManagerData.DepartmentDict[dp.Did];
                             ManagerData.RefreshAllDepartmentList();
-                        }, "\u5373\u5C06\u5220\u9664\u90E8\u95E8 \"dp\" \u53CA\u5176\u5B50\u90E8\u95E8<br/>\n                            \u8BE5\u90E8\u95E8\u6781\u5176\u5B50\u90E8\u95E8\u7684\u6240\u6709\u804C\u4F4D\u90FD\u5C06\u88AB\u5220\u9664");
+                        }, "\u5373\u5C06\u5220\u9664\u90E8\u95E8 \"" + (dp.Name || '空') + "}\" \u53CA\u5176\u5B50\u90E8\u95E8<br/>\n                            \u8BE5\u90E8\u95E8\u53CA\u5176\u5B50\u90E8\u95E8\u7684\u6240\u6709\u804C\u4F4D\u90FD\u5C06\u88AB\u5220\u9664");
                     },
                     onAdd: function () {
                         var dp = {
@@ -333,7 +335,7 @@ var ManagerManagerClass = /** @class */ (function () {
         else {
             var rs = '';
             for (var i = 0; i < dp.Depth; i++) {
-                rs += '-';
+                rs += '--';
             }
             // rs += '└';
             rs += dp.Name;
@@ -393,6 +395,11 @@ var ManagerManagerClass = /** @class */ (function () {
                         }
                         return "<ol class=\"breadcrumb\">\n                                        " + rs.join("") + "\n                                    </ol>";
                     },
+                    /**回到部门列表 */
+                    onBackDepartmentList: function () {
+                        console.log("[debug]", "onBackDepartmentList");
+                        _this.ShowDepartmentList(ManagerData.GetProjByPid(dp.Pid));
+                    },
                     departmentOption: _this.DepartmentOption.bind(_this),
                     onEditParentDp: function (dp, parentDp) {
                         _this.ShowPositionList(parentDp);
@@ -421,7 +428,9 @@ var ManagerManagerClass = /** @class */ (function () {
                         }
                     },
                     onDel: function (e, pos, index) {
-                        dp.PositionList.splice(index, 1);
+                        Common.ConfirmDelete(function () {
+                            dp.PositionList.splice(index, 1);
+                        }, "\u5373\u5C06\u5220\u9664\u804C\u4F4D \"" + (pos.Name || '空') + "\"");
                     },
                     onAdd: function () {
                         var pos = { Posid: _this.NewPositionUuid++, Did: dp.Did, Name: _this.VuePositionList.newName.toString(), AuthorityList: [] };
@@ -494,6 +503,8 @@ var ManagerManagerClass = /** @class */ (function () {
                         for (var authIdStr in selectedAuthDict) {
                             pos.AuthorityList.push(selectedAuthDict[authIdStr]);
                         }
+                        _this.VueAuthList.$el.remove();
+                        _this.VueAuthList = null;
                     },
                     onReset: function () {
                         for (var authIdStr in selectedAuthDict) {
@@ -504,7 +515,7 @@ var ManagerManagerClass = /** @class */ (function () {
                             selectedAuthDict[auth.Authid] = auth;
                         }
                         _this.VueAuthList.checkedChange = !_this.VueAuthList.checkedChange;
-                    },
+                    }
                 },
             }).$mount();
             _this.VueAuthList = vue;

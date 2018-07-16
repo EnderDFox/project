@@ -43,7 +43,7 @@
                         </div>
                     </td>
                     <td>
-                        <button class="btn btn-default " type="submit " @click="onEditPosition(dp,index)" :title="'该部门下已有职位x'+dp.PositionList.length">
+                        <button class="btn btn-default " type="submit " @click="onEditPosition(dp,index)" :title="'该部门下已有'+dp.PositionList.length+'个职位'">
                             <span class="glyphicon glyphicon-pawn" aria-hidden="true ">
                                 (x{{dp.PositionList.length}})
                             </span>

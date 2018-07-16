@@ -702,6 +702,7 @@ func (this *Process) View(BeginDate, EndDate string, modeStatus, linkStatus []ui
 		if workSingle.Wid > 0 {
 			if _, ok := widMap[workSingle.Wid]; !ok {
 				widMap[workSingle.Wid] = workSingle.Wid
+				workSingle.FileList = this.owner.Upload().GetFileList(FILE_JOIN_KIND_WORK, workSingle.Wid)
 				workList = append(workList, workSingle)
 			}
 		}

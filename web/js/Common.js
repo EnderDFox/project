@@ -89,11 +89,11 @@ var CommonClass = /** @class */ (function () {
         return false;
     };
     CommonClass.prototype.Warning = function () {
+        var _a, _b, _d;
         var args = [];
         for (var _i = 0; _i < arguments.length; _i++) {
             args[_i] = arguments[_i];
         }
-        var _a, _b, _d;
         var dom, evt, func, txt;
         if (args.length == 4) {
             dom = $(args[0]); //TODO:Ldom也没用上呢

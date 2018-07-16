@@ -197,6 +197,9 @@ class ManagerDataClass {
         }
         return rs
     }
+    GetProjByPid(pid: number): ProjectSingle {
+        return this.ProjectList.FindOfAttr(FieldName.PID, pid)
+    }
     /**检测dp1是否是dp0的子孙dp */
     IsDepartmentChild(dp0: DepartmentSingle, dp1: DepartmentSingle): boolean {
         for (var i = 0; i < dp0.Children.length; i++) {

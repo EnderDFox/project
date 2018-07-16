@@ -58,6 +58,7 @@ var LinkStatusField;
 var FieldName = /** @class */ (function () {
     function FieldName() {
     }
+    FieldName.PID = "Pid";
     FieldName.Did = "Did";
     FieldName.Uid = "Uid";
     FieldName.Mid = "Mid";

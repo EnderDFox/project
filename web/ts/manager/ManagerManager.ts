@@ -7,7 +7,7 @@ enum ProjectEditPage {
 class ManagerManagerClass {
     VuePath = "manager/"
     VueProjectList: CombinedVueInstance1<{ auth: { [key: number]: boolean }, projectList: ProjectSingle[], newName: string }>
-    VueProjectEdit: CombinedVueInstance1<{ project: ProjectSingle, newName: string, dpTree: DepartmentSingle[], currPage: ProjectEditPage }>
+    VueProjectEdit: CombinedVueInstance1<{ projectList: ProjectSingle[], project: ProjectSingle, newName: string, dpTree: DepartmentSingle[], currPage: ProjectEditPage }>
     VueUserList: CombinedVueInstance1<{ otherUserList: UserSingle[], newUserUid: number }>
     VueDepartmentList: CombinedVueInstance1<{ allDepartmentList: DepartmentSingle[], newName: string }>
     NewDepartmentUuid = 100001
@@ -60,7 +60,7 @@ class ManagerManagerClass {
                         currUser: ManagerData.CurrUser,
                     },
                     methods: {
-                        GetDateStr:(timeStamp:number):string=>{
+                        GetDateStr: (timeStamp: number): string => {
                             return Common.TimeStamp2DateStr(timeStamp)
                         },
                         GetProjMaster: (proj: ProjectSingle): string => {
@@ -166,21 +166,23 @@ class ManagerManagerClass {
                         onClose: function () {
                             $(this.$el).hide()
                         },
-                        onShowProj: (proj: ProjectSingle, index: number) => {
-                            this.ShowProjectEdit(proj, this.VueProjectEdit.currPage)
-                        },
                         onShowProjList: () => {
                             $(this.VueProjectEdit.$el).hide()
                             this.ShowProjectList()
+                        },
+                        onShowCurrProj: () => {
+                            if (this.VueProjectEdit.projectList.length == 1) {
+                                //仅在只有一个项目 可以用, 多个项目就是下拉列表了
+                                this.ShowProjectEdit(this.VueProjectEdit.project, ProjectEditPage.Department)
+                            }
+                        },
+                        onShowProj: (proj: ProjectSingle, index: number) => {
+                            this.ShowProjectEdit(proj, this.VueProjectEdit.currPage)
                         },
                         onShowPage: (page: ProjectEditPage) => {
                             this.VueProjectEdit.currPage = page;
                             this.ShowProjectEditPage(this.VueProjectEdit.currPage)
                         },
-                        onDel: (e, proj: ProjectSingle, index: int) => {
-                        },
-                        onSubmit: () => {
-                        }
                     },
                 }
             ).$mount()
@@ -291,8 +293,8 @@ class ManagerManagerClass {
                                 //
                                 delete ManagerData.DepartmentDict[dp.Did]
                                 ManagerData.RefreshAllDepartmentList()
-                            }, `即将删除部门 "dp" 及其子部门<br/>
-                            该部门极其子部门的所有职位都将被删除`)
+                            }, `即将删除部门 "${dp.Name || '空'}}" 及其子部门<br/>
+                            该部门及其子部门的所有职位都将被删除`)
                         },
                         onAdd: () => {
                             var dp: DepartmentSingle = {
@@ -338,7 +340,7 @@ class ManagerManagerClass {
         } else {
             var rs: string = ''
             for (var i = 0; i < dp.Depth; i++) {
-                rs += '-'
+                rs += '--'
             }
             // rs += '└';
             rs += dp.Name
@@ -399,6 +401,11 @@ class ManagerManagerClass {
                                         ${rs.join(``)}
                                     </ol>`
                         },
+                        /**回到部门列表 */
+                        onBackDepartmentList: () => {
+                            console.log("[debug]","onBackDepartmentList")
+                            this.ShowDepartmentList(ManagerData.GetProjByPid(dp.Pid))
+                        },
                         departmentOption: this.DepartmentOption.bind(this),
                         onEditParentDp: (dp: DepartmentSingle, parentDp: DepartmentSingle) => {
                             this.ShowPositionList(parentDp)
@@ -428,7 +435,9 @@ class ManagerManagerClass {
                             }
                         },
                         onDel: (e, pos: PositionSingle, index: int) => {
-                            dp.PositionList.splice(index, 1)
+                            Common.ConfirmDelete(() => {
+                                dp.PositionList.splice(index, 1)
+                            }, `即将删除职位 "${pos.Name || '空'}"`)
                         },
                         onAdd: () => {
                             var pos: PositionSingle = { Posid: this.NewPositionUuid++, Did: dp.Did, Name: this.VuePositionList.newName.toString(), AuthorityList: [] }
@@ -499,6 +508,8 @@ class ManagerManagerClass {
                         for (var authIdStr in selectedAuthDict) {
                             pos.AuthorityList.push(selectedAuthDict[authIdStr])
                         }
+                        this.VueAuthList.$el.remove()
+                        this.VueAuthList = null
                     },
                     onReset: () => {
                         for (var authIdStr in selectedAuthDict) {
@@ -509,7 +520,7 @@ class ManagerManagerClass {
                             selectedAuthDict[auth.Authid] = auth
                         }
                         this.VueAuthList.checkedChange = !this.VueAuthList.checkedChange
-                    },
+                    }
                 },
             }).$mount()
             this.VueAuthList = vue

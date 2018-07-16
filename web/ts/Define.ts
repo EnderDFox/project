@@ -62,6 +62,7 @@ enum LinkStatusField {
 //# const
 
 class FieldName {
+    static PID = "Pid"
     static Did = "Did"
     static Uid = "Uid"
     static Mid = "Mid"

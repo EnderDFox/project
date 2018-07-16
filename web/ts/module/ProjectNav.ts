@@ -138,6 +138,7 @@ class ProjectNavClass {
         })
         plan.find('.menu').hide()
         $('#saveFile,#projectSer').show()
+        $('#saveFile').hide()//TODO:
         plan.find(".tpl_edit").hide()
         this.NavMenu = NavMenuValue.COLLATE
     }

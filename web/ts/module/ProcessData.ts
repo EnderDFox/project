@@ -22,7 +22,16 @@ class ProcessDataClass {
 		//初始化
 		this.Project = data.Project
 		if (this.IsFirst == false) {
-			document.title = document.title + `- ${this.Project.Name}`
+			document.title = `${function (): string {
+				switch (Loader.ServerKind) {
+					case SERVER_KIND.DEV:
+						return '[DEV]'
+					case SERVER_KIND.BETA:
+						return '[BETA]'
+
+				}
+				return ''
+			}()} ${this.Project.Name}-管理工具v${Loader.RealVer} `
 			this.IsFirst = true
 		}
 		this.Project.ModeList = []
@@ -100,19 +109,19 @@ class ProcessDataClass {
 			if (this.CheckStringArray(link.Name.toLowerCase(), ProcessFilter.Pack.LinkNameLower) == false) {
 				return true
 			}
-			var user:UserSingle = Data.GetUser(link.Uid)
-			if(link.Uid>0 && user==null){
-				console.log("[warn]","link.uid -> user is null",link)
+			var user: UserSingle = Data.GetUser(link.Uid)
+			if (link.Uid > 0 && user == null) {
+				console.log("[warn]", "link.uid -> user is null", link)
 			}
 			//流程负责人查询
-			if (link.Uid>0 && this.CheckStringArray(Data.GetUser(link.Uid).Name.toString(), ProcessFilter.Pack.LinkUserNameLower) == false) {
+			if (link.Uid > 0 && this.CheckStringArray(Data.GetUser(link.Uid).Name.toString(), ProcessFilter.Pack.LinkUserNameLower) == false) {
 				return true
 			}
 			//流程是否归档
 			if (this.CheckNumberArray(link.Status, ProcessFilter.Pack.LinkStatus) == false) {
 				return true
 			}
-			if (link.Uid>0 && this.CheckNumberArray(Data.GetUser(link.Uid).Did, ProcessFilter.Pack.LinkUserDid) == false) {
+			if (link.Uid > 0 && this.CheckNumberArray(Data.GetUser(link.Uid).Did, ProcessFilter.Pack.LinkUserDid) == false) {
 				return true
 			}
 			if (ProjectNav.FilterDid == DidField.SUPERVISOR_ART) {

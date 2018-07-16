@@ -7,8 +7,10 @@
                     <span>/</span>
                 </li>
                 <li class="dropdown">
-                    <a class="dropdown-toggle navbar-brand" :data-toggle="projectList.length>1?'dropdown':'label'" :style="{'cursor':
-                    projectList.length>1?'pointer':'default'}" role="button" aria-haspopup="true" aria-expanded="false">{{project.Name}}
+                    <!-- :data-toggle="projectList.length>1?'dropdown':'label'"
+                    :style="{'cursor':projectList.length>1?'pointer':'default'}"-->
+                    <a class="dropdown-toggle navbar-brand" data-toggle="dropdown" style="cursor:pointer;" role="button" aria-haspopup="true" aria-expanded="false" @click="onShowCurrProj()">
+                    {{project.Name}}
                         <span class="caret" v-if="projectList.length>1"></span>
                     </a>
                     <ul class="dropdown-menu">

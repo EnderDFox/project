@@ -31,7 +31,7 @@ if (!Array.prototype.IndexOfAttr) {
 		return -1;
 	}
 }
-if (!Array.prototype.IndexOfAttr) {
+if (!Array.prototype.FindOfAttr) {
 	Array.prototype.FindOfAttr = function (key, value) {
 		var len = this.length
 		for (var i = 0; i < len; i++) {

@@ -3,8 +3,10 @@
 #   密码: 123456
 #---
 # 发布正式服   
+#   sh /root/trunk/src/run.sh pm_amazing full r head
 #   sh /root/trunk/src/run.sh pm_proj full r head
 # 发布正式服(仅web)   
+#   sh /root/trunk/src/run.sh pm_amazing web r head
 #   sh /root/trunk/src/run.sh pm_proj web r head
 #---
 # 发布beta服   

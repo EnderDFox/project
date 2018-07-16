@@ -1,37 +1,39 @@
 <div>
-    <!-- <div v-html="dpFullName(dp)">
-    </div> -->
-    <table class="table">
-        <thead>
-            <tr>
-                <th style="width: 50px;vertical-align: middle;">
-                    部门:
-                </th>
-                <th>
-                    <div class="dropdown">
-                        <button class="btn btn-default dropdown-toggle" type="button" :id="'ddmPosList'" data-toggle="dropdown" aria-haspopup="true"
-                            aria-expanded="true">
-                            {{dp.Name}}
-                            <span class="caret"></span>
-                        </button>
-                        <ul class="dropdown-menu" :aria-labelledby="'ddmPosList'">
+    <nav class="navbar navbar-default">
+        <div class="container-fluid">
+            <div class="navbar-header" role="button" @click="onBackDepartmentList()">
+                <span class="glyphicon glyphicon-th-list navbar-text" style="margin-right: 0px;">
+                    部门列表
+                </span>
+            </div>
+            <div class="navbar-header" role="cell">
+                <span class="navbar-text">/</span>
+            </div>
+            <div class="navbar-header" role="cell">
+                <div class="dropdown" style="margin-top: 8px;">
+                    <button class="btn btn-default dropdown-toggle" type="button" :id="'ddmPosList'" data-toggle="dropdown" aria-haspopup="true"
+                        aria-expanded="true">
+                        {{dp.Name}}
+                        <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu" :aria-labelledby="'ddmPosList'">
 
-                            <li v-for="parentDp in allDepartmentList" :key="parentDp.Did">
-                                <a @click="onEditParentDp(dp,parentDp)">{{departmentOption(parentDp)}}</a>
-                            </li>
-                            <li role="separator " class="divider "></li>
-                        </ul>
-                    </div>
-                </th>
-            </tr>
-        </thead>
-    </table>
+                        <li v-for="parentDp in allDepartmentList" :key="parentDp.Did">
+                            <a @click="onEditParentDp(dp,parentDp)">{{departmentOption(parentDp)}}</a>
+                        </li>
+                        <li role="separator " class="divider "></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </nav>
     <!--  -->
     <table class="table table-hover">
         <thead>
             <tr>
                 <th style="width: 300px;">职位名称</th>
                 <th style="width: 160px;">权限</th>
+                <th style="width: 120px;">排序</th>
                 <th>删除</th>
             </tr>
         </thead>
@@ -44,20 +46,22 @@
                 <td>
                     <button class="btn btn-default " type="submit " @click="onEditAuth(pos,index)
                             " title="编辑权限 ">
-                        <span class="glyphicon glyphicon-briefcase" aria-hidden="true " :title="'该职位已有权限x'+pos.AuthorityList.length">
+                        <span class="glyphicon glyphicon-briefcase" aria-hidden="true " :title="'该职位已有`+pos.AuthorityList.length+`个权限'">
                             (x{{pos.AuthorityList.length}})
                         </span>
                     </button>
                 </td>
                 <td>
-                    <button class="btn btn-default " type="submit" @click="onSortDown(pos,index)" disabled="!CheckSortDown(pos,index)">
+                    <button class="btn btn-default " type="submit" @click="onSortDown(pos,index)" :disabled="!(index < dp.PositionList.length - 1)">
                         <span class="glyphicon glyphicon-arrow-down " aria-hidden="true "></span>
                     </button>
-                    <button class="btn btn-default " type="submit" @click="onSortUp(pos,index) " disabled="!CheckSortUp(pos,index)">
+                    <button class="btn btn-default " type="submit" @click="onSortUp(pos,index)" :disabled="!(index > 0)">
                         <span class="glyphicon glyphicon-arrow-up " aria-hidden="true "></span>
                     </button>
-                    <button class="btn btn-default " type="submit">
-                        <span class="glyphicon glyphicon-remove " aria-hidden="true " @click="onDel($event,pos,index) "></span>
+                </td>
+                <td>
+                    <button class="btn btn-warning " type="submit" @click="onDel($event,pos,index)">
+                        <span class="glyphicon glyphicon-remove " aria-hidden="true "></span>
                     </button>
                 </td>
             </tr>
@@ -67,11 +71,13 @@
                     />
                 </td>
                 <td>
-                </td>
-                <td>
                     <button class="btn btn-default " type="submit" @click="onAdd() ">
                         <span class="glyphicon glyphicon-plus " aria-hidden="true "></span>
                     </button>
+                </td>
+                <td>
+                </td>
+                <td>
                 </td>
             </tr>
         </transition-group>

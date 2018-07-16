@@ -1,8 +1,18 @@
+var SERVER_KIND;
+(function (SERVER_KIND) {
+    /**正式服 */
+    SERVER_KIND[SERVER_KIND["PROJ"] = 1] = "PROJ";
+    /**beta服 */
+    SERVER_KIND[SERVER_KIND["BETA"] = 2] = "BETA";
+    /**开发服 */
+    SERVER_KIND[SERVER_KIND["DEV"] = 3] = "DEV";
+})(SERVER_KIND || (SERVER_KIND = {}));
 //内容加载
 var LoaderClass = /** @class */ (function () {
     function LoaderClass() {
         this.isDebug = false;
-        //版本号 由外部传入
+        //服务器性质
+        this.ServerKind = SERVER_KIND.PROJ;
         this.Ver = '0.0.0';
         //模块Id
         this.Needs = {};
@@ -42,27 +52,25 @@ var LoaderClass = /** @class */ (function () {
     //初始化
     LoaderClass.prototype.Init = function () {
         Loader.CheckEnviroment();
+        var scripts = window.document.head.getElementsByTagName('script');
+        var len = scripts.length;
+        for (var i = 0; i < len; i++) {
+            var item = scripts[i];
+            if (item.src && item.src.indexOf('Loader.js') > -1) {
+                this.Ver = item.src.split('v=')[1];
+                break;
+            }
+        }
+        this.RealVer = this.Ver;
         if (Loader.isDebug) {
             //开发阶段用随机数做版本号
             this.Ver = Math.random().toString();
-            //加载脚本
-            this.LoadAll();
         }
         else {
             //正式版本读取 <script src="js/Loader.js?v=xxx"></script> 中的版本号
-            var scripts = window.document.head.getElementsByTagName('script');
-            var len = scripts.length;
-            for (var i = 0; i < len; i++) {
-                var item = scripts[i];
-                if (item.src && item.src.indexOf('Loader.js') > -1) {
-                    this.Ver = item.src.split('v=')[1];
-                    //加载脚本
-                    this.LoadAll();
-                    return;
-                }
-            }
-            console.log("[fatal]", "\u6CA1\u6709\u627E\u5230<script src=\"js/Loader.js?v=xxx\"></script>");
         }
+        //加载脚本
+        this.LoadAll();
     };
     //注册函数
     LoaderClass.prototype.RegisterFunc = function () {
@@ -96,6 +104,18 @@ var LoaderClass = /** @class */ (function () {
     };
     //检查环境
     LoaderClass.prototype.CheckEnviroment = function () {
+        var hostMap = { '192.168.118.132:8080': 1, '192.168.50.191:8080': 1, 'localhost:8080': 1, '192.168.118.224:8080': 1, '192.168.120.236:8080': 1 };
+        if (hostMap[location.host]) {
+            this.ServerKind = SERVER_KIND.DEV;
+        }
+        else {
+            if (location.host.indexOf(":8081") > -1) {
+                this.ServerKind = SERVER_KIND.BETA;
+            }
+            else {
+                this.ServerKind = SERVER_KIND.PROJ;
+            }
+        }
         if (window.location.href.toLowerCase().indexOf('isdebug=true') > -1) {
             this.isDebug = true;
         }
@@ -103,12 +123,14 @@ var LoaderClass = /** @class */ (function () {
             this.isDebug = false;
         }
         else {
-            var hostMap = { '192.168.118.132:8080': 1, '192.168.50.191:8080': 1, 'localhost:8080': 1, '192.168.118.224:8080': 1, '192.168.120.236:8080': 1 };
-            if (hostMap[location.host]) {
-                this.isDebug = true;
-            }
-            else {
-                this.isDebug = false;
+            switch (this.ServerKind) {
+                case SERVER_KIND.DEV:
+                    this.isDebug = true;
+                    break;
+                case SERVER_KIND.PROJ:
+                case SERVER_KIND.PROJ:
+                    this.isDebug = false;
+                    break;
             }
         }
     };
@@ -141,7 +163,7 @@ var LoaderClass = /** @class */ (function () {
     };
     //脚本加载完毕
     LoaderClass.prototype.OnLoadJsCssComplete = function () {
-        VueManager.Init(this.OnInitVueComplete);
+        VueManager.Init(this.OnInitVueComplete.bind(this));
     };
     LoaderClass.prototype.OnInitVueComplete = function () {
         //调试

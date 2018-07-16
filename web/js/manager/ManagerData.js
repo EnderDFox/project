@@ -188,6 +188,9 @@ var ManagerDataClass = /** @class */ (function () {
         }
         return rs;
     };
+    ManagerDataClass.prototype.GetProjByPid = function (pid) {
+        return this.ProjectList.FindOfAttr(FieldName.PID, pid);
+    };
     /**检测dp1是否是dp0的子孙dp */
     ManagerDataClass.prototype.IsDepartmentChild = function (dp0, dp1) {
         for (var i = 0; i < dp0.Children.length; i++) {

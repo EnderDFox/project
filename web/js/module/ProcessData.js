@@ -9,7 +9,15 @@ var ProcessDataClass = /** @class */ (function () {
         //初始化
         this.Project = data.Project;
         if (this.IsFirst == false) {
-            document.title = document.title + ("- " + this.Project.Name);
+            document.title = function () {
+                switch (Loader.ServerKind) {
+                    case SERVER_KIND.DEV:
+                        return '[DEV]';
+                    case SERVER_KIND.BETA:
+                        return '[BETA]';
+                }
+                return '';
+            }() + " " + this.Project.Name + "-\u7BA1\u7406\u5DE5\u5177v" + Loader.RealVer + " ";
             this.IsFirst = true;
         }
         this.Project.ModeList = [];

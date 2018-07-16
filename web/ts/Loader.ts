@@ -2,10 +2,21 @@ interface ILoadGroup {
     path: string
     files: string[]
 }
+enum SERVER_KIND {
+    /**正式服 */
+    PROJ = 1,
+    /**beta服 */
+    BETA = 2,
+    /**开发服 */
+    DEV = 3,
+}
 //内容加载
 class LoaderClass {
     isDebug = false
+    //服务器性质
+    ServerKind: SERVER_KIND = SERVER_KIND.PROJ
     //版本号 由外部传入
+    RealVer: string
     Ver = '0.0.0'
     //模块Id
     Needs: { [key: number]: boolean } = {}
@@ -21,7 +32,7 @@ class LoaderClass {
     JsList: ILoadGroup[] = [
         { path: "", files: ['Define', 'JQueryExtend', 'Protocol', 'Config', 'WSConn', 'Commond', 'Common', 'DateTime', 'Templet', 'Data', 'Main'] },
         { path: "lib", files: ['vue', 'Echarts.min', 'Cookie', 'jquery.md5'] },
-        { path: "common", files: ['PrototypeExtend','VueManager'] },
+        { path: "common", files: ['PrototypeExtend', 'VueManager'] },
         {
             path: "module", files: ['User', 'ProjectNav', 'FileManager',
                 'ProcessData', 'ProcessManager', 'ProcessPanel', 'ProcessFilter',
@@ -41,26 +52,24 @@ class LoaderClass {
     //初始化
     Init() {
         Loader.CheckEnviroment()
+        var scripts = window.document.head.getElementsByTagName('script')
+        var len = scripts.length
+        for (var i = 0; i < len; i++) {
+            var item = scripts[i];
+            if (item.src && item.src.indexOf('Loader.js') > -1) {
+                this.Ver = item.src.split('v=')[1]
+                break;
+            }
+        }
+        this.RealVer = this.Ver
         if (Loader.isDebug) {
             //开发阶段用随机数做版本号
             this.Ver = Math.random().toString()
-            //加载脚本
-            this.LoadAll()
         } else {
             //正式版本读取 <script src="js/Loader.js?v=xxx"></script> 中的版本号
-            var scripts = window.document.head.getElementsByTagName('script')
-            var len = scripts.length
-            for (var i = 0; i < len; i++) {
-                var item = scripts[i];
-                if (item.src && item.src.indexOf('Loader.js') > -1) {
-                    this.Ver = item.src.split('v=')[1]
-                    //加载脚本
-                    this.LoadAll()
-                    return;
-                }
-            }
-            console.log("[fatal]", `没有找到<script src="js/Loader.js?v=xxx"></script>`);
         }
+        //加载脚本
+        this.LoadAll()
     }
     //注册函数
     RegisterFunc() {
@@ -94,16 +103,29 @@ class LoaderClass {
     }
     //检查环境
     CheckEnviroment() {
+        var hostMap: any = { '192.168.118.132:8080': 1, '192.168.50.191:8080': 1, 'localhost:8080': 1, '192.168.118.224:8080': 1, '192.168.120.236:8080': 1 }
+        if (hostMap[location.host]) {
+            this.ServerKind = SERVER_KIND.DEV
+        } else {
+            if (location.host.indexOf(":8081") > -1) {
+                this.ServerKind = SERVER_KIND.BETA
+            } else {
+                this.ServerKind = SERVER_KIND.PROJ
+            }
+        }
         if (window.location.href.toLowerCase().indexOf('isdebug=true') > -1) {
             this.isDebug = true;
         } else if (window.location.href.toLowerCase().indexOf('isdebug=false') > -1) {
             this.isDebug = false;
         } else {
-            var hostMap: any = { '192.168.118.132:8080': 1, '192.168.50.191:8080': 1, 'localhost:8080': 1, '192.168.118.224:8080': 1, '192.168.120.236:8080': 1 }
-            if (hostMap[location.host]) {
-                this.isDebug = true;
-            } else {
-                this.isDebug = false;
+            switch (this.ServerKind) {
+                case SERVER_KIND.DEV:
+                    this.isDebug = true;
+                    break;
+                case SERVER_KIND.PROJ:
+                case SERVER_KIND.PROJ:
+                    this.isDebug = false;
+                    break;
             }
         }
     }
@@ -135,7 +157,7 @@ class LoaderClass {
     }
     //脚本加载完毕
     private OnLoadJsCssComplete() {
-        VueManager.Init(this.OnInitVueComplete)
+        VueManager.Init(this.OnInitVueComplete.bind(this))
     }
     private OnInitVueComplete() {
         //调试
