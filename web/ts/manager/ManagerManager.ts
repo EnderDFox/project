@@ -35,7 +35,7 @@ class ManagerManagerClass {
         //
         Loader.LoadVueTemplate(this.VuePath + "ProjectList", (tpl: string) => {
             var projList: ProjectSingle[];
-            if (ManagerData.MyAuth[Auth.PROJECT_LIST]) {
+            if (ManagerData.MyAuth[AUTH.PROJECT_LIST]) {
                 projList = ManagerData.ProjectList
             } else {
                 //只看自己所处的项目
@@ -45,7 +45,7 @@ class ManagerManagerClass {
                     if (proj.UserList.IndexOfAttr(FieldName.Uid, ManagerData.CurrUser.Uid) > -1) {
                         projList.push(proj)
                         if (proj.MasterUid == ManagerData.CurrUser.Uid) {
-                            ManagerData.AddMyAuth(Auth.PROJECT_EDIT)
+                            ManagerData.AddMyAuth(AUTH.PROJECT_EDIT)
                         }
                     }
                 }
@@ -71,11 +71,11 @@ class ManagerManagerClass {
                             }
                         },
                         OnEditMaster: (proj: ProjectSingle, user: UserSingle) => {
-                            if (proj.MasterUid == ManagerData.CurrUser.Uid && !ManagerData.MyAuth[Auth.PROJECT_LIST]) {
+                            if (proj.MasterUid == ManagerData.CurrUser.Uid && !ManagerData.MyAuth[AUTH.PROJECT_LIST]) {
                                 //是这个项目的负责人,并且不是超管
                                 Common.ConfirmWarning(`你是这个项目现在的负责人 <br/>如果修改负责人,你将失去这个项目的管理权限`, `要将'负责人'修改为'${user.Name}'吗?`, () => {
                                     proj.MasterUid = user.Uid
-                                    ManagerData.RemoveMyAuth(Auth.PROJECT_EDIT)
+                                    ManagerData.RemoveMyAuth(AUTH.PROJECT_EDIT)
                                 })
                             } else {
                                 proj.MasterUid = user.Uid
@@ -384,6 +384,7 @@ class ManagerManagerClass {
                         dp: dp,
                         newName: ``,
                         allDepartmentList: ManagerData.DepartmentList,
+                        auth: ManagerData.MyAuth,
                     },
                     methods: {
                         dpFullName: (dp: DepartmentSingle) => {
@@ -474,7 +475,8 @@ class ManagerManagerClass {
                 data: {
                     pos: pos,
                     authorityModuleList: ManagerData.AuthorityModuleList,
-                    checkedChange: false,//为了让check函数被触发
+                    checkedChange: false,//为了让check函数被触发,
+                    auth: ManagerData.MyAuth,
                 },
                 methods: {
                     checkModChecked: _checkModChecked.bind(this),
@@ -539,6 +541,7 @@ class ManagerManagerClass {
                         userList: proj.UserList,
                         allDepartmentList: ManagerData.DepartmentList,
                         newUserUid: 0,
+                        auth: ManagerData.MyAuth,
                     },
                     methods: {
                         ShowDpName: (did: number): string => {

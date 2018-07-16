@@ -38,8 +38,8 @@ class ManagerDataClass {
         switch (uid) {
             case 0:
                 uid = 999999//超级管理员id
-                this.AddMyAuth(Auth.PROJECT_LIST)
-                this.AddMyAuth(Auth.PROJECT_EDIT)
+                this.AddMyAuth(AUTH.PROJECT_LIST)
+                this.AddMyAuth(AUTH.PROJECT_EDIT)
                 break;
         }
         //
@@ -229,14 +229,14 @@ class ManagerDataClass {
             return ManagerData.DepartmentTree
         }
     }
-    AddMyAuth(auth: Auth) {
-        this.MyAuth[auth] = this.MyAuth[Auth[auth]] = true
+    AddMyAuth(auth: AUTH) {
+        this.MyAuth[auth] = this.MyAuth[AUTH[auth]] = true
         // Object.freeze(this.MyAuth)
         // Object.freeze(this.MyAuth[Auth.PROJECT_LIST])
         // Object.freeze(this.MyAuth[Auth[Auth.PROJECT_LIST])
     }
-    RemoveMyAuth(auth: Auth) {
-        this.MyAuth[auth] = this.MyAuth[Auth[auth]] = false
+    RemoveMyAuth(auth: AUTH) {
+        this.MyAuth[auth] = this.MyAuth[AUTH[auth]] = false
     }
 }
 var ManagerData = new ManagerDataClass()

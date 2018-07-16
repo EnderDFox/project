@@ -69,9 +69,11 @@ var FieldName = /** @class */ (function () {
     FieldName.Name = "Name";
     return FieldName;
 }());
-var Auth;
-(function (Auth) {
-    Auth[Auth["PROJECT_LIST"] = 1] = "PROJECT_LIST";
-    Auth[Auth["PROJECT_EDIT"] = 2] = "PROJECT_EDIT";
-})(Auth || (Auth = {}));
+var AUTH;
+(function (AUTH) {
+    AUTH[AUTH["PROJECT_LIST"] = 1] = "PROJECT_LIST";
+    AUTH[AUTH["PROJECT_EDIT"] = 2] = "PROJECT_EDIT";
+    AUTH[AUTH["POSITION_EDIT"] = 3] = "POSITION_EDIT";
+    AUTH[AUTH["DEPARTMENT_MANAGE"] = 101] = "DEPARTMENT_MANAGE";
+})(AUTH || (AUTH = {}));
 //# sourceMappingURL=Define.js.map

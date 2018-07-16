@@ -98,7 +98,7 @@ interface DepartmentSingle {
     //client
     Depth?: number
     Children?: DepartmentSingle[]
-    PositionList?:PositionSingle[]
+    PositionList?: PositionSingle[]
 }
 
 interface PositionSingle {
@@ -112,14 +112,14 @@ interface AuthorityModuleSingle {
     Name?: string
     AuthorityList?: AuthoritySingle[]
     //client
-    CheckedChange?:boolean
+    CheckedChange?: boolean
 }
 interface AuthoritySingle {
     Authid?: int
     Modid?: int
     Name?: string
     //client
-    CheckedChange?:boolean
+    CheckedChange?: boolean
 }
 
 interface DepartmentInfo {
@@ -132,11 +132,11 @@ interface ProjectSingle {
     Pid?: number
     Name?: string
     //负责人id
-    MasterUid?:number   
-    CreateTime:number
+    MasterUid?: number
+    CreateTime: number
     //client cache data
     ModeList?: ModeSingle[]
-    UserList?:UserSingle[]
+    UserList?: UserSingle[]
 }
 
 interface ModeSingle {
@@ -400,7 +400,9 @@ interface L2C_ProcessPublishDelete {
 }
 
 
-enum Auth {
+enum AUTH {
     PROJECT_LIST = 1,
     PROJECT_EDIT = 2,
+    POSITION_EDIT = 3,
+    DEPARTMENT_MANAGE = 101, //所在部门的管理权限
 }

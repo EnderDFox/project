@@ -33,7 +33,7 @@ var ManagerManagerClass = /** @class */ (function () {
         //
         Loader.LoadVueTemplate(this.VuePath + "ProjectList", function (tpl) {
             var projList;
-            if (ManagerData.MyAuth[Auth.PROJECT_LIST]) {
+            if (ManagerData.MyAuth[AUTH.PROJECT_LIST]) {
                 projList = ManagerData.ProjectList;
             }
             else {
@@ -44,7 +44,7 @@ var ManagerManagerClass = /** @class */ (function () {
                     if (proj.UserList.IndexOfAttr(FieldName.Uid, ManagerData.CurrUser.Uid) > -1) {
                         projList.push(proj);
                         if (proj.MasterUid == ManagerData.CurrUser.Uid) {
-                            ManagerData.AddMyAuth(Auth.PROJECT_EDIT);
+                            ManagerData.AddMyAuth(AUTH.PROJECT_EDIT);
                         }
                     }
                 }
@@ -70,11 +70,11 @@ var ManagerManagerClass = /** @class */ (function () {
                         }
                     },
                     OnEditMaster: function (proj, user) {
-                        if (proj.MasterUid == ManagerData.CurrUser.Uid && !ManagerData.MyAuth[Auth.PROJECT_LIST]) {
+                        if (proj.MasterUid == ManagerData.CurrUser.Uid && !ManagerData.MyAuth[AUTH.PROJECT_LIST]) {
                             //是这个项目的负责人,并且不是超管
                             Common.ConfirmWarning("\u4F60\u662F\u8FD9\u4E2A\u9879\u76EE\u73B0\u5728\u7684\u8D1F\u8D23\u4EBA <br/>\u5982\u679C\u4FEE\u6539\u8D1F\u8D23\u4EBA,\u4F60\u5C06\u5931\u53BB\u8FD9\u4E2A\u9879\u76EE\u7684\u7BA1\u7406\u6743\u9650", "\u8981\u5C06'\u8D1F\u8D23\u4EBA'\u4FEE\u6539\u4E3A'" + user.Name + "'\u5417?", function () {
                                 proj.MasterUid = user.Uid;
-                                ManagerData.RemoveMyAuth(Auth.PROJECT_EDIT);
+                                ManagerData.RemoveMyAuth(AUTH.PROJECT_EDIT);
                             });
                         }
                         else {
@@ -379,6 +379,7 @@ var ManagerManagerClass = /** @class */ (function () {
                     dp: dp,
                     newName: "",
                     allDepartmentList: ManagerData.DepartmentList,
+                    auth: ManagerData.MyAuth,
                 },
                 methods: {
                     dpFullName: function (dp) {
@@ -468,6 +469,7 @@ var ManagerManagerClass = /** @class */ (function () {
                     pos: pos,
                     authorityModuleList: ManagerData.AuthorityModuleList,
                     checkedChange: false,
+                    auth: ManagerData.MyAuth,
                 },
                 methods: {
                     checkModChecked: _checkModChecked.bind(_this),
@@ -534,6 +536,7 @@ var ManagerManagerClass = /** @class */ (function () {
                     userList: proj.UserList,
                     allDepartmentList: ManagerData.DepartmentList,
                     newUserUid: 0,
+                    auth: ManagerData.MyAuth,
                 },
                 methods: {
                     ShowDpName: function (did) {
