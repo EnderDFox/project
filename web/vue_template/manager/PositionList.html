@@ -44,7 +44,7 @@
                         :value="pos.Name" @blur="onEditName($event,pos,index)" @keyup.enter="onEditName($event,pos,index)">
                 </td>
                 <td>
-                    <button class="btn btn-default " type="submit " @click="onEditAuth(pos,index)
+                    <button class="btn btn-default " type="button" @click="onEditAuth(pos,index)
                             " title="编辑权限 ">
                         <span class="glyphicon glyphicon-briefcase" aria-hidden="true " :title="'该职位已有`+pos.AuthorityList.length+`个权限'">
                             (x{{pos.AuthorityList.length}})
@@ -52,15 +52,15 @@
                     </button>
                 </td>
                 <td>
-                    <button class="btn btn-default " type="submit" @click="onSortDown(pos,index)" :disabled="!(index < dp.PositionList.length - 1)">
+                    <button class="btn btn-default " type="button" @click="onSortDown(pos,index)" :disabled="!(index < dp.PositionList.length - 1)">
                         <span class="glyphicon glyphicon-arrow-down " aria-hidden="true "></span>
                     </button>
-                    <button class="btn btn-default " type="submit" @click="onSortUp(pos,index)" :disabled="!(index > 0)">
+                    <button class="btn btn-default " type="button" @click="onSortUp(pos,index)" :disabled="!(index > 0)">
                         <span class="glyphicon glyphicon-arrow-up " aria-hidden="true "></span>
                     </button>
                 </td>
                 <td>
-                    <button class="btn btn-warning " type="submit" @click="onDel($event,pos,index)">
+                    <button class="btn btn-warning " type="button" @click="onDel($event,pos,index)">
                         <span class="glyphicon glyphicon-remove " aria-hidden="true "></span>
                     </button>
                 </td>
@@ -71,7 +71,7 @@
                     />
                 </td>
                 <td>
-                    <button class="btn btn-default " type="submit" @click="onAdd() ">
+                    <button class="btn btn-default " type="button" @click="onAdd() ">
                         <span class="glyphicon glyphicon-plus " aria-hidden="true "></span>
                     </button>
                 </td>

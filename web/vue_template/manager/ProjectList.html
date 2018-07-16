@@ -17,7 +17,7 @@
         </thead>
         <transition-group name="list-complete" tag="tbody">
             <tr class="list-complete-item" v-for="proj,index in projectList" :key="proj.Pid">
-                <td class="td_id">
+                <td class="td-id">
                     {{proj.Pid}}
                 </td>
                 <td>
@@ -37,8 +37,8 @@
                             </li>
                         </ul>
                     </div>
-                    <span class="text-danger" title="该项目内还没有成员,需要先用 成员管理 增加成员" v-else>请先用
-                        <button class="btn btn-default btn-xs" type="submit" title="成员管理" @click="onShowUserList(proj,index)">
+                    <span class="text-danger" title="该项目内还没有成员,需要先用 '成员管理' 增加成员" v-else>请先用
+                        <button class="btn btn-default btn-xs" type="button" title="成员管理" @click="onShowUserList(proj,index)">
                             <span class="glyphicon glyphicon-user" aria-hidden="true"></span>
                         </button>增加成员</span>
                 </td>
@@ -46,15 +46,15 @@
                     {{GetProjUserCount(proj)}}
                 </td>
                 <td>
-                    <button class="btn btn-default" type="submit" title="部门管理" @click="onShowDepartmentList(proj,index)">
+                    <button class="btn btn-default" type="button" title="部门管理" @click="onShowDepartmentList(proj,index)">
                         <span class="glyphicon glyphicon-th-list" aria-hidden="true"></span>
                     </button>
-                    <button class="btn btn-default" type="submit" title="成员管理" @click="onShowUserList(proj,index)">
+                    <button class="btn btn-default" type="button" title="成员管理" @click="onShowUserList(proj,index)">
                         <span class="glyphicon glyphicon-user" aria-hidden="true"></span>
                     </button>
                 </td>
                 <td>
-                    <button class="btn btn-warning" type="submit" title="删除项目" @click="onDel($event,proj,index)" :disabled="!(auth['PROJECT_EDIT'])">
+                    <button class="btn btn-warning" type="button" title="删除项目" @click="onDel($event,proj,index)" :disabled="!(auth['PROJECT_EDIT'])">
                         <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
                     </button>
                 </td>
@@ -70,7 +70,7 @@
                     />
                 </td>
                 <td>
-                    <button class="btn btn-default" type="submit" title="增加新项目" @click="onAdd()">
+                    <button class="btn btn-default" type="button" title="增加新项目" @click="onAdd()">
                         <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
                     </button>
                 </td>

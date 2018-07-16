@@ -38,7 +38,7 @@ a {
     opacity: .28;
 }
 
-.td_id {
+.td-id {
     text-align: center;
     /* 没有important优先级不够 真奇怪  */
     vertical-align: middle !important;

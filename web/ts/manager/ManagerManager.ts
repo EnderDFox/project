@@ -404,7 +404,7 @@ class ManagerManagerClass {
                         },
                         /**回到部门列表 */
                         onBackDepartmentList: () => {
-                            console.log("[debug]","onBackDepartmentList")
+                            console.log("[debug]", "onBackDepartmentList")
                             this.ShowDepartmentList(ManagerData.GetProjByPid(dp.Pid))
                         },
                         departmentOption: this.DepartmentOption.bind(this),
@@ -436,9 +436,13 @@ class ManagerManagerClass {
                             }
                         },
                         onDel: (e, pos: PositionSingle, index: int) => {
-                            Common.ConfirmDelete(() => {
-                                dp.PositionList.splice(index, 1)
-                            }, `即将删除职位 "${pos.Name || '空'}"`)
+                            if (dp.PositionList.length == 1) {
+                                Common.AlertWarning(`每个部门下至少要保留一个职位`)
+                            } else {
+                                Common.ConfirmDelete(() => {
+                                    dp.PositionList.splice(index, 1)
+                                }, `即将删除职位 "${pos.Name || '空'}"`)
+                            }
                         },
                         onAdd: () => {
                             var pos: PositionSingle = { Posid: this.NewPositionUuid++, Did: dp.Did, Name: this.VuePositionList.newName.toString(), AuthorityList: [] }
@@ -589,12 +593,24 @@ class ManagerManagerClass {
                                 user.Posid = 0
                             }
                         },
-                        onClose: function () {
-                            $(this.$el).hide()
+                        onPosChange: (user: UserSingle, pos: PositionSingle) => {
+                            user.Posid = pos.Posid
                         },
-                        onDel: (e, user: UserSingle, index: int) => {
-                            proj.UserList.splice(index, 1)
-                            this.VueUserList.otherUserList = ArrayUtil.SubByAttr(ManagerData.UserList, proj.UserList, FieldName.Uid)
+                        onSortDown: (user: UserSingle, index: int) => {
+                            if (index < proj.UserList.length - 1) {
+                                proj.UserList.splice(index + 1, 0, proj.UserList.splice(index, 1)[0])
+                            }
+                        },
+                        onSortUp: (user: UserSingle, index: int) => {
+                            if (index > 0) {
+                                proj.UserList.splice(index - 1, 0, proj.UserList.splice(index, 1)[0])
+                            }
+                        },
+                        onDel: (user: UserSingle, index: int) => {
+                            Common.ConfirmDelete(() => {
+                                proj.UserList.splice(index, 1)
+                                this.VueUserList.otherUserList = ArrayUtil.SubByAttr(ManagerData.UserList, proj.UserList, FieldName.Uid)
+                            }, `即将删除成员 "${user.Name}"`)
                         },
                         onAdd: () => {
                             var newUser: UserSingle = ArrayUtil.FindOfAttr<PositionSingle>(this.VueUserList.otherUserList, FieldName.Uid, this.VueUserList.newUserUid)

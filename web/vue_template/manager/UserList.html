@@ -7,15 +7,16 @@
                     <th style="width: 150px;">成员</th>
                     <th otherUser style="width: 130px;">部门</th>
                     <th otherUser style="width: 130px;">职位</th>
-                    <th>操作</th>
+                    <th style="width: 120px;">排序</th>
+                    <th>删除</th>
                 </tr>
             </thead>
             <transition-group name="list-complete" tag="tbody">
                 <tr class="list-complete-item" v-for="user,index in userList" :key="user.Uid">
-                    <td class="td_id">
+                    <td class="td-id">
                         {{user.Uid}}
                     </td>
-                    <td class="text_middle">
+                    <td class="text-middle">
                         {{user.Name}}
                     </td>
                     <td>
@@ -44,14 +45,22 @@
                             </button>
                             <ul class="dropdown-menu" :aria-labelledby="'ddmUserListDid'+index">
                                 <li v-for="pos in GetPosList(user.Did)" :key="pos.Posid">
-                                    <a @click="user.Posid=pos.Posid">{{pos.Name}}</a>
+                                    <a @click="onPosChange(user,pos)">{{pos.Name}}</a>
                                 </li>
                             </ul>
                         </div>
                     </td>
                     <td>
-                        <button class="btn btn-default" type="submit">
-                            <span class="glyphicon glyphicon-remove" aria-hidden="true" @click="onDel($event,user,index)"></span>
+                        <button class="btn btn-default " type="button" @click="onSortDown(user,index)" :disabled="!(index < userList.length - 1)">
+                            <span class="glyphicon glyphicon-arrow-down " aria-hidden="true "></span>
+                        </button>
+                        <button class="btn btn-default " type="button" @click="onSortUp(user,index)" :disabled="!(index > 0)">
+                            <span class="glyphicon glyphicon-arrow-up " aria-hidden="true "></span>
+                        </button>
+                    </td>
+                    <td>
+                        <button class="btn btn-warning" type="button" @click="onDel(user,index)">
+                            <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
                         </button>
                     </td>
                 </tr>
@@ -73,13 +82,13 @@
                         </div>
                     </td>
                     <td>
-                    </td>
-                    <td>
-                    </td>
-                    <td>
-                        <button class="btn btn-default" type="submit" @click="onAdd()">
+                        <button class="btn btn-default" type="button" @click="onAdd()">
                             <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
                         </button>
+                    </td>
+                    <td>
+                    </td>
+                    <td>
                     </td>
                 </tr>
             </transition-group>

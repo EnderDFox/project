@@ -19,7 +19,7 @@
                             :disabled="!auth['PROJECT_EDIT']" :value="dp.Name" @blur="onEditName($event,dp,index)" @keyup.enter="onEditName($event,dp,index)">
                     </td>
                     <td class="text-center">
-                        <button class="btn btn-default" type="submit " title="在该部门下增加子部门 " :disabled="!auth['PROJECT_EDIT']" @click="onAddChild(dp,index)">
+                        <button class="btn btn-default" type="button" title="在该部门下增加子部门 " :disabled="!auth['PROJECT_EDIT']" @click="onAddChild(dp,index)">
                             <span class="glyphicon glyphicon-plus-sign " aria-hidden="true "></span>
                         </button>
                     </td>
@@ -43,22 +43,22 @@
                         </div>
                     </td>
                     <td>
-                        <button class="btn btn-default " type="submit " @click="onEditPosition(dp,index)" :title="'该部门下已有'+dp.PositionList.length+'个职位'">
+                        <button class="btn btn-default " type="button" @click="onEditPosition(dp,index)" :title="'该部门下已有'+dp.PositionList.length+'个职位'">
                             <span class="glyphicon glyphicon-pawn" aria-hidden="true ">
                                 (x{{dp.PositionList.length}})
                             </span>
                         </button>
                     </td>
                     <td>
-                        <button class="btn btn-default " type="submit" @click="onSortDown($event,dp,index)" :disabled="!(auth['PROJECT_EDIT'] && CheckSortDown(dp,index))">
+                        <button class="btn btn-default " type="button" @click="onSortDown($event,dp,index)" :disabled="!(auth['PROJECT_EDIT'] && CheckSortDown(dp,index))">
                             <span class="glyphicon glyphicon-arrow-down " aria-hidden="true "></span>
                         </button>
-                        <button class="btn btn-default " type="submit " @click="onSortUp($event,dp,index) " :disabled="!(auth['PROJECT_EDIT'] && CheckSortUp(dp,index))">
+                        <button class="btn btn-default " type="button" @click="onSortUp($event,dp,index) " :disabled="!(auth['PROJECT_EDIT'] && CheckSortUp(dp,index))">
                             <span class="glyphicon glyphicon-arrow-up " aria-hidden="true "></span>
                         </button>
                     </td>
                     <td>
-                        <button class="btn btn-warning " title="删除部门" type="submit " :disabled="!auth['PROJECT_EDIT']" @click="onDel(dp,index)">
+                        <button class="btn btn-warning " title="删除部门" type="button" :disabled="!auth['PROJECT_EDIT']" @click="onDel(dp,index)">
                             <span class="glyphicon glyphicon-remove " aria-hidden="true "></span>
                         </button>
                     </td>
@@ -69,7 +69,7 @@
                             @keyup.enter="onAdd()" />
                     </td>
                     <td class="text-center">
-                        <button class="btn btn-default " type="submit " @click="onAdd() " title="增加新部门">
+                        <button class="btn btn-default " type="button" @click="onAdd() " title="增加新部门">
                             <span class="glyphicon glyphicon-plus " aria-hidden="true "></span>
                         </button>
                     </td>

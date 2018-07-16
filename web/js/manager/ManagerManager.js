@@ -429,9 +429,14 @@ var ManagerManagerClass = /** @class */ (function () {
                         }
                     },
                     onDel: function (e, pos, index) {
-                        Common.ConfirmDelete(function () {
-                            dp.PositionList.splice(index, 1);
-                        }, "\u5373\u5C06\u5220\u9664\u804C\u4F4D \"" + (pos.Name || '空') + "\"");
+                        if (dp.PositionList.length == 1) {
+                            Common.AlertWarning("\u6BCF\u4E2A\u90E8\u95E8\u4E0B\u81F3\u5C11\u8981\u4FDD\u7559\u4E00\u4E2A\u804C\u4F4D");
+                        }
+                        else {
+                            Common.ConfirmDelete(function () {
+                                dp.PositionList.splice(index, 1);
+                            }, "\u5373\u5C06\u5220\u9664\u804C\u4F4D \"" + (pos.Name || '空') + "\"");
+                        }
                     },
                     onAdd: function () {
                         var pos = { Posid: _this.NewPositionUuid++, Did: dp.Did, Name: _this.VuePositionList.newName.toString(), AuthorityList: [] };
@@ -588,12 +593,24 @@ var ManagerManagerClass = /** @class */ (function () {
                             user.Posid = 0;
                         }
                     },
-                    onClose: function () {
-                        $(this.$el).hide();
+                    onPosChange: function (user, pos) {
+                        user.Posid = pos.Posid;
                     },
-                    onDel: function (e, user, index) {
-                        proj.UserList.splice(index, 1);
-                        _this.VueUserList.otherUserList = ArrayUtil.SubByAttr(ManagerData.UserList, proj.UserList, FieldName.Uid);
+                    onSortDown: function (user, index) {
+                        if (index < proj.UserList.length - 1) {
+                            proj.UserList.splice(index + 1, 0, proj.UserList.splice(index, 1)[0]);
+                        }
+                    },
+                    onSortUp: function (user, index) {
+                        if (index > 0) {
+                            proj.UserList.splice(index - 1, 0, proj.UserList.splice(index, 1)[0]);
+                        }
+                    },
+                    onDel: function (user, index) {
+                        Common.ConfirmDelete(function () {
+                            proj.UserList.splice(index, 1);
+                            _this.VueUserList.otherUserList = ArrayUtil.SubByAttr(ManagerData.UserList, proj.UserList, FieldName.Uid);
+                        }, "\u5373\u5C06\u5220\u9664\u6210\u5458 \"" + user.Name + "\"");
                     },
                     onAdd: function () {
                         var newUser = ArrayUtil.FindOfAttr(_this.VueUserList.otherUserList, FieldName.Uid, _this.VueUserList.newUserUid);
