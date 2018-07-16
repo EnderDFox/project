@@ -33,6 +33,7 @@
             <tr>
                 <th style="width: 300px;">职位名称</th>
                 <th style="width: 160px;">权限</th>
+                <th class="text-center" style="width: 100px;">成员数量</th>
                 <th style="width: 120px;">排序</th>
                 <th>删除</th>
             </tr>
@@ -46,10 +47,15 @@
                 <td>
                     <button class="btn btn-default " type="button" @click="onEditAuth(pos,index)
                             " title="编辑权限 ">
-                        <span class="glyphicon glyphicon-briefcase" aria-hidden="true " :title="'该职位已有`+pos.AuthorityList.length+`个权限'">
-                            (x{{pos.AuthorityList.length}})
+                        <span class="glyphicon glyphicon-briefcase" aria-hidden="true " :title="'该职位有`+pos.AuthorityList.length+`个权限'">
+                            ({{pos.AuthorityList.length}})
                         </span>
                     </button>
+                </td>
+                <td class="text-center text-middle" :title="'该职位下有'+pos.UserList.length+'名成员'">
+                    <span>
+                        {{pos.UserList.length}}
+                    </span>
                 </td>
                 <td>
                     <button class="btn btn-default " type="button" @click="onSortDown(pos,index)" :disabled="!(index < dp.PositionList.length - 1)">
@@ -74,6 +80,8 @@
                     <button class="btn btn-default " type="button" @click="onAdd() ">
                         <span class="glyphicon glyphicon-plus " aria-hidden="true "></span>
                     </button>
+                </td>
+                <td>
                 </td>
                 <td>
                 </td>

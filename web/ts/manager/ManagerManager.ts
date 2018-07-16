@@ -222,6 +222,9 @@ class ManagerManagerClass {
                         onEditPosition: (dp: DepartmentSingle, i0: int) => {
                             this.ShowPositionList(dp)
                         },
+                        GetDeptAllPosnList:ManagerData.GetDeptAllPosnList.bind(ManagerData),
+                        GetDeptUserList:ManagerData.GetDeptUserList.bind(ManagerData),
+                        GetDeptAllUserList:ManagerData.GetDeptAllUserList.bind(ManagerData),
                         CheckShowEditParentDp: this.CheckShowEditParentDp.bind(this),
                         onEditParentDp: (dp: DepartmentSingle, parentDp: DepartmentSingle) => {
                             if (parentDp == null) {
@@ -445,7 +448,7 @@ class ManagerManagerClass {
                             }
                         },
                         onAdd: () => {
-                            var pos: PositionSingle = { Posid: this.NewPositionUuid++, Did: dp.Did, Name: this.VuePositionList.newName.toString(), AuthorityList: [] }
+                            var pos: PositionSingle = { Posid: this.NewPositionUuid++, Did: dp.Did, Name: this.VuePositionList.newName.toString(), AuthorityList: [], UserList: [] }
                             this.VuePositionList.newName = ''
                             dp.PositionList.push(pos)
                         },
@@ -556,8 +559,7 @@ class ManagerManagerClass {
                             var dp = ManagerData.DepartmentDict[did]
                             if (dp) {
                                 if (posid > 0) {
-                                    var pos: PositionSingle = ArrayUtil.FindOfAttr(dp.PositionList, FieldName.Posid, posid) as PositionSingle
-                                    // console.log("[debug]", posid, ":[posid]", pos, ":[pos]")
+                                    var pos: PositionSingle = dp.PositionList.FindOfAttr(FieldName.Posid, posid)
                                     return pos ? pos.Name : '--'
                                 } else {
                                     return '空'
@@ -585,16 +587,13 @@ class ManagerManagerClass {
                             }
                         },
                         departmentOption: this.DepartmentOption.bind(this),
-                        onDpChange: (user: UserSingle, dp: DepartmentSingle) => {
-                            user.Did = dp.Did
-                            if (dp.PositionList.length > 0) {
-                                user.Posid = dp.PositionList[0].Posid
-                            } else {
-                                user.Posid = 0
-                            }
+                        onDpChange: (user: UserSingle, dept: DepartmentSingle) => {
+                            ManagerData.RemoveUserPosnid(user)
+                            ManagerData.SetUserPosnid(user, dept.Did)
                         },
                         onPosChange: (user: UserSingle, pos: PositionSingle) => {
-                            user.Posid = pos.Posid
+                            ManagerData.RemoveUserPosnid(user)
+                            ManagerData.SetUserPosnid(user, user.Did, pos.Posid)
                         },
                         onSortDown: (user: UserSingle, index: int) => {
                             if (index < proj.UserList.length - 1) {

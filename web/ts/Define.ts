@@ -106,6 +106,8 @@ interface PositionSingle {
     Did?: DidField
     Name?: string
     AuthorityList?: AuthoritySingle[]
+    //client
+    UserList?:UserSingle[]
 }
 interface AuthorityModuleSingle {
     Modid?: int

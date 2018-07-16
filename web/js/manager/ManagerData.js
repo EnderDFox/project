@@ -95,45 +95,45 @@ var ManagerDataClass = /** @class */ (function () {
         this.DepartmentTree = [
             /* {
                 Did: -1, Name: '项目管理', Depth: 0, Children: [], PositionList: [
-                    { Posid: 0, Did: -1, Name: '制作人' },
-                    { Posid: 1, Did: -1, Name: '产品经理' },
+                    { Posid: 0, Did: -1, Name: '制作人' ,UserList:[] },
+                    { Posid: 1, Did: -1, Name: '产品经理' ,UserList:[] },
                 ]
             }, */
             {
                 Did: 1, Name: '策划', Depth: 0, Children: [], PositionList: [
-                    { Posid: 100, Did: 2, Name: '策划' },
-                    { Posid: 101, Did: 2, Name: '策划主管' },
+                    { Posid: 100, Did: 2, Name: '策划', UserList: [] },
+                    { Posid: 101, Did: 2, Name: '策划主管', UserList: [] },
                 ]
             },
             {
                 Did: 2, Name: '美术', Depth: 0, PositionList: [
-                    { Posid: 201, Did: 2, Name: '美术主管' },
+                    { Posid: 201, Did: 2, Name: '美术主管', UserList: [] },
                 ], Children: [
-                    { Did: 21, Name: 'UI', Depth: 1, Children: [], PositionList: [{ Posid: 2102, Did: 2, Name: 'UI' },] },
+                    { Did: 21, Name: 'UI', Depth: 1, Children: [], PositionList: [{ Posid: 2102, Did: 2, Name: 'UI', UserList: [] },] },
                     {
                         Did: 22, Name: '3D', Depth: 1, Children: [], PositionList: [
-                            { Posid: 2200, Did: 2, Name: '3D' },
-                            { Posid: 2201, Did: 2, Name: '3D主管' },
+                            { Posid: 2200, Did: 2, Name: '3D', UserList: [] },
+                            { Posid: 2201, Did: 2, Name: '3D主管', UserList: [] },
                         ]
                     },
                     {
-                        Did: 23, Name: '原画', Depth: 1, PositionList: [{ Posid: 301, Did: 2, Name: '原画主管' }], Children: [
-                            { Did: 231, Name: '角色原画', Depth: 2, Children: [], PositionList: [{ Posid: 23100, Did: 2, Name: '角色原画' },] },
-                            { Did: 232, Name: '场景原画', Depth: 2, Children: [], PositionList: [{ Posid: 23200, Did: 2, Name: '场景原画' },] },
+                        Did: 23, Name: '原画', Depth: 1, PositionList: [{ Posid: 301, Did: 2, Name: '原画主管', UserList: [] }], Children: [
+                            { Did: 231, Name: '角色原画', Depth: 2, Children: [], PositionList: [{ Posid: 23100, Did: 2, Name: '角色原画', UserList: [] },] },
+                            { Did: 232, Name: '场景原画', Depth: 2, Children: [], PositionList: [{ Posid: 23200, Did: 2, Name: '场景原画', UserList: [] },] },
                         ],
                     },
                 ],
             },
             {
                 Did: 3, Name: '后端', Depth: 0, Children: [], PositionList: [
-                    { Posid: 300, Did: 2, Name: '后端' },
-                    { Posid: 301, Did: 2, Name: '后端主管' },
+                    { Posid: 300, Did: 2, Name: '后端', UserList: [] },
+                    { Posid: 301, Did: 2, Name: '后端主管', UserList: [] },
                 ]
             },
             {
                 Did: 4, Name: '前端', Depth: 0, Children: [], PositionList: [
-                    { Posid: 400, Did: 2, Name: '前端' },
-                    { Posid: 401, Did: 2, Name: '前端主管' },
+                    { Posid: 400, Did: 2, Name: '前端', UserList: [] },
+                    { Posid: 401, Did: 2, Name: '前端主管', UserList: [] },
                 ]
             },
         ];
@@ -188,6 +188,41 @@ var ManagerDataClass = /** @class */ (function () {
         }
         return rs;
     };
+    /**一个部门及其子部门下所有的职位 */
+    ManagerDataClass.prototype.GetDeptAllPosnList = function (dept, rs) {
+        if (rs === void 0) { rs = null; }
+        rs = rs || [];
+        rs.push.apply(rs, dept.PositionList);
+        for (var i = 0; i < dept.Children.length; i++) {
+            var child = dept.Children[i];
+            this.GetDeptAllPosnList(child, rs);
+        }
+        return rs;
+    };
+    /**一个部门下的成员,不包括子部门 */
+    ManagerDataClass.prototype.GetDeptUserList = function (dept, rs) {
+        if (rs === void 0) { rs = null; }
+        rs = rs || [];
+        for (var i = 0; i < dept.PositionList.length; i++) {
+            var posn = dept.PositionList[i];
+            rs.push.apply(rs, posn.UserList);
+        }
+        return rs;
+    };
+    /**一个部门及其子部门下所有的user */
+    ManagerDataClass.prototype.GetDeptAllUserList = function (dept, rs) {
+        if (rs === void 0) { rs = null; }
+        rs = rs || [];
+        for (var i = 0; i < dept.PositionList.length; i++) {
+            var posn = dept.PositionList[i];
+            rs.push.apply(rs, posn.UserList);
+        }
+        for (var i = 0; i < dept.Children.length; i++) {
+            var child = dept.Children[i];
+            this.GetDeptAllUserList(child, rs);
+        }
+        return rs;
+    };
     ManagerDataClass.prototype.GetProjByPid = function (pid) {
         return this.ProjectList.FindOfAttr(FieldName.PID, pid);
     };
@@ -230,6 +265,29 @@ var ManagerDataClass = /** @class */ (function () {
     };
     ManagerDataClass.prototype.RemoveMyAuth = function (auth) {
         this.MyAuth[auth] = this.MyAuth[AUTH[auth]] = false;
+    };
+    ManagerDataClass.prototype.RemoveUserPosnid = function (user) {
+        if (user.Did) {
+            var oldDept = ManagerData.DepartmentDict[user.Did];
+            var oldPosn = oldDept.PositionList.FindOfAttr(FieldName.Posid, user.Posid);
+            if (oldPosn) {
+                oldPosn.UserList.RemoveByAttr(FieldName.Uid, user.Uid);
+            }
+        }
+    };
+    ManagerDataClass.prototype.SetUserPosnid = function (user, did, posnid) {
+        if (posnid === void 0) { posnid = -1; }
+        var dept = ManagerData.DepartmentDict[did];
+        user.Did = dept.Did;
+        var posn;
+        if (posnid == -1) {
+            posn = dept.PositionList[0];
+        }
+        else {
+            posn = dept.PositionList.FindOfAttr(FieldName.Posid, posnid);
+        }
+        user.Posid = posn.Posid;
+        posn.UserList.push(user);
     };
     return ManagerDataClass;
 }());

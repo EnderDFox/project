@@ -218,6 +218,9 @@ var ManagerManagerClass = /** @class */ (function () {
                     onEditPosition: function (dp, i0) {
                         _this.ShowPositionList(dp);
                     },
+                    GetDeptAllPosnList: ManagerData.GetDeptAllPosnList.bind(ManagerData),
+                    GetDeptUserList: ManagerData.GetDeptUserList.bind(ManagerData),
+                    GetDeptAllUserList: ManagerData.GetDeptAllUserList.bind(ManagerData),
                     CheckShowEditParentDp: _this.CheckShowEditParentDp.bind(_this),
                     onEditParentDp: function (dp, parentDp) {
                         if (parentDp == null) {
@@ -439,7 +442,7 @@ var ManagerManagerClass = /** @class */ (function () {
                         }
                     },
                     onAdd: function () {
-                        var pos = { Posid: _this.NewPositionUuid++, Did: dp.Did, Name: _this.VuePositionList.newName.toString(), AuthorityList: [] };
+                        var pos = { Posid: _this.NewPositionUuid++, Did: dp.Did, Name: _this.VuePositionList.newName.toString(), AuthorityList: [], UserList: [] };
                         _this.VuePositionList.newName = '';
                         dp.PositionList.push(pos);
                     },
@@ -552,8 +555,7 @@ var ManagerManagerClass = /** @class */ (function () {
                         var dp = ManagerData.DepartmentDict[did];
                         if (dp) {
                             if (posid > 0) {
-                                var pos = ArrayUtil.FindOfAttr(dp.PositionList, FieldName.Posid, posid);
-                                // console.log("[debug]", posid, ":[posid]", pos, ":[pos]")
+                                var pos = dp.PositionList.FindOfAttr(FieldName.Posid, posid);
                                 return pos ? pos.Name : '--';
                             }
                             else {
@@ -584,17 +586,13 @@ var ManagerManagerClass = /** @class */ (function () {
                         }
                     },
                     departmentOption: _this.DepartmentOption.bind(_this),
-                    onDpChange: function (user, dp) {
-                        user.Did = dp.Did;
-                        if (dp.PositionList.length > 0) {
-                            user.Posid = dp.PositionList[0].Posid;
-                        }
-                        else {
-                            user.Posid = 0;
-                        }
+                    onDpChange: function (user, dept) {
+                        ManagerData.RemoveUserPosnid(user);
+                        ManagerData.SetUserPosnid(user, dept.Did);
                     },
                     onPosChange: function (user, pos) {
-                        user.Posid = pos.Posid;
+                        ManagerData.RemoveUserPosnid(user);
+                        ManagerData.SetUserPosnid(user, user.Did, pos.Posid);
                     },
                     onSortDown: function (user, index) {
                         if (index < proj.UserList.length - 1) {

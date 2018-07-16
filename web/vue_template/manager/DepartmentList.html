@@ -6,7 +6,8 @@
                     <th style="width: 300px;">部门名称</th>
                     <th class="text-center" style="width: 100px;">增加子部门</th>
                     <th style="width: 160px;padding-left: 50px;" title="将部门迁移到其它部门下">迁移</th>
-                    <th style="width: 160px;">职位</th>
+                    <th style="width: 120px;">职位</th>
+                    <th class="text-center" style="width: 100px;">成员数量</th>
                     <th style="width: 120px;">排序</th>
                     <th>删除</th>
                 </tr>
@@ -43,11 +44,16 @@
                         </div>
                     </td>
                     <td>
-                        <button class="btn btn-default " type="button" @click="onEditPosition(dp,index)" :title="'该部门下已有'+dp.PositionList.length+'个职位'">
+                        <button class="btn btn-default " type="button" @click="onEditPosition(dp,index)" :title="'该部门下有'+dp.PositionList.length+'个职位'+(dp.Children.length>0?' \n该部门及其子部门共有'+GetDeptAllPosnList(dp).length+'个职位':'')">
                             <span class="glyphicon glyphicon-pawn" aria-hidden="true ">
-                                (x{{dp.PositionList.length}})
+                                ({{dp.PositionList.length}}{{dp.Children.length>0?'/'+GetDeptAllPosnList(dp).length:''}})
                             </span>
                         </button>
+                    </td>
+                    <td class="text-center text-middle" :title="'该部门下有'+GetDeptUserList(dp).length+'名成员'+(dp.Children.length>0?' \n该部门及其子部门共有'+GetDeptAllUserList(dp).length+'名成员':'')">
+                        <span>
+                            {{GetDeptUserList(dp).length}}{{dp.Children.length>0?'/'+GetDeptAllUserList(dp).length:''}}
+                        </span>
                     </td>
                     <td>
                         <button class="btn btn-default " type="button" @click="onSortDown($event,dp,index)" :disabled="!(auth['PROJECT_EDIT'] && CheckSortDown(dp,index))">
@@ -73,7 +79,7 @@
                             <span class="glyphicon glyphicon-plus " aria-hidden="true "></span>
                         </button>
                     </td>
-                    <td colspan="3">
+                    <td colspan="4">
                     </td>
                 </tr>
             </transition-group>

@@ -39,7 +39,7 @@
                     <td>
                         <div class="dropdown">
                             <button class="btn btn-default dropdown-toggle" type="button" :id="'ddmUserListPos'+index" data-toggle="dropdown" aria-haspopup="true"
-                                aria-expanded="true">
+                                aria-expanded="true" :disabled="!user.Did" :title="!user.Did?'请先选择部门':''">
                                 {{ShowPosName(user.Did,user.Posid)}}
                                 <span class="caret"></span>
                             </button>
