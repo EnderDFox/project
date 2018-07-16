@@ -427,7 +427,7 @@ var ManagerManagerClass = /** @class */ (function () {
                         _this.ShowAuthList(pos);
                     },
                     onEditUserList: function (posn) {
-                        _this.ShowUserList(ManagerData.GetProjByPid(dept.Pid), posn.Name);
+                        _this.ShowUserList(ManagerData.GetProjByPid(dept.Pid), posn.Name, dept, posn);
                     },
                     CheckSortDown: function (pos, index) {
                         return index < dept.PositionList.length - 1;
@@ -447,7 +447,7 @@ var ManagerManagerClass = /** @class */ (function () {
                     },
                     onDel: function (e, pos, index) {
                         if (dept.PositionList.length == 1) {
-                            Common.AlertWarning("\u6BCF\u4E2A\u90E8\u95E8\u4E0B\u81F3\u5C11\u8981\u4FDD\u7559\u4E00\u4E2A\u804C\u4F4D");
+                            Common.AlertError("\u6BCF\u4E2A\u90E8\u95E8\u4E0B\u81F3\u5C11\u8981\u4FDD\u7559\u4E00\u4E2A\u804C\u4F4D");
                         }
                         else {
                             Common.ConfirmDelete(function () {
@@ -547,8 +547,10 @@ var ManagerManagerClass = /** @class */ (function () {
             Common.Popup($(vue.$el));
         });
     };
-    ManagerManagerClass.prototype.ShowUserList = function (proj, filterText) {
+    ManagerManagerClass.prototype.ShowUserList = function (proj, filterText, backDept, backPosn) {
         var _this = this;
+        if (backDept === void 0) { backDept = null; }
+        if (backPosn === void 0) { backPosn = null; }
         this.VueProjectEdit.currPage = ProjectEditPage.User;
         Loader.LoadVueTemplate(this.VuePath + "UserList", function (tpl) {
             var vue = new Vue({
@@ -560,6 +562,7 @@ var ManagerManagerClass = /** @class */ (function () {
                     newUserUid: 0,
                     auth: ManagerData.MyAuth,
                     filterText: filterText,
+                    backPosn: backPosn,
                 },
                 methods: {
                     filterUserList: function (userList, filterText) {
@@ -601,6 +604,9 @@ var ManagerManagerClass = /** @class */ (function () {
                             });
                         }
                         return rs;
+                    },
+                    OnBackPosn: function () {
+                        _this.ShowPositionList(backDept);
                     },
                     ShowDpName: function (did) {
                         var dp = ManagerData.DepartmentDict[did];

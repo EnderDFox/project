@@ -433,7 +433,7 @@ class ManagerManagerClass {
                             this.ShowAuthList(pos)
                         },
                         onEditUserList: (posn: PositionSingle) => {
-                            this.ShowUserList(ManagerData.GetProjByPid(dept.Pid), posn.Name)
+                            this.ShowUserList(ManagerData.GetProjByPid(dept.Pid), posn.Name, dept, posn)
                         },
                         CheckSortDown: (pos: PositionSingle, index: int) => {
                             return index < dept.PositionList.length - 1
@@ -454,7 +454,7 @@ class ManagerManagerClass {
                         },
                         onDel: (e, pos: PositionSingle, index: int) => {
                             if (dept.PositionList.length == 1) {
-                                Common.AlertWarning(`每个部门下至少要保留一个职位`)
+                                Common.AlertError(`每个部门下至少要保留一个职位`)
                             } else {
                                 Common.ConfirmDelete(() => {
                                     dept.PositionList.splice(index, 1)
@@ -551,7 +551,7 @@ class ManagerManagerClass {
             Common.Popup($(vue.$el))
         })
     }
-    ShowUserList(proj: ProjectSingle, filterText: string) {
+    ShowUserList(proj: ProjectSingle, filterText: string, backDept: DepartmentSingle = null, backPosn: PositionSingle = null) {
         this.VueProjectEdit.currPage = ProjectEditPage.User
         Loader.LoadVueTemplate(this.VuePath + "UserList", (tpl: string) => {
             var vue = new Vue(
@@ -564,6 +564,7 @@ class ManagerManagerClass {
                         newUserUid: 0,
                         auth: ManagerData.MyAuth,
                         filterText: filterText,
+                        backPosn: backPosn,
                     },
                     methods: {
                         filterUserList: function (userList: UserSingle[], filterText: string): UserSingle[] {
@@ -602,6 +603,9 @@ class ManagerManagerClass {
                                 })
                             }
                             return rs;
+                        },
+                        OnBackPosn: () => {
+                            this.ShowPositionList(backDept)
                         },
                         ShowDpName: (did: number): string => {
                             var dp = ManagerData.DepartmentDict[did]

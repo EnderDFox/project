@@ -1,6 +1,9 @@
 <div class="commonDialog manager" style="min-width:500px; ">
     <nav class="navbar navbar-default">
         <div class="navbar-form navbar-left col-lg-6">
+            <button class="btn btn-default" type="button" :title="'返回职位:'+backPosn.Name" @click="OnBackPosn()" v-if="backPosn.Name">
+                <span class="glyphicon glyphicon-arrow-left"></span>
+            </button>
             <div class="input-group">
                 <input type="text" class="form-control" placeholder="筛选" v-model="filterText">
                 <span class="input-group-btn">
@@ -25,7 +28,7 @@
                 </tr>
             </thead>
             <transition-group name="list-complete" tag="tbody">
-                <tr v-for="user,index in filterUserList(userList,filterText)" :key="user.Uid" class="list-complete-item" >
+                <tr v-for="user,index in filterUserList(userList,filterText)" :key="user.Uid" class="list-complete-item">
                     <td class="td-id">
                         {{user.Uid}}
                     </td>
