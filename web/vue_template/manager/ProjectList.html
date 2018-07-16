@@ -8,8 +8,8 @@
                     <th style="width: 30px;">PID</th>
                     <th style="width: 300px;">项目名称</th>
                     <th class="-text-center" style="width: 150px;" title="负责人拥有该项目所有的管理权限">负责人</th>
-                    <th class="text-center" style="width: 150px;">成员数量</th>
-                    <th style="width: 300px;">管理</th>
+                    <th style="width: 120px;">部门</th>
+                    <th class="~text-center" style="width: 100px;">成员</th>
                     <th>删除</th>
                     <th>创建时间</th>
                 </tr>
@@ -42,23 +42,37 @@
                             <span class="glyphicon glyphicon-user" aria-hidden="true"></span>
                         </button>增加成员</span>
                 </td>
-                <td class="text-center text-middle" :title="GetProjUserCountTitle(proj)">
+                <!--  <td class="text-center text-middle" :title="GetProjUserCountTitle(proj)">
                     {{GetProjUserCount(proj)}}
-                </td>
+                </td> -->
                 <td>
+                    <button class="btn btn-default " type="button" @click="onShowDepartmentList(proj,index)" :title="'该项目有'+GetProjAllDeptList(proj).length+'个部门'">
+                        <span class="glyphicon glyphicon-th-list" aria-hidden="true ">
+                            {{GetProjAllDeptList(proj).length}}
+                        </span>
+                    </button>
+                </td>
+                <td class="~text-center text-middle">
+                    <button class="btn btn-default " type="button" @click="onShowUserList(proj,index)" :title="'该项目有'+GetProjUserCount(proj)+'名成员'">
+                        <span class="glyphicon glyphicon-user" aria-hidden="true ">
+                            {{GetProjUserCount(proj)}}
+                        </span>
+                    </button>
+                </td>
+                <!--  <td>
                     <button class="btn btn-default" type="button" title="部门管理" @click="onShowDepartmentList(proj,index)">
                         <span class="glyphicon glyphicon-th-list" aria-hidden="true"></span>
                     </button>
                     <button class="btn btn-default" type="button" title="成员管理" @click="onShowUserList(proj,index)">
                         <span class="glyphicon glyphicon-user" aria-hidden="true"></span>
                     </button>
-                </td>
+                </td> -->
                 <td>
                     <button class="btn btn-warning" type="button" title="删除项目" @click="onDel($event,proj,index)" :disabled="!(auth['PROJECT_EDIT'])">
                         <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
                     </button>
                 </td>
-                <td>
+                <td class="text-middle">
                     {{GetDateStr(proj.CreateTime)}}
                 </td>
             </tr>

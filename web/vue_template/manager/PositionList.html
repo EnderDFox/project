@@ -48,14 +48,14 @@
                     <button class="btn btn-default " type="button" @click="onEditAuth(pos,index)
                             " :title="'该职位有`+pos.AuthorityList.length+`个权限'">
                         <span class="glyphicon glyphicon-briefcase" aria-hidden="true ">
-                            ({{pos.AuthorityList.length}})
+                            {{pos.AuthorityList.length}}
                         </span>
                     </button>
                 </td>
                 <td class="~text-center text-middle">
                     <button class="btn btn-default " type="button" @click="onEditUserList(pos,index)" :title="'该职位下有'+pos.UserList.length+'名成员'">
                         <span class="glyphicon glyphicon-user" aria-hidden="true ">
-                            ({{pos.UserList.length}})
+                            {{pos.UserList.length}}
                         </span>
                     </button>
                 </td>

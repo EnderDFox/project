@@ -81,6 +81,9 @@ class ManagerManagerClass {
                                 proj.MasterUid = user.Uid
                             }
                         },
+                        GetProjAllDeptList: (proj: ProjectSingle): DepartmentSingle[] => {
+                            return ManagerData.DepartmentList
+                        },
                         GetProjUserCount: (proj: ProjectSingle): number => {
                             return proj.UserList.length
                         },

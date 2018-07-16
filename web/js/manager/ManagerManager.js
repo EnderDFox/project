@@ -81,6 +81,9 @@ var ManagerManagerClass = /** @class */ (function () {
                             proj.MasterUid = user.Uid;
                         }
                     },
+                    GetProjAllDeptList: function (proj) {
+                        return ManagerData.DepartmentList;
+                    },
                     GetProjUserCount: function (proj) {
                         return proj.UserList.length;
                     },
