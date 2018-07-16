@@ -88,6 +88,7 @@ interface UserSingle {
     Name?: string
     IsDel?: number
     IsHide?: number
+    Sort?: number
 }
 
 interface DepartmentSingle {
@@ -107,7 +108,7 @@ interface PositionSingle {
     Name?: string
     AuthorityList?: AuthoritySingle[]
     //client
-    UserList?:UserSingle[]
+    UserList?: UserSingle[]
 }
 interface AuthorityModuleSingle {
     Modid?: int

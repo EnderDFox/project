@@ -8,7 +8,7 @@ class ManagerManagerClass {
     VuePath = "manager/"
     VueProjectList: CombinedVueInstance1<{ auth: { [key: number]: boolean }, projectList: ProjectSingle[], newName: string }>
     VueProjectEdit: CombinedVueInstance1<{ projectList: ProjectSingle[], project: ProjectSingle, newName: string, dpTree: DepartmentSingle[], currPage: ProjectEditPage }>
-    VueUserList: CombinedVueInstance1<{ otherUserList: UserSingle[], newUserUid: number }>
+    VueUserList: CombinedVueInstance1<{ userList: UserSingle[], otherUserList: UserSingle[], newUserUid: number, filterText: string }>
     VueDepartmentList: CombinedVueInstance1<{ allDepartmentList: DepartmentSingle[], newName: string }>
     NewDepartmentUuid = 100001
     NewPositionUuid = 200001
@@ -150,6 +150,12 @@ class ManagerManagerClass {
     }
     ShowProjectEdit(proj: ProjectSingle, currPage: ProjectEditPage) {
         Loader.LoadVueTemplateList([`${this.VuePath}ProjectEdit`], (tplList: string[]) => {
+            //TODO:
+            ManagerData.DepartmentList.every((dept: DepartmentSingle): boolean => {
+                dept.Pid = proj.Pid
+                return true
+            })
+            //
             var vue = new Vue(
                 {
                     template: tplList[0],
@@ -195,7 +201,7 @@ class ManagerManagerClass {
     ShowProjectEditPage(currPage: ProjectEditPage) {
         switch (currPage) {
             case ProjectEditPage.User:
-                this.ShowUserList(this.VueProjectEdit.project)
+                this.ShowUserList(this.VueProjectEdit.project, '')
                 break;
             case ProjectEditPage.Department:
                 this.ShowDepartmentList(this.VueProjectEdit.project)
@@ -222,9 +228,12 @@ class ManagerManagerClass {
                         onEditPosition: (dp: DepartmentSingle, i0: int) => {
                             this.ShowPositionList(dp)
                         },
-                        GetDeptAllPosnList:ManagerData.GetDeptAllPosnList.bind(ManagerData),
-                        GetDeptUserList:ManagerData.GetDeptUserList.bind(ManagerData),
-                        GetDeptAllUserList:ManagerData.GetDeptAllUserList.bind(ManagerData),
+                        onEditUserList: (dept: DepartmentSingle) => {
+                            this.ShowUserList(proj, dept.Name)
+                        },
+                        GetDeptAllPosnList: ManagerData.GetDeptAllPosnList.bind(ManagerData),
+                        GetDeptUserList: ManagerData.GetDeptUserList.bind(ManagerData),
+                        GetDeptAllUserList: ManagerData.GetDeptAllUserList.bind(ManagerData),
                         CheckShowEditParentDp: this.CheckShowEditParentDp.bind(this),
                         onEditParentDp: (dp: DepartmentSingle, parentDp: DepartmentSingle) => {
                             if (parentDp == null) {
@@ -378,13 +387,13 @@ class ManagerManagerClass {
         }
         return true
     }
-    ShowPositionList(dp: DepartmentSingle) {
+    ShowPositionList(dept: DepartmentSingle) {
         Loader.LoadVueTemplate(this.VuePath + "PositionList", (tpl: string) => {
             var vue = new Vue(
                 {
                     template: tpl,
                     data: {
-                        dp: dp,
+                        dp: dept,
                         newName: ``,
                         allDepartmentList: ManagerData.DepartmentList,
                         auth: ManagerData.MyAuth,
@@ -407,8 +416,7 @@ class ManagerManagerClass {
                         },
                         /**回到部门列表 */
                         onBackDepartmentList: () => {
-                            console.log("[debug]", "onBackDepartmentList")
-                            this.ShowDepartmentList(ManagerData.GetProjByPid(dp.Pid))
+                            this.ShowDepartmentList(ManagerData.GetProjByPid(dept.Pid))
                         },
                         departmentOption: this.DepartmentOption.bind(this),
                         onEditParentDp: (dp: DepartmentSingle, parentDp: DepartmentSingle) => {
@@ -421,36 +429,39 @@ class ManagerManagerClass {
                         onEditAuth: (pos: PositionSingle, index: number) => {
                             this.ShowAuthList(pos)
                         },
+                        onEditUserList: (posn: PositionSingle) => {
+                            this.ShowUserList(ManagerData.GetProjByPid(dept.Pid), posn.Name)
+                        },
                         CheckSortDown: (pos: PositionSingle, index: int) => {
-                            return index < dp.PositionList.length - 1
+                            return index < dept.PositionList.length - 1
                         },
                         CheckSortUp: (pos: PositionSingle, index: int) => {
                             return index > 0
 
                         },
                         onSortDown: (pos: PositionSingle, index: int) => {
-                            if (index < dp.PositionList.length - 1) {
-                                dp.PositionList.splice(index + 1, 0, dp.PositionList.splice(index, 1)[0])
+                            if (index < dept.PositionList.length - 1) {
+                                dept.PositionList.splice(index + 1, 0, dept.PositionList.splice(index, 1)[0])
                             }
                         },
                         onSortUp: (pos: PositionSingle, index: int) => {
                             if (index > 0) {
-                                dp.PositionList.splice(index - 1, 0, dp.PositionList.splice(index, 1)[0])
+                                dept.PositionList.splice(index - 1, 0, dept.PositionList.splice(index, 1)[0])
                             }
                         },
                         onDel: (e, pos: PositionSingle, index: int) => {
-                            if (dp.PositionList.length == 1) {
+                            if (dept.PositionList.length == 1) {
                                 Common.AlertWarning(`每个部门下至少要保留一个职位`)
                             } else {
                                 Common.ConfirmDelete(() => {
-                                    dp.PositionList.splice(index, 1)
+                                    dept.PositionList.splice(index, 1)
                                 }, `即将删除职位 "${pos.Name || '空'}"`)
                             }
                         },
                         onAdd: () => {
-                            var pos: PositionSingle = { Posid: this.NewPositionUuid++, Did: dp.Did, Name: this.VuePositionList.newName.toString(), AuthorityList: [], UserList: [] }
+                            var pos: PositionSingle = { Posid: this.NewPositionUuid++, Did: dept.Did, Name: this.VuePositionList.newName.toString(), AuthorityList: [], UserList: [] }
                             this.VuePositionList.newName = ''
-                            dp.PositionList.push(pos)
+                            dept.PositionList.push(pos)
                         },
                     },
                 }
@@ -537,7 +548,7 @@ class ManagerManagerClass {
             Common.Popup($(vue.$el))
         })
     }
-    ShowUserList(proj: ProjectSingle) {
+    ShowUserList(proj: ProjectSingle, filterText: string) {
         this.VueProjectEdit.currPage = ProjectEditPage.User
         Loader.LoadVueTemplate(this.VuePath + "UserList", (tpl: string) => {
             var vue = new Vue(
@@ -549,8 +560,46 @@ class ManagerManagerClass {
                         allDepartmentList: ManagerData.DepartmentList,
                         newUserUid: 0,
                         auth: ManagerData.MyAuth,
+                        filterText: filterText,
                     },
                     methods: {
+                        filterUserList: function (userList: UserSingle[], filterText: string): UserSingle[] {
+                            var rs = userList.concat()
+                            var dict: { [key: number]: boolean } = {};
+                            if (filterText) {
+                                var _filterText = filterText.toLowerCase().trim()
+                                rs.every((user: UserSingle): boolean => {
+                                    if (user.Name.toLowerCase().indexOf(_filterText) > -1) {
+                                        dict[user.Uid] = true
+                                    } else {
+                                        if (user.Did) {
+                                            var dept: DepartmentSingle = ManagerData.DepartmentDict[user.Did]
+                                            if (dept.Name.toLowerCase().indexOf(_filterText) > -1) {
+                                                dict[user.Uid] = true
+                                            } else {
+                                                for (var i = 0; i < dept.PositionList.length; i++) {
+                                                    var posn = dept.PositionList[i]
+                                                    if (posn.Posid == user.Posid && posn.Name.toLowerCase().indexOf(_filterText) > -1) {
+                                                        dict[user.Uid] = true
+                                                        break;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                    return true
+                                })
+                                rs.sort((u0: UserSingle, u1: UserSingle): number => {
+                                    if (dict[u0.Uid] && !dict[u1.Uid]) {
+                                        return -1
+                                    } else if (!dict[u0.Uid] && dict[u1.Uid]) {
+                                        return 1
+                                    }
+                                    return 0
+                                })
+                            }
+                            return rs;
+                        },
                         ShowDpName: (did: number): string => {
                             var dp = ManagerData.DepartmentDict[did]
                             return dp ? dp.Name : '空'

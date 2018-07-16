@@ -1,4 +1,17 @@
 <div class="commonDialog manager" style="min-width:500px; ">
+    <nav class="navbar navbar-default">
+        <div class="navbar-form navbar-left col-lg-6">
+            <div class="input-group">
+                <input type="text" class="form-control" placeholder="筛选" v-model="filterText">
+                <span class="input-group-btn">
+                    <button class="btn btn-default" type="button" title="按照'成员/部门/职位'名称进行筛选 \n优先显示符合条件的成员">
+                        <span class="glyphicon glyphicon-search"></span>
+                    </button>
+                </span>
+            </div>
+        </div>
+        <!-- /.col-lg-6 -->
+    </nav>
     <table class="table table-hover">
         <thead>
             <thead>
@@ -12,7 +25,7 @@
                 </tr>
             </thead>
             <transition-group name="list-complete" tag="tbody">
-                <tr class="list-complete-item" v-for="user,index in userList" :key="user.Uid">
+                <tr v-for="user,index in filterUserList(userList,filterText)" :key="user.Uid" class="list-complete-item" >
                     <td class="td-id">
                         {{user.Uid}}
                     </td>

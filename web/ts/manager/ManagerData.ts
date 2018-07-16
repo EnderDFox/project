@@ -101,7 +101,13 @@ class ManagerDataClass {
         this.UserDict[user.Uid] = user
         //#
         this.ProjectList[0].UserList.push.apply(this.ProjectList[0].UserList, this.UserList.slice(0, 10))
+        for (var i = 0; i < this.ProjectList[0].UserList.length; i++) {
+            this.ProjectList[0].UserList[i].Sort = i + 1
+        }
         this.ProjectList[2].UserList.push.apply(this.ProjectList[2].UserList, this.UserList.slice(5, 12))
+        for (var i = 0; i < this.ProjectList[2].UserList.length; i++) {
+            this.ProjectList[2].UserList[i].Sort = i + 1
+        }
         //#department
         this.DepartmentTree = [
             /* {
@@ -120,7 +126,7 @@ class ManagerDataClass {
                 Did: 2, Name: '美术', Depth: 0, PositionList: [
                     { Posid: 201, Did: 2, Name: '美术主管', UserList: [] },
                 ], Children: [
-                    { Did: 21, Name: 'UI', Depth: 1, Children: [], PositionList: [{ Posid: 2102, Did: 2, Name: 'UI', UserList:[] },] },
+                    { Did: 21, Name: 'UI', Depth: 1, Children: [], PositionList: [{ Posid: 2102, Did: 2, Name: 'UI', UserList: [] },] },
                     {
                         Did: 22, Name: '3D', Depth: 1, Children: [], PositionList: [
                             { Posid: 2200, Did: 2, Name: '3D', UserList: [] },

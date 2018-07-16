@@ -7,7 +7,7 @@
                     <th class="text-center" style="width: 100px;">增加子部门</th>
                     <th style="width: 160px;padding-left: 50px;" title="将部门迁移到其它部门下">迁移</th>
                     <th style="width: 120px;">职位</th>
-                    <th class="text-center" style="width: 100px;">成员数量</th>
+                    <th class="~text-center" style="width: 100px;">成员</th>
                     <th style="width: 120px;">排序</th>
                     <th>删除</th>
                 </tr>
@@ -50,10 +50,12 @@
                             </span>
                         </button>
                     </td>
-                    <td class="text-center text-middle" :title="'该部门下有'+GetDeptUserList(dp).length+'名成员'+(dp.Children.length>0?' \n该部门及其子部门共有'+GetDeptAllUserList(dp).length+'名成员':'')">
-                        <span>
-                            {{GetDeptUserList(dp).length}}{{dp.Children.length>0?'/'+GetDeptAllUserList(dp).length:''}}
-                        </span>
+                    <td class="~text-center text-middle">
+                        <button class="btn btn-default " type="button" @click="onEditUserList(dp,index)" :title="'该部门下有'+GetDeptUserList(dp).length+'名成员'+(dp.Children.length>0?' \n该部门及其子部门共有'+GetDeptAllUserList(dp).length+'名成员':'')">
+                            <span class="glyphicon glyphicon-user" aria-hidden="true ">
+                                {{GetDeptUserList(dp).length}}{{dp.Children.length>0?'/'+GetDeptAllUserList(dp).length:''}}
+                            </span>
+                        </button>
                     </td>
                     <td>
                         <button class="btn btn-default " type="button" @click="onSortDown($event,dp,index)" :disabled="!(auth['PROJECT_EDIT'] && CheckSortDown(dp,index))">

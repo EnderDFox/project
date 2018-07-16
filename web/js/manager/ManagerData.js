@@ -90,7 +90,13 @@ var ManagerDataClass = /** @class */ (function () {
         this.UserDict[user.Uid] = user;
         //#
         this.ProjectList[0].UserList.push.apply(this.ProjectList[0].UserList, this.UserList.slice(0, 10));
+        for (var i = 0; i < this.ProjectList[0].UserList.length; i++) {
+            this.ProjectList[0].UserList[i].Sort = i + 1;
+        }
         this.ProjectList[2].UserList.push.apply(this.ProjectList[2].UserList, this.UserList.slice(5, 12));
+        for (var i = 0; i < this.ProjectList[2].UserList.length; i++) {
+            this.ProjectList[2].UserList[i].Sort = i + 1;
+        }
         //#department
         this.DepartmentTree = [
             /* {
