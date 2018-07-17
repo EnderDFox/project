@@ -20,7 +20,8 @@ class ManagerManagerClass {
         this.InitVue(this.UrlParamCallback.bind(this))
     }
     UrlParamCallback() {
-        var pid: number = UrlParam.GetParam(URL_PARAM_KEY.PID, 0)
+        Common.PopupHideAll()
+        var pid: number = UrlParam.Get(URL_PARAM_KEY.PID, 0)
         var proj: ProjectSingle = ManagerData.GetProjectListHasAuth().FindOfAttr(FieldName.PID, pid)
         if (proj) {
             this.ShowProjectEdit(proj)
@@ -112,13 +113,11 @@ class ManagerManagerClass {
                         onClose: () => {
                         },
                         onShowUserList: (proj: ProjectSingle, index: number) => {
-                            UrlParam.SetParam(URL_PARAM_KEY.PID, proj.Pid)
-                            UrlParam.SetParam(URL_PARAM_KEY.PAGE, ProjectEditPage.User)
+                            UrlParam.Set(URL_PARAM_KEY.PID, proj.Pid).Set(URL_PARAM_KEY.PAGE, ProjectEditPage.User).Reset()
                             this.ShowProjectEdit(proj)
                         },
                         onShowDepartmentList: (proj: ProjectSingle, index: number) => {
-                            UrlParam.SetParam(URL_PARAM_KEY.PID, proj.Pid)
-                            UrlParam.SetParam(URL_PARAM_KEY.PAGE, ProjectEditPage.Department)
+                            UrlParam.Set(URL_PARAM_KEY.PID, proj.Pid).Set(URL_PARAM_KEY.PAGE, ProjectEditPage.Department).Reset()
                             this.ShowProjectEdit(proj)
                         },
                         onDel: (e, proj: ProjectSingle, index: int) => {
@@ -156,7 +155,7 @@ class ManagerManagerClass {
     }
     ShowProjectEdit(proj: ProjectSingle) {
         Loader.LoadVueTemplateList([`${this.VuePath}ProjectEdit`], (tplList: string[]) => {
-            var currPage = UrlParam.GetParam(URL_PARAM_KEY.PAGE, [ProjectEditPage.Department, ProjectEditPage.User])
+            var currPage = UrlParam.Get(URL_PARAM_KEY.PAGE, [ProjectEditPage.Department, ProjectEditPage.User])
             ManagerData.DepartmentList.every((dept: DepartmentSingle): boolean => {
                 dept.Pid = proj.Pid
                 return true
@@ -179,24 +178,23 @@ class ManagerManagerClass {
                             $(this.$el).hide()
                         },
                         onShowProjList: () => {
-                            UrlParam.RemoveParamAll()
+                            UrlParam.RemoveAll()
                             $(this.VueProjectEdit.$el).hide()
                             this.ShowProjectList()
                         },
                         onShowCurrProj: () => {
                             if (this.VueProjectEdit.projectList.length == 1) {
                                 //仅在只有一个项目 可以用, 多个项目就是下拉列表了
-                                UrlParam.SetParam(URL_PARAM_KEY.PAGE, ProjectEditPage.Department)
+                                UrlParam.Set(URL_PARAM_KEY.PAGE, ProjectEditPage.Department).Reset()
                                 this.ShowProjectEdit(this.VueProjectEdit.project)
                             }
                         },
                         onShowProj: (proj: ProjectSingle, index: number) => {
-                            UrlParam.SetParam(URL_PARAM_KEY.PID, proj.Pid)
-                            UrlParam.SetParam(URL_PARAM_KEY.PAGE, ProjectEditPage.Department)
+                            UrlParam.Set(URL_PARAM_KEY.PID, proj.Pid).Set(URL_PARAM_KEY.PAGE, ProjectEditPage.Department).Reset()
                             this.ShowProjectEdit(proj)
                         },
                         onShowPage: (page: ProjectEditPage) => {
-                            UrlParam.SetParam(URL_PARAM_KEY.PAGE, page)
+                            UrlParam.Set(URL_PARAM_KEY.PAGE, page).Remove(URL_PARAM_KEY.DID).Remove(URL_PARAM_KEY.FKEY).Reset()
                             this.VueProjectEdit.currPage = page;
                             this.ShowProjectEditPage(this.VueProjectEdit.currPage)
                         },
@@ -212,8 +210,6 @@ class ManagerManagerClass {
     ShowProjectEditPage(currPage: ProjectEditPage) {
         switch (currPage) {
             case ProjectEditPage.User:
-                UrlParam.SetParam(URL_PARAM_KEY.PAGE, ProjectEditPage.User)
-                UrlParam.SetParam(URL_PARAM_KEY.FKEY, null)
                 this.ShowUserList(this.VueProjectEdit.project)
                 break;
             case ProjectEditPage.Department:
@@ -239,12 +235,11 @@ class ManagerManagerClass {
                             dp.Name = newName
                         },
                         onEditPosition: (dp: DepartmentSingle, i0: int) => {
-                            UrlParam.SetParam(URL_PARAM_KEY.DID, dp.Did)
+                            UrlParam.Set(URL_PARAM_KEY.DID, dp.Did).Reset()
                             this.ShowPositionList()
                         },
                         onEditUserList: (dept: DepartmentSingle) => {
-                            UrlParam.SetParam(URL_PARAM_KEY.PAGE, ProjectEditPage.User)
-                            UrlParam.SetParam(URL_PARAM_KEY.FKEY, dept.Name)
+                            UrlParam.Set(URL_PARAM_KEY.PAGE, ProjectEditPage.User).Set(URL_PARAM_KEY.FKEY, dept.Name).Reset()
                             this.ShowUserList(proj)
                         },
                         GetDeptAllPosnList: ManagerData.GetDeptAllPosnList.bind(ManagerData),
@@ -358,7 +353,7 @@ class ManagerManagerClass {
             this.VueDepartmentList = vue
             //#show
             Common.InsertIntoDom(vue.$el, '#projectEditContent')
-            var _did = UrlParam.GetParam(URL_PARAM_KEY.DID, 0)
+            var _did = UrlParam.Get(URL_PARAM_KEY.DID, 0)
             if (_did && ManagerData.DepartmentDict[_did]) {
                 this.ShowPositionList()
             }
@@ -406,7 +401,7 @@ class ManagerManagerClass {
         return true
     }
     ShowPositionList() {
-        var _did = UrlParam.GetParam(URL_PARAM_KEY.DID, 0)
+        var _did = UrlParam.Get(URL_PARAM_KEY.DID, 0)
         var dept: DepartmentSingle = ManagerData.DepartmentDict[_did]
         Loader.LoadVueTemplate(this.VuePath + "PositionList", (tpl: string) => {
             var vue = new Vue(
@@ -440,7 +435,7 @@ class ManagerManagerClass {
                         },
                         departmentOption: this.DepartmentOption.bind(this),
                         onEditParentDp: (dp: DepartmentSingle, parentDp: DepartmentSingle) => {
-                            UrlParam.SetParam(URL_PARAM_KEY.DID, parentDp.Did)
+                            UrlParam.Set(URL_PARAM_KEY.DID, parentDp.Did).Reset()
                             this.ShowPositionList()
                         },
                         onEditName: (e: Event, pos: PositionSingle, index: number) => {
@@ -451,8 +446,7 @@ class ManagerManagerClass {
                             this.ShowAuthList(pos)
                         },
                         onEditUserList: (posn: PositionSingle) => {
-                            UrlParam.SetParam(URL_PARAM_KEY.PAGE, ProjectEditPage.User)
-                            UrlParam.SetParam(URL_PARAM_KEY.FKEY, posn.Name)
+                            UrlParam.Set(URL_PARAM_KEY.PAGE, ProjectEditPage.User).Set(URL_PARAM_KEY.FKEY, posn.Name).Reset()
                             this.ShowUserList(ManagerData.GetProjByPid(dept.Pid), dept, posn)
                         },
                         CheckSortDown: (pos: PositionSingle, index: int) => {
@@ -572,7 +566,8 @@ class ManagerManagerClass {
         })
     }
     ShowUserList(proj: ProjectSingle, backDept: DepartmentSingle = null, backPosn: PositionSingle = null) {
-        var filterText = UrlParam.GetParam(URL_PARAM_KEY.FKEY, '')
+        var filterText = UrlParam.Get(URL_PARAM_KEY.FKEY, '')
+        console.log("[debug]", filterText, ":[filterText]")
         this.VueProjectEdit.currPage = ProjectEditPage.User
         Loader.LoadVueTemplate(this.VuePath + "UserList", (tpl: string) => {
             var vue = new Vue(
@@ -589,10 +584,11 @@ class ManagerManagerClass {
                     },
                     methods: {
                         filterUserList: function (userList: UserSingle[], filterText: string): UserSingle[] {
+                            console.log("[debug]", filterText, ":[filterText]", typeof (filterText))
                             var rs = userList.concat()
                             var dict: { [key: number]: boolean } = {};
                             if (filterText) {
-                                var _filterText = filterText.toLowerCase().trim()
+                                var _filterText = filterText.toString().toLowerCase().trim()
                                 var _filterTextSp = _filterText.split(/[\s\,]/g)
                                 rs.every((user: UserSingle): boolean => {
                                     if (StringUtil.IndexOfKeyArr(user.Name.toLowerCase(), _filterTextSp) > -1) {
@@ -627,9 +623,7 @@ class ManagerManagerClass {
                             return rs;
                         },
                         OnBackPosn: () => {
-                            UrlParam.SetParam(URL_PARAM_KEY.PAGE, ProjectEditPage.Department)
-                            UrlParam.SetParam(URL_PARAM_KEY.DID, backDept.Did)
-                            UrlParam.SetParam(URL_PARAM_KEY.FKEY, null)
+                            UrlParam.Set(URL_PARAM_KEY.PAGE, ProjectEditPage.Department).Set(URL_PARAM_KEY.DID, backDept.Did).Set(URL_PARAM_KEY.FKEY, null).Reset()
                             this.ShowPositionList()
                         },
                         ShowDpName: (did: number): string => {
@@ -720,7 +714,7 @@ class ManagerManagerClass {
         Loader.LoadVueTemplate(this.VuePath + "SelectUser", (tpl: string) => {
             var checkedDict: { [key: number]: UserSingle } = {};
             var _GetFilterList = (userList: UserSingle[], filterText: string): UserSingle[] => {
-                var _filterText = filterText.toLowerCase().trim()
+                var _filterText = filterText.toString().toLowerCase().trim()
                 if (_filterText) {
                     var _filterTextSp = _filterText.split(/[\s\,]/g)
                     return userList.filter((user: UserSingle) => {

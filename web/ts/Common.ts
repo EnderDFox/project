@@ -209,8 +209,15 @@ class CommonClass {
 		}
 	}
 	/**popup of bootstrap3 */
+	private CurrPopupDom: JQuery<HTMLElement>
+	PopupHideAll() {
+		if (this.CurrPopupDom) {
+			$(this.CurrPopupDom).remove()
+		}
+	}
 	Popup(dom: HTMLElement | JQuery<HTMLElement>) {
 		var $dom = $(dom)
+		this.CurrPopupDom = $dom
 		Common.InsertBeforeDynamicDom($dom)
 		this.AlginCenterInWindow($dom.find('.popup_content'), false)
 	}
@@ -331,6 +338,7 @@ class UrlParamClass {
 				if (equrlIndex > 0)//如果=在第一个也不能要
 					var key = spi.substring(0, equrlIndex)
 				var val = spi.substring(equrlIndex + 1, spi.length)
+				val = decodeURI(val)
 				console.log("[debug]", key, ":[key]", val, ":[val]")
 				this.ParamDict[key.toLowerCase()] = val
 			}
@@ -339,8 +347,8 @@ class UrlParamClass {
 			this.Callback()
 		}
 	}
-	_resetUrlParam() {
-		//重新生成url参数
+	/**重新生成url参数 */
+	Reset(): UrlParamClass {
 		var rs: string[] = []
 		for (var key in this.ParamDict) {
 			rs.push(key + '=' + this.ParamDict[key])
@@ -348,8 +356,9 @@ class UrlParamClass {
 		var param = rs.join('&')
 		var paramEncode = encodeURI(param)
 		history.pushState(param, null, '?' + paramEncode)
+		return this
 	}
-	RemoveParamAll() {
+	RemoveAll(): UrlParamClass {
 		var isChange: boolean = false
 		for (var key in this.ParamDict) {
 			if (key == URL_PARAM_KEY.UID) {
@@ -360,44 +369,55 @@ class UrlParamClass {
 			}
 		}
 		if (isChange) {
-			this._resetUrlParam()
+			// this.ResetUrlParam()
 		}
+		return this
 	}
-	RemoveParam(key: string) {
-		this.SetParam(key, null)
+	Remove(key: string): UrlParamClass {
+		this.Set(key, null)
+		return this
 	}
-	SetParam(key: string, val: string | number) {
+	Set(key: string, val: string | number): UrlParamClass {
+		this.SetArr({ key: key, val: val })
+		return this
+	}
+	SetArr(...args: { key: string, val: string | number }[]): UrlParamClass {
 		var isChange: boolean = false
-		if (val == null) {
-			if (this.ParamDict.hasOwnProperty(key)) {
-				delete this.ParamDict[key]
-				isChange = true
-			}
-		} else {
-			if (this.ParamDict[key] != val) {
-				this.ParamDict[key] = val
-				isChange = true
+		for (var i = 0; i < args.length; i++) {
+			var arg = args[i]
+			if (arg.val == null) {
+				if (this.ParamDict.hasOwnProperty(arg.key)) {
+					delete this.ParamDict[arg.key]
+					isChange = true
+				}
+			} else {
+				if (this.ParamDict[arg.key] != arg.val) {
+					this.ParamDict[arg.key] = arg.val
+					isChange = true
+				}
 			}
 		}
-		if (isChange) {
-			this._resetUrlParam()
-		}
+		return this
+		/* 	if (isChange) {
+				this.ResetUrlParam()
+			} */
 	}
 	f<T extends number | string>(a: T): T {
 		return 'a' as T
 	}
-	GetParam<T extends number | string>(key: string): T;
-	GetParam<T extends number | string>(key: string, defaultVal: T): T;
-	GetParam<T extends number | string>(key: string, enabledValArr: T[]): T;
-	GetParam<T extends number | string>(key: string, defaultVal: T, enabledValArr: T[]): T;
-	GetParam<T extends number | string>(key: string, ...args) {
+	Get<T extends number | string>(key: string): T;
+	Get<T extends number | string>(key: string, defaultVal: T): T;
+	Get<T extends number | string>(key: string, enabledValArr: T[]): T;
+	Get<T extends number | string>(key: string, defaultVal: T, enabledValArr: T[]): T;
+	Get<T extends number | string>(key: string, ...args) {
 		var [defaultVal, enabledValArr] = this._parseGetParam<string>(args)
 		var val
 		if (this.ParamDict.hasOwnProperty(key)) {
 			val = this.ParamDict[key]
-			if (parseFloat(val).toString() == "NaN") {
-			} else {//是数字需要转换成数字
-				val = parseFloat(val)
+			var valNumber = parseFloat(val)
+			if (valNumber.toString() == val) {
+				//是数字需要转换成数字
+				val = valNumber
 			}
 		} else {
 			val = defaultVal

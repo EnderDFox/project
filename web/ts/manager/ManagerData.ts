@@ -32,7 +32,7 @@ class ManagerDataClass {
         //
         this.InitSimulateData()
         //
-        var uid = Number(UrlParam.GetParam('uid'))
+        var uid = Number(UrlParam.Get('uid'))
         if (isNaN(uid)) {
             uid = 0
         }

@@ -206,9 +206,14 @@ var CommonClass = /** @class */ (function () {
             $(this.VuePullDownMenu.$el).hide();
         }
     };
-    /**popup of bootstrap3 */
+    CommonClass.prototype.PopupHideAll = function () {
+        if (this.CurrPopupDom) {
+            $(this.CurrPopupDom).remove();
+        }
+    };
     CommonClass.prototype.Popup = function (dom) {
         var $dom = $(dom);
+        this.CurrPopupDom = $dom;
         Common.InsertBeforeDynamicDom($dom);
         this.AlginCenterInWindow($dom.find('.popup_content'), false);
     };
@@ -333,6 +338,7 @@ var UrlParamClass = /** @class */ (function () {
                 if (equrlIndex > 0) //如果=在第一个也不能要
                     var key = spi.substring(0, equrlIndex);
                 var val = spi.substring(equrlIndex + 1, spi.length);
+                val = decodeURI(val);
                 console.log("[debug]", key, ":[key]", val, ":[val]");
                 this.ParamDict[key.toLowerCase()] = val;
             }
@@ -341,8 +347,8 @@ var UrlParamClass = /** @class */ (function () {
             this.Callback();
         }
     };
-    UrlParamClass.prototype._resetUrlParam = function () {
-        //重新生成url参数
+    /**重新生成url参数 */
+    UrlParamClass.prototype.Reset = function () {
         var rs = [];
         for (var key in this.ParamDict) {
             rs.push(key + '=' + this.ParamDict[key]);
@@ -350,8 +356,9 @@ var UrlParamClass = /** @class */ (function () {
         var param = rs.join('&');
         var paramEncode = encodeURI(param);
         history.pushState(param, null, '?' + paramEncode);
+        return this;
     };
-    UrlParamClass.prototype.RemoveParamAll = function () {
+    UrlParamClass.prototype.RemoveAll = function () {
         var isChange = false;
         for (var key in this.ParamDict) {
             if (key == URL_PARAM_KEY.UID) {
@@ -363,34 +370,48 @@ var UrlParamClass = /** @class */ (function () {
             }
         }
         if (isChange) {
-            this._resetUrlParam();
+            // this.ResetUrlParam()
         }
+        return this;
     };
-    UrlParamClass.prototype.RemoveParam = function (key) {
-        this.SetParam(key, null);
+    UrlParamClass.prototype.Remove = function (key) {
+        this.Set(key, null);
+        return this;
     };
-    UrlParamClass.prototype.SetParam = function (key, val) {
+    UrlParamClass.prototype.Set = function (key, val) {
+        this.SetArr({ key: key, val: val });
+        return this;
+    };
+    UrlParamClass.prototype.SetArr = function () {
+        var args = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            args[_i] = arguments[_i];
+        }
         var isChange = false;
-        if (val == null) {
-            if (this.ParamDict.hasOwnProperty(key)) {
-                delete this.ParamDict[key];
-                isChange = true;
+        for (var i = 0; i < args.length; i++) {
+            var arg = args[i];
+            if (arg.val == null) {
+                if (this.ParamDict.hasOwnProperty(arg.key)) {
+                    delete this.ParamDict[arg.key];
+                    isChange = true;
+                }
+            }
+            else {
+                if (this.ParamDict[arg.key] != arg.val) {
+                    this.ParamDict[arg.key] = arg.val;
+                    isChange = true;
+                }
             }
         }
-        else {
-            if (this.ParamDict[key] != val) {
-                this.ParamDict[key] = val;
-                isChange = true;
-            }
-        }
-        if (isChange) {
-            this._resetUrlParam();
-        }
+        return this;
+        /* 	if (isChange) {
+                this.ResetUrlParam()
+            } */
     };
     UrlParamClass.prototype.f = function (a) {
         return 'a';
     };
-    UrlParamClass.prototype.GetParam = function (key) {
+    UrlParamClass.prototype.Get = function (key) {
         var args = [];
         for (var _i = 1; _i < arguments.length; _i++) {
             args[_i - 1] = arguments[_i];
@@ -399,10 +420,10 @@ var UrlParamClass = /** @class */ (function () {
         var val;
         if (this.ParamDict.hasOwnProperty(key)) {
             val = this.ParamDict[key];
-            if (parseFloat(val).toString() == "NaN") {
-            }
-            else { //是数字需要转换成数字
-                val = parseFloat(val);
+            var valNumber = parseFloat(val);
+            if (valNumber.toString() == val) {
+                //是数字需要转换成数字
+                val = valNumber;
             }
         }
         else {

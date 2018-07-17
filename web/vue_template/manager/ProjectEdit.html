@@ -9,8 +9,9 @@
                 <li class="dropdown">
                     <!-- :data-toggle="projectList.length>1?'dropdown':'label'"
                     :style="{'cursor':projectList.length>1?'pointer':'default'}"-->
-                    <a class="dropdown-toggle navbar-brand" data-toggle="dropdown" style="cursor:pointer;" role="button" aria-haspopup="true" aria-expanded="false" @click="onShowCurrProj()">
-                    {{project.Name}}
+                    <a class="dropdown-toggle navbar-brand" data-toggle="dropdown" style="cursor:pointer;" role="button" aria-haspopup="true"
+                        aria-expanded="false" @click="onShowCurrProj()">
+                        {{project.Name}}
                         <span class="caret" v-if="projectList.length>1"></span>
                     </a>
                     <ul class="dropdown-menu">
@@ -20,14 +21,14 @@
                     </ul>
                 </li>
                 <li :class="{'active':currPage==1}" style="margin-left: 100px;">
-                    <a @click="onShowPage(2)">
+                    <a @click="onShowPage(1)">
                         <span class="glyphicon glyphicon-th-list" aria-hidden="true">
                             部门
                         </span>
                     </a>
                 </li>
                 <li :class="{'active':currPage==2}">
-                    <a @click="onShowPage(1)">
+                    <a @click="onShowPage(2)">
                         <span class="glyphicon glyphicon-user" aria-hidden="true">
                             成员
                         </span>
