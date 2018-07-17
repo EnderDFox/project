@@ -1,8 +1,8 @@
 /** 管理项目 部门 职位 权限 */
 var ProjectEditPage;
 (function (ProjectEditPage) {
-    ProjectEditPage[ProjectEditPage["User"] = 1] = "User";
-    ProjectEditPage[ProjectEditPage["Department"] = 2] = "Department";
+    ProjectEditPage[ProjectEditPage["Department"] = 1] = "Department";
+    ProjectEditPage[ProjectEditPage["User"] = 2] = "User";
 })(ProjectEditPage || (ProjectEditPage = {}));
 var ManagerManagerClass = /** @class */ (function () {
     function ManagerManagerClass() {
@@ -11,7 +11,18 @@ var ManagerManagerClass = /** @class */ (function () {
         this.NewPositionUuid = 200001;
     }
     ManagerManagerClass.prototype.Init = function () {
-        this.InitVue(this.ShowProjectList.bind(this));
+        UrlParam.Callback = this.UrlParamCallback.bind(this);
+        this.InitVue(this.UrlParamCallback.bind(this));
+    };
+    ManagerManagerClass.prototype.UrlParamCallback = function () {
+        var pid = UrlParam.GetParam(URL_PARAM_KEY.PID, 0);
+        var proj = ManagerData.GetProjectListHasAuth().FindOfAttr(FieldName.PID, pid);
+        if (proj) {
+            this.ShowProjectEdit(proj);
+        }
+        else {
+            this.ShowProjectList();
+        }
     };
     ManagerManagerClass.prototype.InitVue = function (cb) {
         Loader.LoadVueTemplateList([this.VuePath + "NavbarComp"], function (tplList) {
@@ -27,33 +38,20 @@ var ManagerManagerClass = /** @class */ (function () {
             cb();
         });
     };
+    /**没有权限访问的页面 通常是通过url进入的 */
+    ManagerManagerClass.prototype.ShowNoAuthPage = function () {
+        //TODO:
+    };
     ManagerManagerClass.prototype.ShowProjectList = function () {
         var _this = this;
         //
         Loader.LoadVueTemplate(this.VuePath + "ProjectList", function (tpl) {
-            var projList;
-            if (ManagerData.MyAuth[AUTH.PROJECT_LIST]) {
-                projList = ManagerData.ProjectList;
-            }
-            else {
-                //只看自己所处的项目
-                projList = [];
-                for (var i = 0; i < ManagerData.ProjectList.length; i++) {
-                    var proj = ManagerData.ProjectList[i];
-                    if (proj.UserList.IndexOfAttr(FieldName.Uid, ManagerData.CurrUser.Uid) > -1) {
-                        projList.push(proj);
-                        if (proj.MasterUid == ManagerData.CurrUser.Uid) {
-                            ManagerData.AddMyAuth(AUTH.PROJECT_EDIT);
-                        }
-                    }
-                }
-            }
             var vue = new Vue({
                 template: tpl,
                 data: {
                     newName: '',
                     auth: ManagerData.MyAuth,
-                    projectList: projList,
+                    projectList: ManagerData.GetProjectListHasAuth(),
                     currUser: ManagerData.CurrUser,
                 },
                 methods: {
@@ -112,10 +110,14 @@ var ManagerManagerClass = /** @class */ (function () {
                     onClose: function () {
                     },
                     onShowUserList: function (proj, index) {
-                        _this.ShowProjectEdit(proj, ProjectEditPage.User);
+                        UrlParam.SetParam(URL_PARAM_KEY.PID, proj.Pid);
+                        UrlParam.SetParam(URL_PARAM_KEY.PAGE, ProjectEditPage.User);
+                        _this.ShowProjectEdit(proj);
                     },
                     onShowDepartmentList: function (proj, index) {
-                        _this.ShowProjectEdit(proj, ProjectEditPage.Department);
+                        UrlParam.SetParam(URL_PARAM_KEY.PID, proj.Pid);
+                        UrlParam.SetParam(URL_PARAM_KEY.PAGE, ProjectEditPage.Department);
+                        _this.ShowProjectEdit(proj);
                     },
                     onDel: function (e, proj, index) {
                         Common.ConfirmDelete(function () {
@@ -147,10 +149,10 @@ var ManagerManagerClass = /** @class */ (function () {
             Common.InsertIntoPageDom(vue.$el);
         });
     };
-    ManagerManagerClass.prototype.ShowProjectEdit = function (proj, currPage) {
+    ManagerManagerClass.prototype.ShowProjectEdit = function (proj) {
         var _this = this;
         Loader.LoadVueTemplateList([this.VuePath + "ProjectEdit"], function (tplList) {
-            //TODO:
+            var currPage = UrlParam.GetParam(URL_PARAM_KEY.PAGE, [ProjectEditPage.Department, ProjectEditPage.User]);
             ManagerData.DepartmentList.every(function (dept) {
                 dept.Pid = proj.Pid;
                 return true;
@@ -160,7 +162,7 @@ var ManagerManagerClass = /** @class */ (function () {
                 template: tplList[0],
                 data: {
                     project: proj,
-                    projectList: _this.VueProjectList.projectList,
+                    projectList: ManagerData.GetProjectListHasAuth(),
                     dpTree: ManagerData.DepartmentTree,
                     newName: proj ? proj.Name : '',
                     auth: ManagerData.MyAuth,
@@ -172,19 +174,24 @@ var ManagerManagerClass = /** @class */ (function () {
                         $(this.$el).hide();
                     },
                     onShowProjList: function () {
+                        UrlParam.RemoveParamAll();
                         $(_this.VueProjectEdit.$el).hide();
                         _this.ShowProjectList();
                     },
                     onShowCurrProj: function () {
                         if (_this.VueProjectEdit.projectList.length == 1) {
                             //仅在只有一个项目 可以用, 多个项目就是下拉列表了
-                            _this.ShowProjectEdit(_this.VueProjectEdit.project, ProjectEditPage.Department);
+                            UrlParam.SetParam(URL_PARAM_KEY.PAGE, ProjectEditPage.Department);
+                            _this.ShowProjectEdit(_this.VueProjectEdit.project);
                         }
                     },
                     onShowProj: function (proj, index) {
-                        _this.ShowProjectEdit(proj, _this.VueProjectEdit.currPage);
+                        UrlParam.SetParam(URL_PARAM_KEY.PID, proj.Pid);
+                        UrlParam.SetParam(URL_PARAM_KEY.PAGE, ProjectEditPage.Department);
+                        _this.ShowProjectEdit(proj);
                     },
                     onShowPage: function (page) {
+                        UrlParam.SetParam(URL_PARAM_KEY.PAGE, page);
                         _this.VueProjectEdit.currPage = page;
                         _this.ShowProjectEditPage(_this.VueProjectEdit.currPage);
                     },

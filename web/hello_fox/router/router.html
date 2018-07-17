@@ -16,6 +16,7 @@
                 var index = url.indexOf('?')
                 var param = url.substring(index + 1, url.length)
                 document.getElementById("div2").innerText = param
+                console.log("[info]", history.state, ":[history.state]");
             }
             window.addEventListener('popstate', parseParam)
             parseParam()

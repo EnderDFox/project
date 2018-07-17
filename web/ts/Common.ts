@@ -305,6 +305,20 @@ class CommonClass {
 	UrlParamDict: { [key: string]: string };
 	InitUrlParams() {
 		this.UrlParamDict = {}
+		UrlParam.Init()
+	}
+}
+var Common = new CommonClass()
+
+class UrlParamClass {
+	Callback: () => void
+	ParamDict: { [key: string]: string | number } = {};
+	Init() {
+		window.addEventListener('popstate', this._parse.bind(this))
+		this._parse()
+	}
+	_parse() {
+		this.ParamDict = {}
 		var str = window.location.href.toLowerCase()
 		var index0 = str.indexOf('?')
 		if (index0 > -1) {
@@ -318,12 +332,111 @@ class CommonClass {
 					var key = spi.substring(0, equrlIndex)
 				var val = spi.substring(equrlIndex + 1, spi.length)
 				console.log("[debug]", key, ":[key]", val, ":[val]")
-				this.UrlParamDict[key.toLowerCase()] = val
+				this.ParamDict[key.toLowerCase()] = val
 			}
 		}
+		if (this.Callback != null) {
+			this.Callback()
+		}
+	}
+	_resetUrlParam() {
+		//重新生成url参数
+		var rs: string[] = []
+		for (var key in this.ParamDict) {
+			rs.push(key + '=' + this.ParamDict[key])
+		}
+		var param = rs.join('&')
+		var paramEncode = encodeURI(param)
+		history.pushState(param, null, '?' + paramEncode)
+	}
+	RemoveParamAll() {
+		var isChange: boolean = false
+		for (var key in this.ParamDict) {
+			if (key == URL_PARAM_KEY.UID) {
+				//本项目略过这个
+			} else {
+				delete this.ParamDict[key]
+				isChange = true
+			}
+		}
+		if (isChange) {
+			this._resetUrlParam()
+		}
+	}
+	RemoveParam(key: string) {
+		this.SetParam(key, null)
+	}
+	SetParam(key: string, val: string | number) {
+		var isChange: boolean = false
+		if (val == null) {
+			if (this.ParamDict.hasOwnProperty(key)) {
+				delete this.ParamDict[key]
+				isChange = true
+			}
+		} else {
+			if (this.ParamDict[key] != val) {
+				this.ParamDict[key] = val
+				isChange = true
+			}
+		}
+		if (isChange) {
+			this._resetUrlParam()
+		}
+	}
+	f<T extends number | string>(a: T): T {
+		return 'a' as T
+	}
+	GetParam<T extends number | string>(key: string): T;
+	GetParam<T extends number | string>(key: string, defaultVal: T): T;
+	GetParam<T extends number | string>(key: string, enabledValArr: T[]): T;
+	GetParam<T extends number | string>(key: string, defaultVal: T, enabledValArr: T[]): T;
+	GetParam<T extends number | string>(key: string, ...args) {
+		var [defaultVal, enabledValArr] = this._parseGetParam<string>(args)
+		var val
+		if (this.ParamDict.hasOwnProperty(key)) {
+			val = this.ParamDict[key]
+			if (parseFloat(val).toString() == "NaN") {
+			} else {//是数字需要转换成数字
+				val = parseFloat(val)
+			}
+		} else {
+			val = defaultVal
+		}
+		if (enabledValArr && enabledValArr.length > 0) {
+			if (enabledValArr.indexOf(val) > -1) {//有这个值就返回,否则返回默认值
+				return val
+			} else {
+				return defaultVal
+			}
+		} else {
+			return val
+		}
+	}
+	_parseGetParam<T>(args: any[]): [T, T[]] {
+		var defaultVal: T
+		var enabledValArr: T[]
+		switch (args.length) {
+			case 0:
+				defaultVal = null;
+				break;
+			case 1:
+				if (typeof (args[0]) == 'object') {
+					enabledValArr = args[0]
+					defaultVal = enabledValArr[0]
+				} else {
+					defaultVal = args[0]
+				}
+				break;
+			case 2:
+				defaultVal = args[0]
+				enabledValArr = args[1]
+				break;
+		}
+		return [defaultVal, enabledValArr]
 	}
 }
-var Common = new CommonClass()
+var UrlParam = new UrlParamClass()
+
 
 interface IPullDownMenuItem {
 	Key: number | string
@@ -331,13 +444,13 @@ interface IPullDownMenuItem {
 	Data?: any
 }
 
-class StringUtil{
+class StringUtil {
 	/**val中是否包含 keyArr 中的某一个值, 如果有,返回该值在val中的位置*/
-	static IndexOfKeyArr(val:string, keyArr:string[]):number{
+	static IndexOfKeyArr(val: string, keyArr: string[]): number {
 		for (var i = 0; i < keyArr.length; i++) {
 			var key = keyArr[i]
 			var index = val.indexOf(key)
-			if(index>-1){
+			if (index > -1) {
 				return index
 			}
 		}

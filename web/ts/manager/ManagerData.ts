@@ -32,7 +32,7 @@ class ManagerDataClass {
         //
         this.InitSimulateData()
         //
-        var uid = Number(Common.UrlParamDict['uid'])
+        var uid = Number(UrlParam.GetParam('uid'))
         if (isNaN(uid)) {
             uid = 0
         }
@@ -171,6 +171,26 @@ class ManagerDataClass {
                 auth.CheckedChange = false
             }
         }
+    }
+    /**返回当前用户有权限的工程列表 */
+    GetProjectListHasAuth(): ProjectSingle[] {
+        var projList: ProjectSingle[];
+        if (ManagerData.MyAuth[AUTH.PROJECT_LIST]) {
+            projList = ManagerData.ProjectList
+        } else {
+            //只看自己所处的项目
+            projList = []
+            for (var i = 0; i < ManagerData.ProjectList.length; i++) {
+                var proj = ManagerData.ProjectList[i]
+                if (proj.UserList.IndexOfAttr(FieldName.Uid, ManagerData.CurrUser.Uid) > -1) {
+                    projList.push(proj)
+                    if (proj.MasterUid == ManagerData.CurrUser.Uid) {
+                        ManagerData.AddMyAuth(AUTH.PROJECT_EDIT)
+                    }
+                }
+            }
+        }
+        return projList
     }
 
     InitAllDepartmentDict(dpTree: DepartmentSingle[] = null) {

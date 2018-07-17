@@ -306,6 +306,21 @@ var CommonClass = /** @class */ (function () {
     };
     CommonClass.prototype.InitUrlParams = function () {
         this.UrlParamDict = {};
+        UrlParam.Init();
+    };
+    return CommonClass;
+}());
+var Common = new CommonClass();
+var UrlParamClass = /** @class */ (function () {
+    function UrlParamClass() {
+        this.ParamDict = {};
+    }
+    UrlParamClass.prototype.Init = function () {
+        window.addEventListener('popstate', this._parse.bind(this));
+        this._parse();
+    };
+    UrlParamClass.prototype._parse = function () {
+        this.ParamDict = {};
         var str = window.location.href.toLowerCase();
         var index0 = str.indexOf('?');
         if (index0 > -1) {
@@ -319,13 +334,118 @@ var CommonClass = /** @class */ (function () {
                     var key = spi.substring(0, equrlIndex);
                 var val = spi.substring(equrlIndex + 1, spi.length);
                 console.log("[debug]", key, ":[key]", val, ":[val]");
-                this.UrlParamDict[key.toLowerCase()] = val;
+                this.ParamDict[key.toLowerCase()] = val;
             }
         }
+        if (this.Callback != null) {
+            this.Callback();
+        }
     };
-    return CommonClass;
+    UrlParamClass.prototype._resetUrlParam = function () {
+        //重新生成url参数
+        var rs = [];
+        for (var key in this.ParamDict) {
+            rs.push(key + '=' + this.ParamDict[key]);
+        }
+        var param = rs.join('&');
+        var paramEncode = encodeURI(param);
+        history.pushState(param, null, '?' + paramEncode);
+    };
+    UrlParamClass.prototype.RemoveParamAll = function () {
+        var isChange = false;
+        for (var key in this.ParamDict) {
+            if (key == URL_PARAM_KEY.UID) {
+                //本项目略过这个
+            }
+            else {
+                delete this.ParamDict[key];
+                isChange = true;
+            }
+        }
+        if (isChange) {
+            this._resetUrlParam();
+        }
+    };
+    UrlParamClass.prototype.RemoveParam = function (key) {
+        this.SetParam(key, null);
+    };
+    UrlParamClass.prototype.SetParam = function (key, val) {
+        var isChange = false;
+        if (val == null) {
+            if (this.ParamDict.hasOwnProperty(key)) {
+                delete this.ParamDict[key];
+                isChange = true;
+            }
+        }
+        else {
+            if (this.ParamDict[key] != val) {
+                this.ParamDict[key] = val;
+                isChange = true;
+            }
+        }
+        if (isChange) {
+            this._resetUrlParam();
+        }
+    };
+    UrlParamClass.prototype.f = function (a) {
+        return 'a';
+    };
+    UrlParamClass.prototype.GetParam = function (key) {
+        var args = [];
+        for (var _i = 1; _i < arguments.length; _i++) {
+            args[_i - 1] = arguments[_i];
+        }
+        var _a = this._parseGetParam(args), defaultVal = _a[0], enabledValArr = _a[1];
+        var val;
+        if (this.ParamDict.hasOwnProperty(key)) {
+            val = this.ParamDict[key];
+            if (parseFloat(val).toString() == "NaN") {
+            }
+            else { //是数字需要转换成数字
+                val = parseFloat(val);
+            }
+        }
+        else {
+            val = defaultVal;
+        }
+        if (enabledValArr && enabledValArr.length > 0) {
+            if (enabledValArr.indexOf(val) > -1) { //有这个值就返回,否则返回默认值
+                return val;
+            }
+            else {
+                return defaultVal;
+            }
+        }
+        else {
+            return val;
+        }
+    };
+    UrlParamClass.prototype._parseGetParam = function (args) {
+        var defaultVal;
+        var enabledValArr;
+        switch (args.length) {
+            case 0:
+                defaultVal = null;
+                break;
+            case 1:
+                if (typeof (args[0]) == 'object') {
+                    enabledValArr = args[0];
+                    defaultVal = enabledValArr[0];
+                }
+                else {
+                    defaultVal = args[0];
+                }
+                break;
+            case 2:
+                defaultVal = args[0];
+                enabledValArr = args[1];
+                break;
+        }
+        return [defaultVal, enabledValArr];
+    };
+    return UrlParamClass;
 }());
-var Common = new CommonClass();
+var UrlParam = new UrlParamClass();
 var StringUtil = /** @class */ (function () {
     function StringUtil() {
     }

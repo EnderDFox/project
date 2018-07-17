@@ -7,6 +7,18 @@ type uint32 = number
 type uint64 = number
 type char = string
 
+/**
+ * 网址参数使用的key
+ */
+class URL_PARAM_KEY {
+    static UID = 'uid'
+    static PID = 'pid'
+    static PAGE = 'page'
+    static DID = 'did'
+    /**search key */
+    static FKEY = 'fkey'
+}
+
 //项目id  pm_project.pid
 enum PidFeild {
     AGAME = 1,
@@ -114,7 +126,7 @@ interface AuthorityModuleSingle {
     Modid?: int
     Name?: string
     AuthorityList?: AuthoritySingle[]
-    Description?:string //dsc/descr
+    Description?: string //dsc/descr
     //client
     CheckedChange?: boolean
 }
@@ -122,7 +134,7 @@ interface AuthoritySingle {
     Authid?: int
     Modid?: int
     Name?: string
-    Description?:string //dsc/descr
+    Description?: string //dsc/descr
     //client
     CheckedChange?: boolean
 }

@@ -1,3 +1,17 @@
+/**
+ * 网址参数使用的key
+ */
+var URL_PARAM_KEY = /** @class */ (function () {
+    function URL_PARAM_KEY() {
+    }
+    URL_PARAM_KEY.UID = 'uid';
+    URL_PARAM_KEY.PID = 'pid';
+    URL_PARAM_KEY.PAGE = 'page';
+    URL_PARAM_KEY.DID = 'did';
+    /**search key */
+    URL_PARAM_KEY.FKEY = 'fkey';
+    return URL_PARAM_KEY;
+}());
 //项目id  pm_project.pid
 var PidFeild;
 (function (PidFeild) {

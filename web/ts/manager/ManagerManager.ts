@@ -1,7 +1,7 @@
 /** 管理项目 部门 职位 权限 */
 enum ProjectEditPage {
-    User = 1,
-    Department = 2,
+    Department = 1,
+    User = 2,
 }
 
 class ManagerManagerClass {
@@ -16,7 +16,17 @@ class ManagerManagerClass {
     VueAuthList: CombinedVueInstance1<{ checkedChange: boolean }>
     VueSelectUser: CombinedVueInstance1<{ checkedChange: boolean, filterText: string }>
     Init() {
-        this.InitVue(this.ShowProjectList.bind(this))
+        UrlParam.Callback = this.UrlParamCallback.bind(this)
+        this.InitVue(this.UrlParamCallback.bind(this))
+    }
+    UrlParamCallback() {
+        var pid: number = UrlParam.GetParam(URL_PARAM_KEY.PID, 0)
+        var proj: ProjectSingle = ManagerData.GetProjectListHasAuth().FindOfAttr(FieldName.PID, pid)
+        if (proj) {
+            this.ShowProjectEdit(proj)
+        } else {
+            this.ShowProjectList()
+        }
     }
     InitVue(cb: () => void) {
         Loader.LoadVueTemplateList([`${this.VuePath}NavbarComp`], (tplList: string[]) => {
@@ -32,32 +42,20 @@ class ManagerManagerClass {
             cb()
         })
     }
+    /**没有权限访问的页面 通常是通过url进入的 */
+    ShowNoAuthPage() {
+        //TODO:
+    }
     ShowProjectList() {
         //
         Loader.LoadVueTemplate(this.VuePath + "ProjectList", (tpl: string) => {
-            var projList: ProjectSingle[];
-            if (ManagerData.MyAuth[AUTH.PROJECT_LIST]) {
-                projList = ManagerData.ProjectList
-            } else {
-                //只看自己所处的项目
-                projList = []
-                for (var i = 0; i < ManagerData.ProjectList.length; i++) {
-                    var proj = ManagerData.ProjectList[i]
-                    if (proj.UserList.IndexOfAttr(FieldName.Uid, ManagerData.CurrUser.Uid) > -1) {
-                        projList.push(proj)
-                        if (proj.MasterUid == ManagerData.CurrUser.Uid) {
-                            ManagerData.AddMyAuth(AUTH.PROJECT_EDIT)
-                        }
-                    }
-                }
-            }
             var vue = new Vue(
                 {
                     template: tpl,
                     data: {
                         newName: '',
                         auth: ManagerData.MyAuth,
-                        projectList: projList,
+                        projectList: ManagerData.GetProjectListHasAuth(),
                         currUser: ManagerData.CurrUser,
                     },
                     methods: {
@@ -114,10 +112,14 @@ class ManagerManagerClass {
                         onClose: () => {
                         },
                         onShowUserList: (proj: ProjectSingle, index: number) => {
-                            this.ShowProjectEdit(proj, ProjectEditPage.User)
+                            UrlParam.SetParam(URL_PARAM_KEY.PID, proj.Pid)
+                            UrlParam.SetParam(URL_PARAM_KEY.PAGE, ProjectEditPage.User)
+                            this.ShowProjectEdit(proj)
                         },
                         onShowDepartmentList: (proj: ProjectSingle, index: number) => {
-                            this.ShowProjectEdit(proj, ProjectEditPage.Department)
+                            UrlParam.SetParam(URL_PARAM_KEY.PID, proj.Pid)
+                            UrlParam.SetParam(URL_PARAM_KEY.PAGE, ProjectEditPage.Department)
+                            this.ShowProjectEdit(proj)
                         },
                         onDel: (e, proj: ProjectSingle, index: int) => {
                             Common.ConfirmDelete(() => {
@@ -152,9 +154,9 @@ class ManagerManagerClass {
             Common.InsertIntoPageDom(vue.$el)
         })
     }
-    ShowProjectEdit(proj: ProjectSingle, currPage: ProjectEditPage) {
+    ShowProjectEdit(proj: ProjectSingle) {
         Loader.LoadVueTemplateList([`${this.VuePath}ProjectEdit`], (tplList: string[]) => {
-            //TODO:
+            var currPage = UrlParam.GetParam(URL_PARAM_KEY.PAGE, [ProjectEditPage.Department, ProjectEditPage.User])
             ManagerData.DepartmentList.every((dept: DepartmentSingle): boolean => {
                 dept.Pid = proj.Pid
                 return true
@@ -165,7 +167,7 @@ class ManagerManagerClass {
                     template: tplList[0],
                     data: {
                         project: proj,
-                        projectList: this.VueProjectList.projectList,
+                        projectList: ManagerData.GetProjectListHasAuth(),
                         dpTree: ManagerData.DepartmentTree,
                         newName: proj ? proj.Name : '',
                         auth: ManagerData.MyAuth,
@@ -177,19 +179,24 @@ class ManagerManagerClass {
                             $(this.$el).hide()
                         },
                         onShowProjList: () => {
+                            UrlParam.RemoveParamAll()
                             $(this.VueProjectEdit.$el).hide()
                             this.ShowProjectList()
                         },
                         onShowCurrProj: () => {
                             if (this.VueProjectEdit.projectList.length == 1) {
                                 //仅在只有一个项目 可以用, 多个项目就是下拉列表了
-                                this.ShowProjectEdit(this.VueProjectEdit.project, ProjectEditPage.Department)
+                                UrlParam.SetParam(URL_PARAM_KEY.PAGE, ProjectEditPage.Department)
+                                this.ShowProjectEdit(this.VueProjectEdit.project)
                             }
                         },
                         onShowProj: (proj: ProjectSingle, index: number) => {
-                            this.ShowProjectEdit(proj, this.VueProjectEdit.currPage)
+                            UrlParam.SetParam(URL_PARAM_KEY.PID, proj.Pid)
+                            UrlParam.SetParam(URL_PARAM_KEY.PAGE, ProjectEditPage.Department)
+                            this.ShowProjectEdit(proj)
                         },
                         onShowPage: (page: ProjectEditPage) => {
+                            UrlParam.SetParam(URL_PARAM_KEY.PAGE, page)
                             this.VueProjectEdit.currPage = page;
                             this.ShowProjectEditPage(this.VueProjectEdit.currPage)
                         },
