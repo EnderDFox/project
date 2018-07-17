@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>router</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <script>
+        function OnLoad() {
+            console.log("[info]", "OnLoad");
+            console.log("[debug]", window.location.href, "window.location.href");
+            document.getElementById("div1").innerText = new Date().toTimeString() + "-" + Math.random()
+
+            var parseParam = function () {
+                console.log("[debug] on popstate:", window.location.href, ":[window.location.href]");
+                var url = window.location.href
+                var index = url.indexOf('?')
+                var param = url.substring(index + 1, url.length)
+                document.getElementById("div2").innerText = param
+            }
+            window.addEventListener('popstate', parseParam)
+            parseParam()
+        }
+        function OnClick(kind) {
+            console.log("[debug]", "a", kind);
+            // document.location.href = "?kind="+kind
+            history.pushState('state ' + kind, 'title ' + kind, '?kind=' + kind)
+            /*  switch (kind) {
+                 case 1:
+                     break;
+                 case 2:
+                     break;
+                 case 3:
+                     break;
+             } */
+        }
+    </script>
+    <style>
+        a {
+            cursor: pointer;
+            font-size: 32px;
+            margin: 20px;
+        }
+
+        div {
+            margin: 30px;
+        }
+    </style>
+</head>
+
+<body onload="OnLoad()">
+    <div id="div1">---</div>
+    <div id="div2">---</div>
+    <a onclick="OnClick(1)">1</a>
+    <a onclick="OnClick(2)">2</a>
+    <a onclick="OnClick(3)">3</a>
+</body>
+
+</html>
