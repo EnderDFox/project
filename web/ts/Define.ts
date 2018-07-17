@@ -114,6 +114,7 @@ interface AuthorityModuleSingle {
     Modid?: int
     Name?: string
     AuthorityList?: AuthoritySingle[]
+    Description?:string //dsc/descr
     //client
     CheckedChange?: boolean
 }
@@ -121,6 +122,7 @@ interface AuthoritySingle {
     Authid?: int
     Modid?: int
     Name?: string
+    Description?:string //dsc/descr
     //client
     CheckedChange?: boolean
 }

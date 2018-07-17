@@ -28,7 +28,7 @@
                         <div class="dropdown">
                             <button class="btn btn-default dropdown-toggle" type="button" :id="'ddmDpListDid'+index" data-toggle="dropdown" aria-haspopup="true"
                                 aria-expanded="true" :disabled="!auth['PROJECT_EDIT']">
-                                修改上级部门
+                                改变上级部门
                                 <span class="caret"></span>
                             </button>
                             <ul class="dropdown-menu" :aria-labelledby="'ddmDpListDid'+index">
@@ -38,7 +38,7 @@
                                 </li>
                                 <li role="separator " class="divider "></li>
                                 <li :class="{'disabled':dp.Fid==0}">
-                                    <a @click=" onEditParentDp(dp,null)">作为顶级部门</a>
+                                    <a @click=" onEditParentDp(dp,null)">改为顶级部门</a>
                                 </li>
                             </ul>
                         </div>

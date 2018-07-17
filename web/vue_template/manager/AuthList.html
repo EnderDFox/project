@@ -1,4 +1,4 @@
-<popup panel-heading="编辑权限">
+<popup panel-heading="分配权限">
     <p style="background-color:#FFFFFF; ">
         <table class="table table-hover table-bordered">
             <thead>
@@ -10,7 +10,7 @@
             <tbody>
                 <tr v-for="am,index in authorityModuleList" :key="am.Modid">
                     <td>
-                        <div class="checkbox">
+                        <div class="checkbox" :title="am.Description">
                             <label>
                                 <input type="checkbox" :name="am.Name" :value="am.Modid" :key="am.Modid" :checked="checkModChecked(checkedChange,am)" @click="onSwitchMod(am)"
                                 /> {{am.Name}}
@@ -18,12 +18,11 @@
                         </div>
                     </td>
                     <td>
-                        <div v-for="auth,index in am.AuthorityList" :key="auth.Authid" style="display:inline-block;">
-                            <div class="checkbox">
-                                <label>
-                                    <input type="checkbox" :name="auth.Name" :value="auth.Uid" :checked="checkAuthChecked(checkedChange,auth)" @click="onSwitchAuth($event,auth)"> {{auth.Name}}
-                                </label>
-                            </div>
+                        <div class="checkbox" v-for="auth,index in am.AuthorityList" :key="auth.Authid" style="display:inline-block;margin-left: 10px;margin-right: 10px;"
+                            :title="auth.Description">
+                            <label>
+                                <input type="checkbox" :name="auth.Name" :value="auth.Uid" :checked="checkAuthChecked(checkedChange,auth)" @click="onSwitchAuth($event,auth)"> {{auth.Name}}
+                            </label>
                         </div>
                     </td>
                 </tr>

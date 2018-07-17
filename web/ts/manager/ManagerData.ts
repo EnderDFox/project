@@ -52,32 +52,32 @@ class ManagerDataClass {
         //#
         this.AuthorityModuleList = [
             {
-                Modid: 1, Name: '模块A', AuthorityList: [
-                    { Authid: 101, Name: '权限A1' },
-                    { Authid: 102, Name: '权限A2' },
-                    { Authid: 103, Name: '权限A3' },
-                    { Authid: 104, Name: '权限A4' },
-                    { Authid: 105, Name: '权限A5' },
-                    { Authid: 106, Name: '权限A6' },
-                    { Authid: 107, Name: '权限A7' },
-                    { Authid: 108, Name: '权限A8' },
-                    { Authid: 109, Name: '权限A9' },
-                    { Authid: 110, Name: '权限A10' },
+                Modid: 1, Name: '工具管理', AuthorityList: [
+                    { Authid: 101, Name: '项目列表' },
+                    { Authid: 102, Name: '所属项目' },
+                    { Authid: 32, Name: '部门' },
+                    { Authid: 33, Name: '职位' },
+                    { Authid: 34, Name: '权限', Description: `功能,流程的修改` },
+                    { Authid: 35, Name: '成员', Description: `所在部门及其子部门内所有成员的增加,修改和删除` },
                 ]
             },
             {
-                Modid: 2, Name: '模块B', AuthorityList: [
-                    { Authid: 21, Name: '权限B1' },
-                    { Authid: 22, Name: '权限B2' },
+                Modid: 11, Name: '项目模块', AuthorityList: [
+                    { Authid: 1101, Name: '功能管理' },
+                    { Authid: 1102, Name: '工作编辑', Description: `工作的修改` },
+                    { Authid: 1103, Name: '工作评论', Description: `对已有工作进行评论` },
+                    { Authid: 1121, Name: '晨会管理' },
                 ]
             },
             {
-                Modid: 3, Name: '所属部门管理', AuthorityList: [
-                    { Authid: 31, Name: '成员管理' },
-                    { Authid: 32, Name: '职位管理' },
-                    { Authid: 33, Name: '子部门管理' },
-                    { Authid: 34, Name: '功能管理' },
-                    { Authid: 35, Name: '工作管理' },
+                Modid: 2, Name: '所属部门管理', Description: `该员工所在部门及其子部门的管理权限`,
+                AuthorityList: [
+                    { Authid: 21, Name: '成员管理', Description: `所在部门及其子部门内所有成员的增加/修改/删除` },
+                    { Authid: 22, Name: '职位管理' },
+                    { Authid: 23, Name: '子部门管理', Description: `可以增加/修改/删除子部门` },
+                    { Authid: 24, Name: '功能管理', Description: `功能/流程的修改` },
+                    { Authid: 25, Name: '工作编辑', Description: `工作的修改` },
+                    { Authid: 26, Name: '工作评论', Description: `对已有工作进行评论` },
                 ]
             },
         ]

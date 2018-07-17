@@ -41,32 +41,32 @@ var ManagerDataClass = /** @class */ (function () {
         //#
         this.AuthorityModuleList = [
             {
-                Modid: 1, Name: '模块A', AuthorityList: [
-                    { Authid: 101, Name: '权限A1' },
-                    { Authid: 102, Name: '权限A2' },
-                    { Authid: 103, Name: '权限A3' },
-                    { Authid: 104, Name: '权限A4' },
-                    { Authid: 105, Name: '权限A5' },
-                    { Authid: 106, Name: '权限A6' },
-                    { Authid: 107, Name: '权限A7' },
-                    { Authid: 108, Name: '权限A8' },
-                    { Authid: 109, Name: '权限A9' },
-                    { Authid: 110, Name: '权限A10' },
+                Modid: 1, Name: '工具管理', AuthorityList: [
+                    { Authid: 101, Name: '项目列表' },
+                    { Authid: 102, Name: '所属项目' },
+                    { Authid: 32, Name: '部门' },
+                    { Authid: 33, Name: '职位' },
+                    { Authid: 34, Name: '权限', Description: "\u529F\u80FD,\u6D41\u7A0B\u7684\u4FEE\u6539" },
+                    { Authid: 35, Name: '成员', Description: "\u6240\u5728\u90E8\u95E8\u53CA\u5176\u5B50\u90E8\u95E8\u5185\u6240\u6709\u6210\u5458\u7684\u589E\u52A0,\u4FEE\u6539\u548C\u5220\u9664" },
                 ]
             },
             {
-                Modid: 2, Name: '模块B', AuthorityList: [
-                    { Authid: 21, Name: '权限B1' },
-                    { Authid: 22, Name: '权限B2' },
+                Modid: 11, Name: '项目模块', AuthorityList: [
+                    { Authid: 1101, Name: '功能管理' },
+                    { Authid: 1102, Name: '工作编辑', Description: "\u5DE5\u4F5C\u7684\u4FEE\u6539" },
+                    { Authid: 1103, Name: '工作评论', Description: "\u5BF9\u5DF2\u6709\u5DE5\u4F5C\u8FDB\u884C\u8BC4\u8BBA" },
+                    { Authid: 1121, Name: '晨会管理' },
                 ]
             },
             {
-                Modid: 3, Name: '所属部门管理', AuthorityList: [
-                    { Authid: 31, Name: '成员管理' },
-                    { Authid: 32, Name: '职位管理' },
-                    { Authid: 33, Name: '子部门管理' },
-                    { Authid: 34, Name: '功能管理' },
-                    { Authid: 35, Name: '工作管理' },
+                Modid: 2, Name: '所属部门管理', Description: "\u8BE5\u5458\u5DE5\u6240\u5728\u90E8\u95E8\u53CA\u5176\u5B50\u90E8\u95E8\u7684\u7BA1\u7406\u6743\u9650",
+                AuthorityList: [
+                    { Authid: 21, Name: '成员管理', Description: "\u6240\u5728\u90E8\u95E8\u53CA\u5176\u5B50\u90E8\u95E8\u5185\u6240\u6709\u6210\u5458\u7684\u589E\u52A0/\u4FEE\u6539/\u5220\u9664" },
+                    { Authid: 22, Name: '职位管理' },
+                    { Authid: 23, Name: '子部门管理', Description: "\u53EF\u4EE5\u589E\u52A0/\u4FEE\u6539/\u5220\u9664\u5B50\u90E8\u95E8" },
+                    { Authid: 24, Name: '功能管理', Description: "\u529F\u80FD/\u6D41\u7A0B\u7684\u4FEE\u6539" },
+                    { Authid: 25, Name: '工作编辑', Description: "\u5DE5\u4F5C\u7684\u4FEE\u6539" },
+                    { Authid: 26, Name: '工作评论', Description: "\u5BF9\u5DF2\u6709\u5DE5\u4F5C\u8FDB\u884C\u8BC4\u8BBA" },
                 ]
             },
         ];
