@@ -206,7 +206,9 @@ var ManagerManagerClass = /** @class */ (function () {
     ManagerManagerClass.prototype.ShowProjectEditPage = function (currPage) {
         switch (currPage) {
             case ProjectEditPage.User:
-                this.ShowUserList(this.VueProjectEdit.project, '');
+                UrlParam.SetParam(URL_PARAM_KEY.PAGE, ProjectEditPage.User);
+                UrlParam.SetParam(URL_PARAM_KEY.FKEY, null);
+                this.ShowUserList(this.VueProjectEdit.project);
                 break;
             case ProjectEditPage.Department:
                 this.ShowDepartmentList(this.VueProjectEdit.project);
@@ -231,10 +233,13 @@ var ManagerManagerClass = /** @class */ (function () {
                         dp.Name = newName;
                     },
                     onEditPosition: function (dp, i0) {
-                        _this.ShowPositionList(dp);
+                        UrlParam.SetParam(URL_PARAM_KEY.DID, dp.Did);
+                        _this.ShowPositionList();
                     },
                     onEditUserList: function (dept) {
-                        _this.ShowUserList(proj, dept.Name);
+                        UrlParam.SetParam(URL_PARAM_KEY.PAGE, ProjectEditPage.User);
+                        UrlParam.SetParam(URL_PARAM_KEY.FKEY, dept.Name);
+                        _this.ShowUserList(proj);
                     },
                     GetDeptAllPosnList: ManagerData.GetDeptAllPosnList.bind(ManagerData),
                     GetDeptUserList: ManagerData.GetDeptUserList.bind(ManagerData),
@@ -345,8 +350,10 @@ var ManagerManagerClass = /** @class */ (function () {
             _this.VueDepartmentList = vue;
             //#show
             Common.InsertIntoDom(vue.$el, '#projectEditContent');
-            //TEST
-            // this.ShowPositionList(ManagerData.DepartmentList[0])
+            var _did = UrlParam.GetParam(URL_PARAM_KEY.DID, 0);
+            if (_did && ManagerData.DepartmentDict[_did]) {
+                _this.ShowPositionList();
+            }
         });
     };
     ManagerManagerClass.prototype.DepartmentOption = function (dp) {
@@ -391,8 +398,10 @@ var ManagerManagerClass = /** @class */ (function () {
         }
         return true;
     };
-    ManagerManagerClass.prototype.ShowPositionList = function (dept) {
+    ManagerManagerClass.prototype.ShowPositionList = function () {
         var _this = this;
+        var _did = UrlParam.GetParam(URL_PARAM_KEY.DID, 0);
+        var dept = ManagerData.DepartmentDict[_did];
         Loader.LoadVueTemplate(this.VuePath + "PositionList", function (tpl) {
             var vue = new Vue({
                 template: tpl,
@@ -423,7 +432,8 @@ var ManagerManagerClass = /** @class */ (function () {
                     },
                     departmentOption: _this.DepartmentOption.bind(_this),
                     onEditParentDp: function (dp, parentDp) {
-                        _this.ShowPositionList(parentDp);
+                        UrlParam.SetParam(URL_PARAM_KEY.DID, parentDp.Did);
+                        _this.ShowPositionList();
                     },
                     onEditName: function (e, pos, index) {
                         var newName = e.target.value;
@@ -433,7 +443,9 @@ var ManagerManagerClass = /** @class */ (function () {
                         _this.ShowAuthList(pos);
                     },
                     onEditUserList: function (posn) {
-                        _this.ShowUserList(ManagerData.GetProjByPid(dept.Pid), posn.Name, dept, posn);
+                        UrlParam.SetParam(URL_PARAM_KEY.PAGE, ProjectEditPage.User);
+                        UrlParam.SetParam(URL_PARAM_KEY.FKEY, posn.Name);
+                        _this.ShowUserList(ManagerData.GetProjByPid(dept.Pid), dept, posn);
                     },
                     CheckSortDown: function (pos, index) {
                         return index < dept.PositionList.length - 1;
@@ -553,10 +565,11 @@ var ManagerManagerClass = /** @class */ (function () {
             Common.Popup($(vue.$el));
         });
     };
-    ManagerManagerClass.prototype.ShowUserList = function (proj, filterText, backDept, backPosn) {
+    ManagerManagerClass.prototype.ShowUserList = function (proj, backDept, backPosn) {
         var _this = this;
         if (backDept === void 0) { backDept = null; }
         if (backPosn === void 0) { backPosn = null; }
+        var filterText = UrlParam.GetParam(URL_PARAM_KEY.FKEY, '');
         this.VueProjectEdit.currPage = ProjectEditPage.User;
         Loader.LoadVueTemplate(this.VuePath + "UserList", function (tpl) {
             var vue = new Vue({
@@ -613,7 +626,10 @@ var ManagerManagerClass = /** @class */ (function () {
                         return rs;
                     },
                     OnBackPosn: function () {
-                        _this.ShowPositionList(backDept);
+                        UrlParam.SetParam(URL_PARAM_KEY.PAGE, ProjectEditPage.Department);
+                        UrlParam.SetParam(URL_PARAM_KEY.DID, backDept.Did);
+                        UrlParam.SetParam(URL_PARAM_KEY.FKEY, null);
+                        _this.ShowPositionList();
                     },
                     ShowDpName: function (did) {
                         var dp = ManagerData.DepartmentDict[did];

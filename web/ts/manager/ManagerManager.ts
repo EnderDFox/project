@@ -212,7 +212,9 @@ class ManagerManagerClass {
     ShowProjectEditPage(currPage: ProjectEditPage) {
         switch (currPage) {
             case ProjectEditPage.User:
-                this.ShowUserList(this.VueProjectEdit.project, '')
+                UrlParam.SetParam(URL_PARAM_KEY.PAGE, ProjectEditPage.User)
+                UrlParam.SetParam(URL_PARAM_KEY.FKEY, null)
+                this.ShowUserList(this.VueProjectEdit.project)
                 break;
             case ProjectEditPage.Department:
                 this.ShowDepartmentList(this.VueProjectEdit.project)
@@ -237,10 +239,13 @@ class ManagerManagerClass {
                             dp.Name = newName
                         },
                         onEditPosition: (dp: DepartmentSingle, i0: int) => {
-                            this.ShowPositionList(dp)
+                            UrlParam.SetParam(URL_PARAM_KEY.DID, dp.Did)
+                            this.ShowPositionList()
                         },
                         onEditUserList: (dept: DepartmentSingle) => {
-                            this.ShowUserList(proj, dept.Name)
+                            UrlParam.SetParam(URL_PARAM_KEY.PAGE, ProjectEditPage.User)
+                            UrlParam.SetParam(URL_PARAM_KEY.FKEY, dept.Name)
+                            this.ShowUserList(proj)
                         },
                         GetDeptAllPosnList: ManagerData.GetDeptAllPosnList.bind(ManagerData),
                         GetDeptUserList: ManagerData.GetDeptUserList.bind(ManagerData),
@@ -353,8 +358,10 @@ class ManagerManagerClass {
             this.VueDepartmentList = vue
             //#show
             Common.InsertIntoDom(vue.$el, '#projectEditContent')
-            //TEST
-            // this.ShowPositionList(ManagerData.DepartmentList[0])
+            var _did = UrlParam.GetParam(URL_PARAM_KEY.DID, 0)
+            if (_did && ManagerData.DepartmentDict[_did]) {
+                this.ShowPositionList()
+            }
         })
     }
     DepartmentOption(dp: DepartmentSingle) {
@@ -398,7 +405,9 @@ class ManagerManagerClass {
         }
         return true
     }
-    ShowPositionList(dept: DepartmentSingle) {
+    ShowPositionList() {
+        var _did = UrlParam.GetParam(URL_PARAM_KEY.DID, 0)
+        var dept: DepartmentSingle = ManagerData.DepartmentDict[_did]
         Loader.LoadVueTemplate(this.VuePath + "PositionList", (tpl: string) => {
             var vue = new Vue(
                 {
@@ -431,7 +440,8 @@ class ManagerManagerClass {
                         },
                         departmentOption: this.DepartmentOption.bind(this),
                         onEditParentDp: (dp: DepartmentSingle, parentDp: DepartmentSingle) => {
-                            this.ShowPositionList(parentDp)
+                            UrlParam.SetParam(URL_PARAM_KEY.DID, parentDp.Did)
+                            this.ShowPositionList()
                         },
                         onEditName: (e: Event, pos: PositionSingle, index: number) => {
                             var newName = (e.target as HTMLInputElement).value
@@ -441,7 +451,9 @@ class ManagerManagerClass {
                             this.ShowAuthList(pos)
                         },
                         onEditUserList: (posn: PositionSingle) => {
-                            this.ShowUserList(ManagerData.GetProjByPid(dept.Pid), posn.Name, dept, posn)
+                            UrlParam.SetParam(URL_PARAM_KEY.PAGE, ProjectEditPage.User)
+                            UrlParam.SetParam(URL_PARAM_KEY.FKEY, posn.Name)
+                            this.ShowUserList(ManagerData.GetProjByPid(dept.Pid), dept, posn)
                         },
                         CheckSortDown: (pos: PositionSingle, index: int) => {
                             return index < dept.PositionList.length - 1
@@ -559,7 +571,8 @@ class ManagerManagerClass {
             Common.Popup($(vue.$el))
         })
     }
-    ShowUserList(proj: ProjectSingle, filterText: string, backDept: DepartmentSingle = null, backPosn: PositionSingle = null) {
+    ShowUserList(proj: ProjectSingle, backDept: DepartmentSingle = null, backPosn: PositionSingle = null) {
+        var filterText = UrlParam.GetParam(URL_PARAM_KEY.FKEY, '')
         this.VueProjectEdit.currPage = ProjectEditPage.User
         Loader.LoadVueTemplate(this.VuePath + "UserList", (tpl: string) => {
             var vue = new Vue(
@@ -614,7 +627,10 @@ class ManagerManagerClass {
                             return rs;
                         },
                         OnBackPosn: () => {
-                            this.ShowPositionList(backDept)
+                            UrlParam.SetParam(URL_PARAM_KEY.PAGE, ProjectEditPage.Department)
+                            UrlParam.SetParam(URL_PARAM_KEY.DID, backDept.Did)
+                            UrlParam.SetParam(URL_PARAM_KEY.FKEY, null)
+                            this.ShowPositionList()
                         },
                         ShowDpName: (did: number): string => {
                             var dp = ManagerData.DepartmentDict[did]
