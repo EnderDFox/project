@@ -155,7 +155,7 @@ class CommonClass {
 		dd.parentNode.insertBefore($dom.get(0), dd)
 	}
 	/**将资源插入pageDom内 */
-	InsertIntoDom(newDom: HTMLElement, container: string | HTMLElement): void {
+	InsertIntoDom(newDom: HTMLElement, container: string | HTMLElement | Element | Element[] | Vue | Vue[]): void {
 		var _c: HTMLElement = typeof (container) == 'string' ? $(container).get(0) : container as HTMLElement;
 		_c.innerHTML = ''
 		_c.appendChild(newDom)

@@ -1,6 +1,6 @@
 <!-- 编辑模板-功能列表 -->
 <div>
-    <navbar-comp :currUser="currUser" isProjList="1"></navbar-comp>
+    <NavbarComp></NavbarComp>
     <table class="table table-hover" v-if="projectList.length>0">
         <thead>
             <thead>
@@ -43,8 +43,8 @@
                         </button>增加成员</span>
                 </td>
                 <!--  <td class="text-center text-middle" :title="GetProjUserCountTitle(proj)">
-                    {{GetProjUserCount(proj)}}
-                </td> -->
+                        {{GetProjUserCount(proj)}}
+                    </td> -->
                 <td>
                     <button class="btn btn-default " type="button" @click="onShowDepartmentList(proj,index)" :title="'该项目有'+GetProjAllDeptList(proj).length+'个部门'">
                         <span class="glyphicon glyphicon-th-list" aria-hidden="true ">
@@ -60,13 +60,13 @@
                     </button>
                 </td>
                 <!--  <td>
-                    <button class="btn btn-default" type="button" title="部门管理" @click="onShowDepartmentList(proj,index)">
-                        <span class="glyphicon glyphicon-th-list" aria-hidden="true"></span>
-                    </button>
-                    <button class="btn btn-default" type="button" title="成员管理" @click="onShowUserList(proj,index)">
-                        <span class="glyphicon glyphicon-user" aria-hidden="true"></span>
-                    </button>
-                </td> -->
+                        <button class="btn btn-default" type="button" title="部门管理" @click="onShowDepartmentList(proj,index)">
+                            <span class="glyphicon glyphicon-th-list" aria-hidden="true"></span>
+                        </button>
+                        <button class="btn btn-default" type="button" title="成员管理" @click="onShowUserList(proj,index)">
+                            <span class="glyphicon glyphicon-user" aria-hidden="true"></span>
+                        </button>
+                    </td> -->
                 <td>
                     <button class="btn btn-warning" type="button" title="删除项目" @click="onDel($event,proj,index)" :disabled="!(auth['PROJECT_EDIT'])">
                         <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
@@ -88,13 +88,7 @@
                         <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
                     </button>
                 </td>
-                <td>
-                </td>
-                <td>
-                </td>
-                <td>
-                </td>
-                <td>
+                <td colspan="3">
                 </td>
             </tr>
         </transition-group>

@@ -1,9 +1,10 @@
 /** 管理项目 部门 职位 权限 */
-var ProjectEditPage;
-(function (ProjectEditPage) {
-    ProjectEditPage[ProjectEditPage["Department"] = 1] = "Department";
-    ProjectEditPage[ProjectEditPage["User"] = 2] = "User";
-})(ProjectEditPage || (ProjectEditPage = {}));
+var ProjectEditPageIndex;
+(function (ProjectEditPageIndex) {
+    ProjectEditPageIndex[ProjectEditPageIndex["Department"] = 1] = "Department";
+    ProjectEditPageIndex[ProjectEditPageIndex["Position"] = 2] = "Position";
+    ProjectEditPageIndex[ProjectEditPageIndex["User"] = 3] = "User";
+})(ProjectEditPageIndex || (ProjectEditPageIndex = {}));
 var ManagerManagerClass = /** @class */ (function () {
     function ManagerManagerClass() {
         this.VuePath = "manager/";
@@ -26,14 +27,26 @@ var ManagerManagerClass = /** @class */ (function () {
         }
     };
     ManagerManagerClass.prototype.InitVue = function (cb) {
+        var _this = this;
         Loader.LoadVueTemplateList([this.VuePath + "NavbarComp"], function (tplList) {
             //注册组件
-            Vue.component('navbar-comp', {
+            Vue.component('NavbarComp', {
                 template: tplList[0],
-                props: {
-                    isProjList: String,
-                    currUser: Object,
+                props: {},
+                data: function () {
+                    return {
+                        currUser: ManagerData.CurrUser,
+                    };
                 },
+                methods: {
+                    OnShowProjList: function () {
+                        if (_this.VueProjectEdit) {
+                            $(_this.VueProjectEdit.$el).remove();
+                        }
+                        UrlParam.RemoveAll();
+                        _this.ShowProjectList();
+                    },
+                }
             });
             //#
             cb();
@@ -50,10 +63,10 @@ var ManagerManagerClass = /** @class */ (function () {
             var vue = new Vue({
                 template: tpl,
                 data: {
-                    newName: '',
                     auth: ManagerData.MyAuth,
-                    projectList: ManagerData.GetProjectListHasAuth(),
                     currUser: ManagerData.CurrUser,
+                    newName: '',
+                    projectList: ManagerData.GetProjectListHasAuth(),
                 },
                 methods: {
                     GetDateStr: function (timeStamp) {
@@ -111,11 +124,11 @@ var ManagerManagerClass = /** @class */ (function () {
                     onClose: function () {
                     },
                     onShowUserList: function (proj, index) {
-                        UrlParam.Set(URL_PARAM_KEY.PID, proj.Pid).Set(URL_PARAM_KEY.PAGE, ProjectEditPage.User).Reset();
+                        UrlParam.Set(URL_PARAM_KEY.PID, proj.Pid).Set(URL_PARAM_KEY.PAGE, ProjectEditPageIndex.User).Reset();
                         _this.ShowProjectEdit();
                     },
                     onShowDepartmentList: function (proj, index) {
-                        UrlParam.Set(URL_PARAM_KEY.PID, proj.Pid).Set(URL_PARAM_KEY.PAGE, ProjectEditPage.Department).Reset();
+                        UrlParam.Set(URL_PARAM_KEY.PID, proj.Pid).Set(URL_PARAM_KEY.PAGE, ProjectEditPageIndex.Department).Reset();
                         _this.ShowProjectEdit();
                     },
                     onDel: function (e, proj, index) {
@@ -152,7 +165,7 @@ var ManagerManagerClass = /** @class */ (function () {
         var _this = this;
         var proj = ManagerData.GetProjectListHasAuth().FindOfAttr(FieldName.PID, UrlParam.Get(URL_PARAM_KEY.PID));
         Loader.LoadVueTemplateList([this.VuePath + "ProjectEdit"], function (tplList) {
-            var currPage = UrlParam.Get(URL_PARAM_KEY.PAGE, [ProjectEditPage.Department, ProjectEditPage.User]);
+            var currPage = UrlParam.Get(URL_PARAM_KEY.PAGE, [ProjectEditPageIndex.Department, ProjectEditPageIndex.User]);
             ManagerData.DepartmentList.every(function (dept) {
                 dept.Pid = proj.Pid;
                 return true;
@@ -161,29 +174,24 @@ var ManagerManagerClass = /** @class */ (function () {
             var vue = new Vue({
                 template: tplList[0],
                 data: {
-                    project: proj,
+                    auth: ManagerData.MyAuth,
+                    currUser: ManagerData.CurrUser,
+                    currPage: currPage,
                     projectList: ManagerData.GetProjectListHasAuth(),
+                    project: proj,
                     dpTree: ManagerData.DepartmentTree,
                     newName: proj ? proj.Name : '',
-                    auth: ManagerData.MyAuth,
-                    currPage: currPage,
-                    currUser: ManagerData.CurrUser,
                 },
                 methods: {
-                    onShowProjList: function () {
-                        UrlParam.RemoveAll();
-                        $(_this.VueProjectEdit.$el).hide();
-                        _this.ShowProjectList();
-                    },
                     onShowCurrProj: function () {
                         if (_this.VueProjectEdit.projectList.length == 1) {
                             //仅在只有一个项目 可以用, 多个项目就是下拉列表了
-                            UrlParam.Set(URL_PARAM_KEY.PAGE, ProjectEditPage.Department).Reset();
+                            UrlParam.Set(URL_PARAM_KEY.PAGE, ProjectEditPageIndex.Department).Reset();
                             _this.ShowProjectEdit();
                         }
                     },
                     onShowProj: function (proj, index) {
-                        UrlParam.Set(URL_PARAM_KEY.PID, proj.Pid).Set(URL_PARAM_KEY.PAGE, ProjectEditPage.Department).Reset();
+                        UrlParam.Set(URL_PARAM_KEY.PID, proj.Pid).Set(URL_PARAM_KEY.PAGE, ProjectEditPageIndex.Department).Reset();
                         _this.ShowProjectEdit();
                     },
                     onShowPage: function (page) {
@@ -200,26 +208,26 @@ var ManagerManagerClass = /** @class */ (function () {
         });
     };
     ManagerManagerClass.prototype.ShowProjectEditPage = function () {
-        var currPage = UrlParam.Get(URL_PARAM_KEY.PAGE, [ProjectEditPage.Department, ProjectEditPage.User]);
+        var currPage = UrlParam.Get(URL_PARAM_KEY.PAGE, [ProjectEditPageIndex.Department, ProjectEditPageIndex.User]);
         switch (currPage) {
-            case ProjectEditPage.User:
+            case ProjectEditPageIndex.User:
                 this.ShowUserList(this.VueProjectEdit.project);
                 break;
-            case ProjectEditPage.Department:
+            case ProjectEditPageIndex.Department:
                 this.ShowDepartmentList(this.VueProjectEdit.project);
                 break;
         }
     };
     ManagerManagerClass.prototype.ShowDepartmentList = function (proj) {
         var _this = this;
-        this.VueProjectEdit.currPage = ProjectEditPage.Department;
+        this.VueProjectEdit.currPage = ProjectEditPageIndex.Department;
         Loader.LoadVueTemplate(this.VuePath + "DepartmentList", function (tpl) {
             var vue = new Vue({
                 template: tpl,
                 data: {
+                    auth: ManagerData.MyAuth,
                     allDepartmentList: ManagerData.DepartmentList,
                     newName: '',
-                    auth: ManagerData.MyAuth,
                 },
                 methods: {
                     departmentOption: _this.DepartmentOption.bind(_this),
@@ -232,7 +240,7 @@ var ManagerManagerClass = /** @class */ (function () {
                         _this.ShowPositionList();
                     },
                     onEditUserList: function (dept) {
-                        UrlParam.Set(URL_PARAM_KEY.PAGE, ProjectEditPage.User).Set(URL_PARAM_KEY.FKEY, dept.Name).Reset();
+                        UrlParam.Set(URL_PARAM_KEY.PAGE, ProjectEditPageIndex.User).Set(URL_PARAM_KEY.FKEY, dept.Name).Reset();
                         _this.ShowUserList(proj);
                     },
                     GetDeptAllPosnList: ManagerData.GetDeptAllPosnList.bind(ManagerData),
@@ -343,7 +351,7 @@ var ManagerManagerClass = /** @class */ (function () {
             }).$mount();
             _this.VueDepartmentList = vue;
             //#show
-            Common.InsertIntoDom(vue.$el, '#projectEditContent');
+            Common.InsertIntoDom(vue.$el, _this.VueProjectEdit.$refs.pageContent);
             var _did = UrlParam.Get(URL_PARAM_KEY.DID, 0);
             if (_did && ManagerData.DepartmentDict[_did]) {
                 _this.ShowPositionList();
@@ -400,10 +408,10 @@ var ManagerManagerClass = /** @class */ (function () {
             var vue = new Vue({
                 template: tpl,
                 data: {
+                    auth: ManagerData.MyAuth,
+                    allDepartmentList: ManagerData.DepartmentList,
                     dp: dept,
                     newName: "",
-                    allDepartmentList: ManagerData.DepartmentList,
-                    auth: ManagerData.MyAuth,
                 },
                 methods: {
                     dpFullName: function (dp) {
@@ -437,7 +445,7 @@ var ManagerManagerClass = /** @class */ (function () {
                         _this.ShowAuthList(pos);
                     },
                     onEditUserList: function (posn) {
-                        UrlParam.Set(URL_PARAM_KEY.PAGE, ProjectEditPage.User).Set(URL_PARAM_KEY.FKEY, posn.Name).Reset();
+                        UrlParam.Set(URL_PARAM_KEY.PAGE, ProjectEditPageIndex.User).Set(URL_PARAM_KEY.FKEY, posn.Name).Reset();
                         _this.ShowUserList(ManagerData.GetProjByPid(dept.Pid), dept, posn);
                     },
                     CheckSortDown: function (pos, index) {
@@ -475,7 +483,7 @@ var ManagerManagerClass = /** @class */ (function () {
             }).$mount();
             _this.VuePositionList = vue;
             //#show
-            Common.InsertIntoDom(vue.$el, '#projectEditContent');
+            Common.InsertIntoDom(vue.$el, _this.VueProjectEdit.$refs.pageContent);
         });
     };
     ManagerManagerClass.prototype.ShowAuthList = function (pos) {
@@ -499,10 +507,10 @@ var ManagerManagerClass = /** @class */ (function () {
             var vue = new Vue({
                 template: tpl,
                 data: {
+                    auth: ManagerData.MyAuth,
                     pos: pos,
                     authorityModuleList: ManagerData.AuthorityModuleList,
                     checkedChange: false,
-                    auth: ManagerData.MyAuth,
                 },
                 methods: {
                     checkModChecked: _checkModChecked.bind(_this),
@@ -564,18 +572,18 @@ var ManagerManagerClass = /** @class */ (function () {
         if (backPosn === void 0) { backPosn = null; }
         var filterText = UrlParam.Get(URL_PARAM_KEY.FKEY, '');
         console.log("[debug]", filterText, ":[filterText]");
-        this.VueProjectEdit.currPage = ProjectEditPage.User;
+        this.VueProjectEdit.currPage = ProjectEditPageIndex.User;
         Loader.LoadVueTemplate(this.VuePath + "UserList", function (tpl) {
             var vue = new Vue({
                 template: tpl,
                 data: {
-                    otherUserList: ArrayUtil.SubByAttr(ManagerData.UserList, proj.UserList, FieldName.Uid),
-                    userList: proj.UserList,
-                    allDepartmentList: ManagerData.DepartmentList,
-                    newUserUid: 0,
                     auth: ManagerData.MyAuth,
-                    filterText: filterText,
+                    userList: proj.UserList,
+                    otherUserList: ArrayUtil.SubByAttr(ManagerData.UserList, proj.UserList, FieldName.Uid),
+                    allDepartmentList: ManagerData.DepartmentList,
                     backPosn: backPosn,
+                    filterText: filterText,
+                    newUserUid: 0,
                 },
                 methods: {
                     filterUserList: function (userList, filterText) {
@@ -621,7 +629,7 @@ var ManagerManagerClass = /** @class */ (function () {
                         return rs;
                     },
                     OnBackPosn: function () {
-                        UrlParam.Set(URL_PARAM_KEY.PAGE, ProjectEditPage.Department).Set(URL_PARAM_KEY.DID, backDept.Did).Set(URL_PARAM_KEY.FKEY, null).Reset();
+                        UrlParam.Set(URL_PARAM_KEY.PAGE, ProjectEditPageIndex.Department).Set(URL_PARAM_KEY.DID, backDept.Did).Set(URL_PARAM_KEY.FKEY, null).Reset();
                         _this.ShowPositionList();
                     },
                     ShowDpName: function (did) {
@@ -702,7 +710,7 @@ var ManagerManagerClass = /** @class */ (function () {
             }).$mount();
             _this.VueUserList = vue;
             //#show
-            Common.InsertIntoDom(vue.$el, '#projectEditContent');
+            Common.InsertIntoDom(vue.$el, _this.VueProjectEdit.$refs.pageContent);
         });
     };
     /**选择 用户 */
@@ -732,10 +740,10 @@ var ManagerManagerClass = /** @class */ (function () {
             var vue = new Vue({
                 template: tpl,
                 data: {
-                    userList: userList,
-                    checkedChange: false,
                     auth: ManagerData.MyAuth,
+                    userList: userList,
                     filterText: '',
+                    checkedChange: false,
                 },
                 methods: {
                     GetFilterList: _GetFilterList.bind(_this),

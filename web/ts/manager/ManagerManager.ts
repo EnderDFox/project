@@ -1,13 +1,14 @@
 /** 管理项目 部门 职位 权限 */
-enum ProjectEditPage {
+enum ProjectEditPageIndex {
     Department = 1,
-    User = 2,
+    Position = 2,
+    User = 3,
 }
 
 class ManagerManagerClass {
     VuePath = "manager/"
     VueProjectList: CombinedVueInstance1<{ auth: { [key: number]: boolean }, projectList: ProjectSingle[], newName: string }>
-    VueProjectEdit: CombinedVueInstance1<{ projectList: ProjectSingle[], project: ProjectSingle, newName: string, dpTree: DepartmentSingle[], currPage: ProjectEditPage }>
+    VueProjectEdit: CombinedVueInstance1<{ projectList: ProjectSingle[], project: ProjectSingle, newName: string, dpTree: DepartmentSingle[], currPage: ProjectEditPageIndex }>
     VueUserList: CombinedVueInstance1<{ userList: UserSingle[], otherUserList: UserSingle[], newUserUid: number, filterText: string }>
     VueDepartmentList: CombinedVueInstance1<{ allDepartmentList: DepartmentSingle[], newName: string }>
     NewDepartmentUuid = 100001
@@ -32,12 +33,24 @@ class ManagerManagerClass {
     InitVue(cb: () => void) {
         Loader.LoadVueTemplateList([`${this.VuePath}NavbarComp`], (tplList: string[]) => {
             //注册组件
-            Vue.component('navbar-comp', {
+            Vue.component('NavbarComp', {
                 template: tplList[0],
                 props: {
-                    isProjList: String,
-                    currUser: Object,
                 },
+                data: function () {
+                    return {
+                        currUser: ManagerData.CurrUser,
+                    }
+                },
+                methods: {
+                    OnShowProjList: () => {
+                        if (this.VueProjectEdit) {
+                            $(this.VueProjectEdit.$el).remove()
+                        }
+                        UrlParam.RemoveAll()
+                        this.ShowProjectList()
+                    },
+                }
             })
             //#
             cb()
@@ -54,10 +67,10 @@ class ManagerManagerClass {
                 {
                     template: tpl,
                     data: {
-                        newName: '',
                         auth: ManagerData.MyAuth,
-                        projectList: ManagerData.GetProjectListHasAuth(),
                         currUser: ManagerData.CurrUser,
+                        newName: '',
+                        projectList: ManagerData.GetProjectListHasAuth(),
                     },
                     methods: {
                         GetDateStr: (timeStamp: number): string => {
@@ -113,11 +126,11 @@ class ManagerManagerClass {
                         onClose: () => {
                         },
                         onShowUserList: (proj: ProjectSingle, index: number) => {
-                            UrlParam.Set(URL_PARAM_KEY.PID, proj.Pid).Set(URL_PARAM_KEY.PAGE, ProjectEditPage.User).Reset()
+                            UrlParam.Set(URL_PARAM_KEY.PID, proj.Pid).Set(URL_PARAM_KEY.PAGE, ProjectEditPageIndex.User).Reset()
                             this.ShowProjectEdit()
                         },
                         onShowDepartmentList: (proj: ProjectSingle, index: number) => {
-                            UrlParam.Set(URL_PARAM_KEY.PID, proj.Pid).Set(URL_PARAM_KEY.PAGE, ProjectEditPage.Department).Reset()
+                            UrlParam.Set(URL_PARAM_KEY.PID, proj.Pid).Set(URL_PARAM_KEY.PAGE, ProjectEditPageIndex.Department).Reset()
                             this.ShowProjectEdit()
                         },
                         onDel: (e, proj: ProjectSingle, index: int) => {
@@ -156,7 +169,7 @@ class ManagerManagerClass {
     ShowProjectEdit() {
         var proj: ProjectSingle = ManagerData.GetProjectListHasAuth().FindOfAttr(FieldName.PID, UrlParam.Get(URL_PARAM_KEY.PID))
         Loader.LoadVueTemplateList([`${this.VuePath}ProjectEdit`], (tplList: string[]) => {
-            var currPage = UrlParam.Get(URL_PARAM_KEY.PAGE, [ProjectEditPage.Department, ProjectEditPage.User])
+            var currPage = UrlParam.Get(URL_PARAM_KEY.PAGE, [ProjectEditPageIndex.Department, ProjectEditPageIndex.User])
             ManagerData.DepartmentList.every((dept: DepartmentSingle): boolean => {
                 dept.Pid = proj.Pid
                 return true
@@ -166,32 +179,27 @@ class ManagerManagerClass {
                 {
                     template: tplList[0],
                     data: {
-                        project: proj,
+                        auth: ManagerData.MyAuth,
+                        currUser: ManagerData.CurrUser,
+                        currPage: currPage,
                         projectList: ManagerData.GetProjectListHasAuth(),
+                        project: proj,
                         dpTree: ManagerData.DepartmentTree,
                         newName: proj ? proj.Name : '',
-                        auth: ManagerData.MyAuth,
-                        currPage: currPage,
-                        currUser: ManagerData.CurrUser,
                     },
                     methods: {
-                        onShowProjList: () => {
-                            UrlParam.RemoveAll()
-                            $(this.VueProjectEdit.$el).hide()
-                            this.ShowProjectList()
-                        },
                         onShowCurrProj: () => {
                             if (this.VueProjectEdit.projectList.length == 1) {
                                 //仅在只有一个项目 可以用, 多个项目就是下拉列表了
-                                UrlParam.Set(URL_PARAM_KEY.PAGE, ProjectEditPage.Department).Reset()
+                                UrlParam.Set(URL_PARAM_KEY.PAGE, ProjectEditPageIndex.Department).Reset()
                                 this.ShowProjectEdit()
                             }
                         },
                         onShowProj: (proj: ProjectSingle, index: number) => {
-                            UrlParam.Set(URL_PARAM_KEY.PID, proj.Pid).Set(URL_PARAM_KEY.PAGE, ProjectEditPage.Department).Reset()
+                            UrlParam.Set(URL_PARAM_KEY.PID, proj.Pid).Set(URL_PARAM_KEY.PAGE, ProjectEditPageIndex.Department).Reset()
                             this.ShowProjectEdit()
                         },
-                        onShowPage: (page: ProjectEditPage) => {
+                        onShowPage: (page: ProjectEditPageIndex) => {
                             UrlParam.Set(URL_PARAM_KEY.PAGE, page).Remove(URL_PARAM_KEY.DID).Remove(URL_PARAM_KEY.FKEY).Reset()
                             this.VueProjectEdit.currPage = page;
                             this.ShowProjectEditPage()
@@ -206,26 +214,26 @@ class ManagerManagerClass {
         })
     }
     ShowProjectEditPage() {
-        var currPage: ProjectEditPage = UrlParam.Get(URL_PARAM_KEY.PAGE, [ProjectEditPage.Department, ProjectEditPage.User])
+        var currPage: ProjectEditPageIndex = UrlParam.Get(URL_PARAM_KEY.PAGE, [ProjectEditPageIndex.Department, ProjectEditPageIndex.User])
         switch (currPage) {
-            case ProjectEditPage.User:
+            case ProjectEditPageIndex.User:
                 this.ShowUserList(this.VueProjectEdit.project)
                 break;
-            case ProjectEditPage.Department:
+            case ProjectEditPageIndex.Department:
                 this.ShowDepartmentList(this.VueProjectEdit.project)
                 break;
         }
     }
     ShowDepartmentList(proj: ProjectSingle) {
-        this.VueProjectEdit.currPage = ProjectEditPage.Department
+        this.VueProjectEdit.currPage = ProjectEditPageIndex.Department
         Loader.LoadVueTemplate(this.VuePath + "DepartmentList", (tpl: string) => {
             var vue = new Vue(
                 {
                     template: tpl,
                     data: {
+                        auth: ManagerData.MyAuth,
                         allDepartmentList: ManagerData.DepartmentList,
                         newName: '',
-                        auth: ManagerData.MyAuth,
                     },
                     methods: {
                         departmentOption: this.DepartmentOption.bind(this),
@@ -238,7 +246,7 @@ class ManagerManagerClass {
                             this.ShowPositionList()
                         },
                         onEditUserList: (dept: DepartmentSingle) => {
-                            UrlParam.Set(URL_PARAM_KEY.PAGE, ProjectEditPage.User).Set(URL_PARAM_KEY.FKEY, dept.Name).Reset()
+                            UrlParam.Set(URL_PARAM_KEY.PAGE, ProjectEditPageIndex.User).Set(URL_PARAM_KEY.FKEY, dept.Name).Reset()
                             this.ShowUserList(proj)
                         },
                         GetDeptAllPosnList: ManagerData.GetDeptAllPosnList.bind(ManagerData),
@@ -351,7 +359,7 @@ class ManagerManagerClass {
             ).$mount()
             this.VueDepartmentList = vue
             //#show
-            Common.InsertIntoDom(vue.$el, '#projectEditContent')
+            Common.InsertIntoDom(vue.$el, this.VueProjectEdit.$refs.pageContent)
             var _did = UrlParam.Get(URL_PARAM_KEY.DID, 0)
             if (_did && ManagerData.DepartmentDict[_did]) {
                 this.ShowPositionList()
@@ -407,10 +415,10 @@ class ManagerManagerClass {
                 {
                     template: tpl,
                     data: {
+                        auth: ManagerData.MyAuth,
+                        allDepartmentList: ManagerData.DepartmentList,
                         dp: dept,
                         newName: ``,
-                        allDepartmentList: ManagerData.DepartmentList,
-                        auth: ManagerData.MyAuth,
                     },
                     methods: {
                         dpFullName: (dp: DepartmentSingle) => {
@@ -445,7 +453,7 @@ class ManagerManagerClass {
                             this.ShowAuthList(pos)
                         },
                         onEditUserList: (posn: PositionSingle) => {
-                            UrlParam.Set(URL_PARAM_KEY.PAGE, ProjectEditPage.User).Set(URL_PARAM_KEY.FKEY, posn.Name).Reset()
+                            UrlParam.Set(URL_PARAM_KEY.PAGE, ProjectEditPageIndex.User).Set(URL_PARAM_KEY.FKEY, posn.Name).Reset()
                             this.ShowUserList(ManagerData.GetProjByPid(dept.Pid), dept, posn)
                         },
                         CheckSortDown: (pos: PositionSingle, index: int) => {
@@ -484,7 +492,7 @@ class ManagerManagerClass {
             ).$mount()
             this.VuePositionList = vue
             //#show
-            Common.InsertIntoDom(vue.$el, '#projectEditContent')
+            Common.InsertIntoDom(vue.$el, this.VueProjectEdit.$refs.pageContent)
         })
     }
     ShowAuthList(pos: PositionSingle) {
@@ -507,10 +515,10 @@ class ManagerManagerClass {
             var vue = new Vue({
                 template: tpl,
                 data: {
+                    auth: ManagerData.MyAuth,
                     pos: pos,
                     authorityModuleList: ManagerData.AuthorityModuleList,
                     checkedChange: false,//为了让check函数被触发,
-                    auth: ManagerData.MyAuth,
                 },
                 methods: {
                     checkModChecked: _checkModChecked.bind(this),
@@ -567,19 +575,19 @@ class ManagerManagerClass {
     ShowUserList(proj: ProjectSingle, backDept: DepartmentSingle = null, backPosn: PositionSingle = null) {
         var filterText = UrlParam.Get(URL_PARAM_KEY.FKEY, '')
         console.log("[debug]", filterText, ":[filterText]")
-        this.VueProjectEdit.currPage = ProjectEditPage.User
+        this.VueProjectEdit.currPage = ProjectEditPageIndex.User
         Loader.LoadVueTemplate(this.VuePath + "UserList", (tpl: string) => {
             var vue = new Vue(
                 {
                     template: tpl,
                     data: {
-                        otherUserList: ArrayUtil.SubByAttr(ManagerData.UserList, proj.UserList, FieldName.Uid),
-                        userList: proj.UserList,
-                        allDepartmentList: ManagerData.DepartmentList,
-                        newUserUid: 0,
                         auth: ManagerData.MyAuth,
-                        filterText: filterText,
+                        userList: proj.UserList,
+                        otherUserList: ArrayUtil.SubByAttr(ManagerData.UserList, proj.UserList, FieldName.Uid),
+                        allDepartmentList: ManagerData.DepartmentList,
                         backPosn: backPosn,
+                        filterText: filterText,
+                        newUserUid: 0,
                     },
                     methods: {
                         filterUserList: function (userList: UserSingle[], filterText: string): UserSingle[] {
@@ -622,7 +630,7 @@ class ManagerManagerClass {
                             return rs;
                         },
                         OnBackPosn: () => {
-                            UrlParam.Set(URL_PARAM_KEY.PAGE, ProjectEditPage.Department).Set(URL_PARAM_KEY.DID, backDept.Did).Set(URL_PARAM_KEY.FKEY, null).Reset()
+                            UrlParam.Set(URL_PARAM_KEY.PAGE, ProjectEditPageIndex.Department).Set(URL_PARAM_KEY.DID, backDept.Did).Set(URL_PARAM_KEY.FKEY, null).Reset()
                             this.ShowPositionList()
                         },
                         ShowDpName: (did: number): string => {
@@ -701,7 +709,7 @@ class ManagerManagerClass {
             ).$mount()
             this.VueUserList = vue
             //#show
-            Common.InsertIntoDom(vue.$el, '#projectEditContent')
+            Common.InsertIntoDom(vue.$el, this.VueProjectEdit.$refs.pageContent)
         })
     }
     /**选择 用户 */
@@ -729,10 +737,10 @@ class ManagerManagerClass {
             var vue = new Vue({
                 template: tpl,
                 data: {
-                    userList: userList,
-                    checkedChange: false,//为了让check函数被触发,
                     auth: ManagerData.MyAuth,
+                    userList: userList,
                     filterText: '',
+                    checkedChange: false,//为了让check函数被触发,
                 },
                 methods: {
                     GetFilterList: _GetFilterList.bind(this),
