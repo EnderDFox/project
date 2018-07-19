@@ -463,8 +463,8 @@ var ManagerManagerClass = /** @class */ (function () {
                     onBackDepartmentList: function () {
                         _this.ShowDepartmentList(ManagerData.GetProjByPid(dept.Pid));
                     },
-                    onEditParentDp: function (dp, parentDp) {
-                        UrlParam.Set(URL_PARAM_KEY.DID, parentDp.Did).Reset();
+                    OnDeptChange: function (toDept) {
+                        UrlParam.Set(URL_PARAM_KEY.DID, toDept.Did).Reset();
                         _this.ShowPositionList();
                     },
                     onEditName: function (e, pos, index) {
@@ -701,9 +701,11 @@ var ManagerManagerClass = /** @class */ (function () {
                         }
                     },
                     departmentOption: _this.DepartmentOption.bind(_this),
-                    onDpChange: function (user, dept) {
+                    OnDeptChange: function (user, dept) {
                         ManagerData.RemoveUserPosnid(user);
-                        ManagerData.SetUserPosnid(user, dept.Did);
+                        if (dept) {
+                            ManagerData.SetUserPosnid(user, dept.Did);
+                        }
                     },
                     onPosChange: function (user, pos) {
                         ManagerData.RemoveUserPosnid(user);

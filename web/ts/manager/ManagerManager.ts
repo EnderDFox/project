@@ -465,8 +465,8 @@ class ManagerManagerClass {
                         onBackDepartmentList: () => {
                             this.ShowDepartmentList(ManagerData.GetProjByPid(dept.Pid))
                         },
-                        onEditParentDp: (dp: DepartmentSingle, parentDp: DepartmentSingle) => {
-                            UrlParam.Set(URL_PARAM_KEY.DID, parentDp.Did).Reset()
+                        OnDeptChange: (toDept: DepartmentSingle) => {
+                            UrlParam.Set(URL_PARAM_KEY.DID, toDept.Did).Reset()
                             this.ShowPositionList()
                         },
                         onEditName: (e: Event, pos: PositionSingle, index: number) => {
@@ -693,9 +693,11 @@ class ManagerManagerClass {
                             }
                         },
                         departmentOption: this.DepartmentOption.bind(this),
-                        onDpChange: (user: UserSingle, dept: DepartmentSingle) => {
+                        OnDeptChange: (user: UserSingle, dept: DepartmentSingle) => {
                             ManagerData.RemoveUserPosnid(user)
-                            ManagerData.SetUserPosnid(user, dept.Did)
+                            if(dept){
+                                ManagerData.SetUserPosnid(user, dept.Did)
+                            }
                         },
                         onPosChange: (user: UserSingle, pos: PositionSingle) => {
                             ManagerData.RemoveUserPosnid(user)

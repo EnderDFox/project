@@ -7,12 +7,14 @@
             <div class="input-group">
                 <input type="text" class="form-control" placeholder="筛选" v-model.trim="filterText" title="按照'成员/部门/职位'名称进行筛选 \n优先显示符合条件的成员">
                 <span class="input-group-btn">
-                    <button class="btn btn-default" type="button"  @click="filterText=''">
+                    <button class="btn btn-default" type="button" @click="filterText=''">
                         <span class="glyphicon glyphicon-remove-sign"></span>
                     </button>
                 </span>
             </div>
-            <div style="clear: both;color: #BBBBBB"><small>多个筛选关键字可以用'空格'或'逗号'分割</small></div>
+            <div style="clear: both;color: #BBBBBB">
+                <small>多个筛选关键字可以用'空格'或'逗号'分割</small>
+            </div>
         </div>
         <!-- /.col-lg-6 -->
     </nav>
@@ -37,7 +39,14 @@
                         {{user.Name}}
                     </td>
                     <td>
-                        <div class="dropdown">
+                        <DeptDropdownComp :buttonId="'ddmUserListDid'+index" :buttonLabel="ShowDpName(user.Did)" @OnSelect="OnDeptChange(user,arguments[0])">
+                            <template slot="before">
+                                <li>
+                                    <a @click="OnDeptChange(user,null)">空</a>
+                                </li>
+                            </template>
+                        </DeptDropdownComp>
+                        <!-- <div class="dropdown">
                             <button class="btn btn-default dropdown-toggle" type="button" :id="'ddmUserListDid'+index" data-toggle="dropdown" aria-haspopup="true"
                                 aria-expanded="true">
                                 {{ShowDpName(user.Did)}}
@@ -48,10 +57,10 @@
                                     <a @click="user.Did=0">空</a>
                                 </li>
                                 <li v-for="dp in allDepartmentList" :key="dp.Did">
-                                    <a @click="onDpChange(user,dp)">{{departmentOption(dp)}}</a>
+                                    <a @click="OnDeptChange(user,dp)">{{departmentOption(dp)}}</a>
                                 </li>
                             </ul>
-                        </div>
+                        </div> -->
                     </td>
                     <td>
                         <div class="dropdown">
