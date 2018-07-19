@@ -47,7 +47,7 @@ class ManagerManagerClass {
                         if (this.VueProjectEdit) {
                             $(this.VueProjectEdit.$el).remove()
                         }
-                        UrlParam.RemoveAll()
+                        UrlParam.RemoveAll().Reset()
                         this.ShowProjectList()
                     },
                 }
@@ -94,13 +94,13 @@ class ManagerManagerClass {
                                 proj.MasterUid = user.Uid
                             }
                         },
-                        GetProjAllDeptList: (proj: ProjectSingle): DepartmentSingle[] => {
-                            return ManagerData.DepartmentList
+                        GetProjAllDeptLength: (proj: ProjectSingle): number => {
+                            return TreeUtil.Length(ManagerData.DepartmentTree)
                         },
-                        GetProjUserCount: (proj: ProjectSingle): number => {
+                        GetProjUserLength: (proj: ProjectSingle): number => {
                             return proj.UserList.length
                         },
-                        GetProjUserCountTitle: (proj: ProjectSingle): string => {
+                        GetProjUserListTitle: (proj: ProjectSingle): string => {
                             var userNameArr: string[] = []
                             for (var i = 0; i < proj.UserList.length; i++) {
                                 var user = proj.UserList[i]

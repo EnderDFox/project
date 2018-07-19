@@ -530,4 +530,96 @@ var ArrayUtil = /** @class */ (function () {
     };
     return ArrayUtil;
 }());
+/*树 型 数组 的处理, 子数组名必须是Children */
+var TreeUtil = /** @class */ (function () {
+    function TreeUtil() {
+    }
+    TreeUtil.Length = function (tree) {
+        var len = tree.length;
+        for (var i = 0; i < tree.length; i++) {
+            var item = tree[i];
+            if (item.Children) {
+                len += TreeUtil.Length(item.Children);
+            }
+        }
+        return len;
+    };
+    TreeUtil.ToArray = function (tree, rs) {
+        if (rs === void 0) { rs = null; }
+        rs = rs || [];
+        for (var i = 0; i < tree.length; i++) {
+            var item = tree[i];
+            rs.push(item);
+            if (item.Children) {
+                TreeUtil.ToArray(item.Children, rs);
+            }
+        }
+        return rs;
+    };
+    /**返回 使用 在每个tree/Children的位置数组 例如   2.1.3   没找到则返回length=0的数组*/
+    TreeUtil.IndexOfAttr = function (tree, key, value, indexArr) {
+        indexArr = indexArr || [];
+        for (var i = 0; i < tree.length; i++) {
+            var item = tree[i];
+            if ((key == null && item == value) || item[key] == value) {
+                indexArr.push(i);
+                return indexArr;
+            }
+            else { //没有匹配,则继续找子
+                if (item.Children) {
+                    var rs = TreeUtil.FindOfAttr(item.Children, key, value, indexArr);
+                    if (rs) {
+                        //Children中找到了, 直接返回吧
+                        return indexArr;
+                    }
+                }
+            }
+        }
+        return indexArr;
+    };
+    TreeUtil.FindOfAttr = function (tree, key, value, indexArr) {
+        if (indexArr === void 0) { indexArr = null; }
+        indexArr = indexArr || [];
+        for (var i = 0; i < tree.length; i++) {
+            var item = tree[i];
+            if ((key == null && item == value) || item[key] == value) {
+                indexArr.push(i);
+                return item;
+            }
+            else { //没有匹配,则继续找子
+                if (item.Children) {
+                    var rs = TreeUtil.FindOfAttr(item.Children, key, value, indexArr);
+                    if (rs) {
+                        //Children中找到了, 直接返回吧
+                        return rs;
+                    }
+                }
+            }
+        }
+        return null;
+    };
+    TreeUtil.RemoveByAttr = function (tree, key, value, indexArr) {
+        if (indexArr === void 0) { indexArr = null; }
+        indexArr = indexArr || [];
+        for (var i = 0; i < tree.length; i++) {
+            var item = tree[i];
+            if ((key == null && item == value) || item[key] == value) {
+                indexArr.push(i);
+                tree.splice(i, 1);
+                return item;
+            }
+            else { //没有匹配,则继续找子
+                if (item.Children) {
+                    var rs = TreeUtil.RemoveByAttr(item.Children, key, value, indexArr);
+                    if (rs) {
+                        //Children中找到了, 直接返回吧
+                        return rs;
+                    }
+                }
+            }
+        }
+        return null;
+    };
+    return TreeUtil;
+}());
 //# sourceMappingURL=Common.js.map

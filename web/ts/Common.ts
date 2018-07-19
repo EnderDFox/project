@@ -521,3 +521,92 @@ class ArrayUtil {
 		return rs
 	}
 }
+
+interface TreeItem {
+	Children?: TreeItem[]
+}
+interface Tree extends Array<TreeItem> {
+}
+/*树 型 数组 的处理, 子数组名必须是Children */
+class TreeUtil {
+	static Length(tree: Tree): number {
+		var len = tree.length
+		for (var i = 0; i < tree.length; i++) {
+			var item: TreeItem = tree[i]
+			if (item.Children) {
+				len += TreeUtil.Length(item.Children)
+			}
+		}
+		return len
+	}
+	static ToArray(tree: Tree, rs: TreeItem[] = null): TreeItem[] {
+		rs = rs || []
+		for (var i = 0; i < tree.length; i++) {
+			var item: TreeItem = tree[i]
+			rs.push(item)
+			if (item.Children) {
+				TreeUtil.ToArray(item.Children, rs)
+			}
+		}
+		return rs
+	}
+	/**返回 使用 在每个tree/Children的位置数组 例如   2.1.3   没找到则返回length=0的数组*/
+	static IndexOfAttr(tree: Tree, key: string, value: any, indexArr: number[]): number[] {
+		indexArr = indexArr || []
+		for (var i = 0; i < tree.length; i++) {
+			var item: TreeItem = tree[i]
+			if ((key == null && item == value) || item[key] == value) {
+				indexArr.push(i)
+				return indexArr;
+			} else {//没有匹配,则继续找子
+				if (item.Children) {
+					var rs = TreeUtil.FindOfAttr(item.Children, key, value, indexArr)
+					if (rs) {
+						//Children中找到了, 直接返回吧
+						return indexArr
+					}
+				}
+			}
+		}
+		return indexArr
+	}
+	static FindOfAttr(tree: Tree, key: string, value: any, indexArr: number[] = null): TreeItem {
+		indexArr = indexArr || []
+		for (var i = 0; i < tree.length; i++) {
+			var item: TreeItem = tree[i]
+			if ((key == null && item == value) || item[key] == value) {
+				indexArr.push(i)
+				return item;
+			} else {//没有匹配,则继续找子
+				if (item.Children) {
+					var rs = TreeUtil.FindOfAttr(item.Children, key, value, indexArr)
+					if (rs) {
+						//Children中找到了, 直接返回吧
+						return rs
+					}
+				}
+			}
+		}
+		return null
+	}
+	static RemoveByAttr(tree: Tree, key: string, value: any, indexArr: number[] = null): TreeItem {
+		indexArr = indexArr || []
+		for (var i = 0; i < tree.length; i++) {
+			var item: TreeItem = tree[i]
+			if ((key == null && item == value) || item[key] == value) {
+				indexArr.push(i)
+				tree.splice(i, 1)
+				return item;
+			} else {//没有匹配,则继续找子
+				if (item.Children) {
+					var rs = TreeUtil.RemoveByAttr(item.Children, key, value, indexArr)
+					if (rs) {
+						//Children中找到了, 直接返回吧
+						return rs
+					}
+				}
+			}
+		}
+		return null
+	}
+}

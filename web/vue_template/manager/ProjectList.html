@@ -42,20 +42,17 @@
                             <span class="glyphicon glyphicon-user" aria-hidden="true"></span>
                         </button>增加成员</span>
                 </td>
-                <!--  <td class="text-center text-middle" :title="GetProjUserCountTitle(proj)">
-                        {{GetProjUserCount(proj)}}
-                    </td> -->
                 <td>
-                    <button class="btn btn-default " type="button" @click="onShowDepartmentList(proj,index)" :title="'该项目有'+GetProjAllDeptList(proj).length+'个部门'">
+                    <button class="btn btn-default " type="button" @click="onShowDepartmentList(proj,index)" :title="'该项目有'+GetProjAllDeptLength(proj)+'个部门'">
                         <span class="glyphicon glyphicon-th-list" aria-hidden="true ">
-                            {{GetProjAllDeptList(proj).length}}
+                            {{GetProjAllDeptLength(proj)}}
                         </span>
                     </button>
                 </td>
                 <td class="~text-center text-middle">
-                    <button class="btn btn-default " type="button" @click="onShowUserList(proj,index)" :title="'该项目有'+GetProjUserCount(proj)+'名成员'">
+                    <button class="btn btn-default " type="button" @click="onShowUserList(proj,index)" :title="'该项目有'+GetProjUserLength(proj)+'名成员\n'+GetProjUserListTitle(proj)">
                         <span class="glyphicon glyphicon-user" aria-hidden="true ">
-                            {{GetProjUserCount(proj)}}
+                            {{GetProjUserLength(proj)}}
                         </span>
                     </button>
                 </td>

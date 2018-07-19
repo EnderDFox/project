@@ -43,7 +43,7 @@ var ManagerManagerClass = /** @class */ (function () {
                         if (_this.VueProjectEdit) {
                             $(_this.VueProjectEdit.$el).remove();
                         }
-                        UrlParam.RemoveAll();
+                        UrlParam.RemoveAll().Reset();
                         _this.ShowProjectList();
                     },
                 }
@@ -92,13 +92,13 @@ var ManagerManagerClass = /** @class */ (function () {
                             proj.MasterUid = user.Uid;
                         }
                     },
-                    GetProjAllDeptList: function (proj) {
-                        return ManagerData.DepartmentList;
+                    GetProjAllDeptLength: function (proj) {
+                        return TreeUtil.Length(ManagerData.DepartmentTree);
                     },
-                    GetProjUserCount: function (proj) {
+                    GetProjUserLength: function (proj) {
                         return proj.UserList.length;
                     },
-                    GetProjUserCountTitle: function (proj) {
+                    GetProjUserListTitle: function (proj) {
                         var userNameArr = [];
                         for (var i = 0; i < proj.UserList.length; i++) {
                             var user = proj.UserList[i];
