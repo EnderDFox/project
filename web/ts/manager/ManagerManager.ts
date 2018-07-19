@@ -226,106 +226,135 @@ class ManagerManagerClass {
     }
     ShowDepartmentList(proj: ProjectSingle) {
         this.VueProjectEdit.currPage = ProjectEditPageIndex.Department
-        Loader.LoadVueTemplate(this.VuePath + "DepartmentList", (tpl: string) => {
+        Loader.LoadVueTemplateList([`${this.VuePath}DepartmentList`, `${this.VuePath}DepartmentListComp`], (tplList: string[]) => {
+            Vue.component('DepartmentListComp', {
+                template: tplList[1],
+                props: {
+                    dp: Object,
+                    index: Number,
+                },
+                data: function () {
+                    return {
+                        auth: ManagerData.MyAuth,
+                        allDepartmentList: ManagerData.DepartmentList,
+                    }
+                },
+                methods: {
+                    departmentOption: this.DepartmentOption.bind(this),
+                    GetDeptAllPosnList: ManagerData.GetDeptAllPosnList.bind(ManagerData),
+                    GetDeptUserList: ManagerData.GetDeptUserList.bind(ManagerData),
+                    GetDeptAllUserList: ManagerData.GetDeptAllUserList.bind(ManagerData),
+                    CheckShowEditParentDp: this.CheckShowEditParentDp.bind(this),
+                    CheckSortDown: this.CheckSortDown.bind(this),
+                    CheckSortUp: this.CheckSortUp.bind(this),
+                    onEditName: (e: Event, dp: DepartmentSingle, i0: int) => {
+                        var newName = (e.target as HTMLInputElement).value
+                        dp.Name = newName
+                    },
+                    onAddChild: (parentDp: DepartmentSingle, i0: int) => {
+                        var dp: DepartmentSingle = {
+                            Did: this.NewDepartmentUuid, Name: ``, Depth: parentDp.Depth + 1, Children: [], PositionList: [
+                                { Posid: this.NewPositionUuid, Did: this.NewDepartmentUuid, Name: ``, AuthorityList: [] },//给一个默认的职位
+                            ],
+                            Fid: parentDp.Did
+                        }
+                        this.NewDepartmentUuid++
+                        this.NewPositionUuid++
+                        ManagerData.DepartmentDict[dp.Did] = dp
+                        parentDp.Children.push(dp)
+                        var allDpList = this.VueDepartmentList.allDepartmentList
+                        allDpList.splice(i0 + ManagerData.GetAllDepartmentList(parentDp.Children, -1).length, 0, dp)
+                    },
+                    onEditParentDp: (dp: DepartmentSingle, parentDp: DepartmentSingle) => {
+                        if (parentDp == null) {
+                            if (dp.Fid == 0) {
+                                return//已经是顶级职位了
+                            }
+                        }
+                        if (!this.CheckShowEditParentDp(dp, parentDp)) {
+                            return
+                        }
+                        var currParentDp = ManagerData.DepartmentDict[dp.Fid]
+                        if (currParentDp != null) {
+                            ArrayUtil.RemoveByAttr(currParentDp.Children, FieldName.Did, dp.Did)
+
+                        }
+                        var allDpList = this.VueDepartmentList.allDepartmentList
+                        if (parentDp == null) {
+                            //顶级部门
+                            dp.Fid = 0
+                            dp.Depth = 0
+                            var i0 = ArrayUtil.IndexOfAttr(allDpList, FieldName.Did, dp.Did)
+                            allDpList.splice(i0, 1)[0]
+                            allDpList.push(dp)
+                        } else {
+                            dp.Fid = parentDp.Did
+                            dp.Depth = parentDp.Depth + 1
+                            parentDp.Children.push(dp)
+                            //
+                            var i0 = ArrayUtil.IndexOfAttr(allDpList, FieldName.Did, dp.Did)
+                            allDpList.splice(i0, 1)[0]
+                            var i1 = ArrayUtil.IndexOfAttr(allDpList, FieldName.Did, parentDp.Did)
+                            var allChildrenLen = ManagerData.GetAllDepartmentList(parentDp.Children, -1).length
+                            allDpList.splice(i1 + allChildrenLen, 0, dp)
+                        }
+                    },
+                    onEditPosition: (dp: DepartmentSingle, i0: int) => {
+                        UrlParam.Set(URL_PARAM_KEY.DID, dp.Did).Reset()
+                        this.ShowPositionList()
+                    },
+                    onEditUserList: (dept: DepartmentSingle) => {
+                        UrlParam.Set(URL_PARAM_KEY.PAGE, ProjectEditPageIndex.User).Set(URL_PARAM_KEY.FKEY, dept.Name).Reset()
+                        this.ShowUserList(proj)
+                    },
+                    onSortDown: (e, dp: DepartmentSingle, i0: int) => {
+                        if (!this.CheckSortDown(dp, i0)) {
+                            return
+                        }
+                        var brothers: DepartmentSingle[] = ManagerData.GetBrotherDepartmentList(dp)
+                        var brotherIndex = ArrayUtil.IndexOfAttr(brothers, FieldName.Did, dp.Did)
+                        var brother = brothers[brotherIndex + 1]
+                        brothers.splice(brotherIndex, 1)
+                        brothers.splice(brotherIndex + 1, 0, dp)
+                        //
+                        ManagerData.RefreshAllDepartmentList()
+                        // var allDpList = this.VueDepartmentList.allDepartmentList
+                        // var i1 = ArrayUtil.IndexOfAttr(allDpList, FieldName.Did, brother.Did)
+                        // allDpList.splice(i1, 0, allDpList.splice(i0, 1)[0])
+                    },
+                    onSortUp: (e, dp: DepartmentSingle, i0: int) => {
+                        if (!this.CheckSortUp(dp, i0)) {
+                            return
+                        }
+                        var brothers: DepartmentSingle[] = ManagerData.GetBrotherDepartmentList(dp)
+                        var brotherIndex = ArrayUtil.IndexOfAttr(brothers, FieldName.Did, dp.Did)
+                        brothers.splice(brotherIndex, 1)
+                        brothers.splice(brotherIndex - 1, 0, dp)
+                        //
+                        ManagerData.RefreshAllDepartmentList()
+                    },
+                    onDel: (dp: DepartmentSingle, i0: int) => {
+                        Common.ConfirmDelete(() => {
+                            var brothers: DepartmentSingle[] = ManagerData.GetBrotherDepartmentList(dp)
+                            var brotherIndex = ArrayUtil.IndexOfAttr(brothers, FieldName.Did, dp.Did)
+                            brothers.splice(brotherIndex, 1)
+                            //
+                            delete ManagerData.DepartmentDict[dp.Did]
+                            ManagerData.RefreshAllDepartmentList()
+                        }, `即将删除部门 "${dp.Name || '空'}}" 及其子部门<br/>
+                        该部门及其子部门的所有职位都将被删除`)
+                    },
+                }
+            })
             var vue = new Vue(
                 {
-                    template: tpl,
+                    template: tplList[0],
                     data: {
                         auth: ManagerData.MyAuth,
                         allDepartmentList: ManagerData.DepartmentList,
                         newName: '',
                     },
                     methods: {
-                        departmentOption: this.DepartmentOption.bind(this),
-                        onEditName: (e: Event, dp: DepartmentSingle, i0: int) => {
-                            var newName = (e.target as HTMLInputElement).value
-                            dp.Name = newName
-                        },
-                        onEditPosition: (dp: DepartmentSingle, i0: int) => {
-                            UrlParam.Set(URL_PARAM_KEY.DID, dp.Did).Reset()
-                            this.ShowPositionList()
-                        },
-                        onEditUserList: (dept: DepartmentSingle) => {
-                            UrlParam.Set(URL_PARAM_KEY.PAGE, ProjectEditPageIndex.User).Set(URL_PARAM_KEY.FKEY, dept.Name).Reset()
-                            this.ShowUserList(proj)
-                        },
-                        GetDeptAllPosnList: ManagerData.GetDeptAllPosnList.bind(ManagerData),
-                        GetDeptUserList: ManagerData.GetDeptUserList.bind(ManagerData),
-                        GetDeptAllUserList: ManagerData.GetDeptAllUserList.bind(ManagerData),
-                        CheckShowEditParentDp: this.CheckShowEditParentDp.bind(this),
-                        onEditParentDp: (dp: DepartmentSingle, parentDp: DepartmentSingle) => {
-                            if (parentDp == null) {
-                                if (dp.Fid == 0) {
-                                    return//已经是顶级职位了
-                                }
-                            }
-                            if (!this.CheckShowEditParentDp(dp, parentDp)) {
-                                return
-                            }
-                            var currParentDp = ManagerData.DepartmentDict[dp.Fid]
-                            if (currParentDp != null) {
-                                ArrayUtil.RemoveByAttr(currParentDp.Children, FieldName.Did, dp.Did)
-
-                            }
-                            var allDpList = this.VueDepartmentList.allDepartmentList
-                            if (parentDp == null) {
-                                //顶级部门
-                                dp.Fid = 0
-                                dp.Depth = 0
-                                var i0 = ArrayUtil.IndexOfAttr(allDpList, FieldName.Did, dp.Did)
-                                allDpList.splice(i0, 1)[0]
-                                allDpList.push(dp)
-                            } else {
-                                dp.Fid = parentDp.Did
-                                dp.Depth = parentDp.Depth + 1
-                                parentDp.Children.push(dp)
-                                //
-                                var i0 = ArrayUtil.IndexOfAttr(allDpList, FieldName.Did, dp.Did)
-                                allDpList.splice(i0, 1)[0]
-                                var i1 = ArrayUtil.IndexOfAttr(allDpList, FieldName.Did, parentDp.Did)
-                                var allChildrenLen = ManagerData.GetAllDepartmentList(parentDp.Children, -1).length
-                                allDpList.splice(i1 + allChildrenLen, 0, dp)
-                            }
-                        },
-                        CheckSortDown: this.CheckSortDown.bind(this),
-                        CheckSortUp: this.CheckSortUp.bind(this),
-                        onSortDown: (e, dp: DepartmentSingle, i0: int) => {
-                            if (!this.CheckSortDown(dp, i0)) {
-                                return
-                            }
-                            var brothers: DepartmentSingle[] = ManagerData.GetBrotherDepartmentList(dp)
-                            var brotherIndex = ArrayUtil.IndexOfAttr(brothers, FieldName.Did, dp.Did)
-                            var brother = brothers[brotherIndex + 1]
-                            brothers.splice(brotherIndex, 1)
-                            brothers.splice(brotherIndex + 1, 0, dp)
-                            //
-                            ManagerData.RefreshAllDepartmentList()
-                            // var allDpList = this.VueDepartmentList.allDepartmentList
-                            // var i1 = ArrayUtil.IndexOfAttr(allDpList, FieldName.Did, brother.Did)
-                            // allDpList.splice(i1, 0, allDpList.splice(i0, 1)[0])
-                        },
-                        onSortUp: (e, dp: DepartmentSingle, i0: int) => {
-                            if (!this.CheckSortUp(dp, i0)) {
-                                return
-                            }
-                            var brothers: DepartmentSingle[] = ManagerData.GetBrotherDepartmentList(dp)
-                            var brotherIndex = ArrayUtil.IndexOfAttr(brothers, FieldName.Did, dp.Did)
-                            brothers.splice(brotherIndex, 1)
-                            brothers.splice(brotherIndex - 1, 0, dp)
-                            //
-                            ManagerData.RefreshAllDepartmentList()
-                        },
-                        onDel: (dp: DepartmentSingle, i0: int) => {
-                            Common.ConfirmDelete(() => {
-                                var brothers: DepartmentSingle[] = ManagerData.GetBrotherDepartmentList(dp)
-                                var brotherIndex = ArrayUtil.IndexOfAttr(brothers, FieldName.Did, dp.Did)
-                                brothers.splice(brotherIndex, 1)
-                                //
-                                delete ManagerData.DepartmentDict[dp.Did]
-                                ManagerData.RefreshAllDepartmentList()
-                            }, `即将删除部门 "${dp.Name || '空'}}" 及其子部门<br/>
-                            该部门及其子部门的所有职位都将被删除`)
-                        },
                         onAdd: () => {
                             var dp: DepartmentSingle = {
                                 Did: this.NewDepartmentUuid, Name: this.VueDepartmentList.newName.toString(), Depth: 0, Children: [], PositionList: [
@@ -339,20 +368,6 @@ class ManagerManagerClass {
                             ManagerData.DepartmentDict[dp.Did] = dp
                             ManagerData.DepartmentTree.push(dp)
                             ManagerData.DepartmentList.push(dp)
-                        },
-                        onAddChild: (parentDp: DepartmentSingle, i0: int) => {
-                            var dp: DepartmentSingle = {
-                                Did: this.NewDepartmentUuid, Name: ``, Depth: parentDp.Depth + 1, Children: [], PositionList: [
-                                    { Posid: this.NewPositionUuid, Did: this.NewDepartmentUuid, Name: ``, AuthorityList: [] },//给一个默认的职位
-                                ],
-                                Fid: parentDp.Did
-                            }
-                            this.NewDepartmentUuid++
-                            this.NewPositionUuid++
-                            ManagerData.DepartmentDict[dp.Did] = dp
-                            parentDp.Children.push(dp)
-                            var allDpList = this.VueDepartmentList.allDepartmentList
-                            allDpList.splice(i0 + ManagerData.GetAllDepartmentList(parentDp.Children, -1).length, 0, dp)
                         },
                     },
                 }

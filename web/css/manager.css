@@ -30,7 +30,9 @@ a {
     opacity: 0.62;
 }
 
-.btn.disabled, .btn[disabled], fieldset[disabled] .btn {
+.btn.disabled,
+.btn[disabled],
+fieldset[disabled] .btn {
     cursor: not-allowed;
     filter: alpha(opacity=28);
     -webkit-box-shadow: none;
@@ -50,11 +52,14 @@ a {
     /* 没有important优先级不够 真奇怪 */
 }
 
-.div-tr{
+/* div 模拟的 table */
+
+.div-tr {
     width: 100%;
     border-top: 1px solid #ddd;
 }
-.div-tr > div {
+
+.div-tr>div {
     display: inline-block;
     padding: 8px;
     line-height: 1.42857143;
@@ -62,24 +67,37 @@ a {
     /* outline: solid 1px #00FF00; */
 }
 
-.DeptList-tr div:nth-child(1){
+.div-tr:hover {
+    background-color: #c4e3f3;
+}
+
+/* 控制div tr中每列的宽度 */
+
+.DeptList-tr>div:nth-child(1) {
     width: 300px;
+    overflow: hidden;
+    white-space: nowrap;
     /* outline: solid 1px #00FF00; */
 }
-.DeptList-tr div:nth-child(2){
+
+.DeptList-tr>div:nth-child(2) {
     width: 100px;
     /* outline: solid 1px #00FF00; */
 }
-.DeptList-tr div:nth-child(3){
+
+.DeptList-tr>div:nth-child(3) {
     width: 160px;
 }
-.DeptList-tr div:nth-child(4){
+
+.DeptList-tr>div:nth-child(4) {
     width: 120px;
 }
-.DeptList-tr div:nth-child(5){
+
+.DeptList-tr>div:nth-child(5) {
     width: 100px;
 }
-.DeptList-tr div:nth-child(6){
+
+.DeptList-tr>div:nth-child(6) {
     width: 120px;
 }
 

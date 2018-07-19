@@ -221,32 +221,45 @@ var ManagerManagerClass = /** @class */ (function () {
     ManagerManagerClass.prototype.ShowDepartmentList = function (proj) {
         var _this = this;
         this.VueProjectEdit.currPage = ProjectEditPageIndex.Department;
-        Loader.LoadVueTemplate(this.VuePath + "DepartmentList", function (tpl) {
-            var vue = new Vue({
-                template: tpl,
-                data: {
-                    auth: ManagerData.MyAuth,
-                    allDepartmentList: ManagerData.DepartmentList,
-                    newName: '',
+        Loader.LoadVueTemplateList([this.VuePath + "DepartmentList", this.VuePath + "DepartmentListComp"], function (tplList) {
+            Vue.component('DepartmentListComp', {
+                template: tplList[1],
+                props: {
+                    dp: Object,
+                    index: Number,
+                },
+                data: function () {
+                    return {
+                        auth: ManagerData.MyAuth,
+                        allDepartmentList: ManagerData.DepartmentList,
+                    };
                 },
                 methods: {
                     departmentOption: _this.DepartmentOption.bind(_this),
-                    onEditName: function (e, dp, i0) {
-                        var newName = e.target.value;
-                        dp.Name = newName;
-                    },
-                    onEditPosition: function (dp, i0) {
-                        UrlParam.Set(URL_PARAM_KEY.DID, dp.Did).Reset();
-                        _this.ShowPositionList();
-                    },
-                    onEditUserList: function (dept) {
-                        UrlParam.Set(URL_PARAM_KEY.PAGE, ProjectEditPageIndex.User).Set(URL_PARAM_KEY.FKEY, dept.Name).Reset();
-                        _this.ShowUserList(proj);
-                    },
                     GetDeptAllPosnList: ManagerData.GetDeptAllPosnList.bind(ManagerData),
                     GetDeptUserList: ManagerData.GetDeptUserList.bind(ManagerData),
                     GetDeptAllUserList: ManagerData.GetDeptAllUserList.bind(ManagerData),
                     CheckShowEditParentDp: _this.CheckShowEditParentDp.bind(_this),
+                    CheckSortDown: _this.CheckSortDown.bind(_this),
+                    CheckSortUp: _this.CheckSortUp.bind(_this),
+                    onEditName: function (e, dp, i0) {
+                        var newName = e.target.value;
+                        dp.Name = newName;
+                    },
+                    onAddChild: function (parentDp, i0) {
+                        var dp = {
+                            Did: _this.NewDepartmentUuid, Name: "", Depth: parentDp.Depth + 1, Children: [], PositionList: [
+                                { Posid: _this.NewPositionUuid, Did: _this.NewDepartmentUuid, Name: "", AuthorityList: [] },
+                            ],
+                            Fid: parentDp.Did
+                        };
+                        _this.NewDepartmentUuid++;
+                        _this.NewPositionUuid++;
+                        ManagerData.DepartmentDict[dp.Did] = dp;
+                        parentDp.Children.push(dp);
+                        var allDpList = _this.VueDepartmentList.allDepartmentList;
+                        allDpList.splice(i0 + ManagerData.GetAllDepartmentList(parentDp.Children, -1).length, 0, dp);
+                    },
                     onEditParentDp: function (dp, parentDp) {
                         if (parentDp == null) {
                             if (dp.Fid == 0) {
@@ -281,8 +294,14 @@ var ManagerManagerClass = /** @class */ (function () {
                             allDpList.splice(i1 + allChildrenLen, 0, dp);
                         }
                     },
-                    CheckSortDown: _this.CheckSortDown.bind(_this),
-                    CheckSortUp: _this.CheckSortUp.bind(_this),
+                    onEditPosition: function (dp, i0) {
+                        UrlParam.Set(URL_PARAM_KEY.DID, dp.Did).Reset();
+                        _this.ShowPositionList();
+                    },
+                    onEditUserList: function (dept) {
+                        UrlParam.Set(URL_PARAM_KEY.PAGE, ProjectEditPageIndex.User).Set(URL_PARAM_KEY.FKEY, dept.Name).Reset();
+                        _this.ShowUserList(proj);
+                    },
                     onSortDown: function (e, dp, i0) {
                         if (!_this.CheckSortDown(dp, i0)) {
                             return;
@@ -317,8 +336,18 @@ var ManagerManagerClass = /** @class */ (function () {
                             //
                             delete ManagerData.DepartmentDict[dp.Did];
                             ManagerData.RefreshAllDepartmentList();
-                        }, "\u5373\u5C06\u5220\u9664\u90E8\u95E8 \"" + (dp.Name || '空') + "}\" \u53CA\u5176\u5B50\u90E8\u95E8<br/>\n                            \u8BE5\u90E8\u95E8\u53CA\u5176\u5B50\u90E8\u95E8\u7684\u6240\u6709\u804C\u4F4D\u90FD\u5C06\u88AB\u5220\u9664");
+                        }, "\u5373\u5C06\u5220\u9664\u90E8\u95E8 \"" + (dp.Name || '空') + "}\" \u53CA\u5176\u5B50\u90E8\u95E8<br/>\n                        \u8BE5\u90E8\u95E8\u53CA\u5176\u5B50\u90E8\u95E8\u7684\u6240\u6709\u804C\u4F4D\u90FD\u5C06\u88AB\u5220\u9664");
                     },
+                }
+            });
+            var vue = new Vue({
+                template: tplList[0],
+                data: {
+                    auth: ManagerData.MyAuth,
+                    allDepartmentList: ManagerData.DepartmentList,
+                    newName: '',
+                },
+                methods: {
                     onAdd: function () {
                         var dp = {
                             Did: _this.NewDepartmentUuid, Name: _this.VueDepartmentList.newName.toString(), Depth: 0, Children: [], PositionList: [
@@ -332,20 +361,6 @@ var ManagerManagerClass = /** @class */ (function () {
                         ManagerData.DepartmentDict[dp.Did] = dp;
                         ManagerData.DepartmentTree.push(dp);
                         ManagerData.DepartmentList.push(dp);
-                    },
-                    onAddChild: function (parentDp, i0) {
-                        var dp = {
-                            Did: _this.NewDepartmentUuid, Name: "", Depth: parentDp.Depth + 1, Children: [], PositionList: [
-                                { Posid: _this.NewPositionUuid, Did: _this.NewDepartmentUuid, Name: "", AuthorityList: [] },
-                            ],
-                            Fid: parentDp.Did
-                        };
-                        _this.NewDepartmentUuid++;
-                        _this.NewPositionUuid++;
-                        ManagerData.DepartmentDict[dp.Did] = dp;
-                        parentDp.Children.push(dp);
-                        var allDpList = _this.VueDepartmentList.allDepartmentList;
-                        allDpList.splice(i0 + ManagerData.GetAllDepartmentList(parentDp.Children, -1).length, 0, dp);
                     },
                 },
             }).$mount();
