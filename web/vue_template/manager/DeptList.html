@@ -9,7 +9,7 @@
             <div>排序</div>
             <div>删除</div>
         </div>
-        <DepartmentListComp :deptTree="deptTree"></DepartmentListComp>
+        <DeptListComp :deptTree="deptTree"></DeptListComp>
         <div class="div-tr DeptList-tr" v-if="auth['PROJECT_EDIT']">
             <div>
                 <input type="text " class="form-control " placeholder="输入新部门名称 " aria-describedby="basic-addon1 " v-model.trim="newName"

@@ -31,7 +31,7 @@ class ManagerManagerClass {
         }
     }
     InitVue(cb: () => void) {
-        Loader.LoadVueTemplateList([`${this.VuePath}NavbarComp`], (tplList: string[]) => {
+        Loader.LoadVueTemplateList([`${this.VuePath}NavbarComp`, `${this.VuePath}DeptDropdownComp`], (tplList: string[]) => {
             //注册组件
             Vue.component('NavbarComp', {
                 template: tplList[0],
@@ -50,6 +50,23 @@ class ManagerManagerClass {
                         UrlParam.RemoveAll().Reset()
                         this.ShowProjectList()
                     },
+                }
+            })
+            Vue.component('DeptDropdownComp', {
+                template: tplList[1],
+                props: {
+                    // deptList: Array,
+                    buttonId: String,
+                    buttonLabel: String,
+                    CheckItemCb: Function,
+                },
+                data: function () {
+                    return {
+                        deptList: ManagerData.DepartmentTree,
+                    }
+                },
+                methods: {
+                    departmentOption: this.DepartmentOption.bind(this),
                 }
             })
             //#
@@ -226,8 +243,8 @@ class ManagerManagerClass {
     }
     ShowDepartmentList(proj: ProjectSingle) {
         this.VueProjectEdit.currPage = ProjectEditPageIndex.Department
-        Loader.LoadVueTemplateList([`${this.VuePath}DepartmentList`, `${this.VuePath}DepartmentListComp`], (tplList: string[]) => {
-            Vue.component('DepartmentListComp', {
+        Loader.LoadVueTemplateList([`${this.VuePath}DeptList`, `${this.VuePath}DeptListComp`], (tplList: string[]) => {
+            Vue.component('DeptListComp', {
                 template: tplList[1],
                 props: {
                     deptTree: Array,
@@ -262,6 +279,9 @@ class ManagerManagerClass {
                         this.NewPositionUuid++
                         ManagerData.DepartmentDict[dp.Did] = dp
                         parentDp.Children.push(dp)
+                    },
+                    onEditParentDp1:(...args)=>{
+                        console.log("[debug]",args)
                     },
                     onEditParentDp: (dp: DepartmentSingle, parentDp: DepartmentSingle) => {
                         if (parentDp == null) {

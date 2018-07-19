@@ -28,7 +28,7 @@ var ManagerManagerClass = /** @class */ (function () {
     };
     ManagerManagerClass.prototype.InitVue = function (cb) {
         var _this = this;
-        Loader.LoadVueTemplateList([this.VuePath + "NavbarComp"], function (tplList) {
+        Loader.LoadVueTemplateList([this.VuePath + "NavbarComp", this.VuePath + "DeptDropdownComp"], function (tplList) {
             //注册组件
             Vue.component('NavbarComp', {
                 template: tplList[0],
@@ -46,6 +46,23 @@ var ManagerManagerClass = /** @class */ (function () {
                         UrlParam.RemoveAll().Reset();
                         _this.ShowProjectList();
                     },
+                }
+            });
+            Vue.component('DeptDropdownComp', {
+                template: tplList[1],
+                props: {
+                    // deptList: Array,
+                    buttonId: String,
+                    buttonLabel: String,
+                    CheckItemCb: Function,
+                },
+                data: function () {
+                    return {
+                        deptList: ManagerData.DepartmentTree,
+                    };
+                },
+                methods: {
+                    departmentOption: _this.DepartmentOption.bind(_this),
                 }
             });
             //#
@@ -221,8 +238,8 @@ var ManagerManagerClass = /** @class */ (function () {
     ManagerManagerClass.prototype.ShowDepartmentList = function (proj) {
         var _this = this;
         this.VueProjectEdit.currPage = ProjectEditPageIndex.Department;
-        Loader.LoadVueTemplateList([this.VuePath + "DepartmentList", this.VuePath + "DepartmentListComp"], function (tplList) {
-            Vue.component('DepartmentListComp', {
+        Loader.LoadVueTemplateList([this.VuePath + "DeptList", this.VuePath + "DeptListComp"], function (tplList) {
+            Vue.component('DeptListComp', {
                 template: tplList[1],
                 props: {
                     deptTree: Array,
@@ -257,6 +274,13 @@ var ManagerManagerClass = /** @class */ (function () {
                         _this.NewPositionUuid++;
                         ManagerData.DepartmentDict[dp.Did] = dp;
                         parentDp.Children.push(dp);
+                    },
+                    onEditParentDp1: function () {
+                        var args = [];
+                        for (var _i = 0; _i < arguments.length; _i++) {
+                            args[_i] = arguments[_i];
+                        }
+                        console.log("[debug]", args);
                     },
                     onEditParentDp: function (dp, parentDp) {
                         if (parentDp == null) {

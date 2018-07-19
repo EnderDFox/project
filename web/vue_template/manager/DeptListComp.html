@@ -12,7 +12,16 @@
                 </button>
             </div>
             <div>
-                <div class="dropdown">
+                <DeptDropdownComp :disabled="!auth['PROJECT_EDIT']" :SelectArgs="[dp]" :buttonId="'ddmDpListDid'+index" :buttonLabel="'改变上级部门'" 
+                :CheckItemCb="(dropdownDept)=>{return !CheckCanMoveParentDp(dp,dropdownDept);}"
+                 @OnSelect="onEditParentDp(dp,arguments[0])">
+                    <template slot="after">
+                        <li :class="{'disabled':dp.Fid==0}">
+                            <a @click="onEditParentDp(dp,null)">改为顶级部门</a>
+                        </li>
+                    </template>
+                </DeptDropdownComp>
+               <!--  <div class="dropdown">
                     <button class="btn btn-default dropdown-toggle" type="button" :id="'ddmDpListDid'+index" data-toggle="dropdown" aria-haspopup="true"
                         aria-expanded="true" :disabled="!auth['PROJECT_EDIT']">
                         改变上级部门
@@ -28,7 +37,7 @@
                             <a @click=" onEditParentDp(dp,null)">改为顶级部门</a>
                         </li>
                     </ul>
-                </div>
+                </div> -->
             </div>
             <div>
                 <button class="btn btn-default " type="button" @click="onEditPosition(dp,index)" :title="'该部门下有'+dp.PositionList.length+'个职位'+(dp.Children.length>0?' \n该部门及其子部门共有'+GetDeptAllPosnList(dp).length+'个职位':'')">
@@ -58,6 +67,6 @@
                 </button>
             </div>
         </div>
-        <DepartmentListComp :deptTree="dp.Children"></DepartmentListComp>
+        <DeptListComp :deptTree="dp.Children"></DeptListComp>
     </div>
 </transition-group>
