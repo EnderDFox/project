@@ -231,7 +231,7 @@ var CommonClass = /** @class */ (function () {
             _arg[key] = arg[key];
         }
         if (_arg.Title.trim() == "") {
-            _arg.Title = "&nbsp;";
+            _arg.Title = "&nbsp;"; //没有内容 会导致heading div高度不够
         }
         //
         if (this.VueAlert) {
@@ -245,15 +245,18 @@ var CommonClass = /** @class */ (function () {
             },
             methods: {
                 OnOk: function () {
+                    $(_this.VueAlert.$el).remove();
+                    _this.VueAlert = null;
                     if (_arg.CallbackOk) {
                         _arg.CallbackOk();
                     }
-                    $(_this.VueAlert.$el).remove();
-                    _this.VueAlert = null;
                 },
                 OnClose: function () {
                     $(_this.VueAlert.$el).remove();
                     _this.VueAlert = null;
+                    if (_arg.CallbackCancel) {
+                        _arg.CallbackCancel();
+                    }
                 },
             }
         }).$mount();
@@ -271,7 +274,10 @@ var CommonClass = /** @class */ (function () {
     };
     CommonClass.prototype.AlertError = function (content, title) {
         if (content === void 0) { content = ""; }
-        if (title === void 0) { title = "错误"; }
+        if (title === void 0) { title = null; }
+        if (title == null) {
+            title = "错误";
+        }
         var arg = {
             Title: title,
             Content: content,
@@ -283,7 +289,10 @@ var CommonClass = /** @class */ (function () {
     };
     CommonClass.prototype.AlertWarning = function (content, title) {
         if (content === void 0) { content = ""; }
-        if (title === void 0) { title = "警告"; }
+        if (title === void 0) { title = null; }
+        if (title == null) {
+            title = "警告";
+        }
         var arg = {
             Title: title,
             Content: content,
@@ -293,14 +302,19 @@ var CommonClass = /** @class */ (function () {
         };
         this.Alert(arg);
     };
-    CommonClass.prototype.ConfirmWarning = function (content, title, callbackOk) {
+    CommonClass.prototype.ConfirmWarning = function (content, title, callbackOk, callbackCancel) {
         if (content === void 0) { content = ""; }
-        if (title === void 0) { title = ""; }
+        if (title === void 0) { title = null; }
+        if (callbackCancel === void 0) { callbackCancel = null; }
+        if (title == null) {
+            title = "请确认";
+        }
         var arg = {
             Title: title,
             Content: content,
             Theme: "warning",
             CallbackOk: callbackOk,
+            CallbackCancel: callbackCancel,
         };
         this.Alert(arg);
     };

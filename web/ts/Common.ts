@@ -3,6 +3,7 @@ interface IAlertArg {
 	Title?: string
 	Content?: string
 	CallbackOk?: () => void
+	CallbackCancel?: () => void
 	Theme?: string
 	BtnOkLabel?: string
 	BtnCancelLabel?: string
@@ -236,7 +237,7 @@ class CommonClass {
 			_arg[key] = arg[key]
 		}
 		if (_arg.Title.trim() == "") {
-			_arg.Title = "&nbsp;"
+			_arg.Title = "&nbsp;"//没有内容 会导致heading div高度不够
 		}
 		//
 		if (this.VueAlert) {
@@ -250,15 +251,18 @@ class CommonClass {
 			},
 			methods: {
 				OnOk: () => {
+					$(this.VueAlert.$el).remove()
+					this.VueAlert = null;
 					if (_arg.CallbackOk) {
 						_arg.CallbackOk()
 					}
-					$(this.VueAlert.$el).remove()
-					this.VueAlert = null;
 				},
 				OnClose: () => {
 					$(this.VueAlert.$el).remove()
 					this.VueAlert = null;
+					if (_arg.CallbackCancel) {
+						_arg.CallbackCancel()
+					}
 				},
 			}
 		}).$mount()
@@ -273,7 +277,10 @@ class CommonClass {
 		}
 		this.Alert(arg)
 	}
-	AlertError(content: string = "", title: string = "错误") {
+	AlertError(content: string = "", title: string = null) {
+		if (title == null) {
+			title = "错误"
+		}
 		var arg: IAlertArg = {
 			Title: title,
 			Content: content,
@@ -283,7 +290,10 @@ class CommonClass {
 		}
 		this.Alert(arg)
 	}
-	AlertWarning(content: string = "", title: string = "警告") {
+	AlertWarning(content: string = "", title: string = null) {
+		if (title == null) {
+			title = "警告"
+		}
 		var arg: IAlertArg = {
 			Title: title,
 			Content: content,
@@ -293,12 +303,16 @@ class CommonClass {
 		}
 		this.Alert(arg)
 	}
-	ConfirmWarning(content: string = "", title: string = "", callbackOk: () => void) {
+	ConfirmWarning(content: string = "", title: string = null, callbackOk: () => void, callbackCancel: () => void = null) {
+		if (title == null) {
+			title = "请确认"
+		}
 		var arg: IAlertArg = {
 			Title: title,
 			Content: content,
 			Theme: "warning",
 			CallbackOk: callbackOk,
+			CallbackCancel: callbackCancel,
 		}
 		this.Alert(arg)
 	}

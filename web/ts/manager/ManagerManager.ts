@@ -140,21 +140,29 @@ class ManagerManagerClass {
                             }
                             if (newName != proj.Name) {
                                 if (ManagerData.ProjectList.IndexOfAttr(FieldName.Name, newName) > -1) {
-                                    Common.AlertError(`项目名称 ${newName} 已经存在`);
+                                    Common.AlertError(`即将把项目 "${proj.Name}" 改名为 "${newName}" <br/><br/>但项目名称 "${newName}" 已经存在`);
                                     (e.target as HTMLInputElement).value = proj.Name;
                                     return
                                 }
-                                proj.Name = newName
+                                Common.ConfirmWarning(`即将把项目 "${proj.Name}" 改名为 "${newName}"`, null, () => {
+                                    proj.Name = newName
+                                }, () => {
+                                    (e.target as HTMLInputElement).value = proj.Name
+                                })
                             }
                         },
                         onClose: () => {
                         },
-                        onShowUserList: (proj: ProjectSingle, index: number) => {
-                            UrlParam.Set(URL_PARAM_KEY.PID, proj.Pid).Set(URL_PARAM_KEY.PAGE, ProjectEditPageIndex.User).Reset()
-                            this.ShowProjectEdit()
-                        },
                         onShowDepartmentList: (proj: ProjectSingle, index: number) => {
                             UrlParam.Set(URL_PARAM_KEY.PID, proj.Pid).Set(URL_PARAM_KEY.PAGE, ProjectEditPageIndex.Department).Reset()
+                            this.ShowProjectEdit()
+                        },
+                        onShowPosnList: (proj: ProjectSingle, index: number) => {
+                            UrlParam.Set(URL_PARAM_KEY.PID, proj.Pid).Set(URL_PARAM_KEY.PAGE, ProjectEditPageIndex.Position).Reset()
+                            this.ShowProjectEdit()
+                        },
+                        onShowUserList: (proj: ProjectSingle, index: number) => {
+                            UrlParam.Set(URL_PARAM_KEY.PID, proj.Pid).Set(URL_PARAM_KEY.PAGE, ProjectEditPageIndex.User).Reset()
                             this.ShowProjectEdit()
                         },
                         onDel: (e, proj: ProjectSingle, index: int) => {
@@ -226,7 +234,7 @@ class ManagerManagerClass {
                         onShowPage: (page: ProjectEditPageIndex) => {
                             UrlParam.Set(URL_PARAM_KEY.PAGE, page).Remove(URL_PARAM_KEY.DID).Remove(URL_PARAM_KEY.FKEY).Reset()
                             this.VueProjectEdit.currPage = page;
-                            this.ShowProjectEditPage()
+                            this.SwitchProjectEditPageContent()
                         },
                     },
                 }
@@ -234,14 +242,17 @@ class ManagerManagerClass {
             this.VueProjectEdit = vue
             //#show
             Common.InsertIntoPageDom(vue.$el)
-            this.ShowProjectEditPage()
+            this.SwitchProjectEditPageContent()
         })
     }
-    ShowProjectEditPage() {
+    SwitchProjectEditPageContent() {
         var currPage: ProjectEditPageIndex = UrlParam.Get(URL_PARAM_KEY.PAGE, [ProjectEditPageIndex.Department, ProjectEditPageIndex.User])
         switch (currPage) {
             case ProjectEditPageIndex.User:
                 this.ShowUserList(this.VueProjectEdit.project)
+                break;
+            case ProjectEditPageIndex.User:
+                this.ShowPositionList()
                 break;
             case ProjectEditPageIndex.Department:
                 this.ShowDepartmentList(this.VueProjectEdit.project)
@@ -354,7 +365,7 @@ class ManagerManagerClass {
                             brothers.splice(brotherIndex, 1)
                             //
                             delete ManagerData.DepartmentDict[dp.Did]
-                        }, `即将删除部门 "${dp.Name || '空'}}" 及其子部门<br/>
+                        }, `即将删除部门 "${dp.Name || '空'}" 及其子部门<br/>
                         该部门及其子部门的所有职位都将被删除`)
                     },
                 }

@@ -138,21 +138,29 @@ var ManagerManagerClass = /** @class */ (function () {
                         }
                         if (newName != proj.Name) {
                             if (ManagerData.ProjectList.IndexOfAttr(FieldName.Name, newName) > -1) {
-                                Common.AlertError("\u9879\u76EE\u540D\u79F0 " + newName + " \u5DF2\u7ECF\u5B58\u5728");
+                                Common.AlertError("\u5373\u5C06\u628A\u9879\u76EE \"" + proj.Name + "\" \u6539\u540D\u4E3A \"" + newName + "\" <br/><br/>\u4F46\u9879\u76EE\u540D\u79F0 \"" + newName + "\" \u5DF2\u7ECF\u5B58\u5728");
                                 e.target.value = proj.Name;
                                 return;
                             }
-                            proj.Name = newName;
+                            Common.ConfirmWarning("\u5373\u5C06\u628A\u9879\u76EE \"" + proj.Name + "\" \u6539\u540D\u4E3A \"" + newName + "\"", null, function () {
+                                proj.Name = newName;
+                            }, function () {
+                                e.target.value = proj.Name;
+                            });
                         }
                     },
                     onClose: function () {
                     },
-                    onShowUserList: function (proj, index) {
-                        UrlParam.Set(URL_PARAM_KEY.PID, proj.Pid).Set(URL_PARAM_KEY.PAGE, ProjectEditPageIndex.User).Reset();
-                        _this.ShowProjectEdit();
-                    },
                     onShowDepartmentList: function (proj, index) {
                         UrlParam.Set(URL_PARAM_KEY.PID, proj.Pid).Set(URL_PARAM_KEY.PAGE, ProjectEditPageIndex.Department).Reset();
+                        _this.ShowProjectEdit();
+                    },
+                    onShowPosnList: function (proj, index) {
+                        UrlParam.Set(URL_PARAM_KEY.PID, proj.Pid).Set(URL_PARAM_KEY.PAGE, ProjectEditPageIndex.Position).Reset();
+                        _this.ShowProjectEdit();
+                    },
+                    onShowUserList: function (proj, index) {
+                        UrlParam.Set(URL_PARAM_KEY.PID, proj.Pid).Set(URL_PARAM_KEY.PAGE, ProjectEditPageIndex.User).Reset();
                         _this.ShowProjectEdit();
                     },
                     onDel: function (e, proj, index) {
@@ -221,21 +229,24 @@ var ManagerManagerClass = /** @class */ (function () {
                     onShowPage: function (page) {
                         UrlParam.Set(URL_PARAM_KEY.PAGE, page).Remove(URL_PARAM_KEY.DID).Remove(URL_PARAM_KEY.FKEY).Reset();
                         _this.VueProjectEdit.currPage = page;
-                        _this.ShowProjectEditPage();
+                        _this.SwitchProjectEditPageContent();
                     },
                 },
             }).$mount();
             _this.VueProjectEdit = vue;
             //#show
             Common.InsertIntoPageDom(vue.$el);
-            _this.ShowProjectEditPage();
+            _this.SwitchProjectEditPageContent();
         });
     };
-    ManagerManagerClass.prototype.ShowProjectEditPage = function () {
+    ManagerManagerClass.prototype.SwitchProjectEditPageContent = function () {
         var currPage = UrlParam.Get(URL_PARAM_KEY.PAGE, [ProjectEditPageIndex.Department, ProjectEditPageIndex.User]);
         switch (currPage) {
             case ProjectEditPageIndex.User:
                 this.ShowUserList(this.VueProjectEdit.project);
+                break;
+            case ProjectEditPageIndex.User:
+                this.ShowPositionList();
                 break;
             case ProjectEditPageIndex.Department:
                 this.ShowDepartmentList(this.VueProjectEdit.project);
@@ -355,7 +366,7 @@ var ManagerManagerClass = /** @class */ (function () {
                             brothers.splice(brotherIndex, 1);
                             //
                             delete ManagerData.DepartmentDict[dp.Did];
-                        }, "\u5373\u5C06\u5220\u9664\u90E8\u95E8 \"" + (dp.Name || '空') + "}\" \u53CA\u5176\u5B50\u90E8\u95E8<br/>\n                        \u8BE5\u90E8\u95E8\u53CA\u5176\u5B50\u90E8\u95E8\u7684\u6240\u6709\u804C\u4F4D\u90FD\u5C06\u88AB\u5220\u9664");
+                        }, "\u5373\u5C06\u5220\u9664\u90E8\u95E8 \"" + (dp.Name || '空') + "\" \u53CA\u5176\u5B50\u90E8\u95E8<br/>\n                        \u8BE5\u90E8\u95E8\u53CA\u5176\u5B50\u90E8\u95E8\u7684\u6240\u6709\u804C\u4F4D\u90FD\u5C06\u88AB\u5220\u9664");
                     },
                 }
             });
