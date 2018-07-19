@@ -527,6 +527,11 @@ interface TreeItem {
 }
 interface Tree extends Array<TreeItem> {
 }
+/* interface TreeItem {
+	Children?: TreeItem[]
+}
+interface Tree<T extends TreeItem> extends Array<T> {
+} */
 /*树 型 数组 的处理, 子数组名必须是Children */
 class TreeUtil {
 	static Length(tree: Tree): number {
@@ -539,13 +544,19 @@ class TreeUtil {
 		}
 		return len
 	}
-	static ToArray(tree: Tree, rs: TreeItem[] = null): TreeItem[] {
+	/**
+	 * map() 方法返回一个新数组，数组中的元素为原始数组元素调用函数处理后的值。
+	 * 	map() 方法按照原始数组元素顺序依次处理元素。
+	 * callbackfn 如果 是null则不作处理,将所有TreeItem都返回
+	 * */
+	static Map(tree: Tree, callbackfn: (value: TreeItem, index: number, currTree: Tree) => TreeItem = null, rs: TreeItem[] = null): TreeItem[] {
 		rs = rs || []
 		for (var i = 0; i < tree.length; i++) {
 			var item: TreeItem = tree[i]
-			rs.push(item)
+			var newItem = callbackfn ? callbackfn(item, i, tree) : item
+			rs.push(newItem)
 			if (item.Children) {
-				TreeUtil.ToArray(item.Children, rs)
+				TreeUtil.Map(item.Children, callbackfn, rs)
 			}
 		}
 		return rs
@@ -609,4 +620,29 @@ class TreeUtil {
 		}
 		return null
 	}
+	/**every() 方法用于检测数组所有元素是否都符合指定条件（通过函数提供）。
+
+every() 方法使用指定函数检测数组中的所有元素：
+
+如果数组中检测到有一个元素不满足，则整个表达式返回 false ，且剩余的元素不会再进行检测。
+如果所有元素都满足条件，则返回 true。 */
+	static Every(tree: Tree, callbackfn: (value: TreeItem, index: number, currTree: Tree, depth: number) => boolean, depth: number = 0): boolean {
+		for (var i = 0; i < tree.length; i++) {
+			var item: TreeItem = tree[i]
+			var rs = callbackfn(item, i, tree, depth)
+			if (!rs) {
+				return false
+			} else {//没有匹配,则继续找 子Tree
+				if (item.Children) {
+					var rs: boolean = TreeUtil.Every(item.Children, callbackfn, depth + 1)
+					if (rs = false) {
+						//Children中找到了, 直接返回吧
+						return false
+					}
+				}
+			}
+		}
+		return true
+	}
+
 }

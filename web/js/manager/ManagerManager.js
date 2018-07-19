@@ -166,7 +166,7 @@ var ManagerManagerClass = /** @class */ (function () {
         var proj = ManagerData.GetProjectListHasAuth().FindOfAttr(FieldName.PID, UrlParam.Get(URL_PARAM_KEY.PID));
         Loader.LoadVueTemplateList([this.VuePath + "ProjectEdit"], function (tplList) {
             var currPage = UrlParam.Get(URL_PARAM_KEY.PAGE, [ProjectEditPageIndex.Department, ProjectEditPageIndex.User]);
-            ManagerData.DepartmentList.every(function (dept) {
+            TreeUtil.Every(ManagerData.DepartmentTree, function (dept) {
                 dept.Pid = proj.Pid;
                 return true;
             });
@@ -231,7 +231,7 @@ var ManagerManagerClass = /** @class */ (function () {
                 data: function () {
                     return {
                         auth: ManagerData.MyAuth,
-                        allDepartmentList: ManagerData.DepartmentList,
+                        allDepartmentList: ManagerData.DepartmentTree,
                     };
                 },
                 methods: {
@@ -239,7 +239,7 @@ var ManagerManagerClass = /** @class */ (function () {
                     GetDeptAllPosnList: ManagerData.GetDeptAllPosnList.bind(ManagerData),
                     GetDeptUserList: ManagerData.GetDeptUserList.bind(ManagerData),
                     GetDeptAllUserList: ManagerData.GetDeptAllUserList.bind(ManagerData),
-                    CheckShowEditParentDp: _this.CheckShowEditParentDp.bind(_this),
+                    CheckCanMoveParentDp: _this.CheckCanMoveParentDp.bind(_this),
                     CheckSortDown: _this.CheckSortDown.bind(_this),
                     CheckSortUp: _this.CheckSortUp.bind(_this),
                     onEditName: function (e, dp, i0) {
@@ -257,8 +257,6 @@ var ManagerManagerClass = /** @class */ (function () {
                         _this.NewPositionUuid++;
                         ManagerData.DepartmentDict[dp.Did] = dp;
                         parentDp.Children.push(dp);
-                        var allDpList = _this.VueDepartmentList.allDepartmentList;
-                        allDpList.splice(i0 + ManagerData.GetAllDepartmentList(parentDp.Children, -1).length, 0, dp);
                     },
                     onEditParentDp: function (dp, parentDp) {
                         if (parentDp == null) {
@@ -266,33 +264,32 @@ var ManagerManagerClass = /** @class */ (function () {
                                 return; //已经是顶级职位了
                             }
                         }
-                        if (!_this.CheckShowEditParentDp(dp, parentDp)) {
-                            return;
+                        else {
+                            if (!_this.CheckCanMoveParentDp(dp, parentDp)) {
+                                return;
+                            }
                         }
-                        var currParentDp = ManagerData.DepartmentDict[dp.Fid];
-                        if (currParentDp != null) {
-                            ArrayUtil.RemoveByAttr(currParentDp.Children, FieldName.Did, dp.Did);
-                        }
-                        var allDpList = _this.VueDepartmentList.allDepartmentList;
+                        //从当前父tree中删除
+                        var brothers = ManagerData.GetBrotherDepartmentList(dp);
+                        brothers.RemoveByAttr(FieldName.Did, dp.Did);
+                        //
                         if (parentDp == null) {
-                            //顶级部门
+                            //改为顶级部门
                             dp.Fid = 0;
                             dp.Depth = 0;
-                            var i0 = ArrayUtil.IndexOfAttr(allDpList, FieldName.Did, dp.Did);
-                            allDpList.splice(i0, 1)[0];
-                            allDpList.push(dp);
+                            ManagerData.DepartmentTree.push(dp);
                         }
                         else {
+                            //放到其他部门下
                             dp.Fid = parentDp.Did;
                             dp.Depth = parentDp.Depth + 1;
                             parentDp.Children.push(dp);
-                            //
-                            var i0 = ArrayUtil.IndexOfAttr(allDpList, FieldName.Did, dp.Did);
-                            allDpList.splice(i0, 1)[0];
-                            var i1 = ArrayUtil.IndexOfAttr(allDpList, FieldName.Did, parentDp.Did);
-                            var allChildrenLen = ManagerData.GetAllDepartmentList(parentDp.Children, -1).length;
-                            allDpList.splice(i1 + allChildrenLen, 0, dp);
                         }
+                        //子部门的深度改变
+                        TreeUtil.Every(dp.Children, function (child, _, __, depthChild) {
+                            child.Depth = dp.Depth + depthChild + 1;
+                            return true;
+                        });
                     },
                     onEditPosition: function (dp, i0) {
                         UrlParam.Set(URL_PARAM_KEY.DID, dp.Did).Reset();
@@ -311,11 +308,6 @@ var ManagerManagerClass = /** @class */ (function () {
                         var brother = brothers[brotherIndex + 1];
                         brothers.splice(brotherIndex, 1);
                         brothers.splice(brotherIndex + 1, 0, dp);
-                        //
-                        ManagerData.RefreshAllDepartmentList();
-                        // var allDpList = this.VueDepartmentList.allDepartmentList
-                        // var i1 = ArrayUtil.IndexOfAttr(allDpList, FieldName.Did, brother.Did)
-                        // allDpList.splice(i1, 0, allDpList.splice(i0, 1)[0])
                     },
                     onSortUp: function (e, dp, i0) {
                         if (!_this.CheckSortUp(dp, i0)) {
@@ -325,8 +317,6 @@ var ManagerManagerClass = /** @class */ (function () {
                         var brotherIndex = ArrayUtil.IndexOfAttr(brothers, FieldName.Did, dp.Did);
                         brothers.splice(brotherIndex, 1);
                         brothers.splice(brotherIndex - 1, 0, dp);
-                        //
-                        ManagerData.RefreshAllDepartmentList();
                     },
                     onDel: function (dp, i0) {
                         Common.ConfirmDelete(function () {
@@ -335,7 +325,6 @@ var ManagerManagerClass = /** @class */ (function () {
                             brothers.splice(brotherIndex, 1);
                             //
                             delete ManagerData.DepartmentDict[dp.Did];
-                            ManagerData.RefreshAllDepartmentList();
                         }, "\u5373\u5C06\u5220\u9664\u90E8\u95E8 \"" + (dp.Name || '空') + "}\" \u53CA\u5176\u5B50\u90E8\u95E8<br/>\n                        \u8BE5\u90E8\u95E8\u53CA\u5176\u5B50\u90E8\u95E8\u7684\u6240\u6709\u804C\u4F4D\u90FD\u5C06\u88AB\u5220\u9664");
                     },
                 }
@@ -345,7 +334,7 @@ var ManagerManagerClass = /** @class */ (function () {
                 data: {
                     auth: ManagerData.MyAuth,
                     deptTree: ManagerData.DepartmentTree,
-                    allDepartmentList: ManagerData.DepartmentList,
+                    allDepartmentList: ManagerData.DepartmentTree,
                     newName: '',
                 },
                 methods: {
@@ -361,7 +350,6 @@ var ManagerManagerClass = /** @class */ (function () {
                         _this.NewPositionUuid++;
                         ManagerData.DepartmentDict[dp.Did] = dp;
                         ManagerData.DepartmentTree.push(dp);
-                        ManagerData.DepartmentList.push(dp);
                     },
                 },
             }).$mount();
@@ -404,7 +392,8 @@ var ManagerManagerClass = /** @class */ (function () {
         }
         return false;
     };
-    ManagerManagerClass.prototype.CheckShowEditParentDp = function (dp, parentDp) {
+    /**是否可以移动到 目标部门 */
+    ManagerManagerClass.prototype.CheckCanMoveParentDp = function (dp, parentDp) {
         if (dp.Did == parentDp.Did) {
             return false;
         }
@@ -425,7 +414,7 @@ var ManagerManagerClass = /** @class */ (function () {
                 template: tpl,
                 data: {
                     auth: ManagerData.MyAuth,
-                    allDepartmentList: ManagerData.DepartmentList,
+                    allDepartmentList: ManagerData.DepartmentTree,
                     dp: dept,
                     newName: "",
                 },
@@ -596,7 +585,7 @@ var ManagerManagerClass = /** @class */ (function () {
                     auth: ManagerData.MyAuth,
                     userList: proj.UserList,
                     otherUserList: ArrayUtil.SubByAttr(ManagerData.UserList, proj.UserList, FieldName.Uid),
-                    allDepartmentList: ManagerData.DepartmentList,
+                    allDepartmentList: ManagerData.DepartmentTree,
                     backPosn: backPosn,
                     filterText: filterText,
                     newUserUid: 0,

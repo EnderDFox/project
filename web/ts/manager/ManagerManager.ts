@@ -170,7 +170,7 @@ class ManagerManagerClass {
         var proj: ProjectSingle = ManagerData.GetProjectListHasAuth().FindOfAttr(FieldName.PID, UrlParam.Get(URL_PARAM_KEY.PID))
         Loader.LoadVueTemplateList([`${this.VuePath}ProjectEdit`], (tplList: string[]) => {
             var currPage = UrlParam.Get(URL_PARAM_KEY.PAGE, [ProjectEditPageIndex.Department, ProjectEditPageIndex.User])
-            ManagerData.DepartmentList.every((dept: DepartmentSingle): boolean => {
+            TreeUtil.Every(ManagerData.DepartmentTree, (dept: DepartmentSingle): boolean => {
                 dept.Pid = proj.Pid
                 return true
             })
@@ -236,7 +236,7 @@ class ManagerManagerClass {
                 data: function () {
                     return {
                         auth: ManagerData.MyAuth,
-                        allDepartmentList: ManagerData.DepartmentList,
+                        allDepartmentList: ManagerData.DepartmentTree,
                     }
                 },
                 methods: {
@@ -244,7 +244,7 @@ class ManagerManagerClass {
                     GetDeptAllPosnList: ManagerData.GetDeptAllPosnList.bind(ManagerData),
                     GetDeptUserList: ManagerData.GetDeptUserList.bind(ManagerData),
                     GetDeptAllUserList: ManagerData.GetDeptAllUserList.bind(ManagerData),
-                    CheckShowEditParentDp: this.CheckShowEditParentDp.bind(this),
+                    CheckCanMoveParentDp: this.CheckCanMoveParentDp.bind(this),
                     CheckSortDown: this.CheckSortDown.bind(this),
                     CheckSortUp: this.CheckSortUp.bind(this),
                     onEditName: (e: Event, dp: DepartmentSingle, i0: int) => {
@@ -262,42 +262,37 @@ class ManagerManagerClass {
                         this.NewPositionUuid++
                         ManagerData.DepartmentDict[dp.Did] = dp
                         parentDp.Children.push(dp)
-                        var allDpList = this.VueDepartmentList.allDepartmentList
-                        allDpList.splice(i0 + ManagerData.GetAllDepartmentList(parentDp.Children, -1).length, 0, dp)
                     },
                     onEditParentDp: (dp: DepartmentSingle, parentDp: DepartmentSingle) => {
                         if (parentDp == null) {
                             if (dp.Fid == 0) {
                                 return//已经是顶级职位了
                             }
+                        } else {
+                            if (!this.CheckCanMoveParentDp(dp, parentDp)) {
+                                return
+                            }
                         }
-                        if (!this.CheckShowEditParentDp(dp, parentDp)) {
-                            return
-                        }
-                        var currParentDp = ManagerData.DepartmentDict[dp.Fid]
-                        if (currParentDp != null) {
-                            ArrayUtil.RemoveByAttr(currParentDp.Children, FieldName.Did, dp.Did)
-
-                        }
-                        var allDpList = this.VueDepartmentList.allDepartmentList
+                        //从当前父tree中删除
+                        var brothers: DepartmentSingle[] = ManagerData.GetBrotherDepartmentList(dp)
+                        brothers.RemoveByAttr(FieldName.Did, dp.Did)
+                        //
                         if (parentDp == null) {
-                            //顶级部门
+                            //改为顶级部门
                             dp.Fid = 0
                             dp.Depth = 0
-                            var i0 = ArrayUtil.IndexOfAttr(allDpList, FieldName.Did, dp.Did)
-                            allDpList.splice(i0, 1)[0]
-                            allDpList.push(dp)
+                            ManagerData.DepartmentTree.push(dp)
                         } else {
+                            //放到其他部门下
                             dp.Fid = parentDp.Did
                             dp.Depth = parentDp.Depth + 1
                             parentDp.Children.push(dp)
-                            //
-                            var i0 = ArrayUtil.IndexOfAttr(allDpList, FieldName.Did, dp.Did)
-                            allDpList.splice(i0, 1)[0]
-                            var i1 = ArrayUtil.IndexOfAttr(allDpList, FieldName.Did, parentDp.Did)
-                            var allChildrenLen = ManagerData.GetAllDepartmentList(parentDp.Children, -1).length
-                            allDpList.splice(i1 + allChildrenLen, 0, dp)
                         }
+                        //子部门的深度改变
+                        TreeUtil.Every(dp.Children, (child: DepartmentSingle, _, __, depthChild: number): boolean => {
+                            child.Depth = dp.Depth + depthChild + 1
+                            return true
+                        })
                     },
                     onEditPosition: (dp: DepartmentSingle, i0: int) => {
                         UrlParam.Set(URL_PARAM_KEY.DID, dp.Did).Reset()
@@ -316,11 +311,6 @@ class ManagerManagerClass {
                         var brother = brothers[brotherIndex + 1]
                         brothers.splice(brotherIndex, 1)
                         brothers.splice(brotherIndex + 1, 0, dp)
-                        //
-                        ManagerData.RefreshAllDepartmentList()
-                        // var allDpList = this.VueDepartmentList.allDepartmentList
-                        // var i1 = ArrayUtil.IndexOfAttr(allDpList, FieldName.Did, brother.Did)
-                        // allDpList.splice(i1, 0, allDpList.splice(i0, 1)[0])
                     },
                     onSortUp: (e, dp: DepartmentSingle, i0: int) => {
                         if (!this.CheckSortUp(dp, i0)) {
@@ -330,8 +320,6 @@ class ManagerManagerClass {
                         var brotherIndex = ArrayUtil.IndexOfAttr(brothers, FieldName.Did, dp.Did)
                         brothers.splice(brotherIndex, 1)
                         brothers.splice(brotherIndex - 1, 0, dp)
-                        //
-                        ManagerData.RefreshAllDepartmentList()
                     },
                     onDel: (dp: DepartmentSingle, i0: int) => {
                         Common.ConfirmDelete(() => {
@@ -340,7 +328,6 @@ class ManagerManagerClass {
                             brothers.splice(brotherIndex, 1)
                             //
                             delete ManagerData.DepartmentDict[dp.Did]
-                            ManagerData.RefreshAllDepartmentList()
                         }, `即将删除部门 "${dp.Name || '空'}}" 及其子部门<br/>
                         该部门及其子部门的所有职位都将被删除`)
                     },
@@ -352,7 +339,7 @@ class ManagerManagerClass {
                     data: {
                         auth: ManagerData.MyAuth,
                         deptTree: ManagerData.DepartmentTree,
-                        allDepartmentList: ManagerData.DepartmentList,
+                        allDepartmentList: ManagerData.DepartmentTree,
                         newName: '',
                     },
                     methods: {
@@ -368,7 +355,6 @@ class ManagerManagerClass {
                             this.NewPositionUuid++
                             ManagerData.DepartmentDict[dp.Did] = dp
                             ManagerData.DepartmentTree.push(dp)
-                            ManagerData.DepartmentList.push(dp)
                         },
                     },
                 }
@@ -411,7 +397,8 @@ class ManagerManagerClass {
         }
         return false
     }
-    CheckShowEditParentDp(dp: DepartmentSingle, parentDp: DepartmentSingle) {
+    /**是否可以移动到 目标部门 */
+    CheckCanMoveParentDp(dp: DepartmentSingle, parentDp: DepartmentSingle) {
         if (dp.Did == parentDp.Did) {
             return false
         }
@@ -432,7 +419,7 @@ class ManagerManagerClass {
                     template: tpl,
                     data: {
                         auth: ManagerData.MyAuth,
-                        allDepartmentList: ManagerData.DepartmentList,
+                        allDepartmentList: ManagerData.DepartmentTree,
                         dp: dept,
                         newName: ``,
                     },
@@ -600,7 +587,7 @@ class ManagerManagerClass {
                         auth: ManagerData.MyAuth,
                         userList: proj.UserList,
                         otherUserList: ArrayUtil.SubByAttr(ManagerData.UserList, proj.UserList, FieldName.Uid),
-                        allDepartmentList: ManagerData.DepartmentList,
+                        allDepartmentList: ManagerData.DepartmentTree,
                         backPosn: backPosn,
                         filterText: filterText,
                         newUserUid: 0,

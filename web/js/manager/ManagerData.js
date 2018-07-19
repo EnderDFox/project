@@ -100,54 +100,69 @@ var ManagerDataClass = /** @class */ (function () {
         //#department
         this.DepartmentTree = [
             /* {
-                Did: -1, Name: '项目管理', Depth: 0, Children: [], PositionList: [
+                Did: -1, Name: '项目管理', Depth: 0, Children: [],
+                PositionList: [
                     { Posid: 0, Did: -1, Name: '制作人' ,UserList:[] },
                     { Posid: 1, Did: -1, Name: '产品经理' ,UserList:[] },
                 ]
             }, */
             {
-                Did: 1, Name: '策划', Depth: 0, Children: [], PositionList: [
-                    { Posid: 100, Did: 2, Name: '策划', UserList: [] },
-                    { Posid: 101, Did: 2, Name: '策划主管', UserList: [] },
+                Did: 1, Fid: 0, Name: '策划', Depth: 0, Children: [],
+                PositionList: [
+                    { Posid: 100, Did: 2, Name: '策划', UserList: [], AuthorityList: [] },
+                    { Posid: 101, Did: 2, Name: '策划主管', UserList: [], AuthorityList: [] },
                 ]
             },
             {
-                Did: 2, Name: '美术', Depth: 0, PositionList: [
-                    { Posid: 201, Did: 2, Name: '美术主管', UserList: [] },
+                Did: 2, Fid: 0, Name: '美术', Depth: 0,
+                PositionList: [
+                    { Posid: 201, Did: 2, Name: '美术主管', UserList: [], AuthorityList: [] },
                 ], Children: [
-                    { Did: 21, Name: 'UI', Depth: 1, Children: [], PositionList: [{ Posid: 2102, Did: 2, Name: 'UI', UserList: [] },] },
                     {
-                        Did: 22, Name: '3D', Depth: 1, Children: [], PositionList: [
-                            { Posid: 2200, Did: 2, Name: '3D', UserList: [] },
-                            { Posid: 2201, Did: 2, Name: '3D主管', UserList: [] },
+                        Did: 21, Fid: 2, Name: 'UI', Depth: 1, Children: [],
+                        PositionList: [{ Posid: 2102, Did: 2, Name: 'UI', UserList: [], AuthorityList: [] },]
+                    },
+                    {
+                        Did: 22, Fid: 2, Name: '3D', Depth: 1, Children: [],
+                        PositionList: [
+                            { Posid: 2200, Did: 2, Name: '3D', UserList: [], AuthorityList: [] },
+                            { Posid: 2201, Did: 2, Name: '3D主管', UserList: [], AuthorityList: [] },
                         ]
                     },
                     {
-                        Did: 23, Name: '原画', Depth: 1, PositionList: [{ Posid: 301, Did: 2, Name: '原画主管', UserList: [] }], Children: [
-                            { Did: 231, Name: '角色原画', Depth: 2, Children: [], PositionList: [{ Posid: 23100, Did: 2, Name: '角色原画', UserList: [] },] },
-                            { Did: 232, Name: '场景原画', Depth: 2, Children: [], PositionList: [{ Posid: 23200, Did: 2, Name: '场景原画', UserList: [] },] },
+                        Did: 23, Fid: 2, Name: '原画', Depth: 1,
+                        PositionList: [{ Posid: 301, Did: 2, Name: '原画主管', UserList: [], AuthorityList: [] }],
+                        Children: [
+                            {
+                                Did: 231, Fid: 23, Name: '角色原画', Depth: 2, Children: [],
+                                PositionList: [{ Posid: 23100, Did: 2, Name: '角色原画', UserList: [], AuthorityList: [] },]
+                            },
+                            {
+                                Did: 232, Fid: 23, Name: '场景原画', Depth: 2, Children: [],
+                                PositionList: [{ Posid: 23200, Did: 2, Name: '场景原画', UserList: [], AuthorityList: [] },]
+                            },
                         ],
                     },
                 ],
             },
             {
-                Did: 3, Name: '后端', Depth: 0, Children: [], PositionList: [
-                    { Posid: 300, Did: 2, Name: '后端', UserList: [] },
-                    { Posid: 301, Did: 2, Name: '后端主管', UserList: [] },
+                Did: 3, Fid: 0, Name: '后端', Depth: 0, Children: [],
+                PositionList: [
+                    { Posid: 300, Did: 2, Name: '后端', UserList: [], AuthorityList: [] },
+                    { Posid: 301, Did: 2, Name: '后端主管', UserList: [], AuthorityList: [] },
                 ]
             },
             {
-                Did: 4, Name: '前端', Depth: 0, Children: [], PositionList: [
-                    { Posid: 400, Did: 2, Name: '前端', UserList: [] },
-                    { Posid: 401, Did: 2, Name: '前端主管', UserList: [] },
+                Did: 4, Fid: 0, Name: '前端', Depth: 0, Children: [],
+                PositionList: [
+                    { Posid: 400, Did: 2, Name: '前端', UserList: [], AuthorityList: [] },
+                    { Posid: 401, Did: 2, Name: '前端主管', UserList: [], AuthorityList: [] },
                 ]
             },
         ];
         //
         this.DepartmentDict = {};
         this.InitAllDepartmentDict();
-        this.DepartmentList = [];
-        this.GetAllDepartmentList(this.DepartmentTree, 0, this.DepartmentList);
     };
     ManagerDataClass.prototype.InitAuthorityModuleList = function () {
         var amList = this.AuthorityModuleList;
@@ -191,29 +206,6 @@ var ManagerDataClass = /** @class */ (function () {
                 this.InitAllDepartmentDict(dp.Children);
             }
         }
-    };
-    ManagerDataClass.prototype.RefreshAllDepartmentList = function () {
-        this.DepartmentList.splice(0, this.DepartmentList.length);
-        this.GetAllDepartmentList(this.DepartmentTree, 0, this.DepartmentList);
-    };
-    /**把一个 部门list和每个子孙部门一起合并为一个大list */
-    ManagerDataClass.prototype.GetAllDepartmentList = function (dpTree, fid, rs) {
-        if (rs === void 0) { rs = []; }
-        for (var i = 0; i < dpTree.length; i++) {
-            var dp = dpTree[i];
-            if (fid > -1) {
-                dp.Fid = fid;
-                dp.PositionList.every(function (pos) {
-                    pos.AuthorityList = [];
-                    return true;
-                });
-            }
-            rs.push(dp);
-            if (dp.Children.length > 0) {
-                this.GetAllDepartmentList(dp.Children, dp.Did, rs);
-            }
-        }
-        return rs;
     };
     /**一个部门及其子部门下所有的职位 */
     ManagerDataClass.prototype.GetDeptAllPosnList = function (dept, rs) {

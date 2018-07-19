@@ -33,7 +33,7 @@
                             </button>
                             <ul class="dropdown-menu" :aria-labelledby="'ddmDpListDid'+index">
 
-                                <li v-for="parentDp in allDepartmentList" :key="parentDp.Did" :class="{'disabled':!CheckShowEditParentDp(dp,parentDp)}">
+                                <li v-for="parentDp in allDepartmentList" :key="parentDp.Did" :class="{'disabled':!CheckCanMoveParentDp(dp,parentDp)}">
                                     <a @click="onEditParentDp(dp,parentDp)">{{departmentOption(parentDp)}}</a>
                                 </li>
                                 <li role="separator " class="divider "></li>
