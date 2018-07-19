@@ -351,6 +351,7 @@ class ManagerManagerClass {
                     template: tplList[0],
                     data: {
                         auth: ManagerData.MyAuth,
+                        deptTree: ManagerData.DepartmentTree,
                         allDepartmentList: ManagerData.DepartmentList,
                         newName: '',
                     },

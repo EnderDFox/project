@@ -1,4 +1,5 @@
-<div class="list-complete-item div-tr DeptList-tr">
+<div class="list-complete-item">
+    <div class="div-tr DeptList-tr">
         <div>
             <span class="glyphicon glyphicon-minus" aria-hidden="true" v-for="dep,index in dp.Depth*2"></span>
             <input type="text" class="form-control" style="display: inline-block;width: auto;" placeholder="空" aria-describedby="basic-addon1"
@@ -17,7 +18,7 @@
                     <span class="caret"></span>
                 </button>
                 <ul class="dropdown-menu" :aria-labelledby="'ddmDpListDid'+index">
-    
+
                     <li v-for="parentDp in allDepartmentList" :key="parentDp.Did" :class="{'disabled':!CheckShowEditParentDp(dp,parentDp)}">
                         <a @click="onEditParentDp(dp,parentDp)">{{departmentOption(parentDp)}}</a>
                     </li>
@@ -56,3 +57,5 @@
             </button>
         </div>
     </div>
+    <DepartmentListComp v-for="dpc,indexc in dp.Children" :dp="dpc" :index="indexc" :key="dpc.Did" style="display: block;padding: 0px;"></DepartmentListComp>
+</div>

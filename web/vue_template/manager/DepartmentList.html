@@ -98,7 +98,7 @@
             <div>删除</div>
         </div>
         <transition-group name="list-complete" tag="div">
-            <DepartmentListComp v-for="dp,index in allDepartmentList" :dp="dp" :index="3" :key="dp.Did"></DepartmentListComp>
+            <DepartmentListComp v-for="dp,index in deptTree" :dp="dp" :index="index" :key="dp.Did"></DepartmentListComp>
         </transition-group>
         <div class="div-tr DeptList-tr" v-if="auth['PROJECT_EDIT']">
             <div>
