@@ -230,7 +230,7 @@ class ManagerManagerClass {
             Vue.component('DepartmentListComp', {
                 template: tplList[1],
                 props: {
-                    dp: Object,
+                    deptTree: Array,
                     index: Number,
                 },
                 data: function () {
