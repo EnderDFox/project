@@ -549,11 +549,11 @@ class TreeUtil {
 	 * 	map() 方法按照原始数组元素顺序依次处理元素。
 	 * callbackfn 如果 是null则不作处理,将所有TreeItem都返回
 	 * */
-	static Map(tree: Tree, callbackfn: (value: TreeItem, index: number, currTree: Tree) => TreeItem = null, rs: TreeItem[] = null): TreeItem[] {
+	static Map<T>(tree: Tree, callbackfn: (value: TreeItem, index: number, currTree: Tree) => T = null, rs: T[] = null): T[] {
 		rs = rs || []
 		for (var i = 0; i < tree.length; i++) {
 			var item: TreeItem = tree[i]
-			var newItem = callbackfn ? callbackfn(item, i, tree) : item
+			var newItem = callbackfn ? callbackfn(item, i, tree) : item as T
 			rs.push(newItem)
 			if (item.Children) {
 				TreeUtil.Map(item.Children, callbackfn, rs)

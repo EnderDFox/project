@@ -216,6 +216,15 @@ class ManagerDataClass {
             }
         }
     }
+    /**得到一个proj下所有职位的list */
+    GetProjAllPosnList(proj:ProjectSingle, rs: PositionSingle[] = null): PositionSingle[] {
+        rs = rs || [];
+        for (var i = 0; i < this.DepartmentTree.length; i++) {
+            var item = this.DepartmentTree[i]
+            this.GetDeptAllPosnList(item,rs)
+        }
+        return rs
+    }
     /**一个部门及其子部门下所有的职位 */
     GetDeptAllPosnList(dept: DepartmentSingle, rs: PositionSingle[] = null): PositionSingle[] {
         rs = rs || [];

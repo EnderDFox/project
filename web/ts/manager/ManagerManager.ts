@@ -67,7 +67,7 @@ class ManagerManagerClass {
                 },
                 methods: {
                     departmentOption: this.DepartmentOption.bind(this),
-                    OnButtonClick:function(){//点击时刷新列表
+                    OnButtonClick: function () {//点击时刷新列表
                         this.deptList = TreeUtil.Map(ManagerData.DepartmentTree)
                     },
                 }
@@ -116,6 +116,10 @@ class ManagerManagerClass {
                         },
                         GetProjAllDeptLength: (proj: ProjectSingle): number => {
                             return TreeUtil.Length(ManagerData.DepartmentTree)
+                        },
+                        GetProjAllPosnLength: (proj: ProjectSingle): number => {
+                            console.log("[debug]", "This GetProjAllPosnLength")
+                            return ManagerData.GetProjAllPosnList(proj).length
                         },
                         GetProjUserLength: (proj: ProjectSingle): number => {
                             return proj.UserList.length
@@ -282,8 +286,8 @@ class ManagerManagerClass {
                         ManagerData.DepartmentDict[dp.Did] = dp
                         parentDp.Children.push(dp)
                     },
-                    onEditParentDp1:(...args)=>{
-                        console.log("[debug]",args)
+                    onEditParentDp1: (...args) => {
+                        console.log("[debug]", args)
                     },
                     onEditParentDp: (dp: DepartmentSingle, parentDp: DepartmentSingle) => {
                         if (parentDp == null) {
@@ -695,7 +699,7 @@ class ManagerManagerClass {
                         departmentOption: this.DepartmentOption.bind(this),
                         OnDeptChange: (user: UserSingle, dept: DepartmentSingle) => {
                             ManagerData.RemoveUserPosnid(user)
-                            if(dept){
+                            if (dept) {
                                 ManagerData.SetUserPosnid(user, dept.Did)
                             }
                         },

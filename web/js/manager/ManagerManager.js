@@ -115,6 +115,10 @@ var ManagerManagerClass = /** @class */ (function () {
                     GetProjAllDeptLength: function (proj) {
                         return TreeUtil.Length(ManagerData.DepartmentTree);
                     },
+                    GetProjAllPosnLength: function (proj) {
+                        console.log("[debug]", "This GetProjAllPosnLength");
+                        return ManagerData.GetProjAllPosnList(proj).length;
+                    },
                     GetProjUserLength: function (proj) {
                         return proj.UserList.length;
                     },

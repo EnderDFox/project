@@ -9,7 +9,8 @@
                     <th style="width: 300px;">项目名称</th>
                     <th class="-text-center" style="width: 150px;" title="负责人拥有该项目所有的管理权限">负责人</th>
                     <th style="width: 120px;">部门</th>
-                    <th class="~text-center" style="width: 100px;">成员</th>
+                    <th style="width: 120px;">职位</th>
+                    <th class="~text-center" style="width: 120px;">成员</th>
                     <th>删除</th>
                     <th>创建时间</th>
                 </tr>
@@ -46,6 +47,13 @@
                     <button class="btn btn-default " type="button" @click="onShowDepartmentList(proj,index)" :title="'该项目有'+GetProjAllDeptLength(proj)+'个部门'">
                         <span class="glyphicon glyphicon-th-list" aria-hidden="true ">
                             {{GetProjAllDeptLength(proj)}}
+                        </span>
+                    </button>
+                </td>
+                <td>
+                    <button class="btn btn-default " type="button" @click="onShowDepartmentList(proj,index)" :title="'该项目有'+GetProjAllDeptLength(proj)+'个职位'">
+                        <span class="glyphicon glyphicon-th-list" aria-hidden="true ">
+                            {{GetProjAllPosnLength(proj)}}
                         </span>
                     </button>
                 </td>
