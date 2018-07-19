@@ -1,6 +1,5 @@
 <div class="dropdown">
-    <button class="btn btn-default dropdown-toggle" type="button" :id="buttonId" data-toggle="dropdown" aria-haspopup="true"
-        aria-expanded="true">
+    <button class="btn btn-default dropdown-toggle" type="button" :id="buttonId" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" @click="OnButtonClick()">
         {{buttonLabel}}
         <span class="caret"></span>
     </button>
@@ -9,7 +8,6 @@
         <li v-for="dept in deptList" :key="dept.Did" :class="{'disabled':(CheckItemCb && CheckItemCb(dept))}">
             <a @click="$emit('OnSelect',dept)">{{departmentOption(dept)}}</a>
         </li>
-        <li role="separator " class="divider "></li>
         <slot name="after"></slot>
     </ul>
 </div>

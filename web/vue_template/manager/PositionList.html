@@ -10,7 +10,9 @@
                 <span class="navbar-text">/</span>
             </div>
             <div class="navbar-header" role="cell">
-                <div class="dropdown" style="margin-top: 8px;">
+                <DeptDropdownComp style="margin-top: 8px;" :buttonId="'ddmPosList'" :buttonLabel="dp.Name" @OnSelect="onEditParentDp(dp,arguments[0])">
+                </DeptDropdownComp>
+                <!-- <div class="dropdown" style="margin-top: 8px;">
                     <button class="btn btn-default dropdown-toggle" type="button" :id="'ddmPosList'" data-toggle="dropdown" aria-haspopup="true"
                         aria-expanded="true">
                         {{dp.Name}}
@@ -22,7 +24,7 @@
                             <a @click="onEditParentDp(dp,parentDp)">{{departmentOption(parentDp)}}</a>
                         </li>
                     </ul>
-                </div>
+                </div> -->
             </div>
         </div>
     </nav>

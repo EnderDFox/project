@@ -12,16 +12,16 @@
                 </button>
             </div>
             <div>
-                <DeptDropdownComp :disabled="!auth['PROJECT_EDIT']" :SelectArgs="[dp]" :buttonId="'ddmDpListDid'+index" :buttonLabel="'改变上级部门'" 
-                :CheckItemCb="(dropdownDept)=>{return !CheckCanMoveParentDp(dp,dropdownDept);}"
-                 @OnSelect="onEditParentDp(dp,arguments[0])">
+                <DeptDropdownComp :disabled="!auth['PROJECT_EDIT']" :buttonId="'ddmDpListDid'+index" :buttonLabel="'改变上级部门'" :CheckItemCb="(dropdownDept)=>{return !CheckCanMoveParentDp(dp,dropdownDept);}"
+                    @OnSelect="onEditParentDp(dp,arguments[0])">
                     <template slot="after">
+                        <li role="separator " class="divider "></li>
                         <li :class="{'disabled':dp.Fid==0}">
                             <a @click="onEditParentDp(dp,null)">改为顶级部门</a>
                         </li>
                     </template>
                 </DeptDropdownComp>
-               <!--  <div class="dropdown">
+                <!--  <div class="dropdown">
                     <button class="btn btn-default dropdown-toggle" type="button" :id="'ddmDpListDid'+index" data-toggle="dropdown" aria-haspopup="true"
                         aria-expanded="true" :disabled="!auth['PROJECT_EDIT']">
                         改变上级部门

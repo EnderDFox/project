@@ -67,6 +67,9 @@ class ManagerManagerClass {
                 },
                 methods: {
                     departmentOption: this.DepartmentOption.bind(this),
+                    OnButtonClick:function(){//点击时刷新列表
+                        this.deptList = TreeUtil.Map(ManagerData.DepartmentTree)
+                    },
                 }
             })
             //#
@@ -257,7 +260,6 @@ class ManagerManagerClass {
                     }
                 },
                 methods: {
-                    departmentOption: this.DepartmentOption.bind(this),
                     GetDeptAllPosnList: ManagerData.GetDeptAllPosnList.bind(ManagerData),
                     GetDeptUserList: ManagerData.GetDeptUserList.bind(ManagerData),
                     GetDeptAllUserList: ManagerData.GetDeptAllUserList.bind(ManagerData),
@@ -463,7 +465,6 @@ class ManagerManagerClass {
                         onBackDepartmentList: () => {
                             this.ShowDepartmentList(ManagerData.GetProjByPid(dept.Pid))
                         },
-                        departmentOption: this.DepartmentOption.bind(this),
                         onEditParentDp: (dp: DepartmentSingle, parentDp: DepartmentSingle) => {
                             UrlParam.Set(URL_PARAM_KEY.DID, parentDp.Did).Reset()
                             this.ShowPositionList()

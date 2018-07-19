@@ -63,6 +63,9 @@ var ManagerManagerClass = /** @class */ (function () {
                 },
                 methods: {
                     departmentOption: _this.DepartmentOption.bind(_this),
+                    OnButtonClick: function () {
+                        this.deptList = TreeUtil.Map(ManagerData.DepartmentTree);
+                    },
                 }
             });
             //#
@@ -252,7 +255,6 @@ var ManagerManagerClass = /** @class */ (function () {
                     };
                 },
                 methods: {
-                    departmentOption: _this.DepartmentOption.bind(_this),
                     GetDeptAllPosnList: ManagerData.GetDeptAllPosnList.bind(ManagerData),
                     GetDeptUserList: ManagerData.GetDeptUserList.bind(ManagerData),
                     GetDeptAllUserList: ManagerData.GetDeptAllUserList.bind(ManagerData),
@@ -461,7 +463,6 @@ var ManagerManagerClass = /** @class */ (function () {
                     onBackDepartmentList: function () {
                         _this.ShowDepartmentList(ManagerData.GetProjByPid(dept.Pid));
                     },
-                    departmentOption: _this.DepartmentOption.bind(_this),
                     onEditParentDp: function (dp, parentDp) {
                         UrlParam.Set(URL_PARAM_KEY.DID, parentDp.Did).Reset();
                         _this.ShowPositionList();
