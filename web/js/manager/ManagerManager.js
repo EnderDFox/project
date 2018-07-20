@@ -5,20 +5,26 @@ var ProjectEditPageIndex;
     ProjectEditPageIndex[ProjectEditPageIndex["Position"] = 2] = "Position";
     ProjectEditPageIndex[ProjectEditPageIndex["User"] = 3] = "User";
 })(ProjectEditPageIndex || (ProjectEditPageIndex = {}));
+/**部门下拉列表可用性 */
+var DeptDropdownItemEnabled;
+(function (DeptDropdownItemEnabled) {
+    DeptDropdownItemEnabled[DeptDropdownItemEnabled["ENABLED"] = 0] = "ENABLED";
+    DeptDropdownItemEnabled[DeptDropdownItemEnabled["DISABLED"] = 2] = "DISABLED";
+    DeptDropdownItemEnabled[DeptDropdownItemEnabled["HIDE"] = 4] = "HIDE";
+})(DeptDropdownItemEnabled || (DeptDropdownItemEnabled = {}));
 var ManagerManagerClass = /** @class */ (function () {
     function ManagerManagerClass() {
         this.VuePath = "manager/";
-        this.NewDepartmentUuid = 100001;
-        this.NewPositionUuid = 200001;
     }
     ManagerManagerClass.prototype.Init = function () {
+        this.Data = ManagerData;
         UrlParam.Callback = this.UrlParamCallback.bind(this);
         this.InitVue(this.UrlParamCallback.bind(this));
     };
     ManagerManagerClass.prototype.UrlParamCallback = function () {
         Common.PopupHideAll();
         var pid = UrlParam.Get(URL_PARAM_KEY.PID, 0);
-        var proj = ManagerData.GetProjectListHasAuth().FindOfAttr(FieldName.PID, pid);
+        var proj = this.Data.GetProjectListHasAuth().FindOfAttr(FieldName.PID, pid);
         if (proj) {
             this.ShowProjectEdit();
         }
@@ -35,7 +41,7 @@ var ManagerManagerClass = /** @class */ (function () {
                 props: {},
                 data: function () {
                     return {
-                        currUser: ManagerData.CurrUser,
+                        currUser: _this.Data.CurrUser,
                     };
                 },
                 methods: {
@@ -52,19 +58,21 @@ var ManagerManagerClass = /** @class */ (function () {
                 template: tplList[1],
                 props: {
                     // deptList: Array,
-                    buttonId: String,
-                    buttonLabel: String,
+                    btnId: String,
+                    btnLabel: String,
+                    btnDisabled: Boolean,
                     CheckItemCb: Function,
+                    ItemStyle: Function,
                 },
                 data: function () {
                     return {
-                        deptList: ManagerData.DepartmentTree,
+                        deptList: _this.Data.CurrProj.DeptTree,
                     };
                 },
                 methods: {
-                    departmentOption: _this.DepartmentOption.bind(_this),
-                    OnButtonClick: function () {
-                        this.deptList = TreeUtil.Map(ManagerData.DepartmentTree);
+                    deptOption: _this.DeptOption.bind(_this),
+                    OnBtnClick: function () {
+                        this.deptList = TreeUtil.Map(ManagerData.CurrProj.DeptTree);
                     },
                 }
             });
@@ -83,10 +91,10 @@ var ManagerManagerClass = /** @class */ (function () {
             var vue = new Vue({
                 template: tpl,
                 data: {
-                    auth: ManagerData.MyAuth,
-                    currUser: ManagerData.CurrUser,
+                    auth: _this.Data.MyAuth,
+                    currUser: _this.Data.CurrUser,
                     newName: '',
-                    projectList: ManagerData.GetProjectListHasAuth(),
+                    projectList: _this.Data.GetProjectListHasAuth(),
                 },
                 methods: {
                     GetDateStr: function (timeStamp) {
@@ -94,18 +102,18 @@ var ManagerManagerClass = /** @class */ (function () {
                     },
                     GetProjMaster: function (proj) {
                         if (proj.MasterUid > 0) {
-                            return ManagerData.UserDict[proj.MasterUid].Name;
+                            return _this.Data.UserDict[proj.MasterUid].Name;
                         }
                         else {
                             return '空';
                         }
                     },
                     OnEditMaster: function (proj, user) {
-                        if (proj.MasterUid == ManagerData.CurrUser.Uid && !ManagerData.MyAuth[AUTH.PROJECT_LIST]) {
+                        if (proj.MasterUid == _this.Data.CurrUser.Uid && !_this.Data.MyAuth[AUTH.PROJECT_LIST]) {
                             //是这个项目的负责人,并且不是超管
                             Common.ConfirmWarning("\u4F60\u662F\u8FD9\u4E2A\u9879\u76EE\u73B0\u5728\u7684\u8D1F\u8D23\u4EBA <br/>\u5982\u679C\u4FEE\u6539\u8D1F\u8D23\u4EBA,\u4F60\u5C06\u5931\u53BB\u8FD9\u4E2A\u9879\u76EE\u7684\u7BA1\u7406\u6743\u9650", "\u8981\u5C06'\u8D1F\u8D23\u4EBA'\u4FEE\u6539\u4E3A'" + user.Name + "'\u5417?", function () {
                                 proj.MasterUid = user.Uid;
-                                ManagerData.RemoveMyAuth(AUTH.PROJECT_EDIT);
+                                _this.Data.RemoveMyAuth(AUTH.PROJECT_EDIT);
                             });
                         }
                         else {
@@ -113,11 +121,10 @@ var ManagerManagerClass = /** @class */ (function () {
                         }
                     },
                     GetProjAllDeptLength: function (proj) {
-                        return TreeUtil.Length(ManagerData.DepartmentTree);
+                        return TreeUtil.Length(proj.DeptTree);
                     },
                     GetProjAllPosnLength: function (proj) {
-                        console.log("[debug]", "This GetProjAllPosnLength");
-                        return ManagerData.GetProjAllPosnList(proj).length;
+                        return _this.Data.GetProjAllPosnList(proj).length;
                     },
                     GetProjUserLength: function (proj) {
                         return proj.UserList.length;
@@ -137,7 +144,7 @@ var ManagerManagerClass = /** @class */ (function () {
                             return;
                         }
                         if (newName != proj.Name) {
-                            if (ManagerData.ProjectList.IndexOfAttr(FieldName.Name, newName) > -1) {
+                            if (_this.Data.ProjectList.IndexOfAttr(FieldName.Name, newName) > -1) {
                                 Common.AlertError("\u5373\u5C06\u628A\u9879\u76EE \"" + proj.Name + "\" \u6539\u540D\u4E3A \"" + newName + "\" <br/><br/>\u4F46\u9879\u76EE\u540D\u79F0 \"" + newName + "\" \u5DF2\u7ECF\u5B58\u5728");
                                 e.target.value = proj.Name;
                                 return;
@@ -174,12 +181,12 @@ var ManagerManagerClass = /** @class */ (function () {
                             Common.AlertError("\u9879\u76EE\u540D\u79F0 " + newName + " \u4E0D\u53EF\u4EE5\u4E3A\u7A7A");
                             return;
                         }
-                        if (ManagerData.ProjectList.IndexOfAttr(FieldName.Name, newName) > -1) {
+                        if (_this.Data.ProjectList.IndexOfAttr(FieldName.Name, newName) > -1) {
                             Common.AlertError("\u9879\u76EE\u540D\u79F0 " + newName + " \u5DF2\u7ECF\u5B58\u5728");
                             return;
                         }
-                        ManagerData.ProjectList.push({
-                            Pid: ManagerData.ProjectList[_this.VueProjectList.projectList.length - 1].Pid + 1,
+                        _this.Data.ProjectList.push({
+                            Pid: _this.Data.ProjectList[_this.VueProjectList.projectList.length - 1].Pid + 1,
                             Name: _this.VueProjectList.newName.toString(),
                             MasterUid: 0, UserList: [],
                             CreateTime: new Date().getTime(),
@@ -195,10 +202,11 @@ var ManagerManagerClass = /** @class */ (function () {
     };
     ManagerManagerClass.prototype.ShowProjectEdit = function () {
         var _this = this;
-        var proj = ManagerData.GetProjectListHasAuth().FindOfAttr(FieldName.PID, UrlParam.Get(URL_PARAM_KEY.PID));
+        var proj = this.Data.GetProjectListHasAuth().FindOfAttr(FieldName.PID, UrlParam.Get(URL_PARAM_KEY.PID));
+        this.Data.CurrProj = proj;
         Loader.LoadVueTemplateList([this.VuePath + "ProjectEdit"], function (tplList) {
             var currPage = UrlParam.Get(URL_PARAM_KEY.PAGE, [ProjectEditPageIndex.Department, ProjectEditPageIndex.User]);
-            TreeUtil.Every(ManagerData.DepartmentTree, function (dept) {
+            TreeUtil.Every(_this.Data.CurrProj.DeptTree, function (dept) {
                 dept.Pid = proj.Pid;
                 return true;
             });
@@ -206,12 +214,12 @@ var ManagerManagerClass = /** @class */ (function () {
             var vue = new Vue({
                 template: tplList[0],
                 data: {
-                    auth: ManagerData.MyAuth,
-                    currUser: ManagerData.CurrUser,
+                    auth: _this.Data.MyAuth,
+                    currUser: _this.Data.CurrUser,
                     currPage: currPage,
-                    projectList: ManagerData.GetProjectListHasAuth(),
+                    projectList: _this.Data.GetProjectListHasAuth(),
                     project: proj,
-                    dpTree: ManagerData.DepartmentTree,
+                    dpTree: _this.Data.CurrProj.DeptTree,
                     newName: proj ? proj.Name : '',
                 },
                 methods: {
@@ -265,14 +273,14 @@ var ManagerManagerClass = /** @class */ (function () {
                 },
                 data: function () {
                     return {
-                        auth: ManagerData.MyAuth,
-                        allDepartmentList: ManagerData.DepartmentTree,
+                        auth: _this.Data.MyAuth,
+                        allDepartmentList: _this.Data.CurrProj.DeptTree,
                     };
                 },
                 methods: {
-                    GetDeptAllPosnList: ManagerData.GetDeptAllPosnList.bind(ManagerData),
-                    GetDeptUserList: ManagerData.GetDeptUserList.bind(ManagerData),
-                    GetDeptAllUserList: ManagerData.GetDeptAllUserList.bind(ManagerData),
+                    GetDeptAllPosnList: _this.Data.GetDeptAllPosnList.bind(_this.Data),
+                    GetDeptUserList: _this.Data.GetDeptUserList.bind(_this.Data),
+                    GetDeptAllUserList: _this.Data.GetDeptAllUserList.bind(_this.Data),
                     CheckCanMoveParentDp: _this.CheckCanMoveParentDp.bind(_this),
                     CheckSortDown: _this.CheckSortDown.bind(_this),
                     CheckSortUp: _this.CheckSortUp.bind(_this),
@@ -282,22 +290,34 @@ var ManagerManagerClass = /** @class */ (function () {
                     },
                     onAddChild: function (parentDp, i0) {
                         var dp = {
-                            Did: _this.NewDepartmentUuid, Name: "", Depth: parentDp.Depth + 1, Children: [], PositionList: [
-                                { Posid: _this.NewPositionUuid, Did: _this.NewDepartmentUuid, Name: "", AuthorityList: [] },
+                            Did: _this.Data.NewDepartmentUuid, Name: "", Depth: parentDp.Depth + 1, Children: [], PositionList: [
+                                { Posid: _this.Data.NewPositionUuid, Did: _this.Data.NewDepartmentUuid, Name: "", AuthorityList: [] },
                             ],
                             Fid: parentDp.Did
                         };
-                        _this.NewDepartmentUuid++;
-                        _this.NewPositionUuid++;
-                        ManagerData.DepartmentDict[dp.Did] = dp;
+                        _this.Data.NewDepartmentUuid++;
+                        _this.Data.NewPositionUuid++;
+                        _this.Data.DeptDict[dp.Did] = dp;
                         parentDp.Children.push(dp);
                     },
-                    onEditParentDp1: function () {
-                        var args = [];
-                        for (var _i = 0; _i < arguments.length; _i++) {
-                            args[_i] = arguments[_i];
+                    DeptDropdownCheckItemCb: function (dept, deptDropdown) {
+                        if (deptDropdown.Sort == 0) {
+                            return DeptDropdownItemEnabled.HIDE;
                         }
-                        console.log("[debug]", args);
+                        else if (!_this.CheckCanMoveParentDp(dept, deptDropdown)) {
+                            return DeptDropdownItemEnabled.DISABLED;
+                        }
+                        else {
+                            return DeptDropdownItemEnabled.ENABLED;
+                        }
+                    },
+                    DeptDropdownItemStyleCb: function (dept, deptDropdown) {
+                        if (dept.Did == deptDropdown.Did) {
+                            return [{ 'background-color': '#FFFF00' }];
+                        }
+                        else {
+                            return null;
+                        }
                     },
                     onEditParentDp: function (dp, parentDp) {
                         if (parentDp == null) {
@@ -311,14 +331,14 @@ var ManagerManagerClass = /** @class */ (function () {
                             }
                         }
                         //从当前父tree中删除
-                        var brothers = ManagerData.GetBrotherDepartmentList(dp);
+                        var brothers = _this.Data.GetBrotherDepartmentList(dp);
                         brothers.RemoveByAttr(FieldName.Did, dp.Did);
                         //
                         if (parentDp == null) {
                             //改为顶级部门
                             dp.Fid = 0;
                             dp.Depth = 0;
-                            ManagerData.DepartmentTree.push(dp);
+                            _this.Data.CurrProj.DeptTree.push(dp);
                         }
                         else {
                             //放到其他部门下
@@ -344,7 +364,7 @@ var ManagerManagerClass = /** @class */ (function () {
                         if (!_this.CheckSortDown(dp, i0)) {
                             return;
                         }
-                        var brothers = ManagerData.GetBrotherDepartmentList(dp);
+                        var brothers = _this.Data.GetBrotherDepartmentList(dp);
                         var brotherIndex = ArrayUtil.IndexOfAttr(brothers, FieldName.Did, dp.Did);
                         var brother = brothers[brotherIndex + 1];
                         brothers.splice(brotherIndex, 1);
@@ -354,18 +374,18 @@ var ManagerManagerClass = /** @class */ (function () {
                         if (!_this.CheckSortUp(dp, i0)) {
                             return;
                         }
-                        var brothers = ManagerData.GetBrotherDepartmentList(dp);
+                        var brothers = _this.Data.GetBrotherDepartmentList(dp);
                         var brotherIndex = ArrayUtil.IndexOfAttr(brothers, FieldName.Did, dp.Did);
                         brothers.splice(brotherIndex, 1);
                         brothers.splice(brotherIndex - 1, 0, dp);
                     },
                     onDel: function (dp, i0) {
                         Common.ConfirmDelete(function () {
-                            var brothers = ManagerData.GetBrotherDepartmentList(dp);
+                            var brothers = _this.Data.GetBrotherDepartmentList(dp);
                             var brotherIndex = ArrayUtil.IndexOfAttr(brothers, FieldName.Did, dp.Did);
                             brothers.splice(brotherIndex, 1);
                             //
-                            delete ManagerData.DepartmentDict[dp.Did];
+                            delete _this.Data.DeptDict[dp.Did];
                         }, "\u5373\u5C06\u5220\u9664\u90E8\u95E8 \"" + (dp.Name || '空') + "\" \u53CA\u5176\u5B50\u90E8\u95E8<br/>\n                        \u8BE5\u90E8\u95E8\u53CA\u5176\u5B50\u90E8\u95E8\u7684\u6240\u6709\u804C\u4F4D\u90FD\u5C06\u88AB\u5220\u9664");
                     },
                 }
@@ -373,24 +393,24 @@ var ManagerManagerClass = /** @class */ (function () {
             var vue = new Vue({
                 template: tplList[0],
                 data: {
-                    auth: ManagerData.MyAuth,
-                    deptTree: ManagerData.DepartmentTree,
-                    allDepartmentList: ManagerData.DepartmentTree,
+                    auth: _this.Data.MyAuth,
+                    deptTree: _this.Data.CurrProj.DeptTree,
+                    allDepartmentList: _this.Data.CurrProj.DeptTree,
                     newName: '',
                 },
                 methods: {
                     onAdd: function () {
                         var dp = {
-                            Did: _this.NewDepartmentUuid, Name: _this.VueDepartmentList.newName.toString(), Depth: 0, Children: [], PositionList: [
-                                { Posid: _this.NewPositionUuid, Did: _this.NewDepartmentUuid, Name: _this.VueDepartmentList.newName.toString(), AuthorityList: [] },
+                            Did: _this.Data.NewDepartmentUuid, Name: _this.VueDepartmentList.newName.toString(), Depth: 0, Children: [], PositionList: [
+                                { Posid: _this.Data.NewPositionUuid, Did: _this.Data.NewDepartmentUuid, Name: _this.VueDepartmentList.newName.toString(), AuthorityList: [] },
                             ],
                             Fid: 0,
                         };
                         _this.VueDepartmentList.newName = '';
-                        _this.NewDepartmentUuid++;
-                        _this.NewPositionUuid++;
-                        ManagerData.DepartmentDict[dp.Did] = dp;
-                        ManagerData.DepartmentTree.push(dp);
+                        _this.Data.NewDepartmentUuid++;
+                        _this.Data.NewPositionUuid++;
+                        _this.Data.DeptDict[dp.Did] = dp;
+                        _this.Data.CurrProj.DeptTree.push(dp);
                     },
                 },
             }).$mount();
@@ -398,12 +418,12 @@ var ManagerManagerClass = /** @class */ (function () {
             //#show
             Common.InsertIntoDom(vue.$el, _this.VueProjectEdit.$refs.pageContent);
             var _did = UrlParam.Get(URL_PARAM_KEY.DID, 0);
-            if (_did && ManagerData.DepartmentDict[_did]) {
+            if (_did && _this.Data.DeptDict[_did]) {
                 _this.ShowPositionList();
             }
         });
     };
-    ManagerManagerClass.prototype.DepartmentOption = function (dp) {
+    ManagerManagerClass.prototype.DeptOption = function (dp) {
         if (dp.Depth == 0) {
             return dp.Name;
         }
@@ -418,7 +438,7 @@ var ManagerManagerClass = /** @class */ (function () {
         }
     };
     ManagerManagerClass.prototype.CheckSortDown = function (dp, i0) {
-        var brothers = ManagerData.GetBrotherDepartmentList(dp);
+        var brothers = this.Data.GetBrotherDepartmentList(dp);
         var brotherIndex = ArrayUtil.IndexOfAttr(brothers, FieldName.Did, dp.Did);
         if (brotherIndex < brothers.length - 1) {
             return true;
@@ -426,7 +446,7 @@ var ManagerManagerClass = /** @class */ (function () {
         return false;
     };
     ManagerManagerClass.prototype.CheckSortUp = function (dp, i0) {
-        var brothers = ManagerData.GetBrotherDepartmentList(dp);
+        var brothers = this.Data.GetBrotherDepartmentList(dp);
         var brotherIndex = ArrayUtil.IndexOfAttr(brothers, FieldName.Did, dp.Did);
         if (brotherIndex > 0) {
             return true;
@@ -441,7 +461,7 @@ var ManagerManagerClass = /** @class */ (function () {
         if (dp.Fid == parentDp.Did) {
             return false;
         }
-        if (ManagerData.IsDepartmentChild(dp, parentDp)) {
+        if (this.Data.IsDepartmentChild(dp, parentDp)) {
             return false;
         }
         return true;
@@ -449,13 +469,13 @@ var ManagerManagerClass = /** @class */ (function () {
     ManagerManagerClass.prototype.ShowPositionList = function () {
         var _this = this;
         var _did = UrlParam.Get(URL_PARAM_KEY.DID, 0);
-        var dept = ManagerData.DepartmentDict[_did];
+        var dept = this.Data.DeptDict[_did];
         Loader.LoadVueTemplate(this.VuePath + "PositionList", function (tpl) {
             var vue = new Vue({
                 template: tpl,
                 data: {
-                    auth: ManagerData.MyAuth,
-                    allDepartmentList: ManagerData.DepartmentTree,
+                    auth: _this.Data.MyAuth,
+                    allDepartmentList: _this.Data.CurrProj.DeptTree,
                     dp: dept,
                     newName: "",
                 },
@@ -470,13 +490,13 @@ var ManagerManagerClass = /** @class */ (function () {
                             else {
                                 rs.unshift("<li>" + parentDp.Name + "</li>");
                             }
-                            parentDp = ManagerData.DepartmentDict[parentDp.Fid];
+                            parentDp = _this.Data.DeptDict[parentDp.Fid];
                         }
                         return "<ol class=\"breadcrumb\">\n                                        " + rs.join("") + "\n                                    </ol>";
                     },
                     /**回到部门列表 */
                     onBackDepartmentList: function () {
-                        _this.ShowDepartmentList(ManagerData.GetProjByPid(dept.Pid));
+                        _this.ShowDepartmentList(_this.Data.GetProjByPid(dept.Pid));
                     },
                     OnDeptChange: function (toDept) {
                         UrlParam.Set(URL_PARAM_KEY.DID, toDept.Did).Reset();
@@ -491,7 +511,7 @@ var ManagerManagerClass = /** @class */ (function () {
                     },
                     onEditUserList: function (posn) {
                         UrlParam.Set(URL_PARAM_KEY.PAGE, ProjectEditPageIndex.User).Set(URL_PARAM_KEY.FKEY, posn.Name).Reset();
-                        _this.ShowUserList(ManagerData.GetProjByPid(dept.Pid), dept, posn);
+                        _this.ShowUserList(_this.Data.GetProjByPid(dept.Pid), dept, posn);
                     },
                     CheckSortDown: function (pos, index) {
                         return index < dept.PositionList.length - 1;
@@ -520,7 +540,7 @@ var ManagerManagerClass = /** @class */ (function () {
                         }
                     },
                     onAdd: function () {
-                        var pos = { Posid: _this.NewPositionUuid++, Did: dept.Did, Name: _this.VuePositionList.newName.toString(), AuthorityList: [], UserList: [] };
+                        var pos = { Posid: _this.Data.NewPositionUuid++, Did: dept.Did, Name: _this.VuePositionList.newName.toString(), AuthorityList: [], UserList: [] };
                         _this.VuePositionList.newName = '';
                         dept.PositionList.push(pos);
                     },
@@ -552,9 +572,9 @@ var ManagerManagerClass = /** @class */ (function () {
             var vue = new Vue({
                 template: tpl,
                 data: {
-                    auth: ManagerData.MyAuth,
+                    auth: _this.Data.MyAuth,
                     pos: pos,
-                    authorityModuleList: ManagerData.AuthorityModuleList,
+                    authorityModuleList: _this.Data.AuthorityModuleList,
                     checkedChange: false,
                 },
                 methods: {
@@ -616,23 +636,21 @@ var ManagerManagerClass = /** @class */ (function () {
         if (backDept === void 0) { backDept = null; }
         if (backPosn === void 0) { backPosn = null; }
         var filterText = UrlParam.Get(URL_PARAM_KEY.FKEY, '');
-        console.log("[debug]", filterText, ":[filterText]");
         this.VueProjectEdit.currPage = ProjectEditPageIndex.User;
         Loader.LoadVueTemplate(this.VuePath + "UserList", function (tpl) {
             var vue = new Vue({
                 template: tpl,
                 data: {
-                    auth: ManagerData.MyAuth,
+                    auth: _this.Data.MyAuth,
                     userList: proj.UserList,
-                    otherUserList: ArrayUtil.SubByAttr(ManagerData.UserList, proj.UserList, FieldName.Uid),
-                    allDepartmentList: ManagerData.DepartmentTree,
+                    otherUserList: ArrayUtil.SubByAttr(_this.Data.UserList, proj.UserList, FieldName.Uid),
+                    allDepartmentList: _this.Data.CurrProj.DeptTree,
                     backPosn: backPosn,
                     filterText: filterText,
                     newUserUid: 0,
                 },
                 methods: {
                     filterUserList: function (userList, filterText) {
-                        console.log("[debug]", filterText, ":[filterText]", typeof (filterText));
                         var rs = userList.concat();
                         var dict = {};
                         if (filterText) {
@@ -644,7 +662,7 @@ var ManagerManagerClass = /** @class */ (function () {
                                 }
                                 else {
                                     if (user.Did) {
-                                        var dept = ManagerData.DepartmentDict[user.Did];
+                                        var dept = _this.Data.DeptDict[user.Did];
                                         if (StringUtil.IndexOfKeyArr(dept.Name.toLowerCase(), _filterTextSp) > -1) {
                                             dict[user.Uid] = true;
                                         }
@@ -678,11 +696,11 @@ var ManagerManagerClass = /** @class */ (function () {
                         _this.ShowPositionList();
                     },
                     ShowDpName: function (did) {
-                        var dp = ManagerData.DepartmentDict[did];
+                        var dp = _this.Data.DeptDict[did];
                         return dp ? dp.Name : '空';
                     },
                     ShowPosName: function (did, posid) {
-                        var dp = ManagerData.DepartmentDict[did];
+                        var dp = _this.Data.DeptDict[did];
                         if (dp) {
                             if (posid > 0) {
                                 var pos = dp.PositionList.FindOfAttr(FieldName.Posid, posid);
@@ -707,7 +725,7 @@ var ManagerManagerClass = /** @class */ (function () {
                         return '选择新成员';
                     },
                     GetPosList: function (did) {
-                        var dp = ManagerData.DepartmentDict[did];
+                        var dp = _this.Data.DeptDict[did];
                         if (dp) {
                             return dp.PositionList;
                         }
@@ -715,16 +733,15 @@ var ManagerManagerClass = /** @class */ (function () {
                             return [];
                         }
                     },
-                    departmentOption: _this.DepartmentOption.bind(_this),
                     OnDeptChange: function (user, dept) {
-                        ManagerData.RemoveUserPosnid(user);
+                        _this.Data.RemoveUserPosnid(user);
                         if (dept) {
-                            ManagerData.SetUserPosnid(user, dept.Did);
+                            _this.Data.SetUserPosnid(user, dept.Did);
                         }
                     },
                     onPosChange: function (user, pos) {
-                        ManagerData.RemoveUserPosnid(user);
-                        ManagerData.SetUserPosnid(user, user.Did, pos.Posid);
+                        _this.Data.RemoveUserPosnid(user);
+                        _this.Data.SetUserPosnid(user, user.Did, pos.Posid);
                     },
                     onSortDown: function (user, index) {
                         if (index < proj.UserList.length - 1) {
@@ -739,18 +756,18 @@ var ManagerManagerClass = /** @class */ (function () {
                     onDel: function (user, index) {
                         Common.ConfirmDelete(function () {
                             proj.UserList.splice(index, 1);
-                            _this.VueUserList.otherUserList = ArrayUtil.SubByAttr(ManagerData.UserList, proj.UserList, FieldName.Uid);
+                            _this.VueUserList.otherUserList = ArrayUtil.SubByAttr(_this.Data.UserList, proj.UserList, FieldName.Uid);
                         }, "\u5373\u5C06\u5220\u9664\u6210\u5458 \"" + user.Name + "\"");
                     },
                     onAddSelect: function () {
-                        _this.ShowSelectUser(proj, ArrayUtil.SubByAttr(ManagerData.UserList, proj.UserList, FieldName.Uid));
+                        _this.ShowSelectUser(proj, ArrayUtil.SubByAttr(_this.Data.UserList, proj.UserList, FieldName.Uid));
                     },
                     onAdd: function () {
                         var newUser = ArrayUtil.FindOfAttr(_this.VueUserList.otherUserList, FieldName.Uid, _this.VueUserList.newUserUid);
                         if (newUser) {
                             proj.UserList.push(newUser);
                             _this.VueUserList.newUserUid = 0;
-                            _this.VueUserList.otherUserList = ArrayUtil.SubByAttr(ManagerData.UserList, proj.UserList, FieldName.Uid);
+                            _this.VueUserList.otherUserList = ArrayUtil.SubByAttr(_this.Data.UserList, proj.UserList, FieldName.Uid);
                         }
                     },
                 },
@@ -787,7 +804,7 @@ var ManagerManagerClass = /** @class */ (function () {
             var vue = new Vue({
                 template: tpl,
                 data: {
-                    auth: ManagerData.MyAuth,
+                    auth: _this.Data.MyAuth,
                     userList: userList,
                     filterText: '',
                     checkedChange: false,

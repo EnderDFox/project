@@ -87,7 +87,7 @@ var AUTH;
 (function (AUTH) {
     AUTH[AUTH["PROJECT_LIST"] = 1] = "PROJECT_LIST";
     AUTH[AUTH["PROJECT_EDIT"] = 2] = "PROJECT_EDIT";
-    AUTH[AUTH["POSITION_EDIT"] = 3] = "POSITION_EDIT";
-    AUTH[AUTH["DEPARTMENT_MANAGE"] = 101] = "DEPARTMENT_MANAGE";
+    // POSITION_EDIT = 3,
+    // DEPARTMENT_MANAGE = 101, //所在部门的管理权限
 })(AUTH || (AUTH = {}));
 //# sourceMappingURL=Define.js.map

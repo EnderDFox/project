@@ -30,6 +30,9 @@ a {
     opacity: 0.62;
 }
 
+.disabled,
+[disabled],
+fieldset[disabled],
 .btn.disabled,
 .btn[disabled],
 fieldset[disabled] .btn {

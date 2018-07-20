@@ -108,6 +108,7 @@ interface DepartmentSingle {
     Pid?: PidFeild
     Fid?: DidField//上级部门
     Name?: string
+    Sort?: number
     //client
     Depth?: number
     Children?: DepartmentSingle[]
@@ -151,6 +152,8 @@ interface ProjectSingle {
     //负责人id
     MasterUid?: number
     CreateTime: number
+    //
+    DeptTree?: DepartmentSingle[]
     //client cache data
     ModeList?: ModeSingle[]
     UserList?: UserSingle[]
@@ -420,6 +423,6 @@ interface L2C_ProcessPublishDelete {
 enum AUTH {
     PROJECT_LIST = 1,
     PROJECT_EDIT = 2,
-    POSITION_EDIT = 3,
-    DEPARTMENT_MANAGE = 101, //所在部门的管理权限
+    // POSITION_EDIT = 3,
+    // DEPARTMENT_MANAGE = 101, //所在部门的管理权限
 }

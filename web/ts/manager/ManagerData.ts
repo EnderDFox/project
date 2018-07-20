@@ -1,33 +1,23 @@
 class ManagerDataClass {
+    /**全部AUTH */
+    AuthorityModuleList: AuthorityModuleSingle[]
+    AuthDict: { [key: number]: AuthoritySingle };
+    //
+    ProjectList: ProjectSingle[]
+    /**全部user */
+    UserList: UserSingle[]
+    UserDict: { [key: number]: UserSingle };
+    /**部门字典 */
+    DeptDict: { [key: number]: DepartmentSingle };
+    //
     CurrUser: UserSingle
     /**我的权限 */
     MyAuth: { [key: number]: boolean } = {};
-    ProjectList: ProjectSingle[]
-    UserList: UserSingle[]
-    UserDict: { [key: number]: UserSingle };
-    /*user 关系表 */
-    UserRlat: { [key: number]: UserSingle }
-    DepartmentTree: DepartmentSingle[]
-    DepartmentDict: { [key: number]: DepartmentSingle }
+    CurrProj: ProjectSingle
     //
-    AuthorityModuleList: AuthorityModuleSingle[]
+    NewDepartmentUuid = 100001
+    NewPositionUuid = 200001
     Init() {
-        /* var authCodeArr: number[]
-        // console.log("[debug]", str)
-        if (Common.UrlParamDict['auth']) {
-            authCodeArr = Common.UrlParamDict['auth'].split(",").map<number>((item: string) => { return parseInt(item) })
-        } else {
-            authCodeArr = []
-        } 
-        //
-        for (var i = 0; i < authCodeArr.length; i++) {
-            var authCode = authCodeArr[i]
-            if (Auth[authCode]) {
-                this.MyAuth[authCode] = this.MyAuth[Auth[authCode]] = true
-            }
-        }*/
-
-        //
         this.InitSimulateData()
         //
         var uid = Number(UrlParam.Get('uid'))
@@ -47,12 +37,14 @@ class ManagerDataClass {
     }
     /**初始化虚拟数据 */
     private InitSimulateData() {
+        this.AuthDict = {}
+        this.DeptDict = {}
         //#
         this.AuthorityModuleList = [
             {
                 Modid: 1, Name: '工具管理', AuthorityList: [
-                    { Authid: 101, Name: '项目列表' },
-                    { Authid: 102, Name: '所属项目' },
+                    { Authid: AUTH.PROJECT_LIST, Name: '项目列表' },
+                    { Authid: AUTH.PROJECT_EDIT, Name: '所属项目' },
                     { Authid: 32, Name: '部门' },
                     { Authid: 33, Name: '职位' },
                     { Authid: 34, Name: '权限', Description: `功能,流程的修改` },
@@ -82,9 +74,18 @@ class ManagerDataClass {
         this.InitAuthorityModuleList()
         //#project
         this.ProjectList = [
-            { Pid: 1, Name: '项目A', MasterUid: 3, UserList: [], CreateTime: Common.GetOffsetDate({ Day: -33 }).getTime() },
-            { Pid: 2, Name: '项目B', MasterUid: 0, UserList: [], CreateTime: Common.GetOffsetDate({ Day: -22 }).getTime() },
-            { Pid: 3, Name: '项目C', MasterUid: 0, UserList: [], CreateTime: Common.GetOffsetDate({ Day: -11 }).getTime() },
+            {
+                Pid: 1, Name: '项目A', MasterUid: 3, UserList: [], CreateTime: Common.GetOffsetDate({ Day: -33 }).getTime(),
+                DeptTree: []
+            },
+            {
+                Pid: 2, Name: '项目B', MasterUid: 0, UserList: [], CreateTime: Common.GetOffsetDate({ Day: -22 }).getTime(),
+                DeptTree: [this.NewDeptManager()]
+            },
+            {
+                Pid: 3, Name: '项目C', MasterUid: 0, UserList: [], CreateTime: Common.GetOffsetDate({ Day: -11 }).getTime(),
+                DeptTree: [this.NewDeptManager()]
+            },
         ]
         //#user
         this.UserList = []
@@ -107,14 +108,9 @@ class ManagerDataClass {
             this.ProjectList[2].UserList[i].Sort = i + 1
         }
         //#department
-        this.DepartmentTree = [
-            /* {
-                Did: -1, Name: '项目管理', Depth: 0, Children: [], 
-                PositionList: [
-                    { Posid: 0, Did: -1, Name: '制作人' ,UserList:[] },
-                    { Posid: 1, Did: -1, Name: '产品经理' ,UserList:[] },
-                ]
-            }, */
+        var proj: ProjectSingle = this.ProjectList[0]
+        proj.DeptTree = [
+            this.NewDeptManager(),
             {
                 Did: 1, Fid: 0, Name: '策划', Depth: 0, Children: [],
                 PositionList: [
@@ -170,10 +166,8 @@ class ManagerDataClass {
             },
         ]
         //
-        this.DepartmentDict = {}
-        this.InitAllDepartmentDict()
+        this.InitAllDeptDict(proj.DeptTree)
     }
-
     InitAuthorityModuleList() {
         var amList = this.AuthorityModuleList
         for (var i = 0; i < amList.length; i++) {
@@ -181,9 +175,34 @@ class ManagerDataClass {
             am.CheckedChange = false
             for (var j = 0; j < am.AuthorityList.length; j++) {
                 var auth = am.AuthorityList[j]
+                this.AuthDict[auth.Authid] = auth
                 auth.CheckedChange = false
             }
         }
+    }
+    InitAllDeptDict(deptTree: DepartmentSingle[] = null) {
+        for (var i = 0; i < deptTree.length; i++) {
+            var dept = deptTree[i]
+            if (dept.Sort == null) {
+                dept.Sort = 1
+            }
+            this.DeptDict[dept.Did] = dept
+            if (dept.Children.length > 0) {
+                this.InitAllDeptDict(dept.Children)
+            }
+        }
+    }
+    AddMyAuth(auth: AUTH) {
+        this.MyAuth[auth] = this.MyAuth[AUTH[auth]] = true
+        // Object.freeze(this.MyAuth)
+        // Object.freeze(this.MyAuth[Auth.PROJECT_LIST])
+        // Object.freeze(this.MyAuth[Auth[Auth.PROJECT_LIST])
+    }
+    RemoveMyAuth(auth: AUTH) {
+        this.MyAuth[auth] = this.MyAuth[AUTH[auth]] = false
+    }
+    GetProjByPid(pid: number): ProjectSingle {
+        return this.ProjectList.FindOfAttr(FieldName.PID, pid)
     }
     /**返回当前用户有权限的工程列表 */
     GetProjectListHasAuth(): ProjectSingle[] {
@@ -206,22 +225,12 @@ class ManagerDataClass {
         return projList
     }
 
-    InitAllDepartmentDict(dpTree: DepartmentSingle[] = null) {
-        dpTree ? null : dpTree = this.DepartmentTree
-        for (var i = 0; i < dpTree.length; i++) {
-            var dp = dpTree[i]
-            this.DepartmentDict[dp.Did] = dp
-            if (dp.Children.length > 0) {
-                this.InitAllDepartmentDict(dp.Children)
-            }
-        }
-    }
     /**得到一个proj下所有职位的list */
-    GetProjAllPosnList(proj:ProjectSingle, rs: PositionSingle[] = null): PositionSingle[] {
+    GetProjAllPosnList(proj: ProjectSingle, rs: PositionSingle[] = null): PositionSingle[] {
         rs = rs || [];
-        for (var i = 0; i < this.DepartmentTree.length; i++) {
-            var item = this.DepartmentTree[i]
-            this.GetDeptAllPosnList(item,rs)
+        for (var i = 0; i < proj.DeptTree.length; i++) {
+            var item = proj.DeptTree[i]
+            this.GetDeptAllPosnList(item, rs)
         }
         return rs
     }
@@ -257,8 +266,21 @@ class ManagerDataClass {
         }
         return rs
     }
-    GetProjByPid(pid: number): ProjectSingle {
-        return this.ProjectList.FindOfAttr(FieldName.PID, pid)
+    /**获取默认的管理员部门 */
+    NewDeptManager(): DepartmentSingle {
+        var dept: DepartmentSingle = {
+            Did: this.NewDepartmentUuid, Name: '管理员', Fid: 0, Depth: 0,
+            Sort: 0,//标记管理员部门主要靠sort=0
+            Children: [],
+            PositionList: [
+                { Posid: this.NewPositionUuid++, Did: this.NewDepartmentUuid, Name: '制作人', UserList: [], AuthorityList: [this.AuthDict[AUTH.PROJECT_EDIT]] },
+                { Posid: this.NewPositionUuid++, Did: this.NewDepartmentUuid, Name: 'PM', UserList: [], AuthorityList: [this.AuthDict[AUTH.PROJECT_EDIT]] },
+                { Posid: this.NewPositionUuid++, Did: this.NewDepartmentUuid, Name: '管理员', UserList: [], AuthorityList: [this.AuthDict[AUTH.PROJECT_EDIT]] },
+            ]
+        }
+        this.NewDepartmentUuid++
+        this.DeptDict[dept.Did] = dept
+        return dept
     }
     /**检测dp1是否是dp0的子孙dp */
     IsDepartmentChild(dp0: DepartmentSingle, dp1: DepartmentSingle): boolean {
@@ -277,30 +299,21 @@ class ManagerDataClass {
         var rs: string[] = []
         while (dp) {
             rs.unshift(dp.Name)
-            dp = this.DepartmentDict[dp.Fid]
+            dp = this.DeptDict[dp.Fid]
         }
         return rs
     }
     /**得到一个 部门的兄弟部门数组 */
     GetBrotherDepartmentList(dp: DepartmentSingle): DepartmentSingle[] {
         if (dp.Fid) {
-            return ManagerData.DepartmentDict[dp.Fid].Children
+            return ManagerData.DeptDict[dp.Fid].Children
         } else {//顶级部门
-            return ManagerData.DepartmentTree
+            return this.CurrProj.DeptTree
         }
-    }
-    AddMyAuth(auth: AUTH) {
-        this.MyAuth[auth] = this.MyAuth[AUTH[auth]] = true
-        // Object.freeze(this.MyAuth)
-        // Object.freeze(this.MyAuth[Auth.PROJECT_LIST])
-        // Object.freeze(this.MyAuth[Auth[Auth.PROJECT_LIST])
-    }
-    RemoveMyAuth(auth: AUTH) {
-        this.MyAuth[auth] = this.MyAuth[AUTH[auth]] = false
     }
     RemoveUserPosnid(user: UserSingle) {
         if (user.Did) {
-            var oldDept: DepartmentSingle = ManagerData.DepartmentDict[user.Did]
+            var oldDept: DepartmentSingle = ManagerData.DeptDict[user.Did]
             var oldPosn: PositionSingle = oldDept.PositionList.FindOfAttr(FieldName.Posid, user.Posid)
             if (oldPosn) {
                 oldPosn.UserList.RemoveByAttr(FieldName.Uid, user.Uid)
@@ -308,7 +321,7 @@ class ManagerDataClass {
         }
     }
     SetUserPosnid(user: UserSingle, did: number, posnid: number = -1) {
-        var dept: DepartmentSingle = ManagerData.DepartmentDict[did]
+        var dept: DepartmentSingle = ManagerData.DeptDict[did]
         user.Did = dept.Did
         var posn: PositionSingle
         if (posnid == -1) {

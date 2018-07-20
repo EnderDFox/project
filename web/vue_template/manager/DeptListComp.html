@@ -4,15 +4,15 @@
             <div>
                 <span class="glyphicon glyphicon-minus" aria-hidden="true" v-for="dep,index in dp.Depth*2"></span>
                 <input type="text" class="form-control" style="display: inline-block;width: auto;" placeholder="空" aria-describedby="basic-addon1"
-                    :disabled="!auth['PROJECT_EDIT']" :value="dp.Name" @blur="onEditName($event,dp,index)" @keyup.enter="onEditName($event,dp,index)">
+                    :disabled="!auth['PROJECT_EDIT'] || dp.Sort==0" :value="dp.Name" @blur="onEditName($event,dp,index)" @keyup.enter="onEditName($event,dp,index)">
             </div>
             <div class="text-center">
-                <button class="btn btn-default" type="button" title="在该部门下增加子部门 " :disabled="!auth['PROJECT_EDIT']" @click="onAddChild(dp,index)">
+                <button class="btn btn-default" type="button" title="在该部门下增加子部门 " :disabled="!auth['PROJECT_EDIT']" v-if="dp.Sort>0" @click="onAddChild(dp,index)">
                     <span class="glyphicon glyphicon-plus-sign " aria-hidden="true "></span>
                 </button>
             </div>
             <div>
-                <DeptDropdownComp :disabled="!auth['PROJECT_EDIT']" :buttonId="'ddmDpListDid'+index" :buttonLabel="'改变上级部门'" :CheckItemCb="(dropdownDept)=>{return !CheckCanMoveParentDp(dp,dropdownDept);}"
+                <DeptDropdownComp :btnId="'ddmDpListDid'+index" :btnLabel="'改变上级部门'" :btnDisabled="!auth['PROJECT_EDIT']" v-if="dp.Sort>0" :CheckItemCb="(deptDropdown)=>{return DeptDropdownCheckItemCb(dp,deptDropdown)}" :ItemStyle="(deptDropdown)=>{return DeptDropdownItemStyleCb(dp,deptDropdown)}"
                     @OnSelect="onEditParentDp(dp,arguments[0])">
                     <template slot="after">
                         <li role="separator " class="divider "></li>
@@ -54,15 +54,15 @@
                 </button>
             </div>
             <div>
-                <button class="btn btn-default " type="button" @click="onSortDown($event,dp,index)" :disabled="!(auth['PROJECT_EDIT'] && CheckSortDown(dp,index))">
+                <button class="btn btn-default " type="button" @click="onSortDown($event,dp,index)" :disabled="!(auth['PROJECT_EDIT'] && CheckSortDown(dp,index))" v-if="dp.Sort>0">
                     <span class="glyphicon glyphicon-arrow-down " aria-hidden="true "></span>
                 </button>
-                <button class="btn btn-default " type="button" @click="onSortUp($event,dp,index) " :disabled="!(auth['PROJECT_EDIT'] && CheckSortUp(dp,index))">
+                <button class="btn btn-default " type="button" @click="onSortUp($event,dp,index) " :disabled="!(auth['PROJECT_EDIT'] && CheckSortUp(dp,index))" v-if="dp.Sort>0">
                     <span class="glyphicon glyphicon-arrow-up " aria-hidden="true "></span>
                 </button>
             </div>
             <div>
-                <button class="btn btn-warning " title="删除部门" type="button" :disabled="!auth['PROJECT_EDIT']" @click="onDel(dp,index)">
+                <button class="btn btn-warning " title="删除部门" type="button" :disabled="!auth['PROJECT_EDIT']" v-if="dp.Sort>0" @click="onDel(dp,index)">
                     <span class="glyphicon glyphicon-remove " aria-hidden="true "></span>
                 </button>
             </div>

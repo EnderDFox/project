@@ -39,7 +39,7 @@
                         {{user.Name}}
                     </td>
                     <td>
-                        <DeptDropdownComp :buttonId="'ddmUserListDid'+index" :buttonLabel="ShowDpName(user.Did)" @OnSelect="OnDeptChange(user,arguments[0])">
+                        <DeptDropdownComp :btnId="'ddmUserListDid'+index" :btnLabel="ShowDpName(user.Did)" @OnSelect="OnDeptChange(user,arguments[0])">
                             <template slot="before">
                                 <li>
                                     <a @click="OnDeptChange(user,null)">空</a>
