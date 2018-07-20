@@ -12,12 +12,17 @@ enum DeptDropdownItemEnabled {
 }
 
 class ManagerManagerClass {
+    UserConfig = {
+        /**posn list显示子部门的职位 */
+        ShownDeptChildren: true,
+    }
+    //
     Data: ManagerDataClass
     VuePath = "manager/"
     VueProjectList: CombinedVueInstance1<{ auth: { [key: number]: boolean }, projectList: ProjectSingle[], newName: string }>
     VueProjectEdit: CombinedVueInstance1<{ projectList: ProjectSingle[], project: ProjectSingle, newName: string, dpTree: DepartmentSingle[], currPage: ProjectEditPageIndex }>
     VueUserList: CombinedVueInstance1<{ userList: UserSingle[], otherUserList: UserSingle[], newUserUid: number, filterText: string }>
-    VueDepartmentList: CombinedVueInstance1<{ allDepartmentList: DepartmentSingle[], newName: string }>
+    VueDepartmentList: CombinedVueInstance1<{ newName: string }>
     VuePositionList: CombinedVueInstance1<{ newName: string }>
     VueAuthList: CombinedVueInstance1<{ checkedChange: boolean }>
     VueSelectUser: CombinedVueInstance1<{ checkedChange: boolean, filterText: string }>
@@ -65,8 +70,8 @@ class ManagerManagerClass {
                     btnId: String,
                     btnLabel: String,
                     btnDisabled: Boolean,
-                    CheckItemCb: Function,
-                    ItemStyle: Function,
+                    checkItemCb: Function,
+                    currDept: Object,
                 },
                 data: () => {
                     return {
@@ -210,7 +215,7 @@ class ManagerManagerClass {
         var proj: ProjectSingle = this.Data.GetProjectListHasAuth().FindOfAttr(FieldName.PID, UrlParam.Get(URL_PARAM_KEY.PID))
         this.Data.CurrProj = proj
         Loader.LoadVueTemplateList([`${this.VuePath}ProjectEdit`], (tplList: string[]) => {
-            var currPage = UrlParam.Get(URL_PARAM_KEY.PAGE, [ProjectEditPageIndex.Department, ProjectEditPageIndex.User])
+            var currPage = UrlParam.Get(URL_PARAM_KEY.PAGE, [ProjectEditPageIndex.Department, ProjectEditPageIndex.Position, ProjectEditPageIndex.User])
             TreeUtil.Every(this.Data.CurrProj.DeptTree, (dept: DepartmentSingle): boolean => {
                 dept.Pid = proj.Pid
                 return true
@@ -255,20 +260,20 @@ class ManagerManagerClass {
         })
     }
     SwitchProjectEditPageContent() {
-        var currPage: ProjectEditPageIndex = UrlParam.Get(URL_PARAM_KEY.PAGE, [ProjectEditPageIndex.Department, ProjectEditPageIndex.User])
+        var currPage: ProjectEditPageIndex = UrlParam.Get(URL_PARAM_KEY.PAGE, [ProjectEditPageIndex.Department, ProjectEditPageIndex.Position, ProjectEditPageIndex.User])
         switch (currPage) {
-            case ProjectEditPageIndex.User:
-                this.ShowUserList(this.VueProjectEdit.project)
+            case ProjectEditPageIndex.Department:
+                this.ShowDepartmentList()
                 break;
-            case ProjectEditPageIndex.User:
+            case ProjectEditPageIndex.Position:
                 this.ShowPositionList()
                 break;
-            case ProjectEditPageIndex.Department:
-                this.ShowDepartmentList(this.VueProjectEdit.project)
+            case ProjectEditPageIndex.User:
+                this.ShowUserList()
                 break;
         }
     }
-    ShowDepartmentList(proj: ProjectSingle) {
+    ShowDepartmentList() {
         this.VueProjectEdit.currPage = ProjectEditPageIndex.Department
         Loader.LoadVueTemplateList([`${this.VuePath}DeptList`, `${this.VuePath}DeptListComp`], (tplList: string[]) => {
             Vue.component('DeptListComp', {
@@ -280,7 +285,6 @@ class ManagerManagerClass {
                 data: () => {
                     return {
                         auth: this.Data.MyAuth,
-                        allDepartmentList: this.Data.CurrProj.DeptTree,
                     }
                 },
                 methods: {
@@ -316,13 +320,6 @@ class ManagerManagerClass {
                             return DeptDropdownItemEnabled.ENABLED
                         }
                     },
-                    DeptDropdownItemStyleCb: (dept: DepartmentSingle, deptDropdown: DepartmentSingle) => {
-                        if (dept.Did == deptDropdown.Did) {
-                            return [{ 'background-color': '#FFFF00' }]
-                        } else {
-                            return null
-                        }
-                    },
                     onEditParentDp: (dp: DepartmentSingle, parentDp: DepartmentSingle) => {
                         if (parentDp == null) {
                             if (dp.Fid == 0) {
@@ -355,12 +352,12 @@ class ManagerManagerClass {
                         })
                     },
                     onEditPosition: (dp: DepartmentSingle, i0: int) => {
-                        UrlParam.Set(URL_PARAM_KEY.DID, dp.Did).Reset()
+                        UrlParam.Set(URL_PARAM_KEY.PAGE, ProjectEditPageIndex.Position).Set(URL_PARAM_KEY.DID, dp.Did).Reset()
                         this.ShowPositionList()
                     },
                     onEditUserList: (dept: DepartmentSingle) => {
                         UrlParam.Set(URL_PARAM_KEY.PAGE, ProjectEditPageIndex.User).Set(URL_PARAM_KEY.FKEY, dept.Name).Reset()
-                        this.ShowUserList(proj)
+                        this.ShowUserList()
                     },
                     onSortDown: (e, dp: DepartmentSingle, i0: int) => {
                         if (!this.DeptListCheckSortDown(dp, i0)) {
@@ -399,7 +396,6 @@ class ManagerManagerClass {
                     data: {
                         auth: this.Data.MyAuth,
                         deptTree: this.Data.CurrProj.DeptTree,
-                        allDepartmentList: this.Data.CurrProj.DeptTree,
                         newName: '',
                     },
                     methods: {
@@ -422,10 +418,6 @@ class ManagerManagerClass {
             this.VueDepartmentList = vue
             //#show
             Common.InsertIntoDom(vue.$el, this.VueProjectEdit.$refs.pageContent)
-            var _did = UrlParam.Get(URL_PARAM_KEY.DID, 0)
-            if (_did && this.Data.DeptDict[_did]) {
-                this.ShowPositionList()
-            }
         })
     }
     DeptOption(dp: DepartmentSingle) {
@@ -475,17 +467,81 @@ class ManagerManagerClass {
         return true
     }
     ShowPositionList() {
-        var _did = UrlParam.Get(URL_PARAM_KEY.DID, 0)
-        var dept: DepartmentSingle = this.Data.DeptDict[_did]
-        Loader.LoadVueTemplate(this.VuePath + "PositionList", (tpl: string) => {
+        Loader.LoadVueTemplateList([`${this.VuePath}PosnList`, `${this.VuePath}PosnListComp`], (tplList: string[]) => {
+            Vue.component(`PosnListComp`, {
+                template: tplList[1],
+                props: {
+                    currDept: Object,
+                    dept: Object,
+                    startDepth: Number,
+                    shownDeptChildren: Boolean,
+                },
+                data: () => {
+                    return {
+                        auth: this.Data.MyAuth,
+                    }
+                },
+                methods: {
+                    OnEnterDept: (toDept: DepartmentSingle) => {
+                        UrlParam.Set(URL_PARAM_KEY.DID, toDept.Did).Reset()
+                        this.ShowPositionList()
+                    },
+                    onEditName: (e: Event, dept: DepartmentSingle, pos: PositionSingle, index: number) => {
+                        var newName = (e.target as HTMLInputElement).value
+                        pos.Name = newName
+                    },
+                    onEditAuth: (dept: DepartmentSingle, pos: PositionSingle, index: number) => {
+                        this.ShowAuthList(pos)
+                    },
+                    onEditUserList: (dept: DepartmentSingle, posn: PositionSingle) => {
+                        UrlParam.Set(URL_PARAM_KEY.PAGE, ProjectEditPageIndex.User).Set(URL_PARAM_KEY.FKEY, posn.Name).Reset()
+                        this.ShowUserList(dept, posn)
+                    },
+                    CheckSortUp: (dept: DepartmentSingle, pos: PositionSingle, index: int) => {
+                        return index > 0
+                    },
+                    CheckSortDown: (dept: DepartmentSingle, pos: PositionSingle, index: int) => {
+                        return index < dept.PositionList.length - 1
+                    },
+                    onSortDown: (dept: DepartmentSingle, pos: PositionSingle, index: int) => {
+                        if (index < dept.PositionList.length - 1) {
+                            dept.PositionList.splice(index + 1, 0, dept.PositionList.splice(index, 1)[0])
+                        }
+                    },
+                    onSortUp: (dept: DepartmentSingle, pos: PositionSingle, index: int) => {
+                        if (index > 0) {
+                            dept.PositionList.splice(index - 1, 0, dept.PositionList.splice(index, 1)[0])
+                        }
+                    },
+                    onDel: (dept: DepartmentSingle, pos: PositionSingle, index: int) => {
+                        if (dept.PositionList.length == 1) {
+                            Common.AlertError(`每个部门下至少要保留一个职位`)
+                        } else {
+                            Common.ConfirmDelete(() => {
+                                dept.PositionList.splice(index, 1)
+                            }, `即将删除职位 "${pos.Name || '空'}"`)
+                        }
+                    },
+                },
+            })
+            var _did = UrlParam.Get(URL_PARAM_KEY.DID, 0)
+            var currDept: DepartmentSingle;
+            if (_did > 0) {
+                currDept = this.Data.DeptDict[_did]
+            } else {
+                //显示全部部门
+            }
             var vue = new Vue(
                 {
-                    template: tpl,
+                    template: tplList[0],
                     data: {
                         auth: this.Data.MyAuth,
-                        allDepartmentList: this.Data.CurrProj.DeptTree,
-                        dp: dept,
+                        isRoot: _did == 0,
+                        currDept: currDept,
+                        deptTree: currDept ? [currDept] : this.Data.CurrProj.DeptTree,
                         newName: ``,
+                        startDepth: currDept ? currDept.Depth : 0,
+                        userConfig: this.UserConfig,
                     },
                     methods: {
                         dpFullName: (dp: DepartmentSingle) => {
@@ -503,54 +559,49 @@ class ManagerManagerClass {
                                         ${rs.join(``)}
                                     </ol>`
                         },
+                        GetEnterParentDeptTitle: (did: number): string => {
+                            if (did > 0) {
+                                return `回到 上级部门"${this.Data.DeptDict[did].Name}" 的职位列表`
+                            } else {
+                                return `回到 全部部门 的职位列表`
+                            }
+                        },
+                        DeptDropdownCheckItemCb:(deptDropdown:DepartmentSingle)=>{
+                            if(currDept){
+                                if(currDept.Did==deptDropdown.Did){
+                                    return DeptDropdownItemEnabled.DISABLED
+                                }else{
+                                    return DeptDropdownItemEnabled.ENABLED
+                                }
+                            }else{
+                                return DeptDropdownItemEnabled.ENABLED
+                            }
+                        },
                         /**回到部门列表 */
                         onBackDepartmentList: () => {
-                            this.ShowDepartmentList(this.Data.GetProjByPid(dept.Pid))
+                            this.ShowDepartmentList()
+                        },
+                        OnToggleShownDeptChildren: () => {
+                            this.UserConfig.ShownDeptChildren = !this.UserConfig.ShownDeptChildren
                         },
                         OnDeptChange: (toDept: DepartmentSingle) => {
-                            UrlParam.Set(URL_PARAM_KEY.DID, toDept.Did).Reset()
+                            UrlParam.Set(URL_PARAM_KEY.DID, toDept ? toDept.Did : 0).Reset()
                             this.ShowPositionList()
                         },
-                        onEditName: (e: Event, pos: PositionSingle, index: number) => {
-                            var newName = (e.target as HTMLInputElement).value
-                            pos.Name = newName
+                        OnEnterDeptById: (did: number) => {
+                            UrlParam.Set(URL_PARAM_KEY.DID, did).Reset()
+                            this.ShowPositionList()
                         },
-                        onEditAuth: (pos: PositionSingle, index: number) => {
-                            this.ShowAuthList(pos)
-                        },
-                        onEditUserList: (posn: PositionSingle) => {
-                            UrlParam.Set(URL_PARAM_KEY.PAGE, ProjectEditPageIndex.User).Set(URL_PARAM_KEY.FKEY, posn.Name).Reset()
-                            this.ShowUserList(this.Data.GetProjByPid(dept.Pid), dept, posn)
-                        },
-                        CheckSortUp: (pos: PositionSingle, index: int) => {
-                            return index > 0
-                        },
-                        CheckSortDown: (pos: PositionSingle, index: int) => {
-                            return index < dept.PositionList.length - 1
-                        },
-                        onSortDown: (pos: PositionSingle, index: int) => {
-                            if (index < dept.PositionList.length - 1) {
-                                dept.PositionList.splice(index + 1, 0, dept.PositionList.splice(index, 1)[0])
-                            }
-                        },
-                        onSortUp: (pos: PositionSingle, index: int) => {
-                            if (index > 0) {
-                                dept.PositionList.splice(index - 1, 0, dept.PositionList.splice(index, 1)[0])
-                            }
-                        },
-                        onDel: (e, pos: PositionSingle, index: int) => {
-                            if (dept.PositionList.length == 1) {
-                                Common.AlertError(`每个部门下至少要保留一个职位`)
-                            } else {
-                                Common.ConfirmDelete(() => {
-                                    dept.PositionList.splice(index, 1)
-                                }, `即将删除职位 "${pos.Name || '空'}"`)
-                            }
+                        OnEnterDept: (toDept: DepartmentSingle) => {
+                            UrlParam.Set(URL_PARAM_KEY.DID, toDept ? toDept.Did : 0).Reset()
+                            this.ShowPositionList()
                         },
                         onAdd: () => {
-                            var pos: PositionSingle = { Posid: this.Data.NewPositionUuid++, Did: dept.Did, Name: this.VuePositionList.newName.toString(), AuthorityList: [], UserList: [] }
-                            this.VuePositionList.newName = ''
-                            dept.PositionList.push(pos)
+                            if (currDept) {
+                                var pos: PositionSingle = { Posid: this.Data.NewPositionUuid++, Did: currDept.Did, Name: this.VuePositionList.newName.toString(), AuthorityList: [], UserList: [] }
+                                this.VuePositionList.newName = ''
+                                currDept.PositionList.push(pos)
+                            }
                         },
                     },
                 }
@@ -588,7 +639,6 @@ class ManagerManagerClass {
                 methods: {
                     checkModChecked: _checkModChecked.bind(this),
                     checkAuthChecked: (_, auth: AuthoritySingle): boolean => {
-                        // console.log("[debug] checkAuthSelected", auth.Authid, selectedAuthDict[auth.Authid])
                         return checkedDict[auth.Authid] != null
                     },
                     onSwitchMod: (mod: AuthorityModuleSingle) => {
@@ -637,7 +687,8 @@ class ManagerManagerClass {
             Common.Popup($(vue.$el))
         })
     }
-    ShowUserList(proj: ProjectSingle, backDept: DepartmentSingle = null, backPosn: PositionSingle = null) {
+    ShowUserList(backDept: DepartmentSingle = null, backPosn: PositionSingle = null) {
+        var proj: ProjectSingle = this.Data.CurrProj
         var filterText = UrlParam.Get(URL_PARAM_KEY.FKEY, '')
         this.VueProjectEdit.currPage = ProjectEditPageIndex.User
         Loader.LoadVueTemplate(this.VuePath + "UserList", (tpl: string) => {
@@ -648,7 +699,6 @@ class ManagerManagerClass {
                         auth: this.Data.MyAuth,
                         userList: proj.UserList,
                         otherUserList: ArrayUtil.SubByAttr(this.Data.UserList, proj.UserList, FieldName.Uid),
-                        allDepartmentList: this.Data.CurrProj.DeptTree,
                         backPosn: backPosn,
                         filterText: filterText,
                         newUserUid: 0,
@@ -693,7 +743,7 @@ class ManagerManagerClass {
                             return rs;
                         },
                         OnBackPosn: () => {
-                            UrlParam.Set(URL_PARAM_KEY.PAGE, ProjectEditPageIndex.Department).Set(URL_PARAM_KEY.DID, backDept.Did).Set(URL_PARAM_KEY.FKEY, null).Reset()
+                            UrlParam.Set(URL_PARAM_KEY.PAGE, ProjectEditPageIndex.Position).Set(URL_PARAM_KEY.DID, backDept.Did).Set(URL_PARAM_KEY.FKEY, null).Reset()
                             this.ShowPositionList()
                         },
                         ShowDpName: (did: number): string => {

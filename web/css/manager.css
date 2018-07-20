@@ -57,53 +57,82 @@ fieldset[disabled] .btn {
 
 /* div 模拟的 table */
 
-.div-tr {
+.divrow {
+    min-width: 1024px;
     width: 100%;
     border-top: 1px solid #ddd;
 }
 
-.div-tr>div {
-    display: inline-block;
+.divrow>div {
+    display: inline-table;
     padding: 8px;
     line-height: 1.42857143;
-    vertical-align: top;
+    /* vertical-align: top; */
     /* outline: solid 1px #00FF00; */
 }
 
-.div-tr:hover {
+.divrow:hover {
     background-color: #c4e3f3;
 }
 
 /* 控制div tr中每列的宽度 */
 
-.DeptList-tr>div:nth-child(1) {
+.DeptList-row>div:nth-child(1) {
     width: 300px;
+    max-width: 300px;
     overflow: hidden;
     white-space: nowrap;
     /* outline: solid 1px #00FF00; */
 }
 
-.DeptList-tr>div:nth-child(2) {
-    width: 100px;
+.DeptList-row>div:nth-child(2) {
+    width: 90px;
     /* outline: solid 1px #00FF00; */
 }
 
-.DeptList-tr>div:nth-child(3) {
+.DeptList-row>div:nth-child(3) {
+    width: 100px;
+}
+
+.DeptList-row>div:nth-child(4) {
+    width: 100px;
+}
+
+.DeptList-row>div:nth-child(5) {
+    width: 180px;
+    max-width: 300px;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.DeptList-row>div:nth-child(6) {
     width: 160px;
 }
 
-.DeptList-tr>div:nth-child(4) {
-    width: 120px;
+.PosnList-row>div:nth-child(1) {
+    width: 240px;
+    max-width: 240px;
+    overflow: hidden;
+    white-space: nowrap;
 }
 
-.DeptList-tr>div:nth-child(5) {
+.PosnList-row>div:nth-child(2) {
+    width: 240px;
+}
+
+.PosnList-row>div:nth-child(3) {
     width: 100px;
 }
 
-.DeptList-tr>div:nth-child(6) {
+.PosnList-row>div:nth-child(4) {
+    width: 100px;
+}
+
+.PosnList-row>div:nth-child(5) {
+    width: 180px;
+    max-width: 180px;
     overflow: hidden;
     white-space: nowrap;
-    width: 180px;
 }
 
 /*vue transition-group*/

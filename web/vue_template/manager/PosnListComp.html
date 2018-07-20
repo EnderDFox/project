@@ -1,0 +1,54 @@
+<transition-group name="list-complete" tag="div">
+    <div class="list-complete-item" v-for="posn,index in dept.PositionList" :key="posn.Posid">
+        <div class="divrow PosnList-row">
+            <div class="text-middle">
+                <span class="glyphicon glyphicon-minus" aria-hidden="true" v-for="dep,index in (dept.Depth-startDepth)*2"></span>
+                <span v-if="currDept && currDept.Depth==dept.Depth">
+                    {{dept.Name}}
+                </span>
+                <button class="btn btn-default " type="button" @click="OnEnterDept(dept)" v-else>
+                    <span aria-hidden="true ">
+                        {{dept.Name}}
+                    </span>
+                </button>
+            </div>
+            <div>
+                <input type="text" class="form-control" style="display: inline-block;" placeholder="空" aria-describedby="basic-addon1" :value="posn.Name"
+                    @blur="onEditName($event,dept,posn,index)" @keyup.enter="onEditName($event,dept,posn,index)">
+            </div>
+            <div>
+                <button class="btn btn-default " type="button" @click="onEditAuth(dept,posn,index)
+                        " :title="'该职位有`+posn.AuthorityList.length+`个权限'">
+                    <span class="glyphicon glyphicon-briefcase" aria-hidden="true ">
+                        {{posn.AuthorityList.length}}
+                    </span>
+                </button>
+            </div>
+            <div class="~text-center">
+                <button class="btn btn-default " type="button" @click="onEditUserList(dept,posn,index)" :title="'该职位下有'+posn.UserList.length+'名成员'">
+                    <span class="glyphicon glyphicon-user" aria-hidden="true ">
+                        {{posn.UserList.length}}
+                    </span>
+                </button>
+            </div>
+            <div>
+                <span class="glyphicon glyphicon-minus" aria-hidden="true" v-for="dep,index in (dept.Depth-startDepth)*2"></span>
+                <button class="btn btn-default " type="button" @click="onSortUp(dept,posn,index)" :disabled="!CheckSortUp(dept,posn,index)">
+                    <span class="glyphicon glyphicon-arrow-up " aria-hidden="true "></span>
+                </button>
+                <button class="btn btn-default " type="button" @click="onSortDown(dept,posn,index)" :disabled="!CheckSortDown(dept,posn,index)">
+                    <span class="glyphicon glyphicon-arrow-down " aria-hidden="true "></span>
+                </button>
+            </div>
+            <div>
+                <button class="btn btn-warning " type="button" @click="onDel(dept,posn,index)">
+                    <span class="glyphicon glyphicon-remove " aria-hidden="true "></span>
+                </button>
+            </div>
+        </div>
+    </div>
+    <template v-if="shownDeptChildren">
+        <PosnListComp :dept="deptChild" :startDepth="startDepth" :shownDeptChildren="shownDeptChildren" v-for="deptChild,deptIndexChild in dept.Children"
+            :key="deptChild.Did"></PosnListComp>
+    </template>
+</transition-group>

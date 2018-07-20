@@ -14,6 +14,10 @@ var DeptDropdownItemEnabled;
 })(DeptDropdownItemEnabled || (DeptDropdownItemEnabled = {}));
 var ManagerManagerClass = /** @class */ (function () {
     function ManagerManagerClass() {
+        this.UserConfig = {
+            /**posn list显示子部门的职位 */
+            ShownDeptChildren: true,
+        };
         this.VuePath = "manager/";
     }
     ManagerManagerClass.prototype.Init = function () {
@@ -61,8 +65,8 @@ var ManagerManagerClass = /** @class */ (function () {
                     btnId: String,
                     btnLabel: String,
                     btnDisabled: Boolean,
-                    CheckItemCb: Function,
-                    ItemStyle: Function,
+                    checkItemCb: Function,
+                    currDept: Object,
                 },
                 data: function () {
                     return {
@@ -206,7 +210,7 @@ var ManagerManagerClass = /** @class */ (function () {
         var proj = this.Data.GetProjectListHasAuth().FindOfAttr(FieldName.PID, UrlParam.Get(URL_PARAM_KEY.PID));
         this.Data.CurrProj = proj;
         Loader.LoadVueTemplateList([this.VuePath + "ProjectEdit"], function (tplList) {
-            var currPage = UrlParam.Get(URL_PARAM_KEY.PAGE, [ProjectEditPageIndex.Department, ProjectEditPageIndex.User]);
+            var currPage = UrlParam.Get(URL_PARAM_KEY.PAGE, [ProjectEditPageIndex.Department, ProjectEditPageIndex.Position, ProjectEditPageIndex.User]);
             TreeUtil.Every(_this.Data.CurrProj.DeptTree, function (dept) {
                 dept.Pid = proj.Pid;
                 return true;
@@ -249,20 +253,20 @@ var ManagerManagerClass = /** @class */ (function () {
         });
     };
     ManagerManagerClass.prototype.SwitchProjectEditPageContent = function () {
-        var currPage = UrlParam.Get(URL_PARAM_KEY.PAGE, [ProjectEditPageIndex.Department, ProjectEditPageIndex.User]);
+        var currPage = UrlParam.Get(URL_PARAM_KEY.PAGE, [ProjectEditPageIndex.Department, ProjectEditPageIndex.Position, ProjectEditPageIndex.User]);
         switch (currPage) {
-            case ProjectEditPageIndex.User:
-                this.ShowUserList(this.VueProjectEdit.project);
+            case ProjectEditPageIndex.Department:
+                this.ShowDepartmentList();
                 break;
-            case ProjectEditPageIndex.User:
+            case ProjectEditPageIndex.Position:
                 this.ShowPositionList();
                 break;
-            case ProjectEditPageIndex.Department:
-                this.ShowDepartmentList(this.VueProjectEdit.project);
+            case ProjectEditPageIndex.User:
+                this.ShowUserList();
                 break;
         }
     };
-    ManagerManagerClass.prototype.ShowDepartmentList = function (proj) {
+    ManagerManagerClass.prototype.ShowDepartmentList = function () {
         var _this = this;
         this.VueProjectEdit.currPage = ProjectEditPageIndex.Department;
         Loader.LoadVueTemplateList([this.VuePath + "DeptList", this.VuePath + "DeptListComp"], function (tplList) {
@@ -275,7 +279,6 @@ var ManagerManagerClass = /** @class */ (function () {
                 data: function () {
                     return {
                         auth: _this.Data.MyAuth,
-                        allDepartmentList: _this.Data.CurrProj.DeptTree,
                     };
                 },
                 methods: {
@@ -313,14 +316,6 @@ var ManagerManagerClass = /** @class */ (function () {
                             return DeptDropdownItemEnabled.ENABLED;
                         }
                     },
-                    DeptDropdownItemStyleCb: function (dept, deptDropdown) {
-                        if (dept.Did == deptDropdown.Did) {
-                            return [{ 'background-color': '#FFFF00' }];
-                        }
-                        else {
-                            return null;
-                        }
-                    },
                     onEditParentDp: function (dp, parentDp) {
                         if (parentDp == null) {
                             if (dp.Fid == 0) {
@@ -355,12 +350,12 @@ var ManagerManagerClass = /** @class */ (function () {
                         });
                     },
                     onEditPosition: function (dp, i0) {
-                        UrlParam.Set(URL_PARAM_KEY.DID, dp.Did).Reset();
+                        UrlParam.Set(URL_PARAM_KEY.PAGE, ProjectEditPageIndex.Position).Set(URL_PARAM_KEY.DID, dp.Did).Reset();
                         _this.ShowPositionList();
                     },
                     onEditUserList: function (dept) {
                         UrlParam.Set(URL_PARAM_KEY.PAGE, ProjectEditPageIndex.User).Set(URL_PARAM_KEY.FKEY, dept.Name).Reset();
-                        _this.ShowUserList(proj);
+                        _this.ShowUserList();
                     },
                     onSortDown: function (e, dp, i0) {
                         if (!_this.DeptListCheckSortDown(dp, i0)) {
@@ -397,7 +392,6 @@ var ManagerManagerClass = /** @class */ (function () {
                 data: {
                     auth: _this.Data.MyAuth,
                     deptTree: _this.Data.CurrProj.DeptTree,
-                    allDepartmentList: _this.Data.CurrProj.DeptTree,
                     newName: '',
                 },
                 methods: {
@@ -419,10 +413,6 @@ var ManagerManagerClass = /** @class */ (function () {
             _this.VueDepartmentList = vue;
             //#show
             Common.InsertIntoDom(vue.$el, _this.VueProjectEdit.$refs.pageContent);
-            var _did = UrlParam.Get(URL_PARAM_KEY.DID, 0);
-            if (_did && _this.Data.DeptDict[_did]) {
-                _this.ShowPositionList();
-            }
         });
     };
     ManagerManagerClass.prototype.DeptOption = function (dp) {
@@ -475,16 +465,82 @@ var ManagerManagerClass = /** @class */ (function () {
     };
     ManagerManagerClass.prototype.ShowPositionList = function () {
         var _this = this;
-        var _did = UrlParam.Get(URL_PARAM_KEY.DID, 0);
-        var dept = this.Data.DeptDict[_did];
-        Loader.LoadVueTemplate(this.VuePath + "PositionList", function (tpl) {
+        Loader.LoadVueTemplateList([this.VuePath + "PosnList", this.VuePath + "PosnListComp"], function (tplList) {
+            Vue.component("PosnListComp", {
+                template: tplList[1],
+                props: {
+                    currDept: Object,
+                    dept: Object,
+                    startDepth: Number,
+                    shownDeptChildren: Boolean,
+                },
+                data: function () {
+                    return {
+                        auth: _this.Data.MyAuth,
+                    };
+                },
+                methods: {
+                    OnEnterDept: function (toDept) {
+                        UrlParam.Set(URL_PARAM_KEY.DID, toDept.Did).Reset();
+                        _this.ShowPositionList();
+                    },
+                    onEditName: function (e, dept, pos, index) {
+                        var newName = e.target.value;
+                        pos.Name = newName;
+                    },
+                    onEditAuth: function (dept, pos, index) {
+                        _this.ShowAuthList(pos);
+                    },
+                    onEditUserList: function (dept, posn) {
+                        UrlParam.Set(URL_PARAM_KEY.PAGE, ProjectEditPageIndex.User).Set(URL_PARAM_KEY.FKEY, posn.Name).Reset();
+                        _this.ShowUserList(dept, posn);
+                    },
+                    CheckSortUp: function (dept, pos, index) {
+                        return index > 0;
+                    },
+                    CheckSortDown: function (dept, pos, index) {
+                        return index < dept.PositionList.length - 1;
+                    },
+                    onSortDown: function (dept, pos, index) {
+                        if (index < dept.PositionList.length - 1) {
+                            dept.PositionList.splice(index + 1, 0, dept.PositionList.splice(index, 1)[0]);
+                        }
+                    },
+                    onSortUp: function (dept, pos, index) {
+                        if (index > 0) {
+                            dept.PositionList.splice(index - 1, 0, dept.PositionList.splice(index, 1)[0]);
+                        }
+                    },
+                    onDel: function (dept, pos, index) {
+                        if (dept.PositionList.length == 1) {
+                            Common.AlertError("\u6BCF\u4E2A\u90E8\u95E8\u4E0B\u81F3\u5C11\u8981\u4FDD\u7559\u4E00\u4E2A\u804C\u4F4D");
+                        }
+                        else {
+                            Common.ConfirmDelete(function () {
+                                dept.PositionList.splice(index, 1);
+                            }, "\u5373\u5C06\u5220\u9664\u804C\u4F4D \"" + (pos.Name || '空') + "\"");
+                        }
+                    },
+                },
+            });
+            var _did = UrlParam.Get(URL_PARAM_KEY.DID, 0);
+            var currDept;
+            if (_did > 0) {
+                currDept = _this.Data.DeptDict[_did];
+            }
+            else {
+                //显示全部部门
+            }
             var vue = new Vue({
-                template: tpl,
+                template: tplList[0],
                 data: {
                     auth: _this.Data.MyAuth,
-                    allDepartmentList: _this.Data.CurrProj.DeptTree,
-                    dp: dept,
+                    isRoot: _did == 0,
+                    currDept: currDept,
+                    deptTree: currDept ? [currDept] : _this.Data.CurrProj.DeptTree,
                     newName: "",
+                    startDepth: currDept ? currDept.Depth : 0,
+                    userConfig: _this.UserConfig,
                 },
                 methods: {
                     dpFullName: function (dp) {
@@ -501,55 +557,52 @@ var ManagerManagerClass = /** @class */ (function () {
                         }
                         return "<ol class=\"breadcrumb\">\n                                        " + rs.join("") + "\n                                    </ol>";
                     },
-                    /**回到部门列表 */
-                    onBackDepartmentList: function () {
-                        _this.ShowDepartmentList(_this.Data.GetProjByPid(dept.Pid));
-                    },
-                    OnDeptChange: function (toDept) {
-                        UrlParam.Set(URL_PARAM_KEY.DID, toDept.Did).Reset();
-                        _this.ShowPositionList();
-                    },
-                    onEditName: function (e, pos, index) {
-                        var newName = e.target.value;
-                        pos.Name = newName;
-                    },
-                    onEditAuth: function (pos, index) {
-                        _this.ShowAuthList(pos);
-                    },
-                    onEditUserList: function (posn) {
-                        UrlParam.Set(URL_PARAM_KEY.PAGE, ProjectEditPageIndex.User).Set(URL_PARAM_KEY.FKEY, posn.Name).Reset();
-                        _this.ShowUserList(_this.Data.GetProjByPid(dept.Pid), dept, posn);
-                    },
-                    CheckSortUp: function (pos, index) {
-                        return index > 0;
-                    },
-                    CheckSortDown: function (pos, index) {
-                        return index < dept.PositionList.length - 1;
-                    },
-                    onSortDown: function (pos, index) {
-                        if (index < dept.PositionList.length - 1) {
-                            dept.PositionList.splice(index + 1, 0, dept.PositionList.splice(index, 1)[0]);
-                        }
-                    },
-                    onSortUp: function (pos, index) {
-                        if (index > 0) {
-                            dept.PositionList.splice(index - 1, 0, dept.PositionList.splice(index, 1)[0]);
-                        }
-                    },
-                    onDel: function (e, pos, index) {
-                        if (dept.PositionList.length == 1) {
-                            Common.AlertError("\u6BCF\u4E2A\u90E8\u95E8\u4E0B\u81F3\u5C11\u8981\u4FDD\u7559\u4E00\u4E2A\u804C\u4F4D");
+                    GetEnterParentDeptTitle: function (did) {
+                        if (did > 0) {
+                            return "\u56DE\u5230 \u4E0A\u7EA7\u90E8\u95E8\"" + _this.Data.DeptDict[did].Name + "\" \u7684\u804C\u4F4D\u5217\u8868";
                         }
                         else {
-                            Common.ConfirmDelete(function () {
-                                dept.PositionList.splice(index, 1);
-                            }, "\u5373\u5C06\u5220\u9664\u804C\u4F4D \"" + (pos.Name || '空') + "\"");
+                            return "\u56DE\u5230 \u5168\u90E8\u90E8\u95E8 \u7684\u804C\u4F4D\u5217\u8868";
                         }
                     },
+                    DeptDropdownCheckItemCb: function (deptDropdown) {
+                        if (currDept) {
+                            if (currDept.Did == deptDropdown.Did) {
+                                return DeptDropdownItemEnabled.DISABLED;
+                            }
+                            else {
+                                return DeptDropdownItemEnabled.ENABLED;
+                            }
+                        }
+                        else {
+                            return DeptDropdownItemEnabled.ENABLED;
+                        }
+                    },
+                    /**回到部门列表 */
+                    onBackDepartmentList: function () {
+                        _this.ShowDepartmentList();
+                    },
+                    OnToggleShownDeptChildren: function () {
+                        _this.UserConfig.ShownDeptChildren = !_this.UserConfig.ShownDeptChildren;
+                    },
+                    OnDeptChange: function (toDept) {
+                        UrlParam.Set(URL_PARAM_KEY.DID, toDept ? toDept.Did : 0).Reset();
+                        _this.ShowPositionList();
+                    },
+                    OnEnterDeptById: function (did) {
+                        UrlParam.Set(URL_PARAM_KEY.DID, did).Reset();
+                        _this.ShowPositionList();
+                    },
+                    OnEnterDept: function (toDept) {
+                        UrlParam.Set(URL_PARAM_KEY.DID, toDept ? toDept.Did : 0).Reset();
+                        _this.ShowPositionList();
+                    },
                     onAdd: function () {
-                        var pos = { Posid: _this.Data.NewPositionUuid++, Did: dept.Did, Name: _this.VuePositionList.newName.toString(), AuthorityList: [], UserList: [] };
-                        _this.VuePositionList.newName = '';
-                        dept.PositionList.push(pos);
+                        if (currDept) {
+                            var pos = { Posid: _this.Data.NewPositionUuid++, Did: currDept.Did, Name: _this.VuePositionList.newName.toString(), AuthorityList: [], UserList: [] };
+                            _this.VuePositionList.newName = '';
+                            currDept.PositionList.push(pos);
+                        }
                     },
                 },
             }).$mount();
@@ -587,7 +640,6 @@ var ManagerManagerClass = /** @class */ (function () {
                 methods: {
                     checkModChecked: _checkModChecked.bind(_this),
                     checkAuthChecked: function (_, auth) {
-                        // console.log("[debug] checkAuthSelected", auth.Authid, selectedAuthDict[auth.Authid])
                         return checkedDict[auth.Authid] != null;
                     },
                     onSwitchMod: function (mod) {
@@ -638,10 +690,11 @@ var ManagerManagerClass = /** @class */ (function () {
             Common.Popup($(vue.$el));
         });
     };
-    ManagerManagerClass.prototype.ShowUserList = function (proj, backDept, backPosn) {
+    ManagerManagerClass.prototype.ShowUserList = function (backDept, backPosn) {
         var _this = this;
         if (backDept === void 0) { backDept = null; }
         if (backPosn === void 0) { backPosn = null; }
+        var proj = this.Data.CurrProj;
         var filterText = UrlParam.Get(URL_PARAM_KEY.FKEY, '');
         this.VueProjectEdit.currPage = ProjectEditPageIndex.User;
         Loader.LoadVueTemplate(this.VuePath + "UserList", function (tpl) {
@@ -651,7 +704,6 @@ var ManagerManagerClass = /** @class */ (function () {
                     auth: _this.Data.MyAuth,
                     userList: proj.UserList,
                     otherUserList: ArrayUtil.SubByAttr(_this.Data.UserList, proj.UserList, FieldName.Uid),
-                    allDepartmentList: _this.Data.CurrProj.DeptTree,
                     backPosn: backPosn,
                     filterText: filterText,
                     newUserUid: 0,
@@ -699,7 +751,7 @@ var ManagerManagerClass = /** @class */ (function () {
                         return rs;
                     },
                     OnBackPosn: function () {
-                        UrlParam.Set(URL_PARAM_KEY.PAGE, ProjectEditPageIndex.Department).Set(URL_PARAM_KEY.DID, backDept.Did).Set(URL_PARAM_KEY.FKEY, null).Reset();
+                        UrlParam.Set(URL_PARAM_KEY.PAGE, ProjectEditPageIndex.Position).Set(URL_PARAM_KEY.DID, backDept.Did).Set(URL_PARAM_KEY.FKEY, null).Reset();
                         _this.ShowPositionList();
                     },
                     ShowDpName: function (did) {

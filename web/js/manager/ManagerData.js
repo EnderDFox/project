@@ -119,8 +119,10 @@ var ManagerDataClass = /** @class */ (function () {
                     {
                         Did: 22, Fid: 2, Name: '3D', Depth: 1, Children: [],
                         PositionList: [
-                            { Posid: 2200, Did: 2, Name: '3D', UserList: [], AuthorityList: [] },
-                            { Posid: 2201, Did: 2, Name: '3D主管', UserList: [], AuthorityList: [] },
+                            { Posid: 2200, Did: 2, Name: '3D主管', UserList: [], AuthorityList: [] },
+                            { Posid: 2201, Did: 2, Name: '3D建模', UserList: [], AuthorityList: [] },
+                            { Posid: 2202, Did: 2, Name: '3D渲染', UserList: [], AuthorityList: [] },
+                            { Posid: 2203, Did: 2, Name: '3D动作', UserList: [], AuthorityList: [] },
                         ]
                     },
                     {
@@ -263,7 +265,7 @@ var ManagerDataClass = /** @class */ (function () {
     /**获取默认的管理员部门 */
     ManagerDataClass.prototype.NewDeptManager = function () {
         var dept = {
-            Did: this.NewDepartmentUuid, Name: '管理部门', Fid: 0, Depth: 0,
+            Did: this.NewDepartmentUuid, Name: '管理部', Fid: 0, Depth: 0,
             Sort: 0,
             Children: [],
             PositionList: [

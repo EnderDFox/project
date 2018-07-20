@@ -1,6 +1,6 @@
 <transition-group name="list-complete" tag="div">
     <div class="list-complete-item" v-for="dp,index in deptTree" :dp="dp" :index="index" :key="dp.Did">
-        <div class="div-tr DeptList-tr">
+        <div class="divrow DeptList-row">
             <div>
                 <span class="glyphicon glyphicon-minus" aria-hidden="true" v-for="dep,index in dp.Depth*2"></span>
                 <input type="text" class="form-control" style="display: inline-block;width: auto;" placeholder="空" aria-describedby="basic-addon1"
@@ -12,50 +12,22 @@
                 </button>
             </div>
             <div>
-                <DeptDropdownComp :btnId="'ddmDpListDid'+index" :btnLabel="'改变上级部门'" :btnDisabled="!auth['PROJECT_EDIT']" v-if="dp.Sort>0"
-                    :CheckItemCb="(deptDropdown)=>{return DeptDropdownCheckItemCb(dp,deptDropdown)}" :ItemStyle="(deptDropdown)=>{return DeptDropdownItemStyleCb(dp,deptDropdown)}"
-                    @OnSelect="onEditParentDp(dp,arguments[0])">
-                    <template slot="after">
-                        <li role="separator " class="divider "></li>
-                        <li :class="{'disabled':dp.Fid==0}">
-                            <a @click="onEditParentDp(dp,null)">改为顶级部门</a>
-                        </li>
-                    </template>
-                </DeptDropdownComp>
-                <!--  <div class="dropdown">
-                    <button class="btn btn-default dropdown-toggle" type="button" :id="'ddmDpListDid'+index" data-toggle="dropdown" aria-haspopup="true"
-                        aria-expanded="true" :disabled="!auth['PROJECT_EDIT']">
-                        改变上级部门
-                        <span class="caret"></span>
-                    </button>
-                    <ul class="dropdown-menu" :aria-labelledby="'ddmDpListDid'+index">
-
-                        <li v-for="parentDp in allDepartmentList" :key="parentDp.Did" :class="{'disabled':!CheckCanMoveParentDp(dp,parentDp)}">
-                            <a @click="onEditParentDp(dp,parentDp)">{{departmentOption(parentDp)}}</a>
-                        </li>
-                        <li role="separator " class="divider "></li>
-                        <li :class="{'disabled':dp.Fid==0}">
-                            <a @click=" onEditParentDp(dp,null)">改为顶级部门</a>
-                        </li>
-                    </ul>
-                </div> -->
-            </div>
-            <div>
-                <button class="btn btn-default " type="button" @click="onEditPosition(dp,index)" :title="'该部门下有'+dp.PositionList.length+'个职位'+(dp.Children.length>0?' \n该部门及其子部门共有'+GetDeptAllPosnList(dp).length+'个职位':'')">
+                <button class="btn btn-default " type="button" @click="onEditPosition(dp,index)" :title="'该部门及其子部门共有'+GetDeptAllPosnList(dp).length+'个职位'">
                     <span class="glyphicon glyphicon-pawn" aria-hidden="true ">
-                        {{dp.PositionList.length}}{{dp.Children.length>0?'/'+GetDeptAllPosnList(dp).length:''}}
+                        {{GetDeptAllPosnList(dp).length}}
                     </span>
                 </button>
             </div>
             <div class="~text-center text-middle">
-                <button class="btn btn-default " type="button" @click="onEditUserList(dp,index)" :title="'该部门下有'+GetDeptUserList(dp).length+'名成员'+(dp.Children.length>0?' \n该部门及其子部门共有'+GetDeptAllUserList(dp).length+'名成员':'')">
+                <button class="btn btn-default " type="button" @click="onEditUserList(dp,index)" :title="'该部门及其子部门共有'+GetDeptAllUserList(dp).length+'名成员'">
                     <span class="glyphicon glyphicon-user" aria-hidden="true ">
-                        {{GetDeptUserList(dp).length}}{{dp.Children.length>0?'/'+GetDeptAllUserList(dp).length:''}}
+                        {{GetDeptAllUserList(dp).length}}
                     </span>
                 </button>
             </div>
+            <!-- sort -->
             <div>
-                <span class="glyphicon glyphicon-minus" style="font-size: 50%;" aria-hidden="true" v-for="dep,index in dp.Depth"></span>
+                <span class="glyphicon glyphicon-minus" aria-hidden="true" v-for="dep,index in dp.Depth*2"></span>
                 <!-- <div style="display: inline-block; width: 15px;" v-for="dep,index in dp.Depth"></div> -->
                 <button class="btn btn-default " type="button" @click="onSortUp($event,dp,index) " :disabled="!(auth['PROJECT_EDIT'] && CheckSortUp(dp,index))"
                     v-if="dp.Sort>0">
@@ -66,6 +38,20 @@
                     <span class="glyphicon glyphicon-arrow-down " aria-hidden="true "></span>
                 </button>
             </div>
+            <!-- 迁移 -->
+            <div>
+                <DeptDropdownComp :btnId="'ddmDpListDid'+index" :btnLabel="'改变上级部门'" :btnDisabled="!auth['PROJECT_EDIT']" v-if="dp.Sort>0"
+                    :checkItemCb="(deptDropdown)=>{return DeptDropdownCheckItemCb(dp,deptDropdown)}" :currDept="dp"
+                    @OnSelect="onEditParentDp(dp,arguments[0])">
+                    <template slot="after">
+                        <li role="separator " class="divider "></li>
+                        <li :class="{'disabled':dp.Fid==0}">
+                            <a @click="onEditParentDp(dp,null)">改为顶级部门</a>
+                        </li>
+                    </template>
+                </DeptDropdownComp>
+            </div>
+            <!-- remove -->
             <div>
                 <button class="btn btn-warning " title="删除部门" type="button" :disabled="!auth['PROJECT_EDIT']" v-if="dp.Sort>0" @click="onDel(dp,index)">
                     <span class="glyphicon glyphicon-remove " aria-hidden="true "></span>
