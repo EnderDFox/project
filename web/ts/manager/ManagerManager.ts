@@ -301,7 +301,7 @@ class ManagerManagerClass {
                     onAddChild: (parentDp: DepartmentSingle, i0: int) => {
                         var dp: DepartmentSingle = {
                             Did: this.Data.NewDepartmentUuid, Name: ``, Depth: parentDp.Depth + 1, Children: [], PositionList: [
-                                { Posid: this.Data.NewPositionUuid, Did: this.Data.NewDepartmentUuid, Name: ``, AuthorityList: [] },//给一个默认的职位
+                                { Posid: this.Data.NewPositionUuid, Did: this.Data.NewDepartmentUuid, Name: ``, AuthorityList: [], UserList: [], },//给一个默认的职位
                             ],
                             Fid: parentDp.Did,
                             Sort: 1,
@@ -402,9 +402,15 @@ class ManagerManagerClass {
                         onAdd: () => {
                             var dp: DepartmentSingle = {
                                 Did: this.Data.NewDepartmentUuid, Name: this.VueDepartmentList.newName.toString(), Depth: 0, Children: [], PositionList: [
-                                    { Posid: this.Data.NewPositionUuid, Did: this.Data.NewDepartmentUuid, Name: this.VueDepartmentList.newName.toString(), AuthorityList: [] },//给一个默认的职位
+                                    {//给一个默认的职位
+                                        Posid: this.Data.NewPositionUuid,
+                                        Did: this.Data.NewDepartmentUuid,
+                                        Name: this.VueDepartmentList.newName.toString(),
+                                        AuthorityList: [],
+                                        UserList: [],
+                                    },
                                 ],
-                                Fid: 0,
+                                Fid: 0, Sort: 1,
                             }
                             this.VueDepartmentList.newName = ''
                             this.Data.NewDepartmentUuid++
@@ -566,14 +572,14 @@ class ManagerManagerClass {
                                 return `回到 全部部门 的职位列表`
                             }
                         },
-                        DeptDropdownCheckItemCb:(deptDropdown:DepartmentSingle)=>{
-                            if(currDept){
-                                if(currDept.Did==deptDropdown.Did){
+                        DeptDropdownCheckItemCb: (deptDropdown: DepartmentSingle) => {
+                            if (currDept) {
+                                if (currDept.Did == deptDropdown.Did) {
                                     return DeptDropdownItemEnabled.DISABLED
-                                }else{
+                                } else {
                                     return DeptDropdownItemEnabled.ENABLED
                                 }
-                            }else{
+                            } else {
                                 return DeptDropdownItemEnabled.ENABLED
                             }
                         },

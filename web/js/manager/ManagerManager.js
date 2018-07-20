@@ -295,7 +295,7 @@ var ManagerManagerClass = /** @class */ (function () {
                     onAddChild: function (parentDp, i0) {
                         var dp = {
                             Did: _this.Data.NewDepartmentUuid, Name: "", Depth: parentDp.Depth + 1, Children: [], PositionList: [
-                                { Posid: _this.Data.NewPositionUuid, Did: _this.Data.NewDepartmentUuid, Name: "", AuthorityList: [] },
+                                { Posid: _this.Data.NewPositionUuid, Did: _this.Data.NewDepartmentUuid, Name: "", AuthorityList: [], UserList: [], },
                             ],
                             Fid: parentDp.Did,
                             Sort: 1,
@@ -398,9 +398,15 @@ var ManagerManagerClass = /** @class */ (function () {
                     onAdd: function () {
                         var dp = {
                             Did: _this.Data.NewDepartmentUuid, Name: _this.VueDepartmentList.newName.toString(), Depth: 0, Children: [], PositionList: [
-                                { Posid: _this.Data.NewPositionUuid, Did: _this.Data.NewDepartmentUuid, Name: _this.VueDepartmentList.newName.toString(), AuthorityList: [] },
+                                {
+                                    Posid: _this.Data.NewPositionUuid,
+                                    Did: _this.Data.NewDepartmentUuid,
+                                    Name: _this.VueDepartmentList.newName.toString(),
+                                    AuthorityList: [],
+                                    UserList: [],
+                                },
                             ],
-                            Fid: 0,
+                            Fid: 0, Sort: 1,
                         };
                         _this.VueDepartmentList.newName = '';
                         _this.Data.NewDepartmentUuid++;
