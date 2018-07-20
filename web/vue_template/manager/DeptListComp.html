@@ -12,7 +12,8 @@
                 </button>
             </div>
             <div>
-                <DeptDropdownComp :btnId="'ddmDpListDid'+index" :btnLabel="'改变上级部门'" :btnDisabled="!auth['PROJECT_EDIT']" v-if="dp.Sort>0" :CheckItemCb="(deptDropdown)=>{return DeptDropdownCheckItemCb(dp,deptDropdown)}" :ItemStyle="(deptDropdown)=>{return DeptDropdownItemStyleCb(dp,deptDropdown)}"
+                <DeptDropdownComp :btnId="'ddmDpListDid'+index" :btnLabel="'改变上级部门'" :btnDisabled="!auth['PROJECT_EDIT']" v-if="dp.Sort>0"
+                    :CheckItemCb="(deptDropdown)=>{return DeptDropdownCheckItemCb(dp,deptDropdown)}" :ItemStyle="(deptDropdown)=>{return DeptDropdownItemStyleCb(dp,deptDropdown)}"
                     @OnSelect="onEditParentDp(dp,arguments[0])">
                     <template slot="after">
                         <li role="separator " class="divider "></li>
@@ -54,11 +55,15 @@
                 </button>
             </div>
             <div>
-                <button class="btn btn-default " type="button" @click="onSortDown($event,dp,index)" :disabled="!(auth['PROJECT_EDIT'] && CheckSortDown(dp,index))" v-if="dp.Sort>0">
-                    <span class="glyphicon glyphicon-arrow-down " aria-hidden="true "></span>
-                </button>
-                <button class="btn btn-default " type="button" @click="onSortUp($event,dp,index) " :disabled="!(auth['PROJECT_EDIT'] && CheckSortUp(dp,index))" v-if="dp.Sort>0">
+                <span class="glyphicon glyphicon-minus" style="font-size: 50%;" aria-hidden="true" v-for="dep,index in dp.Depth"></span>
+                <!-- <div style="display: inline-block; width: 15px;" v-for="dep,index in dp.Depth"></div> -->
+                <button class="btn btn-default " type="button" @click="onSortUp($event,dp,index) " :disabled="!(auth['PROJECT_EDIT'] && CheckSortUp(dp,index))"
+                    v-if="dp.Sort>0">
                     <span class="glyphicon glyphicon-arrow-up " aria-hidden="true "></span>
+                </button>
+                <button class="btn btn-default " type="button" @click="onSortDown($event,dp,index)" :disabled="!(auth['PROJECT_EDIT'] && CheckSortDown(dp,index))"
+                    v-if="dp.Sort>0">
+                    <span class="glyphicon glyphicon-arrow-down " aria-hidden="true "></span>
                 </button>
             </div>
             <div>

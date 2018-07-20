@@ -48,11 +48,11 @@
                     </button>
                 </td>
                 <td>
-                    <button class="btn btn-default " type="button" @click="onSortDown(pos,index)" :disabled="!(index < dp.PositionList.length - 1)">
-                        <span class="glyphicon glyphicon-arrow-down " aria-hidden="true "></span>
-                    </button>
                     <button class="btn btn-default " type="button" @click="onSortUp(pos,index)" :disabled="!(index > 0)">
                         <span class="glyphicon glyphicon-arrow-up " aria-hidden="true "></span>
+                    </button>
+                    <button class="btn btn-default " type="button" @click="onSortDown(pos,index)" :disabled="!(index < dp.PositionList.length - 1)">
+                        <span class="glyphicon glyphicon-arrow-down " aria-hidden="true "></span>
                     </button>
                 </td>
                 <td>

@@ -263,7 +263,7 @@ var ManagerDataClass = /** @class */ (function () {
     /**获取默认的管理员部门 */
     ManagerDataClass.prototype.NewDeptManager = function () {
         var dept = {
-            Did: this.NewDepartmentUuid, Name: '管理员', Fid: 0, Depth: 0,
+            Did: this.NewDepartmentUuid, Name: '管理部门', Fid: 0, Depth: 0,
             Sort: 0,
             Children: [],
             PositionList: [

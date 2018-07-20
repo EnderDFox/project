@@ -101,7 +101,9 @@ fieldset[disabled] .btn {
 }
 
 .DeptList-tr>div:nth-child(6) {
-    width: 120px;
+    overflow: hidden;
+    white-space: nowrap;
+    width: 180px;
 }
 
 /*vue transition-group*/

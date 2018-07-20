@@ -193,6 +193,7 @@ class ManagerManagerClass {
                                     Name: this.VueProjectList.newName.toString(),
                                     MasterUid: 0, UserList: [],
                                     CreateTime: new Date().getTime(),
+                                    DeptTree: [this.Data.NewDeptManager()],
                                 }
                             )
                             this.VueProjectList.newName = ''
@@ -287,8 +288,8 @@ class ManagerManagerClass {
                     GetDeptUserList: this.Data.GetDeptUserList.bind(this.Data),
                     GetDeptAllUserList: this.Data.GetDeptAllUserList.bind(this.Data),
                     CheckCanMoveParentDp: this.CheckCanMoveParentDp.bind(this),
-                    CheckSortDown: this.CheckSortDown.bind(this),
-                    CheckSortUp: this.CheckSortUp.bind(this),
+                    CheckSortDown: this.DeptListCheckSortDown.bind(this),
+                    CheckSortUp: this.DeptListCheckSortUp.bind(this),
                     onEditName: (e: Event, dp: DepartmentSingle, i0: int) => {
                         var newName = (e.target as HTMLInputElement).value
                         dp.Name = newName
@@ -298,7 +299,8 @@ class ManagerManagerClass {
                             Did: this.Data.NewDepartmentUuid, Name: ``, Depth: parentDp.Depth + 1, Children: [], PositionList: [
                                 { Posid: this.Data.NewPositionUuid, Did: this.Data.NewDepartmentUuid, Name: ``, AuthorityList: [] },//给一个默认的职位
                             ],
-                            Fid: parentDp.Did
+                            Fid: parentDp.Did,
+                            Sort: 1,
                         }
                         this.Data.NewDepartmentUuid++
                         this.Data.NewPositionUuid++
@@ -314,10 +316,10 @@ class ManagerManagerClass {
                             return DeptDropdownItemEnabled.ENABLED
                         }
                     },
-                    DeptDropdownItemStyleCb:(dept: DepartmentSingle, deptDropdown: DepartmentSingle)=>{
-                        if(dept.Did == deptDropdown.Did){
-                            return [{'background-color':'#FFFF00'}]
-                        }else{
+                    DeptDropdownItemStyleCb: (dept: DepartmentSingle, deptDropdown: DepartmentSingle) => {
+                        if (dept.Did == deptDropdown.Did) {
+                            return [{ 'background-color': '#FFFF00' }]
+                        } else {
                             return null
                         }
                     },
@@ -361,7 +363,7 @@ class ManagerManagerClass {
                         this.ShowUserList(proj)
                     },
                     onSortDown: (e, dp: DepartmentSingle, i0: int) => {
-                        if (!this.CheckSortDown(dp, i0)) {
+                        if (!this.DeptListCheckSortDown(dp, i0)) {
                             return
                         }
                         var brothers: DepartmentSingle[] = this.Data.GetBrotherDepartmentList(dp)
@@ -371,7 +373,7 @@ class ManagerManagerClass {
                         brothers.splice(brotherIndex + 1, 0, dp)
                     },
                     onSortUp: (e, dp: DepartmentSingle, i0: int) => {
-                        if (!this.CheckSortUp(dp, i0)) {
+                        if (!this.DeptListCheckSortUp(dp, i0)) {
                             return
                         }
                         var brothers: DepartmentSingle[] = this.Data.GetBrotherDepartmentList(dp)
@@ -439,18 +441,22 @@ class ManagerManagerClass {
             return rs
         }
     }
-    CheckSortDown(dp: DepartmentSingle, i0: int) {
-        var brothers: DepartmentSingle[] = this.Data.GetBrotherDepartmentList(dp)
-        var brotherIndex = ArrayUtil.IndexOfAttr(brothers, FieldName.Did, dp.Did)
-        if (brotherIndex < brothers.length - 1) {
-            return true
+    DeptListCheckSortUp(dp: DepartmentSingle, i0: int) {
+        if (dp.Fid == 0) {
+            if (i0 > 1) {//顶级因为有个`管理员`部门
+                return true
+            }
+        } else {
+            if (i0 > 0) {
+                return true
+            }
         }
         return false
     }
-    CheckSortUp(dp: DepartmentSingle, i0: int) {
+    DeptListCheckSortDown(dp: DepartmentSingle, i0: int) {
         var brothers: DepartmentSingle[] = this.Data.GetBrotherDepartmentList(dp)
         var brotherIndex = ArrayUtil.IndexOfAttr(brothers, FieldName.Did, dp.Did)
-        if (brotherIndex > 0) {
+        if (brotherIndex < brothers.length - 1) {
             return true
         }
         return false
@@ -516,12 +522,11 @@ class ManagerManagerClass {
                             UrlParam.Set(URL_PARAM_KEY.PAGE, ProjectEditPageIndex.User).Set(URL_PARAM_KEY.FKEY, posn.Name).Reset()
                             this.ShowUserList(this.Data.GetProjByPid(dept.Pid), dept, posn)
                         },
-                        CheckSortDown: (pos: PositionSingle, index: int) => {
-                            return index < dept.PositionList.length - 1
-                        },
                         CheckSortUp: (pos: PositionSingle, index: int) => {
                             return index > 0
-
+                        },
+                        CheckSortDown: (pos: PositionSingle, index: int) => {
+                            return index < dept.PositionList.length - 1
                         },
                         onSortDown: (pos: PositionSingle, index: int) => {
                             if (index < dept.PositionList.length - 1) {

@@ -190,6 +190,7 @@ var ManagerManagerClass = /** @class */ (function () {
                             Name: _this.VueProjectList.newName.toString(),
                             MasterUid: 0, UserList: [],
                             CreateTime: new Date().getTime(),
+                            DeptTree: [_this.Data.NewDeptManager()],
                         });
                         _this.VueProjectList.newName = '';
                     }
@@ -282,8 +283,8 @@ var ManagerManagerClass = /** @class */ (function () {
                     GetDeptUserList: _this.Data.GetDeptUserList.bind(_this.Data),
                     GetDeptAllUserList: _this.Data.GetDeptAllUserList.bind(_this.Data),
                     CheckCanMoveParentDp: _this.CheckCanMoveParentDp.bind(_this),
-                    CheckSortDown: _this.CheckSortDown.bind(_this),
-                    CheckSortUp: _this.CheckSortUp.bind(_this),
+                    CheckSortDown: _this.DeptListCheckSortDown.bind(_this),
+                    CheckSortUp: _this.DeptListCheckSortUp.bind(_this),
                     onEditName: function (e, dp, i0) {
                         var newName = e.target.value;
                         dp.Name = newName;
@@ -293,7 +294,8 @@ var ManagerManagerClass = /** @class */ (function () {
                             Did: _this.Data.NewDepartmentUuid, Name: "", Depth: parentDp.Depth + 1, Children: [], PositionList: [
                                 { Posid: _this.Data.NewPositionUuid, Did: _this.Data.NewDepartmentUuid, Name: "", AuthorityList: [] },
                             ],
-                            Fid: parentDp.Did
+                            Fid: parentDp.Did,
+                            Sort: 1,
                         };
                         _this.Data.NewDepartmentUuid++;
                         _this.Data.NewPositionUuid++;
@@ -361,7 +363,7 @@ var ManagerManagerClass = /** @class */ (function () {
                         _this.ShowUserList(proj);
                     },
                     onSortDown: function (e, dp, i0) {
-                        if (!_this.CheckSortDown(dp, i0)) {
+                        if (!_this.DeptListCheckSortDown(dp, i0)) {
                             return;
                         }
                         var brothers = _this.Data.GetBrotherDepartmentList(dp);
@@ -371,7 +373,7 @@ var ManagerManagerClass = /** @class */ (function () {
                         brothers.splice(brotherIndex + 1, 0, dp);
                     },
                     onSortUp: function (e, dp, i0) {
-                        if (!_this.CheckSortUp(dp, i0)) {
+                        if (!_this.DeptListCheckSortUp(dp, i0)) {
                             return;
                         }
                         var brothers = _this.Data.GetBrotherDepartmentList(dp);
@@ -437,18 +439,23 @@ var ManagerManagerClass = /** @class */ (function () {
             return rs;
         }
     };
-    ManagerManagerClass.prototype.CheckSortDown = function (dp, i0) {
-        var brothers = this.Data.GetBrotherDepartmentList(dp);
-        var brotherIndex = ArrayUtil.IndexOfAttr(brothers, FieldName.Did, dp.Did);
-        if (brotherIndex < brothers.length - 1) {
-            return true;
+    ManagerManagerClass.prototype.DeptListCheckSortUp = function (dp, i0) {
+        if (dp.Fid == 0) {
+            if (i0 > 1) { //顶级因为有个`管理员`部门
+                return true;
+            }
+        }
+        else {
+            if (i0 > 0) {
+                return true;
+            }
         }
         return false;
     };
-    ManagerManagerClass.prototype.CheckSortUp = function (dp, i0) {
+    ManagerManagerClass.prototype.DeptListCheckSortDown = function (dp, i0) {
         var brothers = this.Data.GetBrotherDepartmentList(dp);
         var brotherIndex = ArrayUtil.IndexOfAttr(brothers, FieldName.Did, dp.Did);
-        if (brotherIndex > 0) {
+        if (brotherIndex < brothers.length - 1) {
             return true;
         }
         return false;
@@ -513,11 +520,11 @@ var ManagerManagerClass = /** @class */ (function () {
                         UrlParam.Set(URL_PARAM_KEY.PAGE, ProjectEditPageIndex.User).Set(URL_PARAM_KEY.FKEY, posn.Name).Reset();
                         _this.ShowUserList(_this.Data.GetProjByPid(dept.Pid), dept, posn);
                     },
-                    CheckSortDown: function (pos, index) {
-                        return index < dept.PositionList.length - 1;
-                    },
                     CheckSortUp: function (pos, index) {
                         return index > 0;
+                    },
+                    CheckSortDown: function (pos, index) {
+                        return index < dept.PositionList.length - 1;
                     },
                     onSortDown: function (pos, index) {
                         if (index < dept.PositionList.length - 1) {

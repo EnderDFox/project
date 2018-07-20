@@ -269,7 +269,7 @@ class ManagerDataClass {
     /**获取默认的管理员部门 */
     NewDeptManager(): DepartmentSingle {
         var dept: DepartmentSingle = {
-            Did: this.NewDepartmentUuid, Name: '管理员', Fid: 0, Depth: 0,
+            Did: this.NewDepartmentUuid, Name: '管理部门', Fid: 0, Depth: 0,
             Sort: 0,//标记管理员部门主要靠sort=0
             Children: [],
             PositionList: [
