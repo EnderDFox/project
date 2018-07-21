@@ -50,9 +50,13 @@
                 handle: ".btndrag",
                 group: 'photo',
                 ghostClass: 'sort-ghostClass',
+                filter:'.undrag',
                 // chosenClass:'sort-chosenClass',
                 animation: 150, //动画参数
                 scorll: true,
+                onMove:function(evt){
+                    console.log("[debug] onMove", evt);
+                },
                 onStart: function (evt) {
                     // console.log("[debug] onStart", arguments, ":[arguments]");
                     console.log("[debug] onStart", evt);
@@ -99,7 +103,7 @@
 
 <body onload="onload()">
     <div id="items" class="list">
-        <div class="row">
+        <div class="row undrag">
             <div>item 1
                 <button class="btndrag">drag</button>
             </div>

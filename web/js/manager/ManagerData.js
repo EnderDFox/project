@@ -300,10 +300,20 @@ var ManagerDataClass = /** @class */ (function () {
         }
         return rs;
     };
-    /**得到一个 部门的兄弟部门数组 */
-    ManagerDataClass.prototype.GetBrotherDepartmentList = function (dp) {
-        if (dp.Fid) {
-            return ManagerData.DeptDict[dp.Fid].Children;
+    ManagerDataClass.prototype.GetBrotherDepartmentList = function () {
+        var args = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            args[_i] = arguments[_i];
+        }
+        var fid;
+        if (typeof (args[0]) == 'number' || typeof (args[0]) == 'string') {
+            fid = parseInt(args[0]);
+        }
+        else {
+            fid = args[0].Fid;
+        }
+        if (fid) {
+            return ManagerData.DeptDict[fid].Children;
         }
         else { //顶级部门
             return this.CurrProj.DeptTree;

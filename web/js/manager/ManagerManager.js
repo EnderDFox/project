@@ -273,6 +273,7 @@ var ManagerManagerClass = /** @class */ (function () {
             Vue.component('DeptListComp', {
                 template: tplList[1],
                 props: {
+                    parentDept: Object,
                     deptTree: Array,
                     index: Number,
                 },
@@ -316,36 +317,36 @@ var ManagerManagerClass = /** @class */ (function () {
                             return DeptDropdownItemEnabled.ENABLED;
                         }
                     },
-                    onEditParentDp: function (dp, parentDp) {
-                        if (parentDp == null) {
-                            if (dp.Fid == 0) {
+                    onEditParentDp: function (dept, toParentDept) {
+                        if (toParentDept == null) {
+                            if (dept.Fid == 0) {
                                 return; //已经是顶级职位了
                             }
                         }
                         else {
-                            if (!_this.CheckCanMoveParentDp(dp, parentDp)) {
+                            if (!_this.CheckCanMoveParentDp(dept, toParentDept)) {
                                 return;
                             }
                         }
                         //从当前父tree中删除
-                        var brothers = _this.Data.GetBrotherDepartmentList(dp);
-                        brothers.RemoveByAttr(FieldName.Did, dp.Did);
+                        var brothers = _this.Data.GetBrotherDepartmentList(dept);
+                        brothers.RemoveByAttr(FieldName.Did, dept.Did);
                         //
-                        if (parentDp == null) {
+                        if (toParentDept == null) {
                             //改为顶级部门
-                            dp.Fid = 0;
-                            dp.Depth = 0;
-                            _this.Data.CurrProj.DeptTree.push(dp);
+                            dept.Fid = 0;
+                            dept.Depth = 0;
+                            _this.Data.CurrProj.DeptTree.push(dept);
                         }
                         else {
                             //放到其他部门下
-                            dp.Fid = parentDp.Did;
-                            dp.Depth = parentDp.Depth + 1;
-                            parentDp.Children.push(dp);
+                            dept.Fid = toParentDept.Did;
+                            dept.Depth = toParentDept.Depth + 1;
+                            toParentDept.Children.push(dept);
                         }
                         //子部门的深度改变
-                        TreeUtil.Every(dp.Children, function (child, _, __, depthChild) {
-                            child.Depth = dp.Depth + depthChild + 1;
+                        TreeUtil.Every(dept.Children, function (child, _, __, depthChild) {
+                            child.Depth = dept.Depth + depthChild + 1;
                             return true;
                         });
                     },
@@ -394,6 +395,12 @@ var ManagerManagerClass = /** @class */ (function () {
                     deptTree: _this.Data.CurrProj.DeptTree,
                     newName: '',
                 },
+                filters: {
+                    /**除去第一个数据后剩下的 */
+                    remainDeptTree: function (deptTree) {
+                        return deptTree.slice(1, deptTree.length);
+                    }
+                },
                 methods: {
                     onAdd: function () {
                         var dp = {
@@ -420,25 +427,102 @@ var ManagerManagerClass = /** @class */ (function () {
             //#show
             Common.InsertIntoDom(vue.$el, _this.VueProjectEdit.$refs.pageContent);
             //#drag Sortable
+            var _renderTagDepthDrag = function ($ele, depth) {
+                console.log("[debug]", depth, ":[depth]");
+                var rs = [];
+                for (var i = 0; i < depth * 2; i++) {
+                    rs.push("<span class=\"glyphicon glyphicon-minus\" aria-hidden=\"true\"></span>");
+                }
+                console.log("[debug]", rs);
+                $ele.html(rs.join(''));
+            };
+            var _oldDepth = 0;
             var opt = {
                 draggable: ".list-complete-item",
                 handle: ".btn-drag",
                 group: 'dragGroup',
-                // ghostClass: '',
+                scorll: true,
                 animation: 150,
-                onStart: function () {
-                    console.log("[debug] onStart", arguments, ":[arguments]");
+                // ghostClass: 'sortable-ghostClass',
+                chosenClass: 'sortable-chosenClass',
+                onStart: function (evt) {
+                    var $curr = $(evt.item);
+                    $curr.find('.tag-depth').hide();
+                    var dept = _this.Data.DeptDict[parseInt($(evt.item).attr(FieldName.Did))];
+                    $curr.find('.tag-depth-drag').show();
+                    _oldDepth = dept.Depth;
+                    _renderTagDepthDrag($curr.find('.tag-depth-drag'), dept.Depth);
+                },
+                onMove: function (evt) {
+                    var $curr = $(evt.item);
+                    var toDid = parseInt($(evt.to).attr(FieldName.Did));
+                    var toParentDept = _this.Data.DeptDict[toDid];
+                    var depth;
+                    if (toParentDept == null) {
+                        depth = 0;
+                    }
+                    else {
+                        depth = toParentDept.Depth + 1;
+                    }
+                    // if (_oldDepth != depth) {
+                    _oldDepth = depth;
+                    _renderTagDepthDrag($curr.find('.tag-depth-drag'), depth);
+                    // }
                 },
                 onEnd: function (evt) {
-                    console.log("[debug] onEnd", arguments, ":[arguments]");
-                    // console.log("[debug]", evt.item, ":[evt.item]");
-                    // console.log("[info]", evt.from, evt.oldIndex, ":[evt.from]");
-                    // console.log("[info]", evt.to, evt.newIndex, ":[evt.to]");
+                    var $curr = $(evt.item);
+                    $curr.find('.tag-depth').show();
+                    $curr.find('.tag-depth-drag').hide();
                 },
+                onAdd: function (evt) {
+                    // console.log("[debug] onAdd:", $(evt.item).attr(FieldName.Did), $(evt.from).attr(FieldName.Did),evt.oldIndex, '->', $(evt.to).attr(FieldName.Did), evt.newIndex)
+                    var dept = _this.Data.DeptDict[parseInt($(evt.item).attr(FieldName.Did))];
+                    var fromBrothers = _this.Data.GetBrotherDepartmentList(dept);
+                    var toDid = parseInt($(evt.to).attr(FieldName.Did));
+                    var toParentDept = _this.Data.DeptDict[toDid];
+                    var toIndex = evt.newIndex;
+                    //
+                    //从当前父tree中删除
+                    var brothers = _this.Data.GetBrotherDepartmentList(dept);
+                    brothers.RemoveByAttr(FieldName.Did, dept.Did);
+                    //
+                    if (toParentDept == null) {
+                        //改为顶级部门
+                        dept.Fid = 0;
+                        dept.Depth = 0;
+                        _this.Data.CurrProj.DeptTree.splice(toIndex + 1, 0, dept); //因为顶级有个`管理部`占用了一格,因此要+1
+                    }
+                    else {
+                        //放到其他部门下
+                        dept.Fid = toParentDept.Did;
+                        dept.Depth = toParentDept.Depth + 1;
+                        toParentDept.Children.splice(toIndex, 0, dept);
+                    }
+                    //子部门的深度改变
+                    TreeUtil.Every(dept.Children, function (child, _, __, depthChild) {
+                        child.Depth = dept.Depth + depthChild + 1;
+                        return true;
+                    });
+                },
+                onUpdate: function (evt) {
+                    // console.log("[debug] onUpdate:", $(evt.item).attr(FieldName.Did), 'index:', evt.oldIndex, '->', evt.newIndex)
+                    var dept = _this.Data.DeptDict[parseInt($(evt.item).attr(FieldName.Did))];
+                    var fromBrothers = _this.Data.GetBrotherDepartmentList(dept);
+                    var fromIndex = evt.oldIndex;
+                    var toIndex = evt.newIndex;
+                    if (dept.Fid == 0) {
+                        fromBrothers.splice(fromIndex + 1, 1);
+                        fromBrothers.splice(toIndex + 1, 0, dept);
+                    }
+                    else {
+                        fromBrothers.splice(fromIndex, 1);
+                        fromBrothers.splice(toIndex, 0, dept);
+                    }
+                }
             };
             var $listComp = $('.listComp');
-            console.log("[debug]", $('.listComp'), ":[$('.listComp').length]");
-            for (var i = 0; i < $listComp.length; i++) {
+            // console.log("[debug]", $('.listComp'), ":[$('.listComp').length]")
+            for (var i = 1; i < $listComp.length; i++) {
                 Sortable.create($listComp.get(i), opt);
             }
         });

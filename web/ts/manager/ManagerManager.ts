@@ -279,6 +279,7 @@ class ManagerManagerClass {
             Vue.component('DeptListComp', {
                 template: tplList[1],
                 props: {
+                    parentDept: Object,
                     deptTree: Array,
                     index: Number,
                 },
@@ -320,34 +321,34 @@ class ManagerManagerClass {
                             return DeptDropdownItemEnabled.ENABLED
                         }
                     },
-                    onEditParentDp: (dp: DepartmentSingle, parentDp: DepartmentSingle) => {
-                        if (parentDp == null) {
-                            if (dp.Fid == 0) {
+                    onEditParentDp: (dept: DepartmentSingle, toParentDept: DepartmentSingle) => {
+                        if (toParentDept == null) {
+                            if (dept.Fid == 0) {
                                 return//已经是顶级职位了
                             }
                         } else {
-                            if (!this.CheckCanMoveParentDp(dp, parentDp)) {
+                            if (!this.CheckCanMoveParentDp(dept, toParentDept)) {
                                 return
                             }
                         }
                         //从当前父tree中删除
-                        var brothers: DepartmentSingle[] = this.Data.GetBrotherDepartmentList(dp)
-                        brothers.RemoveByAttr(FieldName.Did, dp.Did)
+                        var brothers: DepartmentSingle[] = this.Data.GetBrotherDepartmentList(dept)
+                        brothers.RemoveByAttr(FieldName.Did, dept.Did)
                         //
-                        if (parentDp == null) {
+                        if (toParentDept == null) {
                             //改为顶级部门
-                            dp.Fid = 0
-                            dp.Depth = 0
-                            this.Data.CurrProj.DeptTree.push(dp)
+                            dept.Fid = 0
+                            dept.Depth = 0
+                            this.Data.CurrProj.DeptTree.push(dept)
                         } else {
                             //放到其他部门下
-                            dp.Fid = parentDp.Did
-                            dp.Depth = parentDp.Depth + 1
-                            parentDp.Children.push(dp)
+                            dept.Fid = toParentDept.Did
+                            dept.Depth = toParentDept.Depth + 1
+                            toParentDept.Children.push(dept)
                         }
                         //子部门的深度改变
-                        TreeUtil.Every(dp.Children, (child: DepartmentSingle, _, __, depthChild: number): boolean => {
-                            child.Depth = dp.Depth + depthChild + 1
+                        TreeUtil.Every(dept.Children, (child: DepartmentSingle, _, __, depthChild: number): boolean => {
+                            child.Depth = dept.Depth + depthChild + 1
                             return true
                         })
                     },
@@ -398,6 +399,12 @@ class ManagerManagerClass {
                         deptTree: this.Data.CurrProj.DeptTree,
                         newName: '',
                     },
+                    filters: {
+                        /**除去第一个数据后剩下的 */
+                        remainDeptTree: (deptTree: DepartmentSingle[]) => {
+                            return deptTree.slice(1, deptTree.length)
+                        }
+                    },
                     methods: {
                         onAdd: () => {
                             var dp: DepartmentSingle = {
@@ -425,25 +432,100 @@ class ManagerManagerClass {
             //#show
             Common.InsertIntoDom(vue.$el, this.VueProjectEdit.$refs.pageContent)
             //#drag Sortable
+            var _renderTagDepthDrag = ($ele: JQuery, depth: number) => {
+                console.log("[debug]",depth,":[depth]")
+                var rs: string[] = []
+                for (var i = 0; i < depth*2; i++) {
+                    rs.push(`<span class="glyphicon glyphicon-minus" aria-hidden="true"></span>`)
+                }
+                console.log("[debug]",rs)
+                $ele.html(rs.join(''))
+            }
+            var _oldDepth: number = 0;
             var opt = {
                 draggable: ".list-complete-item",
                 handle: ".btn-drag",
                 group: 'dragGroup',
-                // ghostClass: '',
+                scorll: true,
                 animation: 150, //动画参数
-                onStart: function () {
-                    console.log("[debug] onStart", arguments, ":[arguments]");
+                // ghostClass: 'sortable-ghostClass',
+                chosenClass: 'sortable-chosenClass',
+                onStart: (evt: SortableEvent) => {
+                    var $curr: JQuery = $(evt.item)
+                    $curr.find('.tag-depth').hide()
+                    var dept: DepartmentSingle = this.Data.DeptDict[parseInt($(evt.item).attr(FieldName.Did))]
+                    $curr.find('.tag-depth-drag').show()
+                    _oldDepth = dept.Depth
+                    _renderTagDepthDrag($curr.find('.tag-depth-drag'), dept.Depth)
                 },
-                onEnd: function (evt) {
-                    console.log("[debug] onEnd", arguments, ":[arguments]");
-                    // console.log("[debug]", evt.item, ":[evt.item]");
-                    // console.log("[info]", evt.from, evt.oldIndex, ":[evt.from]");
-                    // console.log("[info]", evt.to, evt.newIndex, ":[evt.to]");
+                onMove: (evt: SortableEvent) => {
+                    var $curr: JQuery = $(evt.item)
+                    var toDid = parseInt($(evt.to).attr(FieldName.Did))
+                    var toParentDept: DepartmentSingle = this.Data.DeptDict[toDid]
+                    var depth: number
+                    if (toParentDept == null) {
+                        depth = 0
+                    } else {
+                        depth = toParentDept.Depth+1
+                    }
+                    // if (_oldDepth != depth) {
+                        _oldDepth = depth
+                        _renderTagDepthDrag($curr.find('.tag-depth-drag'), depth)
+                    // }
                 },
+                onEnd: (evt: SortableEvent) => {
+                    var $curr: JQuery = $(evt.item)
+                    $curr.find('.tag-depth').show()
+                    $curr.find('.tag-depth-drag').hide()
+                },
+                onAdd: (evt: SortableEvent) => {//从一个列表挪到另一个列表
+                    // console.log("[debug] onAdd:", $(evt.item).attr(FieldName.Did), $(evt.from).attr(FieldName.Did),evt.oldIndex, '->', $(evt.to).attr(FieldName.Did), evt.newIndex)
+                    var dept: DepartmentSingle = this.Data.DeptDict[parseInt($(evt.item).attr(FieldName.Did))]
+                    var fromBrothers = this.Data.GetBrotherDepartmentList(dept)
+                    var toDid = parseInt($(evt.to).attr(FieldName.Did))
+                    var toParentDept: DepartmentSingle = this.Data.DeptDict[toDid]
+                    var toIndex: number = evt.newIndex
+                    //
+                    //从当前父tree中删除
+                    var brothers: DepartmentSingle[] = this.Data.GetBrotherDepartmentList(dept)
+                    brothers.RemoveByAttr(FieldName.Did, dept.Did)
+                    //
+                    if (toParentDept == null) {
+                        //改为顶级部门
+                        dept.Fid = 0
+                        dept.Depth = 0
+                        this.Data.CurrProj.DeptTree.splice(toIndex + 1, 0, dept)//因为顶级有个`管理部`占用了一格,因此要+1
+                    } else {
+                        //放到其他部门下
+                        dept.Fid = toParentDept.Did
+                        dept.Depth = toParentDept.Depth + 1
+                        toParentDept.Children.splice(toIndex, 0, dept)
+                    }
+                    //子部门的深度改变
+                    TreeUtil.Every(dept.Children, (child: DepartmentSingle, _, __, depthChild: number): boolean => {
+                        child.Depth = dept.Depth + depthChild + 1
+                        return true
+                    })
+
+                },
+                onUpdate: (evt: SortableEvent) => {//在一个列表中移动
+                    // console.log("[debug] onUpdate:", $(evt.item).attr(FieldName.Did), 'index:', evt.oldIndex, '->', evt.newIndex)
+                    var dept: DepartmentSingle = this.Data.DeptDict[parseInt($(evt.item).attr(FieldName.Did))]
+                    var fromBrothers = this.Data.GetBrotherDepartmentList(dept)
+                    var fromIndex: number = evt.oldIndex
+                    var toIndex: number = evt.newIndex
+                    if (dept.Fid == 0) {
+                        fromBrothers.splice(fromIndex + 1, 1)
+                        fromBrothers.splice(toIndex + 1, 0, dept)
+                    } else {
+                        fromBrothers.splice(fromIndex, 1)
+                        fromBrothers.splice(toIndex, 0, dept)
+                    }
+                }
             }
             var $listComp = $('.listComp')
-            console.log("[debug]", $('.listComp'), ":[$('.listComp').length]")
-            for (var i = 0; i < $listComp.length; i++) {
+            // console.log("[debug]", $('.listComp'), ":[$('.listComp').length]")
+            for (var i = 1; i < $listComp.length; i++) {
                 Sortable.create($listComp.get(i), opt)
             }
         })

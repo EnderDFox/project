@@ -47,10 +47,18 @@ declare var echarts: {
 
 //# Sortable
 interface SortableStatic {
-    create(ele: HTMLElement | Vue | Element | Vue[] | Element[], opt: any):Sortable
+    create(ele: HTMLElement | Vue | Element | Vue[] | Element[], opt: any): Sortable
 }
-interface Sortable{
+interface Sortable {
     destroy()
+}
+interface SortableEvent extends Event {
+    to: HTMLElement;
+    from: HTMLElement
+    item: HTMLElement
+    clone: HTMLElement
+    oldIndex: number
+    newIndex: number
 }
 declare const Sortable: SortableStatic
 

@@ -306,9 +306,17 @@ class ManagerDataClass {
         return rs
     }
     /**得到一个 部门的兄弟部门数组 */
-    GetBrotherDepartmentList(dp: DepartmentSingle): DepartmentSingle[] {
-        if (dp.Fid) {
-            return ManagerData.DeptDict[dp.Fid].Children
+    GetBrotherDepartmentList(did: number): DepartmentSingle[];
+    GetBrotherDepartmentList(dp: DepartmentSingle): DepartmentSingle[];
+    GetBrotherDepartmentList(...args: any[]): DepartmentSingle[] {
+        var fid: number;
+        if (typeof (args[0]) == 'number' || typeof (args[0]) == 'string') {
+            fid = parseInt(args[0])
+        } else {
+            fid = (args[0] as DepartmentSingle).Fid
+        }
+        if (fid) {
+            return ManagerData.DeptDict[fid].Children
         } else {//顶级部门
             return this.CurrProj.DeptTree
         }
