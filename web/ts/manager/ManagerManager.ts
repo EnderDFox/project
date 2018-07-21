@@ -424,6 +424,28 @@ class ManagerManagerClass {
             this.VueDepartmentList = vue
             //#show
             Common.InsertIntoDom(vue.$el, this.VueProjectEdit.$refs.pageContent)
+            //#drag Sortable
+            var opt = {
+                draggable: ".list-complete-item",
+                handle: ".btn-drag",
+                group: 'dragGroup',
+                // ghostClass: '',
+                animation: 150, //动画参数
+                onStart: function () {
+                    console.log("[debug] onStart", arguments, ":[arguments]");
+                },
+                onEnd: function (evt) {
+                    console.log("[debug] onEnd", arguments, ":[arguments]");
+                    // console.log("[debug]", evt.item, ":[evt.item]");
+                    // console.log("[info]", evt.from, evt.oldIndex, ":[evt.from]");
+                    // console.log("[info]", evt.to, evt.newIndex, ":[evt.to]");
+                },
+            }
+            var $listComp = $('.listComp')
+            console.log("[debug]", $('.listComp'), ":[$('.listComp').length]")
+            for (var i = 0; i < $listComp.length; i++) {
+                Sortable.create($listComp.get(i), opt)
+            }
         })
     }
     DeptOption(dp: DepartmentSingle) {

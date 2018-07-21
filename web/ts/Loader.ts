@@ -31,7 +31,7 @@ class LoaderClass {
     //< script src = "js/Loader1.js?v=v1.3.59" > </script>
     JsList: ILoadGroup[] = [
         { path: "", files: ['Define', 'JQueryExtend', 'Protocol', 'Config', 'WSConn', 'Commond', 'Common', 'DateTime', 'Templet', 'Data', 'Main'] },
-        { path: "lib", files: ['vue', 'Echarts.min', 'Cookie', 'jquery.md5'] },
+        { path: "lib", files: ['vue', 'Echarts.min', 'Cookie', 'jquery.md5','Sortable'] },
         { path: "common", files: ['PrototypeExtend', 'VueManager'] },
         {
             path: "module", files: ['User', 'ProjectNav', 'FileManager',

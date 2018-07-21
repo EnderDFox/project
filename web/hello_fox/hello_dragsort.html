@@ -10,6 +10,7 @@
     <style>
         * {
             outline: solid 1px #00FF00;
+            /* height: 200px; */
         }
 
         body {
@@ -29,6 +30,14 @@
         #multi div {
             cursor: move;
         }
+
+        .sort-ghostClass {
+            outline: solid 1px #FF0000;
+        }
+
+        .sort-chosenClass {
+            outline: solid 1px #0000FF;
+        }
     </style>
     <script>
         function onload() {
@@ -36,18 +45,31 @@
                 e.preventDefault();
             })
             var opt = {
+                // sort:false,
                 draggable: ".row",
-                // handler:".btndrag",
+                handle: ".btndrag",
                 group: 'photo',
+                ghostClass: 'sort-ghostClass',
+                // chosenClass:'sort-chosenClass',
                 animation: 150, //动画参数
-                onStart: function () {
-                    console.log("[debug] onStart", arguments, ":[arguments]");
+                scorll: true,
+                onStart: function (evt) {
+                    // console.log("[debug] onStart", arguments, ":[arguments]");
+                    console.log("[debug] onStart", evt);
+                },
+                onAdd: function (evt) {
+                    // console.log("[debug] onAdd", arguments, ":[arguments]");
+                    console.log("[debug] onAdd", evt);
                 },
                 onEnd: function (evt) {
-                    console.log("[debug] onEnd", arguments, ":[arguments]");
-                    console.log("[debug]", evt.item, ":[evt.item]");
-                    console.log("[info]", evt.from, evt.oldIndex, ":[evt.from]");
-                    console.log("[info]", evt.to, evt.newIndex, ":[evt.to]");
+                    // console.log("[debug] onEnd", arguments, ":[arguments]");
+                    console.log("[debug] onEnd", evt);
+                    // console.log("[debug]", evt.item, ":[evt.item]");
+                    // console.log("[info]", evt.from, evt.oldIndex, ":[evt.from]");
+                    // console.log("[info]", evt.to, evt.newIndex, ":[evt.to]");
+                },
+                onUpdate: function (evt) {
+                    console.log("[debug] onUpdate", evt);
                 },
             }
             var el = document.getElementById('items');

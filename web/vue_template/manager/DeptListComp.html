@@ -1,4 +1,4 @@
-<transition-group name="list-complete" tag="div">
+<transition-group name="list-complete" tag="div" class="listComp">
     <div class="list-complete-item" v-for="dp,index in deptTree" :dp="dp" :index="index" :key="dp.Did">
         <div class="divrow DeptList-row">
             <div>
@@ -56,8 +56,11 @@
                 <button class="btn btn-warning " title="删除部门" type="button" :disabled="!auth['PROJECT_EDIT']" v-if="dp.Sort>0" @click="onDel(dp,index)">
                     <span class="glyphicon glyphicon-remove " aria-hidden="true "></span>
                 </button>
+                <button class="btn btn-warning btn-drag" title="拖动" type="button" :disabled="!auth['PROJECT_EDIT']" v-if="dp.Sort>0">
+                    <span class="glyphicon glyphicon-move " aria-hidden="true "></span>
+                </button>
             </div>
         </div>
-        <DeptListComp :deptTree="dp.Children"></DeptListComp>
+        <DeptListComp :deptTree="dp.Children" v-if="dp.Children.length>0"></DeptListComp>
     </div>
 </transition-group>

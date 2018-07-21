@@ -45,4 +45,15 @@ declare var echarts: {
 }
 
 
+//# Sortable
+interface SortableStatic {
+    create(ele: HTMLElement | Vue | Element | Vue[] | Element[], opt: any):Sortable
+}
+interface Sortable{
+    destroy()
+}
+declare const Sortable: SortableStatic
+
+
+
 
