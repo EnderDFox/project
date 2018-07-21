@@ -427,16 +427,21 @@ var ManagerManagerClass = /** @class */ (function () {
             //#show
             Common.InsertIntoDom(vue.$el, _this.VueProjectEdit.$refs.pageContent);
             //#drag Sortable
-            var _renderTagDepthDrag = function ($ele, depth) {
-                console.log("[debug]", depth, ":[depth]");
-                var rs = [];
-                for (var i = 0; i < depth * 2; i++) {
-                    rs.push("<span class=\"glyphicon glyphicon-minus\" aria-hidden=\"true\"></span>");
+            var _renderTagDepthDrag = function ($curr, depth) {
+                var $eleArr = $curr.find('.tag-depth-drag');
+                for (var eleI = 0; eleI < $eleArr.length; eleI++) {
+                    var $ele = $($eleArr[eleI]);
+                    var __originDepth = parseInt($ele.attr('depth'));
+                    var __cDepth = __originDepth + (depth - _originDepth);
+                    var rs = [];
+                    for (var i = 0; i < __cDepth * 2; i++) {
+                        rs.push("<span class=\"glyphicon glyphicon-minus\" aria-hidden=\"true\"></span>");
+                    }
+                    $ele.html(rs.join(''));
                 }
-                console.log("[debug]", rs);
-                $ele.html(rs.join(''));
             };
-            var _oldDepth = 0;
+            var _originDepth; //托转项目原始的depth
+            var _lastDepth = 0; //上一次render时使用的depth
             var opt = {
                 draggable: ".list-complete-item",
                 handle: ".btn-drag",
@@ -450,11 +455,13 @@ var ManagerManagerClass = /** @class */ (function () {
                     $curr.find('.tag-depth').hide();
                     var dept = _this.Data.DeptDict[parseInt($(evt.item).attr(FieldName.Did))];
                     $curr.find('.tag-depth-drag').show();
-                    _oldDepth = dept.Depth;
-                    _renderTagDepthDrag($curr.find('.tag-depth-drag'), dept.Depth);
+                    _originDepth = parseInt($curr.find('.tag-depth-drag:first').attr('depth'));
+                    _lastDepth = dept.Depth;
+                    _renderTagDepthDrag($curr, dept.Depth);
                 },
                 onMove: function (evt) {
-                    var $curr = $(evt.item);
+                    var $curr = $(evt.dragged);
+                    var dept = _this.Data.DeptDict[parseInt($curr.attr(FieldName.Did))];
                     var toDid = parseInt($(evt.to).attr(FieldName.Did));
                     var toParentDept = _this.Data.DeptDict[toDid];
                     var depth;
@@ -462,12 +469,16 @@ var ManagerManagerClass = /** @class */ (function () {
                         depth = 0;
                     }
                     else {
+                        //判断目标不是自己活自己的子成员
+                        if (dept.Did == toParentDept.Did || _this.Data.IsDepartmentChild(dept, toParentDept)) {
+                            return;
+                        }
                         depth = toParentDept.Depth + 1;
                     }
-                    // if (_oldDepth != depth) {
-                    _oldDepth = depth;
-                    _renderTagDepthDrag($curr.find('.tag-depth-drag'), depth);
-                    // }
+                    if (_lastDepth != depth) {
+                        _lastDepth = depth;
+                        _renderTagDepthDrag($curr, depth);
+                    }
                 },
                 onEnd: function (evt) {
                     var $curr = $(evt.item);

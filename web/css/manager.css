@@ -147,10 +147,10 @@ fieldset[disabled] .btn {
     cursor: move !important;
 }
 .sortable-ghostClass{
-    outline: solid 4px #FF00FF;
+    outline: dashed 4px #FF00FF;
 }
 .sortable-chosenClass{
-    outline: solid 4px #00ff99;
+    outline: dashed 4px #00ff99;
 }
 
 /*vue transition-group*/

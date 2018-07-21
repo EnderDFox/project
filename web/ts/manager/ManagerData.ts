@@ -284,13 +284,13 @@ class ManagerDataClass {
         this.DeptDict[dept.Did] = dept
         return dept
     }
-    /**检测dp1是否是dp0的子孙dp */
-    IsDepartmentChild(dp0: DepartmentSingle, dp1: DepartmentSingle): boolean {
-        for (var i = 0; i < dp0.Children.length; i++) {
-            if (dp0.Children[i].Did == dp1.Did) {
+    /**检测childDept是否是parentDept的子孙dept */
+    IsDepartmentChild(parentDept: DepartmentSingle, childDept: DepartmentSingle): boolean {
+        for (var i = 0; i < parentDept.Children.length; i++) {
+            if (parentDept.Children[i].Did == childDept.Did) {
                 return true
             } else {
-                if (ManagerData.IsDepartmentChild(dp0.Children[i], dp1)) {
+                if (ManagerData.IsDepartmentChild(parentDept.Children[i], childDept)) {
                     return true
                 }
             }

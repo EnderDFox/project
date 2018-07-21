@@ -56,6 +56,7 @@ interface SortableEvent extends Event {
     to: HTMLElement;
     from: HTMLElement
     item: HTMLElement
+    dragged: HTMLElement
     clone: HTMLElement
     oldIndex: number
     newIndex: number

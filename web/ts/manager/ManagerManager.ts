@@ -432,16 +432,21 @@ class ManagerManagerClass {
             //#show
             Common.InsertIntoDom(vue.$el, this.VueProjectEdit.$refs.pageContent)
             //#drag Sortable
-            var _renderTagDepthDrag = ($ele: JQuery, depth: number) => {
-                console.log("[debug]",depth,":[depth]")
-                var rs: string[] = []
-                for (var i = 0; i < depth*2; i++) {
-                    rs.push(`<span class="glyphicon glyphicon-minus" aria-hidden="true"></span>`)
+            var _renderTagDepthDrag = ($curr: JQuery, depth: number) => {
+                var $eleArr = $curr.find('.tag-depth-drag')
+                for (var eleI = 0; eleI < $eleArr.length; eleI++) {
+                    var $ele = $($eleArr[eleI])
+                    var __originDepth = parseInt($ele.attr('depth'))
+                    var __cDepth = __originDepth + (depth - _originDepth)
+                    var rs: string[] = []
+                    for (var i = 0; i < __cDepth * 2; i++) {
+                        rs.push(`<span class="glyphicon glyphicon-minus" aria-hidden="true"></span>`)
+                    }
+                    $ele.html(rs.join(''))
                 }
-                console.log("[debug]",rs)
-                $ele.html(rs.join(''))
             }
-            var _oldDepth: number = 0;
+            var _originDepth: number;//托转项目原始的depth
+            var _lastDepth: number = 0;//上一次render时使用的depth
             var opt = {
                 draggable: ".list-complete-item",
                 handle: ".btn-drag",
@@ -455,23 +460,29 @@ class ManagerManagerClass {
                     $curr.find('.tag-depth').hide()
                     var dept: DepartmentSingle = this.Data.DeptDict[parseInt($(evt.item).attr(FieldName.Did))]
                     $curr.find('.tag-depth-drag').show()
-                    _oldDepth = dept.Depth
-                    _renderTagDepthDrag($curr.find('.tag-depth-drag'), dept.Depth)
+                    _originDepth = parseInt($curr.find('.tag-depth-drag:first').attr('depth'))
+                    _lastDepth = dept.Depth
+                    _renderTagDepthDrag($curr, dept.Depth)
                 },
                 onMove: (evt: SortableEvent) => {
-                    var $curr: JQuery = $(evt.item)
+                    var $curr: JQuery = $(evt.dragged)
+                    var dept: DepartmentSingle = this.Data.DeptDict[parseInt($curr.attr(FieldName.Did))]
                     var toDid = parseInt($(evt.to).attr(FieldName.Did))
                     var toParentDept: DepartmentSingle = this.Data.DeptDict[toDid]
                     var depth: number
                     if (toParentDept == null) {
                         depth = 0
                     } else {
-                        depth = toParentDept.Depth+1
+                        //判断目标不是自己活自己的子成员
+                        if (dept.Did == toParentDept.Did || this.Data.IsDepartmentChild(dept, toParentDept)) {
+                            return
+                        }
+                        depth = toParentDept.Depth + 1
                     }
-                    // if (_oldDepth != depth) {
-                        _oldDepth = depth
-                        _renderTagDepthDrag($curr.find('.tag-depth-drag'), depth)
-                    // }
+                    if (_lastDepth != depth) {
+                        _lastDepth = depth
+                        _renderTagDepthDrag($curr, depth)
+                    }
                 },
                 onEnd: (evt: SortableEvent) => {
                     var $curr: JQuery = $(evt.item)

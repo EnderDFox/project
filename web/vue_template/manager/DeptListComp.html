@@ -5,7 +5,7 @@
                 <span class="tag-depth">
                     <span class="glyphicon glyphicon-minus" aria-hidden="true" v-for="dep,index in dp.Depth*2"></span>
                 </span>
-                <span class="tag-depth-drag" style="display: none;">
+                <span class="tag-depth-drag" style="display: none;" :depth="dp.Depth">
                 </span>
                 <input type="text" class="form-control" style="display: inline-block;width: auto;" placeholder="空" aria-describedby="basic-addon1"
                     :disabled="!auth['PROJECT_EDIT'] || dp.Sort==0" :value="dp.Name" @blur="onEditName($event,dp,index)" @keyup.enter="onEditName($event,dp,index)">
