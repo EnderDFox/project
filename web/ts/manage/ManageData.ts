@@ -4,7 +4,7 @@ class ManageDataClass {
     AuthModDict: { [key: number]: AuthModSingle };
     AuthDict: { [key: number]: AuthSingle };
     //
-    ProjectList: ProjectSingle[]
+    ProjList: ProjectSingle[]
     /**全部user */
     UserList: UserSingle[]
     UserDict: { [key: number]: UserSingle };
@@ -20,6 +20,9 @@ class ManageDataClass {
     NewPositionUuid = 200001
     Init(data: L2C_ManageView) {
         this.InitAuthData(data.AuthList)
+        this.InitUserData(data.UserList)
+        this.InitProjData(data.ProjList)
+        //
         this.InitSimulateData()
         //
         var uid = Number(UrlParam.Get('uid'))
@@ -29,7 +32,7 @@ class ManageDataClass {
         //#权限
         switch (uid) {
             case 0:
-                uid = 999999//超级管理员id
+                uid = 67//超级管理员id
                 this.AddMyAuth(AUTH.PROJECT_LIST)
                 this.AddMyAuth(AUTH.PROJECT_MANAGE)
                 break;
@@ -70,51 +73,41 @@ class ManageDataClass {
             var auth: AuthSingle = authList[i]
             auth.CheckedChange = false
             this.AuthDict[auth.Authid] = auth
-            if (auth.Modid > 0) {
+            if (auth.Modid > 0) {//Modid=0是顶级权限
                 this.AuthModDict[auth.Modid].AuthorityList.push(auth)
             }
+        }
+    }
+    private InitUserData(userList: UserSingle[]) {
+        //#user
+        this.UserList = userList
+        this.UserDict = {}
+        for (var i = 0; i < this.UserList.length; i++) {
+            var user: UserSingle = this.UserList[i]
+            user.Did = 0
+            user.Posnid = 0
+            this.UserDict[user.Uid] = user
+        }
+    }
+    private InitProjData(projList: ProjectSingle[]) {
+        this.ProjList = projList
+        for (var i = 0; i < projList.length; i++) {
+            var proj: ProjectSingle = projList[i]
+            proj.UserList = []
+            proj.DeptTree = []
+            proj.MasterUid = 0;//TODO:
+        }
+        //# TODO:
+        this.ProjList[0].UserList.push.apply(this.ProjList[0].UserList, this.UserList.slice(0, 10))
+        for (var i = 0; i < this.ProjList[0].UserList.length; i++) {
+            this.ProjList[0].UserList[i].Sort = i + 1
         }
     }
     /**初始化虚拟数据 */
     private InitSimulateData() {
         this.DeptDict = {}
-        //#project
-        this.ProjectList = [
-            {
-                Pid: 1, Name: '项目A', MasterUid: 3, UserList: [], CreateTime: Common.GetOffsetDate({ Day: -33 }).getTime(),
-                DeptTree: []
-            },
-            {
-                Pid: 2, Name: '项目B', MasterUid: 0, UserList: [], CreateTime: Common.GetOffsetDate({ Day: -22 }).getTime(),
-                DeptTree: [this.NewDeptManager()]
-            },
-            {
-                Pid: 3, Name: '项目C', MasterUid: 0, UserList: [], CreateTime: Common.GetOffsetDate({ Day: -11 }).getTime(),
-                DeptTree: [this.NewDeptManager()]
-            },
-        ]
-        //#user
-        this.UserList = []
-        this.UserDict = {}
-        for (var i = 0; i < 26; i++) {
-            var user: UserSingle = { Uid: i + 1, Name: `用户${String.fromCharCode(65 + i)}`, Did: 0, Posnid: 0 }
-            this.UserList.push(user)
-            this.UserDict[user.Uid] = user
-        }
-        var user: UserSingle = { Uid: 999999, Name: "admin", Did: 0, Posnid: 0 }
-        this.UserList.push(user)
-        this.UserDict[user.Uid] = user
-        //#
-        this.ProjectList[0].UserList.push.apply(this.ProjectList[0].UserList, this.UserList.slice(0, 10))
-        for (var i = 0; i < this.ProjectList[0].UserList.length; i++) {
-            this.ProjectList[0].UserList[i].Sort = i + 1
-        }
-        this.ProjectList[2].UserList.push.apply(this.ProjectList[2].UserList, this.UserList.slice(5, 12))
-        for (var i = 0; i < this.ProjectList[2].UserList.length; i++) {
-            this.ProjectList[2].UserList[i].Sort = i + 1
-        }
         //#department
-        var proj: ProjectSingle = this.ProjectList[0]
+        var proj: ProjectSingle = this.ProjList[0]
         proj.DeptTree = [
             this.NewDeptManager(),
             {
@@ -198,19 +191,19 @@ class ManageDataClass {
         this.MyAuth[auth] = this.MyAuth[AUTH[auth]] = false
     }
     GetProjByPid(pid: number): ProjectSingle {
-        return this.ProjectList.FindOfAttr(FieldName.PID, pid)
+        return this.ProjList.FindByKey(FieldName.PID, pid)
     }
     /**返回当前用户有权限的工程列表 */
     GetProjectListHasAuth(): ProjectSingle[] {
         var projList: ProjectSingle[];
         if (ManageData.MyAuth[AUTH.PROJECT_LIST]) {
-            projList = ManageData.ProjectList
+            projList = ManageData.ProjList
         } else {
             //只看自己所处的项目
             projList = []
-            for (var i = 0; i < ManageData.ProjectList.length; i++) {
-                var proj = ManageData.ProjectList[i]
-                if (proj.UserList.IndexOfAttr(FieldName.Uid, ManageData.CurrUser.Uid) > -1) {
+            for (var i = 0; i < ManageData.ProjList.length; i++) {
+                var proj = ManageData.ProjList[i]
+                if (proj.UserList.IndexOfByKey(FieldName.Uid, ManageData.CurrUser.Uid) > -1) {
                     projList.push(proj)
                     if (proj.MasterUid == ManageData.CurrUser.Uid) {
                         ManageData.AddMyAuth(AUTH.PROJECT_MANAGE)
@@ -327,9 +320,9 @@ class ManageDataClass {
     RemoveUserPosnid(user: UserSingle) {
         if (user.Did) {
             var oldDept: DepartmentSingle = ManageData.DeptDict[user.Did]
-            var oldPosn: PositionSingle = oldDept.PositionList.FindOfAttr(FieldName.Posnid, user.Posnid)
+            var oldPosn: PositionSingle = oldDept.PositionList.FindByKey(FieldName.Posnid, user.Posnid)
             if (oldPosn) {
-                oldPosn.UserList.RemoveByAttr(FieldName.Uid, user.Uid)
+                oldPosn.UserList.RemoveByKey(FieldName.Uid, user.Uid)
             }
         }
     }
@@ -340,7 +333,7 @@ class ManageDataClass {
         if (posnid == -1) {
             posn = dept.PositionList[0]
         } else {
-            posn = dept.PositionList.FindOfAttr(FieldName.Posnid, posnid)
+            posn = dept.PositionList.FindByKey(FieldName.Posnid, posnid)
         }
         user.Posnid = posn.Posnid
         posn.UserList.push(user)

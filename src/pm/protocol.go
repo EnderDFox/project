@@ -25,8 +25,9 @@ type AuthSingle struct {
 }
 
 type ProjectSingle struct {
-	Pid  uint64
-	Name string
+	Pid        uint64
+	Name       string
+	CreateTime uint32
 }
 
 type UserSingle struct {

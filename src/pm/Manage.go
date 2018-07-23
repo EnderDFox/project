@@ -23,7 +23,7 @@ func (this *Manage) View() bool {
 
 //全部项目
 func (this *Manage) GetProjectList() []*ProjectSingle {
-	stmt, err := db.GetDb().Prepare(`SELECT pid,name FROM ` + config.Pm + `.pm_project WHERE is_del=0`)
+	stmt, err := db.GetDb().Prepare(`SELECT pid,name,create_time FROM ` + config.Pm + `.pm_project WHERE is_del=0`)
 	defer stmt.Close()
 	db.CheckErr(err)
 	rows, err := stmt.Query()
@@ -32,7 +32,7 @@ func (this *Manage) GetProjectList() []*ProjectSingle {
 	var list []*ProjectSingle
 	for rows.Next() {
 		single := &ProjectSingle{}
-		rows.Scan(&single.Pid, &single.Name)
+		rows.Scan(&single.Pid, &single.Name, &single.CreateTime)
 		list = append(list, single)
 	}
 	return list

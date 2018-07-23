@@ -20,8 +20,8 @@ if (!Array.from) {
 	}
 }
 //# Array扩展
-if (!Array.prototype.IndexOfAttr) {
-	Array.prototype.IndexOfAttr = function (key, value) {
+if (!Array.prototype.IndexOfByKey) {
+	Array.prototype.IndexOfByKey = function (key, value) {
 		var len = this.length
 		for (var i = 0; i < len; i++) {
 			if ((key == null && this[key] == value) || this[i][key] == value) {
@@ -31,20 +31,18 @@ if (!Array.prototype.IndexOfAttr) {
 		return -1;
 	}
 }
-if (!Array.prototype.FindOfAttr) {
-	Array.prototype.FindOfAttr = function (key, value) {
-		var len = this.length
-		for (var i = 0; i < len; i++) {
-			if ((key == null && this[key] == value) || this[i][key] == value) {
-				return this[i];
-			}
+if (!Array.prototype.FindByKey) {
+	Array.prototype.FindByKey = function (key, value) {
+		var index = ArrayUtil.IndexOfByKey(this, key, value)
+		if (index > -1) {
+			return this[index]
 		}
-		return null;
+		return null
 	}
 }
-if (!Array.prototype.RemoveByAttr) {
-	Array.prototype.RemoveByAttr = function (key, value) {
-		var index = ArrayUtil.IndexOfAttr(this, key, value)
+if (!Array.prototype.RemoveByKey) {
+	Array.prototype.RemoveByKey = function (key, value) {
+		var index = ArrayUtil.IndexOfByKey(this, key, value)
 		if (index > -1) {
 			this.splice(index, 1)
 		}

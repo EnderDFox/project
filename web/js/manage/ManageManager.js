@@ -28,7 +28,7 @@ var ManageManagerClass = /** @class */ (function () {
     ManageManagerClass.prototype.UrlParamCallback = function () {
         Common.PopupHideAll();
         var pid = UrlParam.Get(URL_PARAM_KEY.PID, 0);
-        var proj = this.Data.GetProjectListHasAuth().FindOfAttr(FieldName.PID, pid);
+        var proj = this.Data.GetProjectListHasAuth().FindByKey(FieldName.PID, pid);
         if (proj) {
             this.ShowProjectEdit();
         }
@@ -148,7 +148,7 @@ var ManageManagerClass = /** @class */ (function () {
                             return;
                         }
                         if (newName != proj.Name) {
-                            if (_this.Data.ProjectList.IndexOfAttr(FieldName.Name, newName) > -1) {
+                            if (_this.Data.ProjList.IndexOfByKey(FieldName.Name, newName) > -1) {
                                 Common.AlertError("\u5373\u5C06\u628A\u9879\u76EE \"" + proj.Name + "\" \u6539\u540D\u4E3A \"" + newName + "\" <br/><br/>\u4F46\u9879\u76EE\u540D\u79F0 \"" + newName + "\" \u5DF2\u7ECF\u5B58\u5728");
                                 e.target.value = proj.Name;
                                 return;
@@ -185,12 +185,12 @@ var ManageManagerClass = /** @class */ (function () {
                             Common.AlertError("\u9879\u76EE\u540D\u79F0 " + newName + " \u4E0D\u53EF\u4EE5\u4E3A\u7A7A");
                             return;
                         }
-                        if (_this.Data.ProjectList.IndexOfAttr(FieldName.Name, newName) > -1) {
+                        if (_this.Data.ProjList.IndexOfByKey(FieldName.Name, newName) > -1) {
                             Common.AlertError("\u9879\u76EE\u540D\u79F0 " + newName + " \u5DF2\u7ECF\u5B58\u5728");
                             return;
                         }
-                        _this.Data.ProjectList.push({
-                            Pid: _this.Data.ProjectList[_this.VueProjectList.projectList.length - 1].Pid + 1,
+                        _this.Data.ProjList.push({
+                            Pid: _this.Data.ProjList[_this.VueProjectList.projectList.length - 1].Pid + 1,
                             Name: _this.VueProjectList.newName.toString(),
                             MasterUid: 0, UserList: [],
                             CreateTime: new Date().getTime(),
@@ -207,7 +207,7 @@ var ManageManagerClass = /** @class */ (function () {
     };
     ManageManagerClass.prototype.ShowProjectEdit = function () {
         var _this = this;
-        var proj = this.Data.GetProjectListHasAuth().FindOfAttr(FieldName.PID, UrlParam.Get(URL_PARAM_KEY.PID));
+        var proj = this.Data.GetProjectListHasAuth().FindByKey(FieldName.PID, UrlParam.Get(URL_PARAM_KEY.PID));
         this.Data.CurrProj = proj;
         Loader.LoadVueTemplateList([this.VuePath + "ProjectEdit"], function (tplList) {
             var currPage = UrlParam.Get(URL_PARAM_KEY.PAGE, [ProjectEditPageIndex.Department, ProjectEditPageIndex.Position, ProjectEditPageIndex.User]);
@@ -330,7 +330,7 @@ var ManageManagerClass = /** @class */ (function () {
                         }
                         //从当前父tree中删除
                         var brothers = _this.Data.GetBrotherDepartmentList(dept);
-                        brothers.RemoveByAttr(FieldName.Did, dept.Did);
+                        brothers.RemoveByKey(FieldName.Did, dept.Did);
                         //
                         if (toParentDept == null) {
                             //改为顶级部门
@@ -363,7 +363,7 @@ var ManageManagerClass = /** @class */ (function () {
                             return;
                         }
                         var brothers = _this.Data.GetBrotherDepartmentList(dp);
-                        var brotherIndex = ArrayUtil.IndexOfAttr(brothers, FieldName.Did, dp.Did);
+                        var brotherIndex = ArrayUtil.IndexOfByKey(brothers, FieldName.Did, dp.Did);
                         var brother = brothers[brotherIndex + 1];
                         brothers.splice(brotherIndex, 1);
                         brothers.splice(brotherIndex + 1, 0, dp);
@@ -373,14 +373,14 @@ var ManageManagerClass = /** @class */ (function () {
                             return;
                         }
                         var brothers = _this.Data.GetBrotherDepartmentList(dp);
-                        var brotherIndex = ArrayUtil.IndexOfAttr(brothers, FieldName.Did, dp.Did);
+                        var brotherIndex = ArrayUtil.IndexOfByKey(brothers, FieldName.Did, dp.Did);
                         brothers.splice(brotherIndex, 1);
                         brothers.splice(brotherIndex - 1, 0, dp);
                     },
                     onDel: function (dp, i0) {
                         Common.ConfirmDelete(function () {
                             var brothers = _this.Data.GetBrotherDepartmentList(dp);
-                            var brotherIndex = ArrayUtil.IndexOfAttr(brothers, FieldName.Did, dp.Did);
+                            var brotherIndex = ArrayUtil.IndexOfByKey(brothers, FieldName.Did, dp.Did);
                             brothers.splice(brotherIndex, 1);
                             //
                             delete _this.Data.DeptDict[dp.Did];
@@ -495,7 +495,7 @@ var ManageManagerClass = /** @class */ (function () {
                     //
                     //从当前父tree中删除
                     var brothers = _this.Data.GetBrotherDepartmentList(dept);
-                    brothers.RemoveByAttr(FieldName.Did, dept.Did);
+                    brothers.RemoveByKey(FieldName.Did, dept.Did);
                     //
                     if (toParentDept == null) {
                         //改为顶级部门
@@ -567,7 +567,7 @@ var ManageManagerClass = /** @class */ (function () {
     };
     ManageManagerClass.prototype.DeptListCheckSortDown = function (dp, i0) {
         var brothers = this.Data.GetBrotherDepartmentList(dp);
-        var brotherIndex = ArrayUtil.IndexOfAttr(brothers, FieldName.Did, dp.Did);
+        var brotherIndex = ArrayUtil.IndexOfByKey(brothers, FieldName.Did, dp.Did);
         if (brotherIndex < brothers.length - 1) {
             return true;
         }
@@ -615,15 +615,15 @@ var ManageManagerClass = /** @class */ (function () {
                         _this.ShowAuthList(posn);
                     },
                     checkDeptMgrChecked: function (posn) {
-                        return posn.AuthorityList.IndexOfAttr(FieldName.Authid, AUTH.DEPARTMENT_MANAGE) > -1
-                            && posn.AuthorityList.IndexOfAttr(FieldName.Authid, AUTH.DEPARTMENT_PROCESS) > -1;
+                        return posn.AuthorityList.IndexOfByKey(FieldName.Authid, AUTH.DEPARTMENT_MANAGE) > -1
+                            && posn.AuthorityList.IndexOfByKey(FieldName.Authid, AUTH.DEPARTMENT_PROCESS) > -1;
                     },
                     onChangeDeptMgrChecked: function (posn) {
-                        var has = posn.AuthorityList.IndexOfAttr(FieldName.Authid, AUTH.DEPARTMENT_MANAGE) > -1
-                            && posn.AuthorityList.IndexOfAttr(FieldName.Authid, AUTH.DEPARTMENT_PROCESS) > -1;
+                        var has = posn.AuthorityList.IndexOfByKey(FieldName.Authid, AUTH.DEPARTMENT_MANAGE) > -1
+                            && posn.AuthorityList.IndexOfByKey(FieldName.Authid, AUTH.DEPARTMENT_PROCESS) > -1;
                         if (has) {
-                            posn.AuthorityList.RemoveByAttr(FieldName.Authid, AUTH.DEPARTMENT_MANAGE);
-                            posn.AuthorityList.RemoveByAttr(FieldName.Authid, AUTH.DEPARTMENT_PROCESS);
+                            posn.AuthorityList.RemoveByKey(FieldName.Authid, AUTH.DEPARTMENT_MANAGE);
+                            posn.AuthorityList.RemoveByKey(FieldName.Authid, AUTH.DEPARTMENT_PROCESS);
                         }
                         else {
                             posn.AuthorityList.push(_this.Data.AuthDict[AUTH.DEPARTMENT_MANAGE]);
@@ -904,7 +904,7 @@ var ManageManagerClass = /** @class */ (function () {
                         var dp = _this.Data.DeptDict[did];
                         if (dp) {
                             if (posnid > 0) {
-                                var posn = dp.PositionList.FindOfAttr(FieldName.Posnid, posnid);
+                                var posn = dp.PositionList.FindByKey(FieldName.Posnid, posnid);
                                 return posn ? posn.Name : '--';
                             }
                             else {
@@ -918,7 +918,7 @@ var ManageManagerClass = /** @class */ (function () {
                     ShowUserName: function (uid) {
                         this.newUserUid = uid;
                         if (uid) {
-                            var user = ArrayUtil.FindOfAttr(this.otherUserList, FieldName.Uid, uid);
+                            var user = ArrayUtil.FindByKey(this.otherUserList, FieldName.Uid, uid);
                             if (user) {
                                 return user.Name;
                             }
@@ -964,7 +964,7 @@ var ManageManagerClass = /** @class */ (function () {
                         _this.ShowSelectUser(proj, ArrayUtil.SubByAttr(_this.Data.UserList, proj.UserList, FieldName.Uid));
                     },
                     onAdd: function () {
-                        var newUser = ArrayUtil.FindOfAttr(_this.VueUserList.otherUserList, FieldName.Uid, _this.VueUserList.newUserUid);
+                        var newUser = ArrayUtil.FindByKey(_this.VueUserList.otherUserList, FieldName.Uid, _this.VueUserList.newUserUid);
                         if (newUser) {
                             proj.UserList.push(newUser);
                             _this.VueUserList.newUserUid = 0;

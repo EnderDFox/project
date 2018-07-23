@@ -11,7 +11,7 @@
             <div>删除</div>
         </div>
         <!-- 第一个单独拿出来,因为不能参与sortable -->
-        <DeptListComp :deptTree="[deptTree[0]]" :parentDept="null"></DeptListComp>
+        <DeptListComp :deptTree="[deptTree[0]]" :parentDept="null" v-if="deptTree[0]"></DeptListComp>
         <!-- 所有其它的 -->
         <DeptListComp :deptTree="deptTree|remainDeptTree" :parentDept="null"></DeptListComp>
         <div class="divrow DeptList-row" v-if="auth['PROJECT_MANAGE']">

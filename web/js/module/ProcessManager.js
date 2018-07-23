@@ -65,7 +65,7 @@ var ProcessManagerClass = /** @class */ (function () {
         if (data.LinkSingle.ParentLid == 0) {
             var mode = ProcessData.ModeMap[data.LinkSingle.Mid];
             if (mode) {
-                var prevIndex = ArrayUtil.IndexOfAttr(mode.LinkList, FieldName.Lid, data.PrevLid);
+                var prevIndex = ArrayUtil.IndexOfByKey(mode.LinkList, FieldName.Lid, data.PrevLid);
                 if (prevIndex > -1) {
                     mode.LinkList.splice(prevIndex + 1, 0, data.LinkSingle);
                     _prevLid = data.PrevLid;
@@ -84,7 +84,7 @@ var ProcessManagerClass = /** @class */ (function () {
             //is Child
             var parentLink = ProcessData.LinkMap[data.LinkSingle.ParentLid];
             if (data.PrevLid) {
-                var prevIndex = ArrayUtil.IndexOfAttr(parentLink.Children, FieldName.Lid, data.PrevLid);
+                var prevIndex = ArrayUtil.IndexOfByKey(parentLink.Children, FieldName.Lid, data.PrevLid);
                 if (prevIndex > -1) {
                     parentLink.Children.splice(prevIndex + 1, 0, data.LinkSingle);
                     _prevLid = data.PrevLid;
@@ -154,8 +154,8 @@ var ProcessManagerClass = /** @class */ (function () {
         else {
             var mode = ProcessData.ModeMap[link0.Mid];
             var _linkList = link0.ParentLid ? ProcessData.LinkMap[link0.ParentLid].Children : mode.LinkList;
-            var index0 = ArrayUtil.IndexOfAttr(_linkList, FieldName.Lid, link0.Lid);
-            var index1 = ArrayUtil.IndexOfAttr(_linkList, FieldName.Lid, link1.Lid);
+            var index0 = ArrayUtil.IndexOfByKey(_linkList, FieldName.Lid, link0.Lid);
+            var index1 = ArrayUtil.IndexOfByKey(_linkList, FieldName.Lid, link1.Lid);
             if (index0 > -1 && index0 > -1) {
                 _linkList.splice.apply(_linkList, [index0, 1].concat(_linkList.splice(index1, 1, link0)));
             }
@@ -218,7 +218,7 @@ var ProcessManagerClass = /** @class */ (function () {
     ProcessManagerClass.prototype.DoLinkDelete = function (link) {
         var mode = ProcessData.ModeMap[link.Mid];
         var _linkList = link.ParentLid ? ProcessData.LinkMap[link.ParentLid].Children : mode.LinkList;
-        ArrayUtil.RemoveByAttr(_linkList, FieldName.Lid, link.Lid);
+        ArrayUtil.RemoveByKey(_linkList, FieldName.Lid, link.Lid);
         //删除工作
         $.each(ProcessData.WorkMap, function (k, v) {
             if (v.Lid != link.Lid) {
@@ -308,7 +308,7 @@ var ProcessManagerClass = /** @class */ (function () {
         ProcessData.ModeMap[data.ModeSingle.Mid] = data.ModeSingle;
         var add = $(ProcessPanel.GetModeHtmlRight(data.ModeSingle.Mid));
         if (data.PrevMid > 0) {
-            var prevIndex = ArrayUtil.IndexOfAttr(ProcessData.Project.ModeList, FieldName.Mid, data.PrevMid);
+            var prevIndex = ArrayUtil.IndexOfByKey(ProcessData.Project.ModeList, FieldName.Mid, data.PrevMid);
             if (prevIndex > -1) {
                 ProcessData.Project.ModeList.splice(prevIndex + 1, 0, data.ModeSingle);
             }
@@ -365,8 +365,8 @@ var ProcessManagerClass = /** @class */ (function () {
         }
         else {
             var project = ProcessData.Project;
-            var index0 = ArrayUtil.IndexOfAttr(project.ModeList, FieldName.Mid, mode0.Mid);
-            var index1 = ArrayUtil.IndexOfAttr(project.ModeList, FieldName.Mid, mode1.Mid);
+            var index0 = ArrayUtil.IndexOfByKey(project.ModeList, FieldName.Mid, mode0.Mid);
+            var index1 = ArrayUtil.IndexOfByKey(project.ModeList, FieldName.Mid, mode1.Mid);
             if (index0 > -1 && index0 > -1) {
                 (_a = project.ModeList).splice.apply(_a, [index0, 1].concat(project.ModeList.splice(index1, 1, mode0)));
             }
@@ -407,7 +407,7 @@ var ProcessManagerClass = /** @class */ (function () {
         }
     };
     ProcessManagerClass.prototype.DoModeDelete = function (mode) {
-        ArrayUtil.RemoveByAttr(ProcessData.Project.ModeList, FieldName.Mid, mode.Mid);
+        ArrayUtil.RemoveByKey(ProcessData.Project.ModeList, FieldName.Mid, mode.Mid);
         delete ProcessData.ModeMap[mode.Mid];
         $.each(mode.LinkList, function (k, link) {
             //删除工作

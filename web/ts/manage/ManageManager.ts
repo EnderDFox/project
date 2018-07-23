@@ -34,7 +34,7 @@ class ManageManagerClass {
     UrlParamCallback() {
         Common.PopupHideAll()
         var pid: number = UrlParam.Get(URL_PARAM_KEY.PID, 0)
-        var proj: ProjectSingle = this.Data.GetProjectListHasAuth().FindOfAttr(FieldName.PID, pid)
+        var proj: ProjectSingle = this.Data.GetProjectListHasAuth().FindByKey(FieldName.PID, pid)
         if (proj) {
             this.ShowProjectEdit()
         } else {
@@ -151,7 +151,7 @@ class ManageManagerClass {
                                 return
                             }
                             if (newName != proj.Name) {
-                                if (this.Data.ProjectList.IndexOfAttr(FieldName.Name, newName) > -1) {
+                                if (this.Data.ProjList.IndexOfByKey(FieldName.Name, newName) > -1) {
                                     Common.AlertError(`即将把项目 "${proj.Name}" 改名为 "${newName}" <br/><br/>但项目名称 "${newName}" 已经存在`);
                                     (e.target as HTMLInputElement).value = proj.Name;
                                     return
@@ -188,13 +188,13 @@ class ManageManagerClass {
                                 Common.AlertError(`项目名称 ${newName} 不可以为空`)
                                 return
                             }
-                            if (this.Data.ProjectList.IndexOfAttr(FieldName.Name, newName) > -1) {
+                            if (this.Data.ProjList.IndexOfByKey(FieldName.Name, newName) > -1) {
                                 Common.AlertError(`项目名称 ${newName} 已经存在`)
                                 return
                             }
-                            this.Data.ProjectList.push(
+                            this.Data.ProjList.push(
                                 {
-                                    Pid: this.Data.ProjectList[this.VueProjectList.projectList.length - 1].Pid + 1,
+                                    Pid: this.Data.ProjList[this.VueProjectList.projectList.length - 1].Pid + 1,
                                     Name: this.VueProjectList.newName.toString(),
                                     MasterUid: 0, UserList: [],
                                     CreateTime: new Date().getTime(),
@@ -212,7 +212,7 @@ class ManageManagerClass {
         })
     }
     ShowProjectEdit() {
-        var proj: ProjectSingle = this.Data.GetProjectListHasAuth().FindOfAttr(FieldName.PID, UrlParam.Get(URL_PARAM_KEY.PID))
+        var proj: ProjectSingle = this.Data.GetProjectListHasAuth().FindByKey(FieldName.PID, UrlParam.Get(URL_PARAM_KEY.PID))
         this.Data.CurrProj = proj
         Loader.LoadVueTemplateList([`${this.VuePath}ProjectEdit`], (tplList: string[]) => {
             var currPage = UrlParam.Get(URL_PARAM_KEY.PAGE, [ProjectEditPageIndex.Department, ProjectEditPageIndex.Position, ProjectEditPageIndex.User])
@@ -333,7 +333,7 @@ class ManageManagerClass {
                         }
                         //从当前父tree中删除
                         var brothers: DepartmentSingle[] = this.Data.GetBrotherDepartmentList(dept)
-                        brothers.RemoveByAttr(FieldName.Did, dept.Did)
+                        brothers.RemoveByKey(FieldName.Did, dept.Did)
                         //
                         if (toParentDept == null) {
                             //改为顶级部门
@@ -365,7 +365,7 @@ class ManageManagerClass {
                             return
                         }
                         var brothers: DepartmentSingle[] = this.Data.GetBrotherDepartmentList(dp)
-                        var brotherIndex = ArrayUtil.IndexOfAttr(brothers, FieldName.Did, dp.Did)
+                        var brotherIndex = ArrayUtil.IndexOfByKey(brothers, FieldName.Did, dp.Did)
                         var brother = brothers[brotherIndex + 1]
                         brothers.splice(brotherIndex, 1)
                         brothers.splice(brotherIndex + 1, 0, dp)
@@ -375,14 +375,14 @@ class ManageManagerClass {
                             return
                         }
                         var brothers: DepartmentSingle[] = this.Data.GetBrotherDepartmentList(dp)
-                        var brotherIndex = ArrayUtil.IndexOfAttr(brothers, FieldName.Did, dp.Did)
+                        var brotherIndex = ArrayUtil.IndexOfByKey(brothers, FieldName.Did, dp.Did)
                         brothers.splice(brotherIndex, 1)
                         brothers.splice(brotherIndex - 1, 0, dp)
                     },
                     onDel: (dp: DepartmentSingle, i0: int) => {
                         Common.ConfirmDelete(() => {
                             var brothers: DepartmentSingle[] = this.Data.GetBrotherDepartmentList(dp)
-                            var brotherIndex = ArrayUtil.IndexOfAttr(brothers, FieldName.Did, dp.Did)
+                            var brotherIndex = ArrayUtil.IndexOfByKey(brothers, FieldName.Did, dp.Did)
                             brothers.splice(brotherIndex, 1)
                             //
                             delete this.Data.DeptDict[dp.Did]
@@ -499,7 +499,7 @@ class ManageManagerClass {
                     //
                     //从当前父tree中删除
                     var brothers: DepartmentSingle[] = this.Data.GetBrotherDepartmentList(dept)
-                    brothers.RemoveByAttr(FieldName.Did, dept.Did)
+                    brothers.RemoveByKey(FieldName.Did, dept.Did)
                     //
                     if (toParentDept == null) {
                         //改为顶级部门
@@ -568,7 +568,7 @@ class ManageManagerClass {
     }
     DeptListCheckSortDown(dp: DepartmentSingle, i0: int) {
         var brothers: DepartmentSingle[] = this.Data.GetBrotherDepartmentList(dp)
-        var brotherIndex = ArrayUtil.IndexOfAttr(brothers, FieldName.Did, dp.Did)
+        var brotherIndex = ArrayUtil.IndexOfByKey(brothers, FieldName.Did, dp.Did)
         if (brotherIndex < brothers.length - 1) {
             return true
         }
@@ -615,15 +615,15 @@ class ManageManagerClass {
                         this.ShowAuthList(posn)
                     },
                     checkDeptMgrChecked: (posn: PositionSingle) => {
-                        return posn.AuthorityList.IndexOfAttr(FieldName.Authid, AUTH.DEPARTMENT_MANAGE) > -1
-                            && posn.AuthorityList.IndexOfAttr(FieldName.Authid, AUTH.DEPARTMENT_PROCESS) > -1
+                        return posn.AuthorityList.IndexOfByKey(FieldName.Authid, AUTH.DEPARTMENT_MANAGE) > -1
+                            && posn.AuthorityList.IndexOfByKey(FieldName.Authid, AUTH.DEPARTMENT_PROCESS) > -1
                     },
                     onChangeDeptMgrChecked: (posn: PositionSingle) => {
-                        var has = posn.AuthorityList.IndexOfAttr(FieldName.Authid, AUTH.DEPARTMENT_MANAGE) > -1
-                            && posn.AuthorityList.IndexOfAttr(FieldName.Authid, AUTH.DEPARTMENT_PROCESS) > -1
+                        var has = posn.AuthorityList.IndexOfByKey(FieldName.Authid, AUTH.DEPARTMENT_MANAGE) > -1
+                            && posn.AuthorityList.IndexOfByKey(FieldName.Authid, AUTH.DEPARTMENT_PROCESS) > -1
                         if (has) {
-                            posn.AuthorityList.RemoveByAttr(FieldName.Authid, AUTH.DEPARTMENT_MANAGE)
-                            posn.AuthorityList.RemoveByAttr(FieldName.Authid, AUTH.DEPARTMENT_PROCESS)
+                            posn.AuthorityList.RemoveByKey(FieldName.Authid, AUTH.DEPARTMENT_MANAGE)
+                            posn.AuthorityList.RemoveByKey(FieldName.Authid, AUTH.DEPARTMENT_PROCESS)
                         } else {
                             posn.AuthorityList.push(this.Data.AuthDict[AUTH.DEPARTMENT_MANAGE])
                             posn.AuthorityList.push(this.Data.AuthDict[AUTH.DEPARTMENT_PROCESS])
@@ -893,7 +893,7 @@ class ManageManagerClass {
                             var dp = this.Data.DeptDict[did]
                             if (dp) {
                                 if (posnid > 0) {
-                                    var posn: PositionSingle = dp.PositionList.FindOfAttr(FieldName.Posnid, posnid)
+                                    var posn: PositionSingle = dp.PositionList.FindByKey(FieldName.Posnid, posnid)
                                     return posn ? posn.Name : '--'
                                 } else {
                                     return '空'
@@ -905,7 +905,7 @@ class ManageManagerClass {
                         ShowUserName: function (uid: number): string {
                             this.newUserUid = uid
                             if (uid) {
-                                var user: UserSingle = ArrayUtil.FindOfAttr(this.otherUserList, FieldName.Uid, uid) as PositionSingle
+                                var user: UserSingle = ArrayUtil.FindByKey(this.otherUserList, FieldName.Uid, uid) as PositionSingle
                                 if (user) {
                                     return user.Name
                                 }
@@ -950,7 +950,7 @@ class ManageManagerClass {
                             this.ShowSelectUser(proj, ArrayUtil.SubByAttr(this.Data.UserList, proj.UserList, FieldName.Uid))
                         },
                         onAdd: () => {
-                            var newUser: UserSingle = ArrayUtil.FindOfAttr<PositionSingle>(this.VueUserList.otherUserList, FieldName.Uid, this.VueUserList.newUserUid)
+                            var newUser: UserSingle = ArrayUtil.FindByKey<PositionSingle>(this.VueUserList.otherUserList, FieldName.Uid, this.VueUserList.newUserUid)
                             if (newUser) {
                                 proj.UserList.push(newUser)
                                 this.VueUserList.newUserUid = 0

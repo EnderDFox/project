@@ -18,7 +18,7 @@ var PopManagerClass = /** @class */ (function () {
     /**注册外部点击事件*/
     PopManagerClass.prototype.RegisterMouseOut = function (selector, callback) {
         var _this = this;
-        var oldIndxe = ArrayUtil.IndexOfAttr(this.mouseOutList, "selector", selector);
+        var oldIndxe = ArrayUtil.IndexOfByKey(this.mouseOutList, "selector", selector);
         if (oldIndxe == -1) {
             //延迟一下 避免刚取消就加进来了,因为冒泡会导致这里重复调用
             setTimeout(function () {
@@ -28,7 +28,7 @@ var PopManagerClass = /** @class */ (function () {
     };
     /**注销外部点击事件*/
     PopManagerClass.prototype.CancelMouseOut = function (selector) {
-        var oldIndxe = ArrayUtil.IndexOfAttr(this.mouseOutList, "selector", selector);
+        var oldIndxe = ArrayUtil.IndexOfByKey(this.mouseOutList, "selector", selector);
         if (oldIndxe > -1) {
             this.mouseOutList.splice(oldIndxe, 1);
         }

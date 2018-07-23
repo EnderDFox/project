@@ -505,37 +505,21 @@ var ArrayUtil = /** @class */ (function () {
      * arr是item为对象的数组, 通过item中的某个值 寻找它在数组中的index
      * e.g. arr : [{a:"2"},{a:"3"}]     ArrayUtil.IndexOfAttr(arr,'a',3)  return 1
     */
-    ArrayUtil.IndexOfAttr = function (arr, key, value) {
-        var len = arr.length;
-        for (var i = 0; i < len; i++) {
-            if ((key == null && arr[key] == value) || arr[i][key] == value) {
-                return i;
-            }
-        }
-        return -1;
+    ArrayUtil.IndexOfByKey = function (arr, key, value) {
+        return arr.IndexOfByKey(key, value);
     };
-    ArrayUtil.FindOfAttr = function (arr, key, value) {
-        var len = arr.length;
-        for (var i = 0; i < len; i++) {
-            if ((key == null && arr[key] == value) || arr[i][key] == value) {
-                return arr[i];
-            }
-        }
-        return null;
+    ArrayUtil.FindByKey = function (arr, key, value) {
+        return arr.FindByKey(key, value);
     };
-    ArrayUtil.RemoveByAttr = function (arr, key, value) {
-        var index = ArrayUtil.IndexOfAttr(arr, key, value);
-        if (index > -1) {
-            arr.splice(index, 1);
-        }
-        return index;
+    ArrayUtil.RemoveByKey = function (arr, key, value) {
+        return arr.RemoveByKey(key, value);
     };
     /**用一个数组减去另一个数组 */
     ArrayUtil.SubByAttr = function (arr0, arr1, key) {
         var rs = [];
         for (var i = 0; i < arr0.length; i++) {
             var item0 = arr0[i];
-            var index0 = ArrayUtil.IndexOfAttr(arr1, key, item0[key]);
+            var index0 = ArrayUtil.IndexOfByKey(arr1, key, item0[key]);
             if (index0 == -1) {
                 rs.push(item0);
             }
