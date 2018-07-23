@@ -447,7 +447,7 @@ var ManagerManagerClass = /** @class */ (function () {
                 handle: ".btn-drag",
                 group: 'dragGroup',
                 scorll: true,
-                animation: 150,
+                // animation: 150, //动画参数
                 // ghostClass: 'sortable-ghostClass',
                 chosenClass: 'sortable-chosenClass',
                 onStart: function (evt) {
