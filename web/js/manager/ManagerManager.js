@@ -607,12 +607,12 @@ var ManagerManagerClass = /** @class */ (function () {
                         UrlParam.Set(URL_PARAM_KEY.DID, toDept.Did).Reset();
                         _this.ShowPositionList();
                     },
-                    onEditName: function (e, dept, pos, index) {
+                    onEditName: function (e, dept, posn, index) {
                         var newName = e.target.value;
-                        pos.Name = newName;
+                        posn.Name = newName;
                     },
-                    onEditAuth: function (dept, pos, index) {
-                        _this.ShowAuthList(pos);
+                    onEditAuth: function (dept, posn, index) {
+                        _this.ShowAuthList(posn);
                     },
                     checkDeptMgrChecked: function (posn) {
                         return posn.AuthorityList.IndexOfAttr(FieldName.Authid, AUTH.DEPARTMENT_MANAGE) > -1
@@ -634,30 +634,30 @@ var ManagerManagerClass = /** @class */ (function () {
                         UrlParam.Set(URL_PARAM_KEY.PAGE, ProjectEditPageIndex.User).Set(URL_PARAM_KEY.FKEY, posn.Name).Reset();
                         _this.ShowUserList(dept, posn);
                     },
-                    CheckSortUp: function (dept, pos, index) {
+                    CheckSortUp: function (dept, posn, index) {
                         return index > 0;
                     },
-                    CheckSortDown: function (dept, pos, index) {
+                    CheckSortDown: function (dept, posn, index) {
                         return index < dept.PositionList.length - 1;
                     },
-                    onSortDown: function (dept, pos, index) {
+                    onSortDown: function (dept, posn, index) {
                         if (index < dept.PositionList.length - 1) {
                             dept.PositionList.splice(index + 1, 0, dept.PositionList.splice(index, 1)[0]);
                         }
                     },
-                    onSortUp: function (dept, pos, index) {
+                    onSortUp: function (dept, posn, index) {
                         if (index > 0) {
                             dept.PositionList.splice(index - 1, 0, dept.PositionList.splice(index, 1)[0]);
                         }
                     },
-                    onDel: function (dept, pos, index) {
+                    onDel: function (dept, posn, index) {
                         if (dept.PositionList.length == 1) {
                             Common.AlertError("\u6BCF\u4E2A\u90E8\u95E8\u4E0B\u81F3\u5C11\u8981\u4FDD\u7559\u4E00\u4E2A\u804C\u4F4D");
                         }
                         else {
                             Common.ConfirmDelete(function () {
                                 dept.PositionList.splice(index, 1);
-                            }, "\u5373\u5C06\u5220\u9664\u804C\u4F4D \"" + (pos.Name || '空') + "\"");
+                            }, "\u5373\u5C06\u5220\u9664\u804C\u4F4D \"" + (posn.Name || '空') + "\"");
                         }
                     },
                 },
@@ -738,12 +738,12 @@ var ManagerManagerClass = /** @class */ (function () {
                     },
                     onAdd: function () {
                         if (currDept) {
-                            var pos = {
+                            var posn = {
                                 Posnid: _this.Data.NewPositionUuid++, Did: currDept.Did, Name: _this.VuePositionList.newName.toString(), UserList: [],
                                 AuthorityList: currDept.Sort == 0 ? [_this.Data.AuthDict[AUTH.DEPARTMENT_MANAGE]] : [],
                             };
                             _this.VuePositionList.newName = '';
-                            currDept.PositionList.push(pos);
+                            currDept.PositionList.push(posn);
                         }
                     },
                 },
@@ -753,12 +753,12 @@ var ManagerManagerClass = /** @class */ (function () {
             Common.InsertIntoDom(vue.$el, _this.VueProjectEdit.$refs.pageContent);
         });
     };
-    ManagerManagerClass.prototype.ShowAuthList = function (pos) {
+    ManagerManagerClass.prototype.ShowAuthList = function (posn) {
         var _this = this;
         Loader.LoadVueTemplate(this.VuePath + "AuthList", function (tpl) {
             var checkedDict = {};
-            for (var i = 0; i < pos.AuthorityList.length; i++) {
-                var auth = pos.AuthorityList[i];
+            for (var i = 0; i < posn.AuthorityList.length; i++) {
+                var auth = posn.AuthorityList[i];
                 checkedDict[auth.Authid] = auth;
             }
             var _checkModChecked = function (_, mod) {
@@ -775,7 +775,7 @@ var ManagerManagerClass = /** @class */ (function () {
                 template: tpl,
                 data: {
                     auth: _this.Data.MyAuth,
-                    pos: pos,
+                    posn: posn,
                     authorityModuleList: _this.Data.AuthorityModuleList,
                     checkedChange: false,
                 },
@@ -808,9 +808,9 @@ var ManagerManagerClass = /** @class */ (function () {
                         _this.VueAuthList.checkedChange = !_this.VueAuthList.checkedChange;
                     },
                     onSave: function () {
-                        pos.AuthorityList.splice(0, pos.AuthorityList.length);
+                        posn.AuthorityList.splice(0, posn.AuthorityList.length);
                         for (var authIdStr in checkedDict) {
-                            pos.AuthorityList.push(checkedDict[authIdStr]);
+                            posn.AuthorityList.push(checkedDict[authIdStr]);
                         }
                         _this.VueAuthList.$el.remove();
                         _this.VueAuthList = null;
@@ -819,8 +819,8 @@ var ManagerManagerClass = /** @class */ (function () {
                         for (var authIdStr in checkedDict) {
                             delete checkedDict[authIdStr];
                         }
-                        for (var i = 0; i < pos.AuthorityList.length; i++) {
-                            var auth = pos.AuthorityList[i];
+                        for (var i = 0; i < posn.AuthorityList.length; i++) {
+                            var auth = posn.AuthorityList[i];
                             checkedDict[auth.Authid] = auth;
                         }
                         _this.VueAuthList.checkedChange = !_this.VueAuthList.checkedChange;
@@ -904,8 +904,8 @@ var ManagerManagerClass = /** @class */ (function () {
                         var dp = _this.Data.DeptDict[did];
                         if (dp) {
                             if (posnid > 0) {
-                                var pos = dp.PositionList.FindOfAttr(FieldName.Posnid, posnid);
-                                return pos ? pos.Name : '--';
+                                var posn = dp.PositionList.FindOfAttr(FieldName.Posnid, posnid);
+                                return posn ? posn.Name : '--';
                             }
                             else {
                                 return '空';
@@ -940,9 +940,9 @@ var ManagerManagerClass = /** @class */ (function () {
                             _this.Data.SetUserPosnid(user, dept.Did);
                         }
                     },
-                    onPosChange: function (user, pos) {
+                    onPosChange: function (user, posn) {
                         _this.Data.RemoveUserPosnid(user);
-                        _this.Data.SetUserPosnid(user, user.Did, pos.Posnid);
+                        _this.Data.SetUserPosnid(user, user.Did, posn.Posnid);
                     },
                     onSortDown: function (user, index) {
                         if (index < proj.UserList.length - 1) {

@@ -607,12 +607,12 @@ class ManagerManagerClass {
                         UrlParam.Set(URL_PARAM_KEY.DID, toDept.Did).Reset()
                         this.ShowPositionList()
                     },
-                    onEditName: (e: Event, dept: DepartmentSingle, pos: PositionSingle, index: number) => {
+                    onEditName: (e: Event, dept: DepartmentSingle, posn: PositionSingle, index: number) => {
                         var newName = (e.target as HTMLInputElement).value
-                        pos.Name = newName
+                        posn.Name = newName
                     },
-                    onEditAuth: (dept: DepartmentSingle, pos: PositionSingle, index: number) => {
-                        this.ShowAuthList(pos)
+                    onEditAuth: (dept: DepartmentSingle, posn: PositionSingle, index: number) => {
+                        this.ShowAuthList(posn)
                     },
                     checkDeptMgrChecked: (posn: PositionSingle) => {
                         return posn.AuthorityList.IndexOfAttr(FieldName.Authid, AUTH.DEPARTMENT_MANAGE) > -1
@@ -633,29 +633,29 @@ class ManagerManagerClass {
                         UrlParam.Set(URL_PARAM_KEY.PAGE, ProjectEditPageIndex.User).Set(URL_PARAM_KEY.FKEY, posn.Name).Reset()
                         this.ShowUserList(dept, posn)
                     },
-                    CheckSortUp: (dept: DepartmentSingle, pos: PositionSingle, index: int) => {
+                    CheckSortUp: (dept: DepartmentSingle, posn: PositionSingle, index: int) => {
                         return index > 0
                     },
-                    CheckSortDown: (dept: DepartmentSingle, pos: PositionSingle, index: int) => {
+                    CheckSortDown: (dept: DepartmentSingle, posn: PositionSingle, index: int) => {
                         return index < dept.PositionList.length - 1
                     },
-                    onSortDown: (dept: DepartmentSingle, pos: PositionSingle, index: int) => {
+                    onSortDown: (dept: DepartmentSingle, posn: PositionSingle, index: int) => {
                         if (index < dept.PositionList.length - 1) {
                             dept.PositionList.splice(index + 1, 0, dept.PositionList.splice(index, 1)[0])
                         }
                     },
-                    onSortUp: (dept: DepartmentSingle, pos: PositionSingle, index: int) => {
+                    onSortUp: (dept: DepartmentSingle, posn: PositionSingle, index: int) => {
                         if (index > 0) {
                             dept.PositionList.splice(index - 1, 0, dept.PositionList.splice(index, 1)[0])
                         }
                     },
-                    onDel: (dept: DepartmentSingle, pos: PositionSingle, index: int) => {
+                    onDel: (dept: DepartmentSingle, posn: PositionSingle, index: int) => {
                         if (dept.PositionList.length == 1) {
                             Common.AlertError(`每个部门下至少要保留一个职位`)
                         } else {
                             Common.ConfirmDelete(() => {
                                 dept.PositionList.splice(index, 1)
-                            }, `即将删除职位 "${pos.Name || '空'}"`)
+                            }, `即将删除职位 "${posn.Name || '空'}"`)
                         }
                     },
                 },
@@ -734,12 +734,12 @@ class ManagerManagerClass {
                         },
                         onAdd: () => {
                             if (currDept) {
-                                var pos: PositionSingle = {
+                                var posn: PositionSingle = {
                                     Posnid: this.Data.NewPositionUuid++, Did: currDept.Did, Name: this.VuePositionList.newName.toString(), UserList: [],
                                     AuthorityList: currDept.Sort == 0 ? [this.Data.AuthDict[AUTH.DEPARTMENT_MANAGE]] : [],
                                 }
                                 this.VuePositionList.newName = ''
-                                currDept.PositionList.push(pos)
+                                currDept.PositionList.push(posn)
                             }
                         },
                     },
@@ -750,11 +750,11 @@ class ManagerManagerClass {
             Common.InsertIntoDom(vue.$el, this.VueProjectEdit.$refs.pageContent)
         })
     }
-    ShowAuthList(pos: PositionSingle) {
+    ShowAuthList(posn: PositionSingle) {
         Loader.LoadVueTemplate(this.VuePath + "AuthList", (tpl: string) => {
             var checkedDict: { [key: number]: AuthoritySingle } = {};
-            for (var i = 0; i < pos.AuthorityList.length; i++) {
-                var auth: AuthoritySingle = pos.AuthorityList[i]
+            for (var i = 0; i < posn.AuthorityList.length; i++) {
+                var auth: AuthoritySingle = posn.AuthorityList[i]
                 checkedDict[auth.Authid] = auth
             }
             var _checkModChecked = (_, mod: AuthorityModuleSingle): boolean => {
@@ -771,7 +771,7 @@ class ManagerManagerClass {
                 template: tpl,
                 data: {
                     auth: this.Data.MyAuth,
-                    pos: pos,
+                    posn: posn,
                     authorityModuleList: this.Data.AuthorityModuleList,
                     checkedChange: false,//为了让check函数被触发,
                 },
@@ -802,9 +802,9 @@ class ManagerManagerClass {
                         this.VueAuthList.checkedChange = !this.VueAuthList.checkedChange
                     },
                     onSave: () => {
-                        pos.AuthorityList.splice(0, pos.AuthorityList.length)
+                        posn.AuthorityList.splice(0, posn.AuthorityList.length)
                         for (var authIdStr in checkedDict) {
-                            pos.AuthorityList.push(checkedDict[authIdStr])
+                            posn.AuthorityList.push(checkedDict[authIdStr])
                         }
                         this.VueAuthList.$el.remove()
                         this.VueAuthList = null
@@ -813,8 +813,8 @@ class ManagerManagerClass {
                         for (var authIdStr in checkedDict) {
                             delete checkedDict[authIdStr]
                         }
-                        for (var i = 0; i < pos.AuthorityList.length; i++) {
-                            var auth: AuthoritySingle = pos.AuthorityList[i]
+                        for (var i = 0; i < posn.AuthorityList.length; i++) {
+                            var auth: AuthoritySingle = posn.AuthorityList[i]
                             checkedDict[auth.Authid] = auth
                         }
                         this.VueAuthList.checkedChange = !this.VueAuthList.checkedChange
@@ -893,8 +893,8 @@ class ManagerManagerClass {
                             var dp = this.Data.DeptDict[did]
                             if (dp) {
                                 if (posnid > 0) {
-                                    var pos: PositionSingle = dp.PositionList.FindOfAttr(FieldName.Posnid, posnid)
-                                    return pos ? pos.Name : '--'
+                                    var posn: PositionSingle = dp.PositionList.FindOfAttr(FieldName.Posnid, posnid)
+                                    return posn ? posn.Name : '--'
                                 } else {
                                     return '空'
                                 }
@@ -926,9 +926,9 @@ class ManagerManagerClass {
                                 this.Data.SetUserPosnid(user, dept.Did)
                             }
                         },
-                        onPosChange: (user: UserSingle, pos: PositionSingle) => {
+                        onPosChange: (user: UserSingle, posn: PositionSingle) => {
                             this.Data.RemoveUserPosnid(user)
-                            this.Data.SetUserPosnid(user, user.Did, pos.Posnid)
+                            this.Data.SetUserPosnid(user, user.Did, posn.Posnid)
                         },
                         onSortDown: (user: UserSingle, index: int) => {
                             if (index < proj.UserList.length - 1) {
