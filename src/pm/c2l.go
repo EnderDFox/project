@@ -51,8 +51,6 @@ const (
 	C2L_VERSION_CHANGE_PUBLISH = 80105
 	C2L_VERSION_CHANGE_SORT    = 80106
 	C2L_TEST_1                 = 99101
-	//# Manage
-	C2L_MANAGE_VIEW = 90101
 )
 
 type C2L_SessionLogin struct {
@@ -285,6 +283,12 @@ type C2L_UpdateWorkAdd struct {
 	Kind   uint32
 	Name   string
 	Data   []byte //文件二进制流
+}
+
+type C2L_ManageDeptAdd struct {
+	Pid  uint64
+	Name string
+	Fid  uint64
 }
 
 type C2L_UpdateWorkDelete struct {

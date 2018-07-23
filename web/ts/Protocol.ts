@@ -59,6 +59,9 @@ class C2L {
     //#
     static C2L_MANAGE_VIEW = 90101
 }
+class PB_CMD{
+    PB_MANAGE_DEPT_ADD
+}
 
 //======================L2C协议=======================
 class L2C {

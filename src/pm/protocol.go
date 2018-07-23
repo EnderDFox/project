@@ -1,5 +1,11 @@
 package main
 
+const (
+	//# Manage
+	PB_CMD_MANAGE_VIEW     = 90101
+	PB_CMD_MANAGE_DEPT_ADD = 90121
+)
+
 //=======================通讯数据结构=======================
 type C2L_Message struct {
 	Cid  uint64
@@ -41,8 +47,17 @@ type UserSingle struct {
 
 type DepartmentSingle struct {
 	Did  uint64
-	Name string
+	Pid  uint64
 	Fid  uint64
+	Name string
+	Sort uint32
+}
+
+type PositionSingle struct {
+	Posnid uint64
+	Did    uint64
+	Name   string
+	Sort   uint32
 }
 
 type ScoreNoticeSingle struct {

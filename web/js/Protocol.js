@@ -59,6 +59,11 @@ var C2L = /** @class */ (function () {
     C2L.C2L_MANAGE_VIEW = 90101;
     return C2L;
 }());
+var PB_CMD = /** @class */ (function () {
+    function PB_CMD() {
+    }
+    return PB_CMD;
+}());
 //======================L2C协议=======================
 var L2C = /** @class */ (function () {
     function L2C() {
