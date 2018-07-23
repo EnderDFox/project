@@ -45,6 +45,7 @@
             <div>所属部门</div>
             <div>职位名称</div>
             <div>权限管理</div>
+            <div>部门管理</div>
             <div>成员管理</div>
             <div>排序</div>
             <div>删除</div>
@@ -53,7 +54,7 @@
         <PosnListComp :dept="dept" :currDept="currDept" :startDepth="startDepth" :shownDeptChildren="userConfig.ShownDeptChildren"
             v-for="dept in deptTree" :key="dept.Did" @OnEnterDept="OnEnterDept"></PosnListComp>
         <!-- 新增 -->
-        <div class="divrow PosnList-row" v-if="auth['PROJECT_EDIT']">
+        <div class="divrow PosnList-row" v-if="auth['PROJECT_MANAGE']">
             <div>{{currDept?currDept.Name:''}}</div>
             <div>
                 <input type="text " class="form-control" placeholder="输入新职位名称 " aria-describedby="basic-addon1 " v-model.trim="newName" @keyup.enter="onAdd()"
@@ -66,11 +67,11 @@
             </div>
         </div>
         <!-- 提示信息 -->
-        <div class="alert alert-warning" role="alert" v-if="auth['PROJECT_EDIT'] && !currDept">
+        <div class="alert alert-warning" role="alert" v-if="auth['PROJECT_MANAGE'] && !currDept">
             <strong>本页面显示了项目的全部"职位", 因此不能直接增加"职位""</strong> 请进入到指定"部门"的职位列表中"增加职位"
         </div>
         <!-- 提示信息 -->
-        <div class="alert alert-warning" role="alert" v-else-if="auth['PROJECT_EDIT'] && currDept.Sort==0">
+        <div class="alert alert-warning" role="alert" v-else-if="auth['PROJECT_MANAGE'] && currDept.Sort==0">
             <strong>"管理部"下新建职位将拥有该项目的"全部管理权限"</strong>
         </div>
     </div>

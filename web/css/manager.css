@@ -117,25 +117,29 @@ fieldset[disabled] .btn {
 } */
 
 .PosnList-row>div:nth-child(1) {
-    width: 240px;
-    max-width: 240px;
+    width: 200px;
+    max-width: 200px;
     overflow: hidden;
     white-space: nowrap;
 }
-
+/* 名称 */
 .PosnList-row>div:nth-child(2) {
-    width: 240px;
+    width: 200px;
 }
-
+/* 部门管理 */
 .PosnList-row>div:nth-child(3) {
     width: 100px;
 }
-
+/* 权限 */
 .PosnList-row>div:nth-child(4) {
+    width: 80px;
+}
+/* 成员 */
+.PosnList-row>div:nth-child(5) {
     width: 100px;
 }
-
-.PosnList-row>div:nth-child(5) {
+/* 排序 */
+.PosnList-row>div:nth-child(6) {
     width: 180px;
     max-width: 180px;
     overflow: hidden;

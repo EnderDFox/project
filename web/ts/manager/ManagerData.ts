@@ -29,7 +29,7 @@ class ManagerDataClass {
             case 0:
                 uid = 999999//超级管理员id
                 this.AddMyAuth(AUTH.PROJECT_LIST)
-                this.AddMyAuth(AUTH.PROJECT_EDIT)
+                this.AddMyAuth(AUTH.PROJECT_MANAGE)
                 break;
         }
         //
@@ -42,34 +42,35 @@ class ManagerDataClass {
         //#
         this.AuthorityModuleList = [
             {
-                Modid: 1, Name: '工具管理', AuthorityList: [
-                    { Authid: AUTH.PROJECT_LIST, Name: '项目列表' },
-                    { Authid: AUTH.PROJECT_EDIT, Name: '所属项目' },
-                    { Authid: 32, Name: '部门' },
-                    { Authid: 33, Name: '职位' },
-                    { Authid: 34, Name: '权限', Description: `功能,流程的修改` },
-                    { Authid: 35, Name: '成员', Description: `所在部门及其子部门内所有成员的增加,修改和删除` },
-                ]
-            },
-            {
-                Modid: 11, Name: '项目模块', AuthorityList: [
-                    { Authid: 1101, Name: '功能管理' },
-                    { Authid: 1102, Name: '工作编辑', Description: `工作的修改` },
-                    { Authid: 1103, Name: '工作评论', Description: `对已有工作进行评论` },
-                    { Authid: 1121, Name: '晨会管理' },
-                ]
-            },
-            {
-                Modid: 2, Name: '所属部门管理', Description: `该员工所在部门及其子部门的管理权限`,
+                Modid: 1, Name: '后台管理', Description: `包括 部门 职位 权限修改等`,
                 AuthorityList: [
-                    { Authid: 21, Name: '成员管理', Description: `所在部门及其子部门内所有成员的增加/修改/删除` },
-                    { Authid: 22, Name: '职位管理' },
-                    { Authid: 23, Name: '子部门管理', Description: `可以增加/修改/删除子部门` },
-                    { Authid: 24, Name: '功能管理', Description: `功能/流程的修改` },
-                    { Authid: 25, Name: '工作编辑', Description: `工作的修改` },
-                    { Authid: 26, Name: '工作评论', Description: `对已有工作进行评论` },
+                    // { Authid: AUTH.PROJECT_LIST, Name: '全部项目后台作管理' },
+                    { Authid: AUTH.PROJECT_MANAGE, Name: '所属项目后台管理', Description: `该成员所属项目的"后台"管理` },
+                    { Authid: AUTH.DEPARTMENT_MANAGE, Name: '所属部门后台管理', Description: `该成员所属部门及其子部门的"后台"管理` },
+                    /*   { Authid: 32, Name: '部门' },
+                      { Authid: 33, Name: '职位' },
+                      { Authid: 34, Name: '权限', Description: `功能,流程的修改` },
+                      { Authid: 35, Name: '成员', Description: `所在部门及其子部门内所有成员的增加,修改和删除` }, */
                 ]
             },
+            {
+                Modid: 11, Name: '工作管理', Description: `包括 模块 流程 工作 评价等`,
+                AuthorityList: [
+
+                    { Authid: AUTH.PROJECT_EDIT, Name: '所属项目工作管理', Description: `该成员所属项目及其子部门的"工作"管理` },
+                    { Authid: AUTH.DEPARTMENT_EDIT, Name: '所属部门工作管理', Description: `该成员所属部门及其子部门的"工作"管理` },
+                    { Authid: AUTH.COLLATE_EDIT, Name: '所属项目晨会编辑', Description: `可以在晨会页面编辑状态` },
+                ]
+            },
+            /*  {
+                 Modid: 2, Name: '所属部门管理', Description: `该员工所在部门及其子部门的管理权限`,
+                 AuthorityList: [
+                     /*  { Authid: 21, Name: '成员管理', Description: `所在部门及其子部门内所有成员的增加/修改/删除` },
+                      { Authid: 22, Name: '职位管理' },
+                      { Authid: 23, Name: '子部门管理', Description: `可以增加/修改/删除子部门` },
+                      { Authid: 24, Name: '功能管理', Description: `功能/流程的修改` },
+                      { Authid: 25, Name: '工作编辑', Description: `工作的修改` },
+                      { Authid: 26, Name: '工作评论', Description: `对已有工作进行评论` }, */
         ]
         this.InitAuthorityModuleList()
         //#project
@@ -219,7 +220,7 @@ class ManagerDataClass {
                 if (proj.UserList.IndexOfAttr(FieldName.Uid, ManagerData.CurrUser.Uid) > -1) {
                     projList.push(proj)
                     if (proj.MasterUid == ManagerData.CurrUser.Uid) {
-                        ManagerData.AddMyAuth(AUTH.PROJECT_EDIT)
+                        ManagerData.AddMyAuth(AUTH.PROJECT_MANAGE)
                     }
                 }
             }
@@ -275,9 +276,18 @@ class ManagerDataClass {
             Sort: 0,//标记管理员部门主要靠sort=0
             Children: [],
             PositionList: [
-                { Posid: this.NewPositionUuid++, Did: this.NewDepartmentUuid, Name: '制作人', UserList: [], AuthorityList: [this.AuthDict[AUTH.PROJECT_EDIT]] },
-                { Posid: this.NewPositionUuid++, Did: this.NewDepartmentUuid, Name: 'PM', UserList: [], AuthorityList: [this.AuthDict[AUTH.PROJECT_EDIT]] },
-                { Posid: this.NewPositionUuid++, Did: this.NewDepartmentUuid, Name: '管理员', UserList: [], AuthorityList: [this.AuthDict[AUTH.PROJECT_EDIT]] },
+                {
+                    Posid: this.NewPositionUuid++, Did: this.NewDepartmentUuid, Name: '制作人', UserList: [],
+                    AuthorityList: [this.AuthDict[AUTH.PROJECT_MANAGE], this.AuthDict[AUTH.DEPARTMENT_MANAGE]]
+                },
+                {
+                    Posid: this.NewPositionUuid++, Did: this.NewDepartmentUuid, Name: 'PM', UserList: [],
+                    AuthorityList: [this.AuthDict[AUTH.PROJECT_MANAGE], this.AuthDict[AUTH.DEPARTMENT_MANAGE]]
+                },
+                {
+                    Posid: this.NewPositionUuid++, Did: this.NewDepartmentUuid, Name: '管理员', UserList: [],
+                    AuthorityList: [this.AuthDict[AUTH.PROJECT_MANAGE], this.AuthDict[AUTH.DEPARTMENT_MANAGE]]
+                },
             ]
         }
         this.NewDepartmentUuid++

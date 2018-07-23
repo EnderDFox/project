@@ -121,7 +121,7 @@ class ManagerManagerClass {
                                 //是这个项目的负责人,并且不是超管
                                 Common.ConfirmWarning(`你是这个项目现在的负责人 <br/>如果修改负责人,你将失去这个项目的管理权限`, `要将'负责人'修改为'${user.Name}'吗?`, () => {
                                     proj.MasterUid = user.Uid
-                                    this.Data.RemoveMyAuth(AUTH.PROJECT_EDIT)
+                                    this.Data.RemoveMyAuth(AUTH.PROJECT_MANAGE)
                                 })
                             } else {
                                 proj.MasterUid = user.Uid
@@ -614,6 +614,21 @@ class ManagerManagerClass {
                     onEditAuth: (dept: DepartmentSingle, pos: PositionSingle, index: number) => {
                         this.ShowAuthList(pos)
                     },
+                    checkDeptMgrChecked: (posn: PositionSingle) => {
+                        return posn.AuthorityList.IndexOfAttr(FieldName.Authid, AUTH.DEPARTMENT_MANAGE) > -1
+                            && posn.AuthorityList.IndexOfAttr(FieldName.Authid, AUTH.DEPARTMENT_EDIT) > -1
+                    },
+                    onChangeDeptMgrChecked: (posn: PositionSingle) => {
+                        var has = posn.AuthorityList.IndexOfAttr(FieldName.Authid, AUTH.DEPARTMENT_MANAGE) > -1
+                            && posn.AuthorityList.IndexOfAttr(FieldName.Authid, AUTH.DEPARTMENT_EDIT) > -1
+                        if (has) {
+                            posn.AuthorityList.RemoveByAttr(FieldName.Authid, AUTH.DEPARTMENT_MANAGE)
+                            posn.AuthorityList.RemoveByAttr(FieldName.Authid, AUTH.DEPARTMENT_EDIT)
+                        } else {
+                            posn.AuthorityList.push(this.Data.AuthDict[AUTH.DEPARTMENT_MANAGE])
+                            posn.AuthorityList.push(this.Data.AuthDict[AUTH.DEPARTMENT_EDIT])
+                        }
+                    },
                     onEditUserList: (dept: DepartmentSingle, posn: PositionSingle) => {
                         UrlParam.Set(URL_PARAM_KEY.PAGE, ProjectEditPageIndex.User).Set(URL_PARAM_KEY.FKEY, posn.Name).Reset()
                         this.ShowUserList(dept, posn)
@@ -719,7 +734,10 @@ class ManagerManagerClass {
                         },
                         onAdd: () => {
                             if (currDept) {
-                                var pos: PositionSingle = { Posid: this.Data.NewPositionUuid++, Did: currDept.Did, Name: this.VuePositionList.newName.toString(), AuthorityList: [], UserList: [] }
+                                var pos: PositionSingle = {
+                                    Posid: this.Data.NewPositionUuid++, Did: currDept.Did, Name: this.VuePositionList.newName.toString(), UserList: [],
+                                    AuthorityList: currDept.Sort == 0 ? [this.Data.AuthDict[AUTH.DEPARTMENT_MANAGE]] : [],
+                                }
                                 this.VuePositionList.newName = ''
                                 currDept.PositionList.push(pos)
                             }

@@ -22,13 +22,13 @@
                     {{proj.Pid}}
                 </td>
                 <td>
-                    <input type="text" class="form-control" placeholder="" aria-describedby="basic-addon1" :disabled="!auth['PROJECT_EDIT']"
+                    <input type="text" class="form-control" placeholder="" aria-describedby="basic-addon1" :disabled="!auth['PROJECT_MANAGE']"
                         :value="proj.Name" @blur="onEditName($event,proj,index)" @keyup.enter="onEditName($event,proj,index)">
                 </td>
                 <td class="-text-center text-middle">
                     <div class="dropdown" v-if="proj.UserList.length>0">
                         <button class="btn btn-default dropdown-toggle" type="button" :id="'ddmProjistMaster'+index" data-toggle="dropdown" aria-haspopup="true"
-                            aria-expanded="true" :disabled="!(auth['PROJECT_EDIT'])">
+                            aria-expanded="true" :disabled="!(auth['PROJECT_MANAGE'])">
                             {{GetProjMaster(proj)}}
                             <span class="caret"></span>
                         </button>
@@ -73,7 +73,7 @@
                         </button>
                     </td> -->
                 <td>
-                    <button class="btn btn-warning" type="button" title="删除项目" @click="onDel($event,proj,index)" :disabled="!(auth['PROJECT_EDIT'])">
+                    <button class="btn btn-warning" type="button" title="删除项目" @click="onDel($event,proj,index)" :disabled="!(auth['PROJECT_MANAGE'])">
                         <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
                     </button>
                 </td>

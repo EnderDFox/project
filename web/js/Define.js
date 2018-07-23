@@ -73,21 +73,25 @@ var FieldName = /** @class */ (function () {
     function FieldName() {
     }
     FieldName.PID = "Pid";
-    FieldName.Did = "Did";
     FieldName.Uid = "Uid";
+    FieldName.Did = "Did";
+    FieldName.Posid = "Posid";
+    FieldName.Authid = "Authid";
     FieldName.Mid = "Mid";
     FieldName.Lid = "Lid";
     FieldName.Tmid = "Tmid";
     FieldName.Tlid = "Tlid";
-    FieldName.Posid = "Posid";
     FieldName.Name = "Name";
     return FieldName;
 }());
 var AUTH;
 (function (AUTH) {
     AUTH[AUTH["PROJECT_LIST"] = 1] = "PROJECT_LIST";
-    AUTH[AUTH["PROJECT_EDIT"] = 2] = "PROJECT_EDIT";
-    // POSITION_EDIT = 3,
-    // DEPARTMENT_MANAGE = 101, //所在部门的管理权限
+    AUTH[AUTH["PROJECT_MANAGE"] = 101] = "PROJECT_MANAGE";
+    AUTH[AUTH["DEPARTMENT_MANAGE"] = 110] = "DEPARTMENT_MANAGE";
+    //
+    AUTH[AUTH["PROJECT_EDIT"] = 210] = "PROJECT_EDIT";
+    AUTH[AUTH["DEPARTMENT_EDIT"] = 201] = "DEPARTMENT_EDIT";
+    AUTH[AUTH["COLLATE_EDIT"] = 301] = "COLLATE_EDIT";
 })(AUTH || (AUTH = {}));
 //# sourceMappingURL=Define.js.map

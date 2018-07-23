@@ -75,13 +75,14 @@ enum LinkStatusField {
 
 class FieldName {
     static PID = "Pid"
-    static Did = "Did"
     static Uid = "Uid"
+    static Did = "Did"
+    static Posid = "Posid"
+    static Authid = "Authid"
     static Mid = "Mid"
     static Lid = "Lid"
     static Tmid = "Tmid"
     static Tlid = "Tlid"
-    static Posid = "Posid"
     static Name = "Name"
 }
 
@@ -422,7 +423,10 @@ interface L2C_ProcessPublishDelete {
 
 enum AUTH {
     PROJECT_LIST = 1,
-    PROJECT_EDIT = 2,
-    // POSITION_EDIT = 3,
-    // DEPARTMENT_MANAGE = 101, //所在部门的管理权限
+    PROJECT_MANAGE = 101,
+    DEPARTMENT_MANAGE = 110, //所属部门的管理权限
+    //
+    PROJECT_EDIT = 210, //所属项目的前台
+    DEPARTMENT_EDIT = 201, //所属部门的后台
+    COLLATE_EDIT = 301, //晨会权限 修改状态
 }

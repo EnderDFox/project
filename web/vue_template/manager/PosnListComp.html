@@ -12,10 +12,12 @@
                     </span>
                 </button>
             </div>
+            <!-- 名称 -->
             <div>
                 <input type="text" class="form-control" style="display: inline-block;" placeholder="空" aria-describedby="basic-addon1" :value="posn.Name"
                     @blur="onEditName($event,dept,posn,index)" @keyup.enter="onEditName($event,dept,posn,index)">
             </div>
+            <!-- 权限 -->
             <div>
                 <button class="btn btn-default " type="button" @click="onEditAuth(dept,posn,index)
                         " :title="'该职位有`+posn.AuthorityList.length+`个权限'">
@@ -24,6 +26,16 @@
                     </span>
                 </button>
             </div>
+            <!-- 部门管理 -->
+            <div class="text-center">
+                <div class="checkbox">
+                    <label>
+                        <input type="checkbox" :name="posn.Name" :value="posn.Posid" :checked="checkDeptMgrChecked(posn)" @click="onChangeDeptMgrChecked(posn)" :title="'拥有管理部门`'+dept.Name+'`及其子部门的`后台`和`工作`管理权限'"
+                            :disabled="dept.Sort==0" />
+                    </label>
+                </div>
+            </div>
+            <!-- 成员 -->
             <div class="~text-center">
                 <button class="btn btn-default " type="button" @click="onEditUserList(dept,posn,index)" :title="'该职位下有'+posn.UserList.length+'名成员'">
                     <span class="glyphicon glyphicon-user" aria-hidden="true ">

@@ -117,7 +117,7 @@ var ManagerManagerClass = /** @class */ (function () {
                             //是这个项目的负责人,并且不是超管
                             Common.ConfirmWarning("\u4F60\u662F\u8FD9\u4E2A\u9879\u76EE\u73B0\u5728\u7684\u8D1F\u8D23\u4EBA <br/>\u5982\u679C\u4FEE\u6539\u8D1F\u8D23\u4EBA,\u4F60\u5C06\u5931\u53BB\u8FD9\u4E2A\u9879\u76EE\u7684\u7BA1\u7406\u6743\u9650", "\u8981\u5C06'\u8D1F\u8D23\u4EBA'\u4FEE\u6539\u4E3A'" + user.Name + "'\u5417?", function () {
                                 proj.MasterUid = user.Uid;
-                                _this.Data.RemoveMyAuth(AUTH.PROJECT_EDIT);
+                                _this.Data.RemoveMyAuth(AUTH.PROJECT_MANAGE);
                             });
                         }
                         else {
@@ -614,6 +614,22 @@ var ManagerManagerClass = /** @class */ (function () {
                     onEditAuth: function (dept, pos, index) {
                         _this.ShowAuthList(pos);
                     },
+                    checkDeptMgrChecked: function (posn) {
+                        return posn.AuthorityList.IndexOfAttr(FieldName.Authid, AUTH.DEPARTMENT_MANAGE) > -1
+                            && posn.AuthorityList.IndexOfAttr(FieldName.Authid, AUTH.DEPARTMENT_EDIT) > -1;
+                    },
+                    onChangeDeptMgrChecked: function (posn) {
+                        var has = posn.AuthorityList.IndexOfAttr(FieldName.Authid, AUTH.DEPARTMENT_MANAGE) > -1
+                            && posn.AuthorityList.IndexOfAttr(FieldName.Authid, AUTH.DEPARTMENT_EDIT) > -1;
+                        if (has) {
+                            posn.AuthorityList.RemoveByAttr(FieldName.Authid, AUTH.DEPARTMENT_MANAGE);
+                            posn.AuthorityList.RemoveByAttr(FieldName.Authid, AUTH.DEPARTMENT_EDIT);
+                        }
+                        else {
+                            posn.AuthorityList.push(_this.Data.AuthDict[AUTH.DEPARTMENT_MANAGE]);
+                            posn.AuthorityList.push(_this.Data.AuthDict[AUTH.DEPARTMENT_EDIT]);
+                        }
+                    },
                     onEditUserList: function (dept, posn) {
                         UrlParam.Set(URL_PARAM_KEY.PAGE, ProjectEditPageIndex.User).Set(URL_PARAM_KEY.FKEY, posn.Name).Reset();
                         _this.ShowUserList(dept, posn);
@@ -722,7 +738,10 @@ var ManagerManagerClass = /** @class */ (function () {
                     },
                     onAdd: function () {
                         if (currDept) {
-                            var pos = { Posid: _this.Data.NewPositionUuid++, Did: currDept.Did, Name: _this.VuePositionList.newName.toString(), AuthorityList: [], UserList: [] };
+                            var pos = {
+                                Posid: _this.Data.NewPositionUuid++, Did: currDept.Did, Name: _this.VuePositionList.newName.toString(), UserList: [],
+                                AuthorityList: currDept.Sort == 0 ? [_this.Data.AuthDict[AUTH.DEPARTMENT_MANAGE]] : [],
+                            };
                             _this.VuePositionList.newName = '';
                             currDept.PositionList.push(pos);
                         }

@@ -18,7 +18,7 @@ var ManagerDataClass = /** @class */ (function () {
             case 0:
                 uid = 999999; //超级管理员id
                 this.AddMyAuth(AUTH.PROJECT_LIST);
-                this.AddMyAuth(AUTH.PROJECT_EDIT);
+                this.AddMyAuth(AUTH.PROJECT_MANAGE);
                 break;
         }
         //
@@ -31,32 +31,19 @@ var ManagerDataClass = /** @class */ (function () {
         //#
         this.AuthorityModuleList = [
             {
-                Modid: 1, Name: '工具管理', AuthorityList: [
-                    { Authid: AUTH.PROJECT_LIST, Name: '项目列表' },
-                    { Authid: AUTH.PROJECT_EDIT, Name: '所属项目' },
-                    { Authid: 32, Name: '部门' },
-                    { Authid: 33, Name: '职位' },
-                    { Authid: 34, Name: '权限', Description: "\u529F\u80FD,\u6D41\u7A0B\u7684\u4FEE\u6539" },
-                    { Authid: 35, Name: '成员', Description: "\u6240\u5728\u90E8\u95E8\u53CA\u5176\u5B50\u90E8\u95E8\u5185\u6240\u6709\u6210\u5458\u7684\u589E\u52A0,\u4FEE\u6539\u548C\u5220\u9664" },
-                ]
-            },
-            {
-                Modid: 11, Name: '项目模块', AuthorityList: [
-                    { Authid: 1101, Name: '功能管理' },
-                    { Authid: 1102, Name: '工作编辑', Description: "\u5DE5\u4F5C\u7684\u4FEE\u6539" },
-                    { Authid: 1103, Name: '工作评论', Description: "\u5BF9\u5DF2\u6709\u5DE5\u4F5C\u8FDB\u884C\u8BC4\u8BBA" },
-                    { Authid: 1121, Name: '晨会管理' },
-                ]
-            },
-            {
-                Modid: 2, Name: '所属部门管理', Description: "\u8BE5\u5458\u5DE5\u6240\u5728\u90E8\u95E8\u53CA\u5176\u5B50\u90E8\u95E8\u7684\u7BA1\u7406\u6743\u9650",
+                Modid: 1, Name: '后台管理', Description: "\u5305\u62EC \u90E8\u95E8 \u804C\u4F4D \u6743\u9650\u4FEE\u6539\u7B49",
                 AuthorityList: [
-                    { Authid: 21, Name: '成员管理', Description: "\u6240\u5728\u90E8\u95E8\u53CA\u5176\u5B50\u90E8\u95E8\u5185\u6240\u6709\u6210\u5458\u7684\u589E\u52A0/\u4FEE\u6539/\u5220\u9664" },
-                    { Authid: 22, Name: '职位管理' },
-                    { Authid: 23, Name: '子部门管理', Description: "\u53EF\u4EE5\u589E\u52A0/\u4FEE\u6539/\u5220\u9664\u5B50\u90E8\u95E8" },
-                    { Authid: 24, Name: '功能管理', Description: "\u529F\u80FD/\u6D41\u7A0B\u7684\u4FEE\u6539" },
-                    { Authid: 25, Name: '工作编辑', Description: "\u5DE5\u4F5C\u7684\u4FEE\u6539" },
-                    { Authid: 26, Name: '工作评论', Description: "\u5BF9\u5DF2\u6709\u5DE5\u4F5C\u8FDB\u884C\u8BC4\u8BBA" },
+                    // { Authid: AUTH.PROJECT_LIST, Name: '全部项目后台作管理' },
+                    { Authid: AUTH.PROJECT_MANAGE, Name: '所属项目后台管理', Description: "\u8BE5\u6210\u5458\u6240\u5C5E\u9879\u76EE\u7684\"\u540E\u53F0\"\u7BA1\u7406" },
+                    { Authid: AUTH.DEPARTMENT_MANAGE, Name: '所属部门后台管理', Description: "\u8BE5\u6210\u5458\u6240\u5C5E\u90E8\u95E8\u53CA\u5176\u5B50\u90E8\u95E8\u7684\"\u540E\u53F0\"\u7BA1\u7406" },
+                ]
+            },
+            {
+                Modid: 11, Name: '工作管理', Description: "\u5305\u62EC \u6A21\u5757 \u6D41\u7A0B \u5DE5\u4F5C \u8BC4\u4EF7\u7B49",
+                AuthorityList: [
+                    { Authid: AUTH.PROJECT_EDIT, Name: '所属项目工作管理', Description: "\u8BE5\u6210\u5458\u6240\u5C5E\u9879\u76EE\u53CA\u5176\u5B50\u90E8\u95E8\u7684\"\u5DE5\u4F5C\"\u7BA1\u7406" },
+                    { Authid: AUTH.DEPARTMENT_EDIT, Name: '所属部门工作管理', Description: "\u8BE5\u6210\u5458\u6240\u5C5E\u90E8\u95E8\u53CA\u5176\u5B50\u90E8\u95E8\u7684\"\u5DE5\u4F5C\"\u7BA1\u7406" },
+                    { Authid: AUTH.COLLATE_EDIT, Name: '所属项目晨会编辑', Description: "\u53EF\u4EE5\u5728\u6668\u4F1A\u9875\u9762\u7F16\u8F91\u72B6\u6001" },
                 ]
             },
         ];
@@ -210,7 +197,7 @@ var ManagerDataClass = /** @class */ (function () {
                 if (proj.UserList.IndexOfAttr(FieldName.Uid, ManagerData.CurrUser.Uid) > -1) {
                     projList.push(proj);
                     if (proj.MasterUid == ManagerData.CurrUser.Uid) {
-                        ManagerData.AddMyAuth(AUTH.PROJECT_EDIT);
+                        ManagerData.AddMyAuth(AUTH.PROJECT_MANAGE);
                     }
                 }
             }
@@ -269,9 +256,18 @@ var ManagerDataClass = /** @class */ (function () {
             Sort: 0,
             Children: [],
             PositionList: [
-                { Posid: this.NewPositionUuid++, Did: this.NewDepartmentUuid, Name: '制作人', UserList: [], AuthorityList: [this.AuthDict[AUTH.PROJECT_EDIT]] },
-                { Posid: this.NewPositionUuid++, Did: this.NewDepartmentUuid, Name: 'PM', UserList: [], AuthorityList: [this.AuthDict[AUTH.PROJECT_EDIT]] },
-                { Posid: this.NewPositionUuid++, Did: this.NewDepartmentUuid, Name: '管理员', UserList: [], AuthorityList: [this.AuthDict[AUTH.PROJECT_EDIT]] },
+                {
+                    Posid: this.NewPositionUuid++, Did: this.NewDepartmentUuid, Name: '制作人', UserList: [],
+                    AuthorityList: [this.AuthDict[AUTH.PROJECT_MANAGE], this.AuthDict[AUTH.DEPARTMENT_MANAGE]]
+                },
+                {
+                    Posid: this.NewPositionUuid++, Did: this.NewDepartmentUuid, Name: 'PM', UserList: [],
+                    AuthorityList: [this.AuthDict[AUTH.PROJECT_MANAGE], this.AuthDict[AUTH.DEPARTMENT_MANAGE]]
+                },
+                {
+                    Posid: this.NewPositionUuid++, Did: this.NewDepartmentUuid, Name: '管理员', UserList: [],
+                    AuthorityList: [this.AuthDict[AUTH.PROJECT_MANAGE], this.AuthDict[AUTH.DEPARTMENT_MANAGE]]
+                },
             ]
         };
         this.NewDepartmentUuid++;

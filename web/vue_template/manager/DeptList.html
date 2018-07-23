@@ -14,7 +14,7 @@
         <DeptListComp :deptTree="[deptTree[0]]" :parentDept="null"></DeptListComp>
         <!-- 所有其它的 -->
         <DeptListComp :deptTree="deptTree|remainDeptTree" :parentDept="null"></DeptListComp>
-        <div class="divrow DeptList-row" v-if="auth['PROJECT_EDIT']">
+        <div class="divrow DeptList-row" v-if="auth['PROJECT_MANAGE']">
             <div>
                 <input type="text " class="form-control " placeholder="输入新部门名称 " aria-describedby="basic-addon1 " v-model.trim="newName"
                     @keyup.enter="onAdd()" />
