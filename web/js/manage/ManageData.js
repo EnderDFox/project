@@ -1,12 +1,12 @@
-var ManagerDataClass = /** @class */ (function () {
-    function ManagerDataClass() {
+var ManageDataClass = /** @class */ (function () {
+    function ManageDataClass() {
         /**我的权限 */
         this.MyAuth = {};
         //
         this.NewDepartmentUuid = 100001;
         this.NewPositionUuid = 200001;
     }
-    ManagerDataClass.prototype.Init = function () {
+    ManageDataClass.prototype.Init = function () {
         this.InitSimulateData();
         //
         var uid = Number(UrlParam.Get('uid'));
@@ -25,7 +25,7 @@ var ManagerDataClass = /** @class */ (function () {
         this.CurrUser = this.UserDict[uid];
     };
     /**初始化虚拟数据 */
-    ManagerDataClass.prototype.InitSimulateData = function () {
+    ManageDataClass.prototype.InitSimulateData = function () {
         this.AuthDict = {};
         this.DeptDict = {};
         //#
@@ -41,8 +41,8 @@ var ManagerDataClass = /** @class */ (function () {
             {
                 Modid: 11, Name: '工作管理', Description: "\u5305\u62EC \u6A21\u5757 \u6D41\u7A0B \u5DE5\u4F5C \u8BC4\u4EF7\u7B49",
                 AuthorityList: [
-                    { Authid: AUTH.PROJECT_EDIT, Name: '所属项目工作管理', Description: "\u8BE5\u6210\u5458\u6240\u5C5E\u9879\u76EE\u53CA\u5176\u5B50\u90E8\u95E8\u7684\"\u5DE5\u4F5C\"\u7BA1\u7406" },
-                    { Authid: AUTH.DEPARTMENT_EDIT, Name: '所属部门工作管理', Description: "\u8BE5\u6210\u5458\u6240\u5C5E\u90E8\u95E8\u53CA\u5176\u5B50\u90E8\u95E8\u7684\"\u5DE5\u4F5C\"\u7BA1\u7406" },
+                    { Authid: AUTH.PROJECT_PROCESS, Name: '所属项目工作管理', Description: "\u8BE5\u6210\u5458\u6240\u5C5E\u9879\u76EE\u53CA\u5176\u5B50\u90E8\u95E8\u7684\"\u5DE5\u4F5C\"\u7BA1\u7406" },
+                    { Authid: AUTH.DEPARTMENT_PROCESS, Name: '所属部门工作管理', Description: "\u8BE5\u6210\u5458\u6240\u5C5E\u90E8\u95E8\u53CA\u5176\u5B50\u90E8\u95E8\u7684\"\u5DE5\u4F5C\"\u7BA1\u7406" },
                     { Authid: AUTH.COLLATE_EDIT, Name: '所属项目晨会编辑', Description: "\u53EF\u4EE5\u5728\u6668\u4F1A\u9875\u9762\u7F16\u8F91\u72B6\u6001" },
                 ]
             },
@@ -146,7 +146,7 @@ var ManagerDataClass = /** @class */ (function () {
         //
         this.InitAllDeptDict(proj.DeptTree);
     };
-    ManagerDataClass.prototype.InitAuthorityModuleList = function () {
+    ManageDataClass.prototype.InitAuthorityModuleList = function () {
         var amList = this.AuthorityModuleList;
         for (var i = 0; i < amList.length; i++) {
             var am = amList[i];
@@ -158,7 +158,7 @@ var ManagerDataClass = /** @class */ (function () {
             }
         }
     };
-    ManagerDataClass.prototype.InitAllDeptDict = function (deptTree) {
+    ManageDataClass.prototype.InitAllDeptDict = function (deptTree) {
         if (deptTree === void 0) { deptTree = null; }
         for (var i = 0; i < deptTree.length; i++) {
             var dept = deptTree[i];
@@ -171,33 +171,33 @@ var ManagerDataClass = /** @class */ (function () {
             }
         }
     };
-    ManagerDataClass.prototype.AddMyAuth = function (auth) {
+    ManageDataClass.prototype.AddMyAuth = function (auth) {
         this.MyAuth[auth] = this.MyAuth[AUTH[auth]] = true;
         // Object.freeze(this.MyAuth)
         // Object.freeze(this.MyAuth[Auth.PROJECT_LIST])
         // Object.freeze(this.MyAuth[Auth[Auth.PROJECT_LIST])
     };
-    ManagerDataClass.prototype.RemoveMyAuth = function (auth) {
+    ManageDataClass.prototype.RemoveMyAuth = function (auth) {
         this.MyAuth[auth] = this.MyAuth[AUTH[auth]] = false;
     };
-    ManagerDataClass.prototype.GetProjByPid = function (pid) {
+    ManageDataClass.prototype.GetProjByPid = function (pid) {
         return this.ProjectList.FindOfAttr(FieldName.PID, pid);
     };
     /**返回当前用户有权限的工程列表 */
-    ManagerDataClass.prototype.GetProjectListHasAuth = function () {
+    ManageDataClass.prototype.GetProjectListHasAuth = function () {
         var projList;
-        if (ManagerData.MyAuth[AUTH.PROJECT_LIST]) {
-            projList = ManagerData.ProjectList;
+        if (ManageData.MyAuth[AUTH.PROJECT_LIST]) {
+            projList = ManageData.ProjectList;
         }
         else {
             //只看自己所处的项目
             projList = [];
-            for (var i = 0; i < ManagerData.ProjectList.length; i++) {
-                var proj = ManagerData.ProjectList[i];
-                if (proj.UserList.IndexOfAttr(FieldName.Uid, ManagerData.CurrUser.Uid) > -1) {
+            for (var i = 0; i < ManageData.ProjectList.length; i++) {
+                var proj = ManageData.ProjectList[i];
+                if (proj.UserList.IndexOfAttr(FieldName.Uid, ManageData.CurrUser.Uid) > -1) {
                     projList.push(proj);
-                    if (proj.MasterUid == ManagerData.CurrUser.Uid) {
-                        ManagerData.AddMyAuth(AUTH.PROJECT_MANAGE);
+                    if (proj.MasterUid == ManageData.CurrUser.Uid) {
+                        ManageData.AddMyAuth(AUTH.PROJECT_MANAGE);
                     }
                 }
             }
@@ -205,7 +205,7 @@ var ManagerDataClass = /** @class */ (function () {
         return projList;
     };
     /**得到一个proj下所有职位的list */
-    ManagerDataClass.prototype.GetProjAllPosnList = function (proj, rs) {
+    ManageDataClass.prototype.GetProjAllPosnList = function (proj, rs) {
         if (rs === void 0) { rs = null; }
         rs = rs || [];
         for (var i = 0; i < proj.DeptTree.length; i++) {
@@ -215,7 +215,7 @@ var ManagerDataClass = /** @class */ (function () {
         return rs;
     };
     /**一个部门及其子部门下所有的职位 */
-    ManagerDataClass.prototype.GetDeptAllPosnList = function (dept, rs) {
+    ManageDataClass.prototype.GetDeptAllPosnList = function (dept, rs) {
         if (rs === void 0) { rs = null; }
         rs = rs || [];
         rs.push.apply(rs, dept.PositionList);
@@ -226,7 +226,7 @@ var ManagerDataClass = /** @class */ (function () {
         return rs;
     };
     /**一个部门下的成员,不包括子部门 */
-    ManagerDataClass.prototype.GetDeptUserList = function (dept, rs) {
+    ManageDataClass.prototype.GetDeptUserList = function (dept, rs) {
         if (rs === void 0) { rs = null; }
         rs = rs || [];
         for (var i = 0; i < dept.PositionList.length; i++) {
@@ -236,7 +236,7 @@ var ManagerDataClass = /** @class */ (function () {
         return rs;
     };
     /**一个部门及其子部门下所有的user */
-    ManagerDataClass.prototype.GetDeptAllUserList = function (dept, rs) {
+    ManageDataClass.prototype.GetDeptAllUserList = function (dept, rs) {
         if (rs === void 0) { rs = null; }
         rs = rs || [];
         for (var i = 0; i < dept.PositionList.length; i++) {
@@ -250,7 +250,7 @@ var ManagerDataClass = /** @class */ (function () {
         return rs;
     };
     /**获取默认的管理员部门 */
-    ManagerDataClass.prototype.NewDeptManager = function () {
+    ManageDataClass.prototype.NewDeptManager = function () {
         var dept = {
             Did: this.NewDepartmentUuid, Name: '管理部', Fid: 0, Depth: 0,
             Sort: 0,
@@ -275,20 +275,20 @@ var ManagerDataClass = /** @class */ (function () {
         return dept;
     };
     /**检测childDept是否是parentDept的子孙dept */
-    ManagerDataClass.prototype.IsDepartmentChild = function (parentDept, childDept) {
+    ManageDataClass.prototype.IsDepartmentChild = function (parentDept, childDept) {
         for (var i = 0; i < parentDept.Children.length; i++) {
             if (parentDept.Children[i].Did == childDept.Did) {
                 return true;
             }
             else {
-                if (ManagerData.IsDepartmentChild(parentDept.Children[i], childDept)) {
+                if (ManageData.IsDepartmentChild(parentDept.Children[i], childDept)) {
                     return true;
                 }
             }
         }
         return false;
     };
-    ManagerDataClass.prototype.GetDepartmentFullNameArr = function (dp) {
+    ManageDataClass.prototype.GetDepartmentFullNameArr = function (dp) {
         var rs = [];
         while (dp) {
             rs.unshift(dp.Name);
@@ -296,7 +296,7 @@ var ManagerDataClass = /** @class */ (function () {
         }
         return rs;
     };
-    ManagerDataClass.prototype.GetBrotherDepartmentList = function () {
+    ManageDataClass.prototype.GetBrotherDepartmentList = function () {
         var args = [];
         for (var _i = 0; _i < arguments.length; _i++) {
             args[_i] = arguments[_i];
@@ -309,24 +309,24 @@ var ManagerDataClass = /** @class */ (function () {
             fid = args[0].Fid;
         }
         if (fid) {
-            return ManagerData.DeptDict[fid].Children;
+            return ManageData.DeptDict[fid].Children;
         }
         else { //顶级部门
             return this.CurrProj.DeptTree;
         }
     };
-    ManagerDataClass.prototype.RemoveUserPosnid = function (user) {
+    ManageDataClass.prototype.RemoveUserPosnid = function (user) {
         if (user.Did) {
-            var oldDept = ManagerData.DeptDict[user.Did];
+            var oldDept = ManageData.DeptDict[user.Did];
             var oldPosn = oldDept.PositionList.FindOfAttr(FieldName.Posnid, user.Posnid);
             if (oldPosn) {
                 oldPosn.UserList.RemoveByAttr(FieldName.Uid, user.Uid);
             }
         }
     };
-    ManagerDataClass.prototype.SetUserPosnid = function (user, did, posnid) {
+    ManageDataClass.prototype.SetUserPosnid = function (user, did, posnid) {
         if (posnid === void 0) { posnid = -1; }
-        var dept = ManagerData.DeptDict[did];
+        var dept = ManageData.DeptDict[did];
         user.Did = dept.Did;
         var posn;
         if (posnid == -1) {
@@ -338,7 +338,7 @@ var ManagerDataClass = /** @class */ (function () {
         user.Posnid = posn.Posnid;
         posn.UserList.push(user);
     };
-    return ManagerDataClass;
+    return ManageDataClass;
 }());
-var ManagerData = new ManagerDataClass();
-//# sourceMappingURL=ManagerData.js.map
+var ManageData = new ManageDataClass();
+//# sourceMappingURL=ManageData.js.map

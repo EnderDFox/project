@@ -16,6 +16,13 @@ type L2C_Message struct {
 
 //=======================业务数据结构=======================
 
+type AuthSingle struct {
+	Authid uint64
+	Modid  uint64
+	Name   string
+	Sort   uint32
+}
+
 type ProjectSingle struct {
 	Pid  uint64
 	Name string

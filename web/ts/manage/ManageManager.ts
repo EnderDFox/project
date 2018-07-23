@@ -11,14 +11,14 @@ enum DeptDropdownItemEnabled {
     HIDE = 4,
 }
 
-class ManagerManagerClass {
+class ManageManagerClass {
     UserConfig = {
         /**posn list显示子部门的职位 */
         ShownDeptChildren: true,
     }
     //
-    Data: ManagerDataClass
-    VuePath = "manager/"
+    Data: ManageDataClass
+    VuePath = "manage/"
     VueProjectList: CombinedVueInstance1<{ auth: { [key: number]: boolean }, projectList: ProjectSingle[], newName: string }>
     VueProjectEdit: CombinedVueInstance1<{ projectList: ProjectSingle[], project: ProjectSingle, newName: string, dpTree: DepartmentSingle[], currPage: ProjectEditPageIndex }>
     VueUserList: CombinedVueInstance1<{ userList: UserSingle[], otherUserList: UserSingle[], newUserUid: number, filterText: string }>
@@ -27,7 +27,7 @@ class ManagerManagerClass {
     VueAuthList: CombinedVueInstance1<{ checkedChange: boolean }>
     VueSelectUser: CombinedVueInstance1<{ checkedChange: boolean, filterText: string }>
     Init() {
-        this.Data = ManagerData
+        this.Data = ManageData
         UrlParam.Callback = this.UrlParamCallback.bind(this)
         this.InitVue(this.UrlParamCallback.bind(this))
     }
@@ -81,7 +81,7 @@ class ManagerManagerClass {
                 methods: {
                     deptOption: this.DeptOption.bind(this),
                     OnBtnClick: function () {//点击时刷新列表
-                        this.deptList = TreeUtil.Map(ManagerData.CurrProj.DeptTree)
+                        this.deptList = TreeUtil.Map(ManageData.CurrProj.DeptTree)
                     },
                 }
             })
@@ -616,17 +616,17 @@ class ManagerManagerClass {
                     },
                     checkDeptMgrChecked: (posn: PositionSingle) => {
                         return posn.AuthorityList.IndexOfAttr(FieldName.Authid, AUTH.DEPARTMENT_MANAGE) > -1
-                            && posn.AuthorityList.IndexOfAttr(FieldName.Authid, AUTH.DEPARTMENT_EDIT) > -1
+                            && posn.AuthorityList.IndexOfAttr(FieldName.Authid, AUTH.DEPARTMENT_PROCESS) > -1
                     },
                     onChangeDeptMgrChecked: (posn: PositionSingle) => {
                         var has = posn.AuthorityList.IndexOfAttr(FieldName.Authid, AUTH.DEPARTMENT_MANAGE) > -1
-                            && posn.AuthorityList.IndexOfAttr(FieldName.Authid, AUTH.DEPARTMENT_EDIT) > -1
+                            && posn.AuthorityList.IndexOfAttr(FieldName.Authid, AUTH.DEPARTMENT_PROCESS) > -1
                         if (has) {
                             posn.AuthorityList.RemoveByAttr(FieldName.Authid, AUTH.DEPARTMENT_MANAGE)
-                            posn.AuthorityList.RemoveByAttr(FieldName.Authid, AUTH.DEPARTMENT_EDIT)
+                            posn.AuthorityList.RemoveByAttr(FieldName.Authid, AUTH.DEPARTMENT_PROCESS)
                         } else {
                             posn.AuthorityList.push(this.Data.AuthDict[AUTH.DEPARTMENT_MANAGE])
-                            posn.AuthorityList.push(this.Data.AuthDict[AUTH.DEPARTMENT_EDIT])
+                            posn.AuthorityList.push(this.Data.AuthDict[AUTH.DEPARTMENT_PROCESS])
                         }
                     },
                     onEditUserList: (dept: DepartmentSingle, posn: PositionSingle) => {
@@ -1046,4 +1046,4 @@ class ManagerManagerClass {
     }
 }
 
-var ManagerManager = new ManagerManagerClass()
+var ManageManager = new ManageManagerClass()

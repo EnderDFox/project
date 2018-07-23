@@ -1,4 +1,4 @@
-class ManagerDataClass {
+class ManageDataClass {
     /**全部AUTH */
     AuthorityModuleList: AuthorityModuleSingle[]
     AuthDict: { [key: number]: AuthoritySingle };
@@ -57,8 +57,8 @@ class ManagerDataClass {
                 Modid: 11, Name: '工作管理', Description: `包括 模块 流程 工作 评价等`,
                 AuthorityList: [
 
-                    { Authid: AUTH.PROJECT_EDIT, Name: '所属项目工作管理', Description: `该成员所属项目及其子部门的"工作"管理` },
-                    { Authid: AUTH.DEPARTMENT_EDIT, Name: '所属部门工作管理', Description: `该成员所属部门及其子部门的"工作"管理` },
+                    { Authid: AUTH.PROJECT_PROCESS, Name: '所属项目工作管理', Description: `该成员所属项目及其子部门的"工作"管理` },
+                    { Authid: AUTH.DEPARTMENT_PROCESS, Name: '所属部门工作管理', Description: `该成员所属部门及其子部门的"工作"管理` },
                     { Authid: AUTH.COLLATE_EDIT, Name: '所属项目晨会编辑', Description: `可以在晨会页面编辑状态` },
                 ]
             },
@@ -210,17 +210,17 @@ class ManagerDataClass {
     /**返回当前用户有权限的工程列表 */
     GetProjectListHasAuth(): ProjectSingle[] {
         var projList: ProjectSingle[];
-        if (ManagerData.MyAuth[AUTH.PROJECT_LIST]) {
-            projList = ManagerData.ProjectList
+        if (ManageData.MyAuth[AUTH.PROJECT_LIST]) {
+            projList = ManageData.ProjectList
         } else {
             //只看自己所处的项目
             projList = []
-            for (var i = 0; i < ManagerData.ProjectList.length; i++) {
-                var proj = ManagerData.ProjectList[i]
-                if (proj.UserList.IndexOfAttr(FieldName.Uid, ManagerData.CurrUser.Uid) > -1) {
+            for (var i = 0; i < ManageData.ProjectList.length; i++) {
+                var proj = ManageData.ProjectList[i]
+                if (proj.UserList.IndexOfAttr(FieldName.Uid, ManageData.CurrUser.Uid) > -1) {
                     projList.push(proj)
-                    if (proj.MasterUid == ManagerData.CurrUser.Uid) {
-                        ManagerData.AddMyAuth(AUTH.PROJECT_MANAGE)
+                    if (proj.MasterUid == ManageData.CurrUser.Uid) {
+                        ManageData.AddMyAuth(AUTH.PROJECT_MANAGE)
                     }
                 }
             }
@@ -300,7 +300,7 @@ class ManagerDataClass {
             if (parentDept.Children[i].Did == childDept.Did) {
                 return true
             } else {
-                if (ManagerData.IsDepartmentChild(parentDept.Children[i], childDept)) {
+                if (ManageData.IsDepartmentChild(parentDept.Children[i], childDept)) {
                     return true
                 }
             }
@@ -326,14 +326,14 @@ class ManagerDataClass {
             fid = (args[0] as DepartmentSingle).Fid
         }
         if (fid) {
-            return ManagerData.DeptDict[fid].Children
+            return ManageData.DeptDict[fid].Children
         } else {//顶级部门
             return this.CurrProj.DeptTree
         }
     }
     RemoveUserPosnid(user: UserSingle) {
         if (user.Did) {
-            var oldDept: DepartmentSingle = ManagerData.DeptDict[user.Did]
+            var oldDept: DepartmentSingle = ManageData.DeptDict[user.Did]
             var oldPosn: PositionSingle = oldDept.PositionList.FindOfAttr(FieldName.Posnid, user.Posnid)
             if (oldPosn) {
                 oldPosn.UserList.RemoveByAttr(FieldName.Uid, user.Uid)
@@ -341,7 +341,7 @@ class ManagerDataClass {
         }
     }
     SetUserPosnid(user: UserSingle, did: number, posnid: number = -1) {
-        var dept: DepartmentSingle = ManagerData.DeptDict[did]
+        var dept: DepartmentSingle = ManageData.DeptDict[did]
         user.Did = dept.Did
         var posn: PositionSingle
         if (posnid == -1) {
@@ -353,4 +353,4 @@ class ManagerDataClass {
         posn.UserList.push(user)
     }
 }
-var ManagerData = new ManagerDataClass()
+var ManageData = new ManageDataClass()

@@ -426,7 +426,7 @@ enum AUTH {
     PROJECT_MANAGE = 101,
     DEPARTMENT_MANAGE = 110, //所属部门的管理权限
     //
-    PROJECT_EDIT = 210, //所属项目的前台
-    DEPARTMENT_EDIT = 201, //所属部门的后台
+    PROJECT_PROCESS = 210, //所属项目的前台
+    DEPARTMENT_PROCESS = 201, //所属部门的后台
     COLLATE_EDIT = 301, //晨会权限 修改状态
 }

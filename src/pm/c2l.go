@@ -50,7 +50,9 @@ const (
 	C2L_VERSION_CHANGE_NAME    = 80104
 	C2L_VERSION_CHANGE_PUBLISH = 80105
 	C2L_VERSION_CHANGE_SORT    = 80106
-	C2L_TEST_1                 = 90101
+	C2L_TEST_1                 = 99101
+	//# Manage
+	C2L_MANAGE_VIEW = 90101
 )
 
 type C2L_SessionLogin struct {

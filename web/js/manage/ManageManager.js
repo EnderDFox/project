@@ -12,20 +12,20 @@ var DeptDropdownItemEnabled;
     DeptDropdownItemEnabled[DeptDropdownItemEnabled["DISABLED"] = 2] = "DISABLED";
     DeptDropdownItemEnabled[DeptDropdownItemEnabled["HIDE"] = 4] = "HIDE";
 })(DeptDropdownItemEnabled || (DeptDropdownItemEnabled = {}));
-var ManagerManagerClass = /** @class */ (function () {
-    function ManagerManagerClass() {
+var ManageManagerClass = /** @class */ (function () {
+    function ManageManagerClass() {
         this.UserConfig = {
             /**posn list显示子部门的职位 */
             ShownDeptChildren: true,
         };
-        this.VuePath = "manager/";
+        this.VuePath = "manage/";
     }
-    ManagerManagerClass.prototype.Init = function () {
-        this.Data = ManagerData;
+    ManageManagerClass.prototype.Init = function () {
+        this.Data = ManageData;
         UrlParam.Callback = this.UrlParamCallback.bind(this);
         this.InitVue(this.UrlParamCallback.bind(this));
     };
-    ManagerManagerClass.prototype.UrlParamCallback = function () {
+    ManageManagerClass.prototype.UrlParamCallback = function () {
         Common.PopupHideAll();
         var pid = UrlParam.Get(URL_PARAM_KEY.PID, 0);
         var proj = this.Data.GetProjectListHasAuth().FindOfAttr(FieldName.PID, pid);
@@ -36,7 +36,7 @@ var ManagerManagerClass = /** @class */ (function () {
             this.ShowProjectList();
         }
     };
-    ManagerManagerClass.prototype.InitVue = function (cb) {
+    ManageManagerClass.prototype.InitVue = function (cb) {
         var _this = this;
         Loader.LoadVueTemplateList([this.VuePath + "NavbarComp", this.VuePath + "DeptDropdownComp"], function (tplList) {
             //注册组件
@@ -76,7 +76,7 @@ var ManagerManagerClass = /** @class */ (function () {
                 methods: {
                     deptOption: _this.DeptOption.bind(_this),
                     OnBtnClick: function () {
-                        this.deptList = TreeUtil.Map(ManagerData.CurrProj.DeptTree);
+                        this.deptList = TreeUtil.Map(ManageData.CurrProj.DeptTree);
                     },
                 }
             });
@@ -85,10 +85,10 @@ var ManagerManagerClass = /** @class */ (function () {
         });
     };
     /**没有权限访问的页面 通常是通过url进入的 */
-    ManagerManagerClass.prototype.ShowNoAuthPage = function () {
+    ManageManagerClass.prototype.ShowNoAuthPage = function () {
         //TODO:
     };
-    ManagerManagerClass.prototype.ShowProjectList = function () {
+    ManageManagerClass.prototype.ShowProjectList = function () {
         var _this = this;
         //
         Loader.LoadVueTemplate(this.VuePath + "ProjectList", function (tpl) {
@@ -205,7 +205,7 @@ var ManagerManagerClass = /** @class */ (function () {
             Common.InsertIntoPageDom(vue.$el);
         });
     };
-    ManagerManagerClass.prototype.ShowProjectEdit = function () {
+    ManageManagerClass.prototype.ShowProjectEdit = function () {
         var _this = this;
         var proj = this.Data.GetProjectListHasAuth().FindOfAttr(FieldName.PID, UrlParam.Get(URL_PARAM_KEY.PID));
         this.Data.CurrProj = proj;
@@ -252,7 +252,7 @@ var ManagerManagerClass = /** @class */ (function () {
             _this.SwitchProjectEditPageContent();
         });
     };
-    ManagerManagerClass.prototype.SwitchProjectEditPageContent = function () {
+    ManageManagerClass.prototype.SwitchProjectEditPageContent = function () {
         var currPage = UrlParam.Get(URL_PARAM_KEY.PAGE, [ProjectEditPageIndex.Department, ProjectEditPageIndex.Position, ProjectEditPageIndex.User]);
         switch (currPage) {
             case ProjectEditPageIndex.Department:
@@ -266,7 +266,7 @@ var ManagerManagerClass = /** @class */ (function () {
                 break;
         }
     };
-    ManagerManagerClass.prototype.ShowDepartmentList = function () {
+    ManageManagerClass.prototype.ShowDepartmentList = function () {
         var _this = this;
         this.VueProjectEdit.currPage = ProjectEditPageIndex.Department;
         Loader.LoadVueTemplateList([this.VuePath + "DeptList", this.VuePath + "DeptListComp"], function (tplList) {
@@ -538,7 +538,7 @@ var ManagerManagerClass = /** @class */ (function () {
             }
         });
     };
-    ManagerManagerClass.prototype.DeptOption = function (dp) {
+    ManageManagerClass.prototype.DeptOption = function (dp) {
         if (dp.Depth == 0) {
             return dp.Name;
         }
@@ -552,7 +552,7 @@ var ManagerManagerClass = /** @class */ (function () {
             return rs;
         }
     };
-    ManagerManagerClass.prototype.DeptListCheckSortUp = function (dp, i0) {
+    ManageManagerClass.prototype.DeptListCheckSortUp = function (dp, i0) {
         if (dp.Fid == 0) {
             if (i0 > 1) { //顶级因为有个`管理员`部门
                 return true;
@@ -565,7 +565,7 @@ var ManagerManagerClass = /** @class */ (function () {
         }
         return false;
     };
-    ManagerManagerClass.prototype.DeptListCheckSortDown = function (dp, i0) {
+    ManageManagerClass.prototype.DeptListCheckSortDown = function (dp, i0) {
         var brothers = this.Data.GetBrotherDepartmentList(dp);
         var brotherIndex = ArrayUtil.IndexOfAttr(brothers, FieldName.Did, dp.Did);
         if (brotherIndex < brothers.length - 1) {
@@ -574,7 +574,7 @@ var ManagerManagerClass = /** @class */ (function () {
         return false;
     };
     /**是否可以移动到 目标部门 */
-    ManagerManagerClass.prototype.CheckCanMoveParentDp = function (dp, parentDp) {
+    ManageManagerClass.prototype.CheckCanMoveParentDp = function (dp, parentDp) {
         if (dp.Did == parentDp.Did) {
             return false;
         }
@@ -586,7 +586,7 @@ var ManagerManagerClass = /** @class */ (function () {
         }
         return true;
     };
-    ManagerManagerClass.prototype.ShowPositionList = function () {
+    ManageManagerClass.prototype.ShowPositionList = function () {
         var _this = this;
         Loader.LoadVueTemplateList([this.VuePath + "PosnList", this.VuePath + "PosnListComp"], function (tplList) {
             Vue.component("PosnListComp", {
@@ -616,18 +616,18 @@ var ManagerManagerClass = /** @class */ (function () {
                     },
                     checkDeptMgrChecked: function (posn) {
                         return posn.AuthorityList.IndexOfAttr(FieldName.Authid, AUTH.DEPARTMENT_MANAGE) > -1
-                            && posn.AuthorityList.IndexOfAttr(FieldName.Authid, AUTH.DEPARTMENT_EDIT) > -1;
+                            && posn.AuthorityList.IndexOfAttr(FieldName.Authid, AUTH.DEPARTMENT_PROCESS) > -1;
                     },
                     onChangeDeptMgrChecked: function (posn) {
                         var has = posn.AuthorityList.IndexOfAttr(FieldName.Authid, AUTH.DEPARTMENT_MANAGE) > -1
-                            && posn.AuthorityList.IndexOfAttr(FieldName.Authid, AUTH.DEPARTMENT_EDIT) > -1;
+                            && posn.AuthorityList.IndexOfAttr(FieldName.Authid, AUTH.DEPARTMENT_PROCESS) > -1;
                         if (has) {
                             posn.AuthorityList.RemoveByAttr(FieldName.Authid, AUTH.DEPARTMENT_MANAGE);
-                            posn.AuthorityList.RemoveByAttr(FieldName.Authid, AUTH.DEPARTMENT_EDIT);
+                            posn.AuthorityList.RemoveByAttr(FieldName.Authid, AUTH.DEPARTMENT_PROCESS);
                         }
                         else {
                             posn.AuthorityList.push(_this.Data.AuthDict[AUTH.DEPARTMENT_MANAGE]);
-                            posn.AuthorityList.push(_this.Data.AuthDict[AUTH.DEPARTMENT_EDIT]);
+                            posn.AuthorityList.push(_this.Data.AuthDict[AUTH.DEPARTMENT_PROCESS]);
                         }
                     },
                     onEditUserList: function (dept, posn) {
@@ -753,7 +753,7 @@ var ManagerManagerClass = /** @class */ (function () {
             Common.InsertIntoDom(vue.$el, _this.VueProjectEdit.$refs.pageContent);
         });
     };
-    ManagerManagerClass.prototype.ShowAuthList = function (posn) {
+    ManageManagerClass.prototype.ShowAuthList = function (posn) {
         var _this = this;
         Loader.LoadVueTemplate(this.VuePath + "AuthList", function (tpl) {
             var checkedDict = {};
@@ -832,7 +832,7 @@ var ManagerManagerClass = /** @class */ (function () {
             Common.Popup($(vue.$el));
         });
     };
-    ManagerManagerClass.prototype.ShowUserList = function (backDept, backPosn) {
+    ManageManagerClass.prototype.ShowUserList = function (backDept, backPosn) {
         var _this = this;
         if (backDept === void 0) { backDept = null; }
         if (backPosn === void 0) { backPosn = null; }
@@ -979,7 +979,7 @@ var ManagerManagerClass = /** @class */ (function () {
         });
     };
     /**选择 用户 */
-    ManagerManagerClass.prototype.ShowSelectUser = function (proj, userList) {
+    ManageManagerClass.prototype.ShowSelectUser = function (proj, userList) {
         var _this = this;
         if (userList.length == 0) {
             Common.AlertWarning('所有用户都已经被添加到了这个项目中');
@@ -1061,7 +1061,7 @@ var ManagerManagerClass = /** @class */ (function () {
             Common.Popup($(vue.$el));
         });
     };
-    return ManagerManagerClass;
+    return ManageManagerClass;
 }());
-var ManagerManager = new ManagerManagerClass();
-//# sourceMappingURL=ManagerManager.js.map
+var ManageManager = new ManageManagerClass();
+//# sourceMappingURL=ManageManager.js.map

@@ -54,6 +54,8 @@ const (
 	L2C_VERSION_CHANGE_NAME    = 80104
 	L2C_VERSION_CHANGE_PUBLISH = 80105
 	L2C_VERSION_CHANGE_SORT    = 80106
+	//# Manage
+	L2C_MANAGE_VIEW = 90101
 )
 
 type L2C_SessionLogin struct {
@@ -245,4 +247,10 @@ type L2C_UpdateWorkAdd struct {
 type L2C_UpdateWorkDelete struct {
 	Wid  uint64
 	Fids []uint64
+}
+
+type L2C_ManageView struct {
+	AuthList []*AuthSingle
+	UserList []*UserSingle
+	ProjList []*ProjectSingle
 }

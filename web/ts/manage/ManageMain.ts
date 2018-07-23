@@ -1,16 +1,16 @@
-class ManagerMainClass {
+class ManageMainClass {
     Init(): void {
         Common.InitUrlParams()
         VueManager.Init(this.OnInitVueCpl)
     }
     private OnInitVueCpl(){
-        ManagerData.Init()
+        ManageData.Init()
         //
-        if(ManagerData.CurrUser==null){
+        if(ManageData.CurrUser==null){
             Common.ShowNoAccountPage()
         }else{
-            ManagerManager.Init()
+            ManageManager.Init()
         }
     }
 }
-var ManagerMain = new ManagerMainClass()
+var ManageMain = new ManageMainClass()
