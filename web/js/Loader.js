@@ -20,22 +20,20 @@ var LoaderClass = /** @class */ (function () {
         this.Lang = ['zh'];
         //需要加载的css文件列表
         //     <link rel="stylesheet" href="css/common.css?v=v1.3.59" />
-        this.CssList = [
-            { path: "", files: ['common', 'project', 'project1'] }
-        ];
+        this.CssList = [];
         //需要加载的js文件列表  jquery必须提前加载
         //< script src = "js/Loader1.js?v=v1.3.59" > </script>
         this.JsList = [
             { path: "", files: ['Define', 'JQueryExtend', 'Protocol', 'Config', 'WSConn', 'Commond', 'Common', 'DateTime', 'Templet', 'Data', 'Main'] },
             { path: "lib", files: ['vue', 'Echarts.min', 'Cookie', 'jquery.md5', 'Sortable'] },
-            { path: "common", files: ['PrototypeExtend', 'VueManager'] },
+            { path: "common", files: ['PrototypeExtend', 'VueManager', 'PopManager',] },
             {
                 path: "module", files: ['User', 'ProjectNav', 'FileManager',
                     'ProcessData', 'ProcessManager', 'ProcessPanel', 'ProcessFilter',
                     'CollateData', 'CollateManager', 'CollatePanel', 'CollateFilter',
                     'NoticeData', 'NoticeManager', 'NoticePanel',
                     'ProfileData', 'ProfileManager', 'ProfilePanel',
-                    'TemplateManager', 'PopManager', 'UploadManager', 'VersionManager']
+                    'TemplateManager', 'UploadManager', 'VersionManager',]
             },
             {
                 path: "tests", files: []
@@ -45,12 +43,20 @@ var LoaderClass = /** @class */ (function () {
         this.LoadFileSum = 0;
         //加载状态
         this.IsComplete = false;
+        this.NeedloadBootstrapCss = false;
         this.IsVueTemplateLoaded = false;
         /**vue模板缓存 */
         this.VueTemplateLoadedDict = {};
     }
     //初始化
-    LoaderClass.prototype.Init = function () {
+    LoaderClass.prototype.Init = function (mainName, extendCssList, extendJsList) {
+        this.MainName = mainName;
+        if (extendCssList) {
+            this.ExtendLoadGroupArr(this.CssList, extendCssList);
+        }
+        if (extendJsList) {
+            this.ExtendLoadGroupArr(this.JsList, extendJsList);
+        }
         Loader.CheckEnviroment();
         var scripts = window.document.head.getElementsByTagName('script');
         var len = scripts.length;
@@ -71,6 +77,25 @@ var LoaderClass = /** @class */ (function () {
         }
         //加载脚本
         this.LoadAll();
+    };
+    LoaderClass.prototype.ExtendLoadGroupArr = function (originArr, extendArr) {
+        for (var i = 0; i < extendArr.length; i++) {
+            var extendItem = extendArr[i];
+            var originItem = null;
+            originArr.every(function (_originItem) {
+                if (_originItem.path == extendItem.path) {
+                    originItem = _originItem;
+                    return false;
+                }
+                return true;
+            });
+            if (originItem) {
+                originItem.files = originItem.files.concat(extendItem.files);
+            }
+            else {
+                originArr.push(extendItem);
+            }
+        }
     };
     //注册函数
     LoaderClass.prototype.RegisterFunc = function () {
@@ -162,7 +187,17 @@ var LoaderClass = /** @class */ (function () {
         }
     };
     //脚本加载完毕
-    LoaderClass.prototype.OnLoadJsCssComplete = function () {
+    LoaderClass.prototype.OnLoadCssComplete = function () {
+        this.LoadFileSum = 0;
+        for (var i in this.JsList) {
+            this.LoadFileSum += this.JsList[i].files.length;
+        }
+        for (var i in this.JsList) {
+            var item = this.JsList[i];
+            this.AsyncScript(item.files, item.path + '/');
+        }
+    };
+    LoaderClass.prototype.OnLoadJsComplete = function () {
         VueManager.Init(this.OnInitVueComplete.bind(this));
     };
     LoaderClass.prototype.OnInitVueComplete = function () {
@@ -185,7 +220,7 @@ var LoaderClass = /** @class */ (function () {
             this.loadSingleCss(path + v, function () {
                 _this.LoadFileSum--;
                 if (_this.LoadFileSum == 0) {
-                    _this.OnLoadJsCssComplete();
+                    _this.OnLoadCssComplete();
                 }
             });
         }
@@ -200,7 +235,7 @@ var LoaderClass = /** @class */ (function () {
                 _this.LoadFileSum--;
                 if (_this.LoadFileSum == 0) {
                     //脚本加载完毕
-                    _this.OnLoadJsCssComplete();
+                    _this.OnLoadJsComplete();
                 }
             });
             //方法2 这样无法断点  浏览器console中显示的位置也是VM的位置
@@ -243,24 +278,28 @@ var LoaderClass = /** @class */ (function () {
     //加载脚本
     LoaderClass.prototype.LoadAll = function () {
         var _this = this;
-        //先加载jquery否则需要他的资源无法使用
+        //先加载bootstrap.css和jquery否则需要他的资源无法使用
         this.loadSingleScript("lib/jquery-3.2.1.min", function () {
-            //计算总数
-            _this.LoadFileSum = 0;
-            for (var i in _this.CssList) {
-                _this.LoadFileSum += _this.CssList[i].files.length;
+            var _doLoad = function () {
+                //计算总数
+                _this.LoadFileSum = 0;
+                for (var i in _this.CssList) {
+                    _this.LoadFileSum += _this.CssList[i].files.length;
+                }
+                //开始加载
+                for (var i in _this.CssList) {
+                    var item = _this.CssList[i];
+                    _this.AsyncCss(item.files, item.path + '/');
+                }
+            };
+            if (_this.NeedloadBootstrapCss) {
+                // bootstrap.css必须先加载, 否则字体无法加载成功
+                _this.loadSingleCss('bootstrap', function () {
+                    _doLoad();
+                });
             }
-            for (var i in _this.JsList) {
-                _this.LoadFileSum += _this.JsList[i].files.length;
-            }
-            //开始加载
-            for (var i in _this.CssList) {
-                var item = _this.CssList[i];
-                _this.AsyncCss(item.files, item.path + '/');
-            }
-            for (var i in _this.JsList) {
-                var item = _this.JsList[i];
-                _this.AsyncScript(item.files, item.path + '/');
+            else {
+                _doLoad();
             }
         });
     };
@@ -288,8 +327,18 @@ var LoaderClass = /** @class */ (function () {
     };
     //消息回调
     LoaderClass.prototype.MsgCall = function () {
-        //程序入口
-        Main.Init();
+        switch (this.MainName) {
+            case 'Main':
+                //程序入口
+                Main.Init();
+                break;
+            case 'ManageMain':
+                ManageMain.Init();
+                break;
+            default:
+                console.log("[fatal]", "Error MainName:", this.MainName);
+                break;
+        }
     };
     //消息同步完成
     LoaderClass.prototype.MsgAsync = function (cid) {
