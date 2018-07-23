@@ -107,7 +107,8 @@ class ManageDataClass {
     private InitSimulateData() {
         this.DeptDict = {}
         //#department
-        var proj: ProjectSingle = this.ProjList[0]
+        // var proj: ProjectSingle = this.ProjList[0]
+        var proj: ProjectSingle = {}
         proj.DeptTree = [
             this.NewDeptManager(),
             {

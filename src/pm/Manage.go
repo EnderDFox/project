@@ -66,7 +66,7 @@ func (this *Manage) DoPosnAdd(did uint64, name string) *PositionSingle {
 	stmt, err := db.GetDb().Prepare(`INSERT INTO ` + config.Mg + `.mag_position (did,name,sort) VALUES (?,?,(
 	(SELECT IFNULL(
 		(SELECT ms FROM(SELECT max(sort)+1 AS ms FROM ` + config.Mg + `.mag_position WHERE did=?) m)
-	,1)
+	,1))
 ))`)
 	defer stmt.Close()
 	db.CheckErr(err)

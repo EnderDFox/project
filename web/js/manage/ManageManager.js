@@ -21,10 +21,36 @@ var ManageManagerClass = /** @class */ (function () {
         this.VuePath = "manage/";
     }
     ManageManagerClass.prototype.Init = function () {
+        this.RegisterPB();
         this.Data = ManageData;
         UrlParam.Callback = this.UrlParamCallback.bind(this);
         this.InitVue(this.UrlParamCallback.bind(this));
     };
+    ManageManagerClass.prototype.RegisterPB = function () {
+        Commond.Register(PB_CMD.MANAGE_DEPT_ADD, this.PB_DeptAdd.bind(this));
+    };
+    ManageManagerClass.prototype.PB_DeptAdd = function (data) {
+        var dept = data.Dept;
+        dept.Children = [];
+        dept.PositionList = data.PosnList;
+        for (var i = 0; i < dept.PositionList.length; i++) {
+            var posn = dept.PositionList[i];
+            posn.UserList = [];
+            posn.AuthorityList == null ? posn.AuthorityList = [] : undefined;
+        }
+        //
+        if (dept.Fid == 0) {
+            dept.Depth = 0;
+            this.Data.GetProjByPid(dept.Pid).DeptTree.push(dept);
+        }
+        else {
+            var parentDept = this.Data.DeptDict[dept.Fid];
+            dept.Depth = parentDept.Depth + 1;
+            parentDept.Children.push(dept);
+        }
+        this.Data.DeptDict[dept.Did] = dept;
+    };
+    //#
     ManageManagerClass.prototype.UrlParamCallback = function () {
         Common.PopupHideAll();
         var pid = UrlParam.Get(URL_PARAM_KEY.PID, 0);
@@ -294,17 +320,23 @@ var ManageManagerClass = /** @class */ (function () {
                         dp.Name = newName;
                     },
                     onAddChild: function (parentDp, i0) {
-                        var dp = {
-                            Did: _this.Data.NewDepartmentUuid, Name: "", Depth: parentDp.Depth + 1, Children: [], PositionList: [
-                                { Posnid: _this.Data.NewPositionUuid, Did: _this.Data.NewDepartmentUuid, Name: "", AuthorityList: [], UserList: [], },
-                            ],
+                        /*  var dp: DepartmentSingle = {
+                             Did: this.Data.NewDepartmentUuid, Name: ``, Depth: parentDp.Depth + 1, Children: [], PositionList: [
+                                 { Posnid: this.Data.NewPositionUuid, Did: this.Data.NewDepartmentUuid, Name: ``, AuthorityList: [], UserList: [], },//给一个默认的职位
+                             ],
+                             Fid: parentDp.Did,
+                             Sort: 1,
+                         }
+                         this.Data.NewDepartmentUuid++
+                         this.Data.NewPositionUuid++
+                         this.Data.DeptDict[dp.Did] = dp
+                         parentDp.Children.push(dp) */
+                        var data = {
+                            Pid: _this.Data.CurrProj.Pid,
                             Fid: parentDp.Did,
-                            Sort: 1,
+                            Name: _this.VueDepartmentList.newName.toString(),
                         };
-                        _this.Data.NewDepartmentUuid++;
-                        _this.Data.NewPositionUuid++;
-                        _this.Data.DeptDict[dp.Did] = dp;
-                        parentDp.Children.push(dp);
+                        WSConn.sendMsg(PB_CMD.MANAGE_DEPT_ADD, data);
                     },
                     DeptDropdownCheckItemCb: function (dept, deptDropdown) {
                         if (deptDropdown.Sort == 0) {
@@ -403,23 +435,28 @@ var ManageManagerClass = /** @class */ (function () {
                 },
                 methods: {
                     onAdd: function () {
-                        var dp = {
-                            Did: _this.Data.NewDepartmentUuid, Name: _this.VueDepartmentList.newName.toString(), Depth: 0, Children: [], PositionList: [
-                                {
-                                    Posnid: _this.Data.NewPositionUuid,
-                                    Did: _this.Data.NewDepartmentUuid,
-                                    Name: _this.VueDepartmentList.newName.toString(),
-                                    AuthorityList: [],
-                                    UserList: [],
-                                },
-                            ],
-                            Fid: 0, Sort: 1,
+                        /*  var dp: DepartmentSingle = {
+                             Did: this.Data.NewDepartmentUuid, Name: this.VueDepartmentList.newName.toString(), Depth: 0, Children: [], PositionList: [
+                                 {//给一个默认的职位
+                                     Posnid: this.Data.NewPositionUuid,
+                                     Did: this.Data.NewDepartmentUuid,
+                                     Name: this.VueDepartmentList.newName.toString(),
+                                     AuthorityList: [],
+                                     UserList: [],
+                                 },
+                             ],
+                             Fid: 0, Sort: 1,
+                         }
+                         this.VueDepartmentList.newName = ''
+                         this.Data.NewDepartmentUuid++
+                         this.Data.NewPositionUuid++
+                         this.Data.DeptDict[dp.Did] = dp
+                         this.Data.CurrProj.DeptTree.push(dp) */
+                        var data = {
+                            Pid: _this.Data.CurrProj.Pid,
+                            Name: _this.VueDepartmentList.newName.toString(),
                         };
-                        _this.VueDepartmentList.newName = '';
-                        _this.Data.NewDepartmentUuid++;
-                        _this.Data.NewPositionUuid++;
-                        _this.Data.DeptDict[dp.Did] = dp;
-                        _this.Data.CurrProj.DeptTree.push(dp);
+                        WSConn.sendMsg(PB_CMD.MANAGE_DEPT_ADD, data);
                     },
                 },
             }).$mount();

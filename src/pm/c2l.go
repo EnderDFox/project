@@ -285,13 +285,13 @@ type C2L_UpdateWorkAdd struct {
 	Data   []byte //文件二进制流
 }
 
+type C2L_UpdateWorkDelete struct {
+	Wid  uint64
+	Fids []uint64
+}
+
 type C2L_ManageDeptAdd struct {
 	Pid  uint64
 	Name string
 	Fid  uint64
-}
-
-type C2L_UpdateWorkDelete struct {
-	Wid  uint64
-	Fids []uint64
 }

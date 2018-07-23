@@ -86,7 +86,8 @@ var ManageDataClass = /** @class */ (function () {
     ManageDataClass.prototype.InitSimulateData = function () {
         this.DeptDict = {};
         //#department
-        var proj = this.ProjList[0];
+        // var proj: ProjectSingle = this.ProjList[0]
+        var proj = {};
         proj.DeptTree = [
             this.NewDeptManager(),
             {

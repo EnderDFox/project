@@ -27,10 +27,35 @@ class ManageManagerClass {
     VueAuthList: CombinedVueInstance1<{ checkedChange: boolean }>
     VueSelectUser: CombinedVueInstance1<{ checkedChange: boolean, filterText: string }>
     Init() {
+        this.RegisterPB()
         this.Data = ManageData
         UrlParam.Callback = this.UrlParamCallback.bind(this)
         this.InitVue(this.UrlParamCallback.bind(this))
     }
+    RegisterPB() {
+        Commond.Register(PB_CMD.MANAGE_DEPT_ADD, this.PB_DeptAdd.bind(this))
+    }
+    PB_DeptAdd(data: L2C_ManageDeptAdd) {
+        var dept: DepartmentSingle = data.Dept
+        dept.Children = []
+        dept.PositionList = data.PosnList
+        for (var i = 0; i < dept.PositionList.length; i++) {
+            var posn:PositionSingle = dept.PositionList[i]
+            posn.UserList = []
+            posn.AuthorityList==null?posn.AuthorityList=[]:undefined
+        }
+        //
+        if (dept.Fid == 0) {
+            dept.Depth = 0
+            this.Data.GetProjByPid(dept.Pid).DeptTree.push(dept)
+        } else {
+            var parentDept: DepartmentSingle = this.Data.DeptDict[dept.Fid]
+            dept.Depth = parentDept.Depth + 1
+            parentDept.Children.push(dept)
+        }
+        this.Data.DeptDict[dept.Did] = dept
+    }
+    //#
     UrlParamCallback() {
         Common.PopupHideAll()
         var pid: number = UrlParam.Get(URL_PARAM_KEY.PID, 0)
@@ -300,17 +325,23 @@ class ManageManagerClass {
                         dp.Name = newName
                     },
                     onAddChild: (parentDp: DepartmentSingle, i0: int) => {
-                        var dp: DepartmentSingle = {
-                            Did: this.Data.NewDepartmentUuid, Name: ``, Depth: parentDp.Depth + 1, Children: [], PositionList: [
-                                { Posnid: this.Data.NewPositionUuid, Did: this.Data.NewDepartmentUuid, Name: ``, AuthorityList: [], UserList: [], },//给一个默认的职位
-                            ],
+                        /*  var dp: DepartmentSingle = {
+                             Did: this.Data.NewDepartmentUuid, Name: ``, Depth: parentDp.Depth + 1, Children: [], PositionList: [
+                                 { Posnid: this.Data.NewPositionUuid, Did: this.Data.NewDepartmentUuid, Name: ``, AuthorityList: [], UserList: [], },//给一个默认的职位
+                             ],
+                             Fid: parentDp.Did,
+                             Sort: 1,
+                         }
+                         this.Data.NewDepartmentUuid++
+                         this.Data.NewPositionUuid++
+                         this.Data.DeptDict[dp.Did] = dp
+                         parentDp.Children.push(dp) */
+                        var data: C2L_ManageDeptAdd = {
+                            Pid: this.Data.CurrProj.Pid,
                             Fid: parentDp.Did,
-                            Sort: 1,
+                            Name: this.VueDepartmentList.newName.toString(),
                         }
-                        this.Data.NewDepartmentUuid++
-                        this.Data.NewPositionUuid++
-                        this.Data.DeptDict[dp.Did] = dp
-                        parentDp.Children.push(dp)
+                        WSConn.sendMsg(PB_CMD.MANAGE_DEPT_ADD, data)
                     },
                     DeptDropdownCheckItemCb: (dept: DepartmentSingle, deptDropdown: DepartmentSingle): number => {
                         if (deptDropdown.Sort == 0) {
@@ -407,23 +438,28 @@ class ManageManagerClass {
                     },
                     methods: {
                         onAdd: () => {
-                            var dp: DepartmentSingle = {
-                                Did: this.Data.NewDepartmentUuid, Name: this.VueDepartmentList.newName.toString(), Depth: 0, Children: [], PositionList: [
-                                    {//给一个默认的职位
-                                        Posnid: this.Data.NewPositionUuid,
-                                        Did: this.Data.NewDepartmentUuid,
-                                        Name: this.VueDepartmentList.newName.toString(),
-                                        AuthorityList: [],
-                                        UserList: [],
-                                    },
-                                ],
-                                Fid: 0, Sort: 1,
+                            /*  var dp: DepartmentSingle = {
+                                 Did: this.Data.NewDepartmentUuid, Name: this.VueDepartmentList.newName.toString(), Depth: 0, Children: [], PositionList: [
+                                     {//给一个默认的职位
+                                         Posnid: this.Data.NewPositionUuid,
+                                         Did: this.Data.NewDepartmentUuid,
+                                         Name: this.VueDepartmentList.newName.toString(),
+                                         AuthorityList: [],
+                                         UserList: [],
+                                     },
+                                 ],
+                                 Fid: 0, Sort: 1,
+                             }
+                             this.VueDepartmentList.newName = ''
+                             this.Data.NewDepartmentUuid++
+                             this.Data.NewPositionUuid++
+                             this.Data.DeptDict[dp.Did] = dp
+                             this.Data.CurrProj.DeptTree.push(dp) */
+                            var data: C2L_ManageDeptAdd = {
+                                Pid: this.Data.CurrProj.Pid,
+                                Name: this.VueDepartmentList.newName.toString(),
                             }
-                            this.VueDepartmentList.newName = ''
-                            this.Data.NewDepartmentUuid++
-                            this.Data.NewPositionUuid++
-                            this.Data.DeptDict[dp.Did] = dp
-                            this.Data.CurrProj.DeptTree.push(dp)
+                            WSConn.sendMsg(PB_CMD.MANAGE_DEPT_ADD, data)
                         },
                     },
                 }

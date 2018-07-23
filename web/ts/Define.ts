@@ -153,7 +153,7 @@ interface ProjectSingle {
     Name?: string
     //负责人id
     MasterUid?: number
-    CreateTime: number
+    CreateTime?: number
     //
     DeptTree?: DepartmentSingle[]
     //client cache data
@@ -425,6 +425,18 @@ interface L2C_ManageView {
     AuthList?: AuthSingle[]
     UserList?: UserSingle[]
     ProjList?: ProjectSingle[]
+}
+
+interface C2L_ManageDeptAdd {
+    Pid: uint64
+    Name: string
+    Fid?: uint64
+}
+
+
+interface L2C_ManageDeptAdd {
+    Dept: DepartmentSingle
+    PosnList: PositionSingle[]
 }
 
 

@@ -4,10 +4,10 @@ var ManageMainClass = /** @class */ (function () {
     ManageMainClass.prototype.Init = function () {
         Common.InitUrlParams();
         VueManager.Init(this.OnInitVueCpl);
-        Commond.Register(L2C.L2C_MANAGE_VIEW, this.L2C_ManageView.bind(this));
+        Commond.Register(PB_CMD.MANAGE_VIEW, this.L2C_ManageView.bind(this));
     };
     ManageMainClass.prototype.OnInitVueCpl = function () {
-        WSConn.sendMsg(C2L.C2L_MANAGE_VIEW, null);
+        WSConn.sendMsg(PB_CMD.MANAGE_VIEW, null);
     };
     ManageMainClass.prototype.L2C_ManageView = function (data) {
         ManageData.Init(data);
