@@ -6,7 +6,8 @@ var ManageDataClass = /** @class */ (function () {
         this.NewDepartmentUuid = 100001;
         this.NewPositionUuid = 200001;
     }
-    ManageDataClass.prototype.Init = function () {
+    ManageDataClass.prototype.Init = function (data) {
+        this.InitAuthData(data.AuthList);
         this.InitSimulateData();
         //
         var uid = Number(UrlParam.Get('uid'));
@@ -24,30 +25,38 @@ var ManageDataClass = /** @class */ (function () {
         //
         this.CurrUser = this.UserDict[uid];
     };
-    /**初始化虚拟数据 */
-    ManageDataClass.prototype.InitSimulateData = function () {
-        this.AuthDict = {};
-        this.DeptDict = {};
-        //#
-        this.AuthorityModuleList = [
+    ManageDataClass.prototype.InitAuthData = function (authList) {
+        //# auth module
+        this.AuthModList = [
             {
-                Modid: 1, Name: '后台管理', Description: "\u5305\u62EC \u90E8\u95E8 \u804C\u4F4D \u6743\u9650\u4FEE\u6539\u7B49",
-                AuthorityList: [
-                    // { Authid: AUTH.PROJECT_LIST, Name: '全部项目后台作管理' },
-                    { Authid: AUTH.PROJECT_MANAGE, Name: '所属项目后台管理', Description: "\u8BE5\u6210\u5458\u6240\u5C5E\u9879\u76EE\u7684\"\u540E\u53F0\"\u7BA1\u7406" },
-                    { Authid: AUTH.DEPARTMENT_MANAGE, Name: '所属部门后台管理', Description: "\u8BE5\u6210\u5458\u6240\u5C5E\u90E8\u95E8\u53CA\u5176\u5B50\u90E8\u95E8\u7684\"\u540E\u53F0\"\u7BA1\u7406" },
-                ]
+                Modid: 10, Name: '后台管理', Description: "\u5305\u62EC \u90E8\u95E8 \u804C\u4F4D \u6743\u9650\u4FEE\u6539\u7B49", AuthorityList: [],
+                CheckedChange: false,
             },
             {
-                Modid: 11, Name: '工作管理', Description: "\u5305\u62EC \u6A21\u5757 \u6D41\u7A0B \u5DE5\u4F5C \u8BC4\u4EF7\u7B49",
-                AuthorityList: [
-                    { Authid: AUTH.PROJECT_PROCESS, Name: '所属项目工作管理', Description: "\u8BE5\u6210\u5458\u6240\u5C5E\u9879\u76EE\u53CA\u5176\u5B50\u90E8\u95E8\u7684\"\u5DE5\u4F5C\"\u7BA1\u7406" },
-                    { Authid: AUTH.DEPARTMENT_PROCESS, Name: '所属部门工作管理', Description: "\u8BE5\u6210\u5458\u6240\u5C5E\u90E8\u95E8\u53CA\u5176\u5B50\u90E8\u95E8\u7684\"\u5DE5\u4F5C\"\u7BA1\u7406" },
-                    { Authid: AUTH.COLLATE_EDIT, Name: '所属项目晨会编辑', Description: "\u53EF\u4EE5\u5728\u6668\u4F1A\u9875\u9762\u7F16\u8F91\u72B6\u6001" },
-                ]
+                Modid: 20, Name: '工作管理', Description: "\u5305\u62EC \u6A21\u5757 \u6D41\u7A0B \u5DE5\u4F5C \u8BC4\u4EF7\u7B49", AuthorityList: [],
+                CheckedChange: false,
             },
         ];
-        this.InitAuthorityModuleList();
+        //#
+        this.AuthModDict = {};
+        for (var i = 0; i < this.AuthModList.length; i++) {
+            var am = this.AuthModList[i];
+            this.AuthModDict[am.Modid] = am;
+        }
+        //#
+        this.AuthDict = {};
+        for (var i = 0; i < authList.length; i++) {
+            var auth = authList[i];
+            auth.CheckedChange = false;
+            this.AuthDict[auth.Authid] = auth;
+            if (auth.Modid > 0) {
+                this.AuthModDict[auth.Modid].AuthorityList.push(auth);
+            }
+        }
+    };
+    /**初始化虚拟数据 */
+    ManageDataClass.prototype.InitSimulateData = function () {
+        this.DeptDict = {};
         //#project
         this.ProjectList = [
             {
@@ -145,18 +154,6 @@ var ManageDataClass = /** @class */ (function () {
         ];
         //
         this.InitAllDeptDict(proj.DeptTree);
-    };
-    ManageDataClass.prototype.InitAuthorityModuleList = function () {
-        var amList = this.AuthorityModuleList;
-        for (var i = 0; i < amList.length; i++) {
-            var am = amList[i];
-            am.CheckedChange = false;
-            for (var j = 0; j < am.AuthorityList.length; j++) {
-                var auth = am.AuthorityList[j];
-                this.AuthDict[auth.Authid] = auth;
-                auth.CheckedChange = false;
-            }
-        }
     };
     ManageDataClass.prototype.InitAllDeptDict = function (deptTree) {
         if (deptTree === void 0) { deptTree = null; }

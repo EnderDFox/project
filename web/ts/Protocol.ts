@@ -56,7 +56,8 @@ class C2L {
     static C2L_VERSION_CHANGE_SORT = 80106
 
     static C2L_TEST_1 = 99101
-    static C2L_MANAGE_VIEW = 99101
+    //#
+    static C2L_MANAGE_VIEW = 90101
 }
 
 //======================L2C协议=======================
@@ -118,6 +119,6 @@ class L2C {
     static L2C_VERSION_CHANGE_NAME = 80104
     static L2C_VERSION_CHANGE_PUBLISH = 80105
     static L2C_VERSION_CHANGE_SORT = 80106
-
-    static L2C_MANAGE_VIEW = 99101
+    //#
+    static L2C_MANAGE_VIEW = 90101
 }

@@ -1,7 +1,8 @@
 class ManageDataClass {
     /**全部AUTH */
-    AuthorityModuleList: AuthorityModuleSingle[]
-    AuthDict: { [key: number]: AuthoritySingle };
+    AuthModList: AuthModSingle[]
+    AuthModDict: { [key: number]: AuthModSingle };
+    AuthDict: { [key: number]: AuthSingle };
     //
     ProjectList: ProjectSingle[]
     /**全部user */
@@ -17,7 +18,8 @@ class ManageDataClass {
     //
     NewDepartmentUuid = 100001
     NewPositionUuid = 200001
-    Init() {
+    Init(data: L2C_ManageView) {
+        this.InitAuthData(data.AuthList)
         this.InitSimulateData()
         //
         var uid = Number(UrlParam.Get('uid'))
@@ -35,32 +37,16 @@ class ManageDataClass {
         //
         this.CurrUser = this.UserDict[uid]
     }
-    /**初始化虚拟数据 */
-    private InitSimulateData() {
-        this.AuthDict = {}
-        this.DeptDict = {}
-        //#
-        this.AuthorityModuleList = [
+    private InitAuthData(authList: AuthSingle[]) {
+        //# auth module
+        this.AuthModList = [
             {
-                Modid: 1, Name: '后台管理', Description: `包括 部门 职位 权限修改等`,
-                AuthorityList: [
-                    // { Authid: AUTH.PROJECT_LIST, Name: '全部项目后台作管理' },
-                    { Authid: AUTH.PROJECT_MANAGE, Name: '所属项目后台管理', Description: `该成员所属项目的"后台"管理` },
-                    { Authid: AUTH.DEPARTMENT_MANAGE, Name: '所属部门后台管理', Description: `该成员所属部门及其子部门的"后台"管理` },
-                    /*   { Authid: 32, Name: '部门' },
-                      { Authid: 33, Name: '职位' },
-                      { Authid: 34, Name: '权限', Description: `功能,流程的修改` },
-                      { Authid: 35, Name: '成员', Description: `所在部门及其子部门内所有成员的增加,修改和删除` }, */
-                ]
+                Modid: 10, Name: '后台管理', Description: `包括 部门 职位 权限修改等`, AuthorityList: [],
+                CheckedChange: false,
             },
             {
-                Modid: 11, Name: '工作管理', Description: `包括 模块 流程 工作 评价等`,
-                AuthorityList: [
-
-                    { Authid: AUTH.PROJECT_PROCESS, Name: '所属项目工作管理', Description: `该成员所属项目及其子部门的"工作"管理` },
-                    { Authid: AUTH.DEPARTMENT_PROCESS, Name: '所属部门工作管理', Description: `该成员所属部门及其子部门的"工作"管理` },
-                    { Authid: AUTH.COLLATE_EDIT, Name: '所属项目晨会编辑', Description: `可以在晨会页面编辑状态` },
-                ]
+                Modid: 20, Name: '工作管理', Description: `包括 模块 流程 工作 评价等`, AuthorityList: [],
+                CheckedChange: false,
             },
             /*  {
                  Modid: 2, Name: '所属部门管理', Description: `该员工所在部门及其子部门的管理权限`,
@@ -72,7 +58,26 @@ class ManageDataClass {
                       { Authid: 25, Name: '工作编辑', Description: `工作的修改` },
                       { Authid: 26, Name: '工作评论', Description: `对已有工作进行评论` }, */
         ]
-        this.InitAuthorityModuleList()
+        //#
+        this.AuthModDict = {}
+        for (var i = 0; i < this.AuthModList.length; i++) {
+            var am = this.AuthModList[i]
+            this.AuthModDict[am.Modid] = am
+        }
+        //#
+        this.AuthDict = {}
+        for (var i = 0; i < authList.length; i++) {
+            var auth: AuthSingle = authList[i]
+            auth.CheckedChange = false
+            this.AuthDict[auth.Authid] = auth
+            if (auth.Modid > 0) {
+                this.AuthModDict[auth.Modid].AuthorityList.push(auth)
+            }
+        }
+    }
+    /**初始化虚拟数据 */
+    private InitSimulateData() {
+        this.DeptDict = {}
         //#project
         this.ProjectList = [
             {
@@ -170,18 +175,6 @@ class ManageDataClass {
         ]
         //
         this.InitAllDeptDict(proj.DeptTree)
-    }
-    InitAuthorityModuleList() {
-        var amList = this.AuthorityModuleList
-        for (var i = 0; i < amList.length; i++) {
-            var am = amList[i]
-            am.CheckedChange = false
-            for (var j = 0; j < am.AuthorityList.length; j++) {
-                var auth = am.AuthorityList[j]
-                this.AuthDict[auth.Authid] = auth
-                auth.CheckedChange = false
-            }
-        }
     }
     InitAllDeptDict(deptTree: DepartmentSingle[] = null) {
         for (var i = 0; i < deptTree.length; i++) {

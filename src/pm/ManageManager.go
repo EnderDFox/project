@@ -8,8 +8,8 @@ import (
 
 type ManageManager struct{}
 
-func NewManageManager() *ProcessManager {
-	return &ProcessManager{}
+func NewManageManager() *ManageManager {
+	return &ManageManager{}
 }
 
 func (this *ManageManager) RegisterFunction() {

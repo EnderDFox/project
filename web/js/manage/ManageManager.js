@@ -776,7 +776,7 @@ var ManageManagerClass = /** @class */ (function () {
                 data: {
                     auth: _this.Data.MyAuth,
                     posn: posn,
-                    authorityModuleList: _this.Data.AuthorityModuleList,
+                    authorityModuleList: _this.Data.AuthModList,
                     checkedChange: false,
                 },
                 methods: {

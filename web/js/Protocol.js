@@ -55,7 +55,8 @@ var C2L = /** @class */ (function () {
     C2L.C2L_VERSION_CHANGE_PUBLISH = 80105;
     C2L.C2L_VERSION_CHANGE_SORT = 80106;
     C2L.C2L_TEST_1 = 99101;
-    C2L.C2L_MANAGE_VIEW = 99101;
+    //#
+    C2L.C2L_MANAGE_VIEW = 90101;
     return C2L;
 }());
 //======================L2C协议=======================
@@ -117,7 +118,8 @@ var L2C = /** @class */ (function () {
     L2C.L2C_VERSION_CHANGE_NAME = 80104;
     L2C.L2C_VERSION_CHANGE_PUBLISH = 80105;
     L2C.L2C_VERSION_CHANGE_SORT = 80106;
-    L2C.L2C_MANAGE_VIEW = 99101;
+    //#
+    L2C.L2C_MANAGE_VIEW = 90101;
     return L2C;
 }());
 //# sourceMappingURL=Protocol.js.map

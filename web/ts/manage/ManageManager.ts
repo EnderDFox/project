@@ -752,12 +752,12 @@ class ManageManagerClass {
     }
     ShowAuthList(posn: PositionSingle) {
         Loader.LoadVueTemplate(this.VuePath + "AuthList", (tpl: string) => {
-            var checkedDict: { [key: number]: AuthoritySingle } = {};
+            var checkedDict: { [key: number]: AuthSingle } = {};
             for (var i = 0; i < posn.AuthorityList.length; i++) {
-                var auth: AuthoritySingle = posn.AuthorityList[i]
+                var auth: AuthSingle = posn.AuthorityList[i]
                 checkedDict[auth.Authid] = auth
             }
-            var _checkModChecked = (_, mod: AuthorityModuleSingle): boolean => {
+            var _checkModChecked = (_, mod: AuthModSingle): boolean => {
                 // console.log("[debug]", '_checkAllModSelected')
                 for (var i = 0; i < mod.AuthorityList.length; i++) {
                     var auth = mod.AuthorityList[i]
@@ -772,15 +772,15 @@ class ManageManagerClass {
                 data: {
                     auth: this.Data.MyAuth,
                     posn: posn,
-                    authorityModuleList: this.Data.AuthorityModuleList,
+                    authorityModuleList: this.Data.AuthModList,
                     checkedChange: false,//为了让check函数被触发,
                 },
                 methods: {
                     checkModChecked: _checkModChecked.bind(this),
-                    checkAuthChecked: (_, auth: AuthoritySingle): boolean => {
+                    checkAuthChecked: (_, auth: AuthSingle): boolean => {
                         return checkedDict[auth.Authid] != null
                     },
-                    onSwitchMod: (mod: AuthorityModuleSingle) => {
+                    onSwitchMod: (mod: AuthModSingle) => {
                         var allSelected = _checkModChecked(null, mod)
                         for (var i = 0; i < mod.AuthorityList.length; i++) {
                             var auth = mod.AuthorityList[i]
@@ -792,7 +792,7 @@ class ManageManagerClass {
                         }
                         this.VueAuthList.checkedChange = !this.VueAuthList.checkedChange
                     },
-                    onSwitchAuth: (e: Event, auth: AuthoritySingle) => {
+                    onSwitchAuth: (e: Event, auth: AuthSingle) => {
                         if (checkedDict[auth.Authid]) {
                             delete checkedDict[auth.Authid]
                         } else {
@@ -814,7 +814,7 @@ class ManageManagerClass {
                             delete checkedDict[authIdStr]
                         }
                         for (var i = 0; i < posn.AuthorityList.length; i++) {
-                            var auth: AuthoritySingle = posn.AuthorityList[i]
+                            var auth: AuthSingle = posn.AuthorityList[i]
                             checkedDict[auth.Authid] = auth
                         }
                         this.VueAuthList.checkedChange = !this.VueAuthList.checkedChange

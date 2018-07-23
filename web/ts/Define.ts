@@ -120,23 +120,24 @@ interface PositionSingle {
     Posnid?: int
     Did?: DidField
     Name?: string
-    AuthorityList?: AuthoritySingle[]
+    AuthorityList?: AuthSingle[]
     //client
     UserList?: UserSingle[]
 }
-interface AuthorityModuleSingle {
+interface AuthModSingle {
     Modid?: int
     Name?: string
-    AuthorityList?: AuthoritySingle[]
+    AuthorityList?: AuthSingle[]
     Description?: string //dsc/descr
     //client
     CheckedChange?: boolean
 }
-interface AuthoritySingle {
+interface AuthSingle {
     Authid?: int
     Modid?: int
     Name?: string
     Description?: string //dsc/descr
+    Sort?: number
     //client
     CheckedChange?: boolean
 }
@@ -420,13 +421,20 @@ interface L2C_ProcessPublishDelete {
     DateLine?: string
 }
 
+interface L2C_ManageView {
+    AuthList?: AuthSingle[]
+    UserList?: UserSingle[]
+    ProjList?: ProjectSingle[]
+}
+
 
 enum AUTH {
-    PROJECT_LIST = 1,
+    PROJECT_LIST = 70,
+    //后台
     PROJECT_MANAGE = 101,
     DEPARTMENT_MANAGE = 110, //所属部门的管理权限
-    //
-    PROJECT_PROCESS = 210, //所属项目的前台
-    DEPARTMENT_PROCESS = 201, //所属部门的后台
-    COLLATE_EDIT = 301, //晨会权限 修改状态
+    //前台
+    PROJECT_PROCESS = 201, //所属项目的前台
+    DEPARTMENT_PROCESS = 210, //所属部门的后台
+    COLLATE_EDIT = 230, //晨会权限 修改状态
 }
