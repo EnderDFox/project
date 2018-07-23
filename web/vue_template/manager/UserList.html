@@ -51,11 +51,11 @@
                         <div class="dropdown">
                             <button class="btn btn-default dropdown-toggle" type="button" :id="'ddmUserListPos'+index" data-toggle="dropdown" aria-haspopup="true"
                                 aria-expanded="true" :disabled="!user.Did" :title="!user.Did?'请先选择部门':''">
-                                {{ShowPosName(user.Did,user.Posid)}}
+                                {{ShowPosName(user.Did,user.Posnid)}}
                                 <span class="caret"></span>
                             </button>
                             <ul class="dropdown-menu" :aria-labelledby="'ddmUserListDid'+index">
-                                <li v-for="pos in GetPosList(user.Did)" :key="pos.Posid">
+                                <li v-for="pos in GetPosList(user.Did)" :key="pos.Posnid">
                                     <a @click="onPosChange(user,pos)">{{pos.Name}}</a>
                                 </li>
                             </ul>

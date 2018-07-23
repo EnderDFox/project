@@ -1,5 +1,5 @@
 <transition-group name="list-complete" tag="div">
-    <div class="list-complete-item" v-for="posn,index in dept.PositionList" :key="posn.Posid">
+    <div class="list-complete-item" v-for="posn,index in dept.PositionList" :key="posn.Posnid">
         <div class="divrow PosnList-row">
             <div class="text-middle">
                 <span class="glyphicon glyphicon-minus" aria-hidden="true" v-for="dep,index in (dept.Depth-startDepth)*2"></span>
@@ -30,7 +30,7 @@
             <div class="text-center">
                 <div class="checkbox">
                     <label>
-                        <input type="checkbox" :name="posn.Name" :value="posn.Posid" :checked="checkDeptMgrChecked(posn)" @click="onChangeDeptMgrChecked(posn)" :title="'拥有管理部门`'+dept.Name+'`及其子部门的`后台`和`工作`管理权限'"
+                        <input type="checkbox" :name="posn.Name" :value="posn.Posnid" :checked="checkDeptMgrChecked(posn)" @click="onChangeDeptMgrChecked(posn)" :title="'拥有管理部门`'+dept.Name+'`及其子部门的`后台`和`工作`管理权限'"
                             :disabled="dept.Sort==0" />
                     </label>
                 </div>

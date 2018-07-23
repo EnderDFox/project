@@ -296,7 +296,7 @@ var ManagerManagerClass = /** @class */ (function () {
                     onAddChild: function (parentDp, i0) {
                         var dp = {
                             Did: _this.Data.NewDepartmentUuid, Name: "", Depth: parentDp.Depth + 1, Children: [], PositionList: [
-                                { Posid: _this.Data.NewPositionUuid, Did: _this.Data.NewDepartmentUuid, Name: "", AuthorityList: [], UserList: [], },
+                                { Posnid: _this.Data.NewPositionUuid, Did: _this.Data.NewDepartmentUuid, Name: "", AuthorityList: [], UserList: [], },
                             ],
                             Fid: parentDp.Did,
                             Sort: 1,
@@ -406,7 +406,7 @@ var ManagerManagerClass = /** @class */ (function () {
                         var dp = {
                             Did: _this.Data.NewDepartmentUuid, Name: _this.VueDepartmentList.newName.toString(), Depth: 0, Children: [], PositionList: [
                                 {
-                                    Posid: _this.Data.NewPositionUuid,
+                                    Posnid: _this.Data.NewPositionUuid,
                                     Did: _this.Data.NewDepartmentUuid,
                                     Name: _this.VueDepartmentList.newName.toString(),
                                     AuthorityList: [],
@@ -739,7 +739,7 @@ var ManagerManagerClass = /** @class */ (function () {
                     onAdd: function () {
                         if (currDept) {
                             var pos = {
-                                Posid: _this.Data.NewPositionUuid++, Did: currDept.Did, Name: _this.VuePositionList.newName.toString(), UserList: [],
+                                Posnid: _this.Data.NewPositionUuid++, Did: currDept.Did, Name: _this.VuePositionList.newName.toString(), UserList: [],
                                 AuthorityList: currDept.Sort == 0 ? [_this.Data.AuthDict[AUTH.DEPARTMENT_MANAGE]] : [],
                             };
                             _this.VuePositionList.newName = '';
@@ -870,7 +870,7 @@ var ManagerManagerClass = /** @class */ (function () {
                                         else {
                                             for (var i = 0; i < dept.PositionList.length; i++) {
                                                 var posn = dept.PositionList[i];
-                                                if (posn.Posid == user.Posid && StringUtil.IndexOfKeyArr(posn.Name.toLowerCase(), _filterTextSp) > -1) {
+                                                if (posn.Posnid == user.Posnid && StringUtil.IndexOfKeyArr(posn.Name.toLowerCase(), _filterTextSp) > -1) {
                                                     dict[user.Uid] = true;
                                                     break;
                                                 }
@@ -900,11 +900,11 @@ var ManagerManagerClass = /** @class */ (function () {
                         var dp = _this.Data.DeptDict[did];
                         return dp ? dp.Name : '空';
                     },
-                    ShowPosName: function (did, posid) {
+                    ShowPosName: function (did, posnid) {
                         var dp = _this.Data.DeptDict[did];
                         if (dp) {
-                            if (posid > 0) {
-                                var pos = dp.PositionList.FindOfAttr(FieldName.Posid, posid);
+                            if (posnid > 0) {
+                                var pos = dp.PositionList.FindOfAttr(FieldName.Posnid, posnid);
                                 return pos ? pos.Name : '--';
                             }
                             else {
@@ -942,7 +942,7 @@ var ManagerManagerClass = /** @class */ (function () {
                     },
                     onPosChange: function (user, pos) {
                         _this.Data.RemoveUserPosnid(user);
-                        _this.Data.SetUserPosnid(user, user.Did, pos.Posid);
+                        _this.Data.SetUserPosnid(user, user.Did, pos.Posnid);
                     },
                     onSortDown: function (user, index) {
                         if (index < proj.UserList.length - 1) {

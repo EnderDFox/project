@@ -302,7 +302,7 @@ class ManagerManagerClass {
                     onAddChild: (parentDp: DepartmentSingle, i0: int) => {
                         var dp: DepartmentSingle = {
                             Did: this.Data.NewDepartmentUuid, Name: ``, Depth: parentDp.Depth + 1, Children: [], PositionList: [
-                                { Posid: this.Data.NewPositionUuid, Did: this.Data.NewDepartmentUuid, Name: ``, AuthorityList: [], UserList: [], },//给一个默认的职位
+                                { Posnid: this.Data.NewPositionUuid, Did: this.Data.NewDepartmentUuid, Name: ``, AuthorityList: [], UserList: [], },//给一个默认的职位
                             ],
                             Fid: parentDp.Did,
                             Sort: 1,
@@ -410,7 +410,7 @@ class ManagerManagerClass {
                             var dp: DepartmentSingle = {
                                 Did: this.Data.NewDepartmentUuid, Name: this.VueDepartmentList.newName.toString(), Depth: 0, Children: [], PositionList: [
                                     {//给一个默认的职位
-                                        Posid: this.Data.NewPositionUuid,
+                                        Posnid: this.Data.NewPositionUuid,
                                         Did: this.Data.NewDepartmentUuid,
                                         Name: this.VueDepartmentList.newName.toString(),
                                         AuthorityList: [],
@@ -735,7 +735,7 @@ class ManagerManagerClass {
                         onAdd: () => {
                             if (currDept) {
                                 var pos: PositionSingle = {
-                                    Posid: this.Data.NewPositionUuid++, Did: currDept.Did, Name: this.VuePositionList.newName.toString(), UserList: [],
+                                    Posnid: this.Data.NewPositionUuid++, Did: currDept.Did, Name: this.VuePositionList.newName.toString(), UserList: [],
                                     AuthorityList: currDept.Sort == 0 ? [this.Data.AuthDict[AUTH.DEPARTMENT_MANAGE]] : [],
                                 }
                                 this.VuePositionList.newName = ''
@@ -860,7 +860,7 @@ class ManagerManagerClass {
                                             } else {
                                                 for (var i = 0; i < dept.PositionList.length; i++) {
                                                     var posn = dept.PositionList[i]
-                                                    if (posn.Posid == user.Posid && StringUtil.IndexOfKeyArr(posn.Name.toLowerCase(), _filterTextSp) > -1) {
+                                                    if (posn.Posnid == user.Posnid && StringUtil.IndexOfKeyArr(posn.Name.toLowerCase(), _filterTextSp) > -1) {
                                                         dict[user.Uid] = true
                                                         break;
                                                     }
@@ -889,11 +889,11 @@ class ManagerManagerClass {
                             var dp = this.Data.DeptDict[did]
                             return dp ? dp.Name : '空'
                         },
-                        ShowPosName: (did: number, posid: number): string => {
+                        ShowPosName: (did: number, posnid: number): string => {
                             var dp = this.Data.DeptDict[did]
                             if (dp) {
-                                if (posid > 0) {
-                                    var pos: PositionSingle = dp.PositionList.FindOfAttr(FieldName.Posid, posid)
+                                if (posnid > 0) {
+                                    var pos: PositionSingle = dp.PositionList.FindOfAttr(FieldName.Posnid, posnid)
                                     return pos ? pos.Name : '--'
                                 } else {
                                     return '空'
@@ -928,7 +928,7 @@ class ManagerManagerClass {
                         },
                         onPosChange: (user: UserSingle, pos: PositionSingle) => {
                             this.Data.RemoveUserPosnid(user)
-                            this.Data.SetUserPosnid(user, user.Did, pos.Posid)
+                            this.Data.SetUserPosnid(user, user.Did, pos.Posnid)
                         },
                         onSortDown: (user: UserSingle, index: int) => {
                             if (index < proj.UserList.length - 1) {

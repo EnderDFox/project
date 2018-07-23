@@ -77,7 +77,7 @@ class FieldName {
     static PID = "Pid"
     static Uid = "Uid"
     static Did = "Did"
-    static Posid = "Posid"
+    static Posnid = "Posnid"
     static Authid = "Authid"
     static Mid = "Mid"
     static Lid = "Lid"
@@ -97,7 +97,7 @@ interface UserSingle {
     Uid?: number
     Pid?: PidFeild
     Did?: DidField
-    Posid?: DidField
+    Posnid?: DidField
     Name?: string
     IsDel?: number
     IsHide?: number
@@ -117,7 +117,7 @@ interface DepartmentSingle {
 }
 
 interface PositionSingle {
-    Posid?: int
+    Posnid?: int
     Did?: DidField
     Name?: string
     AuthorityList?: AuthoritySingle[]

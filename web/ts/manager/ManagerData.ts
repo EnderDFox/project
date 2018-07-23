@@ -92,11 +92,11 @@ class ManagerDataClass {
         this.UserList = []
         this.UserDict = {}
         for (var i = 0; i < 26; i++) {
-            var user: UserSingle = { Uid: i + 1, Name: `用户${String.fromCharCode(65 + i)}`, Did: 0, Posid: 0 }
+            var user: UserSingle = { Uid: i + 1, Name: `用户${String.fromCharCode(65 + i)}`, Did: 0, Posnid: 0 }
             this.UserList.push(user)
             this.UserDict[user.Uid] = user
         }
-        var user: UserSingle = { Uid: 999999, Name: "admin", Did: 0, Posid: 0 }
+        var user: UserSingle = { Uid: 999999, Name: "admin", Did: 0, Posnid: 0 }
         this.UserList.push(user)
         this.UserDict[user.Uid] = user
         //#
@@ -115,39 +115,39 @@ class ManagerDataClass {
             {
                 Did: 1, Fid: 0, Name: '策划', Depth: 0, Children: [],
                 PositionList: [
-                    { Posid: 100, Did: 2, Name: '策划', UserList: [], AuthorityList: [] },
-                    { Posid: 101, Did: 2, Name: '策划主管', UserList: [], AuthorityList: [] },
+                    { Posnid: 100, Did: 2, Name: '策划', UserList: [], AuthorityList: [] },
+                    { Posnid: 101, Did: 2, Name: '策划主管', UserList: [], AuthorityList: [] },
                 ]
             },
             {
                 Did: 2, Fid: 0, Name: '美术', Depth: 0,
                 PositionList: [
-                    { Posid: 201, Did: 2, Name: '美术主管', UserList: [], AuthorityList: [] },
+                    { Posnid: 201, Did: 2, Name: '美术主管', UserList: [], AuthorityList: [] },
                 ], Children: [
                     {
                         Did: 21, Fid: 2, Name: 'UI', Depth: 1, Children: [],
-                        PositionList: [{ Posid: 2102, Did: 2, Name: 'UI', UserList: [], AuthorityList: [] },]
+                        PositionList: [{ Posnid: 2102, Did: 2, Name: 'UI', UserList: [], AuthorityList: [] },]
                     },
                     {
                         Did: 22, Fid: 2, Name: '3D', Depth: 1, Children: [],
                         PositionList: [
-                            { Posid: 2200, Did: 2, Name: '3D主管', UserList: [], AuthorityList: [] },
-                            { Posid: 2201, Did: 2, Name: '3D建模', UserList: [], AuthorityList: [] },
-                            { Posid: 2202, Did: 2, Name: '3D渲染', UserList: [], AuthorityList: [] },
-                            { Posid: 2203, Did: 2, Name: '3D动作', UserList: [], AuthorityList: [] },
+                            { Posnid: 2200, Did: 2, Name: '3D主管', UserList: [], AuthorityList: [] },
+                            { Posnid: 2201, Did: 2, Name: '3D建模', UserList: [], AuthorityList: [] },
+                            { Posnid: 2202, Did: 2, Name: '3D渲染', UserList: [], AuthorityList: [] },
+                            { Posnid: 2203, Did: 2, Name: '3D动作', UserList: [], AuthorityList: [] },
                         ]
                     },
                     {
                         Did: 23, Fid: 2, Name: '原画', Depth: 1,
-                        PositionList: [{ Posid: 301, Did: 2, Name: '原画主管', UserList: [], AuthorityList: [] }],
+                        PositionList: [{ Posnid: 301, Did: 2, Name: '原画主管', UserList: [], AuthorityList: [] }],
                         Children: [
                             {
                                 Did: 231, Fid: 23, Name: '角色原画', Depth: 2, Children: [],
-                                PositionList: [{ Posid: 23100, Did: 2, Name: '角色原画', UserList: [], AuthorityList: [] },]
+                                PositionList: [{ Posnid: 23100, Did: 2, Name: '角色原画', UserList: [], AuthorityList: [] },]
                             },
                             {
                                 Did: 232, Fid: 23, Name: '场景原画', Depth: 2, Children: [],
-                                PositionList: [{ Posid: 23200, Did: 2, Name: '场景原画', UserList: [], AuthorityList: [] },]
+                                PositionList: [{ Posnid: 23200, Did: 2, Name: '场景原画', UserList: [], AuthorityList: [] },]
                             },
                         ],
                     },
@@ -156,15 +156,15 @@ class ManagerDataClass {
             {
                 Did: 3, Fid: 0, Name: '后端', Depth: 0, Children: [],
                 PositionList: [
-                    { Posid: 300, Did: 2, Name: '后端', UserList: [], AuthorityList: [] },
-                    { Posid: 301, Did: 2, Name: '后端主管', UserList: [], AuthorityList: [] },
+                    { Posnid: 300, Did: 2, Name: '后端', UserList: [], AuthorityList: [] },
+                    { Posnid: 301, Did: 2, Name: '后端主管', UserList: [], AuthorityList: [] },
                 ]
             },
             {
                 Did: 4, Fid: 0, Name: '前端', Depth: 0, Children: [],
                 PositionList: [
-                    { Posid: 400, Did: 2, Name: '前端', UserList: [], AuthorityList: [] },
-                    { Posid: 401, Did: 2, Name: '前端主管', UserList: [], AuthorityList: [] },
+                    { Posnid: 400, Did: 2, Name: '前端', UserList: [], AuthorityList: [] },
+                    { Posnid: 401, Did: 2, Name: '前端主管', UserList: [], AuthorityList: [] },
                 ]
             },
         ]
@@ -277,15 +277,15 @@ class ManagerDataClass {
             Children: [],
             PositionList: [
                 {
-                    Posid: this.NewPositionUuid++, Did: this.NewDepartmentUuid, Name: '制作人', UserList: [],
+                    Posnid: this.NewPositionUuid++, Did: this.NewDepartmentUuid, Name: '制作人', UserList: [],
                     AuthorityList: [this.AuthDict[AUTH.PROJECT_MANAGE], this.AuthDict[AUTH.DEPARTMENT_MANAGE]]
                 },
                 {
-                    Posid: this.NewPositionUuid++, Did: this.NewDepartmentUuid, Name: 'PM', UserList: [],
+                    Posnid: this.NewPositionUuid++, Did: this.NewDepartmentUuid, Name: 'PM', UserList: [],
                     AuthorityList: [this.AuthDict[AUTH.PROJECT_MANAGE], this.AuthDict[AUTH.DEPARTMENT_MANAGE]]
                 },
                 {
-                    Posid: this.NewPositionUuid++, Did: this.NewDepartmentUuid, Name: '管理员', UserList: [],
+                    Posnid: this.NewPositionUuid++, Did: this.NewDepartmentUuid, Name: '管理员', UserList: [],
                     AuthorityList: [this.AuthDict[AUTH.PROJECT_MANAGE], this.AuthDict[AUTH.DEPARTMENT_MANAGE]]
                 },
             ]
@@ -334,7 +334,7 @@ class ManagerDataClass {
     RemoveUserPosnid(user: UserSingle) {
         if (user.Did) {
             var oldDept: DepartmentSingle = ManagerData.DeptDict[user.Did]
-            var oldPosn: PositionSingle = oldDept.PositionList.FindOfAttr(FieldName.Posid, user.Posid)
+            var oldPosn: PositionSingle = oldDept.PositionList.FindOfAttr(FieldName.Posnid, user.Posnid)
             if (oldPosn) {
                 oldPosn.UserList.RemoveByAttr(FieldName.Uid, user.Uid)
             }
@@ -347,9 +347,9 @@ class ManagerDataClass {
         if (posnid == -1) {
             posn = dept.PositionList[0]
         } else {
-            posn = dept.PositionList.FindOfAttr(FieldName.Posid, posnid)
+            posn = dept.PositionList.FindOfAttr(FieldName.Posnid, posnid)
         }
-        user.Posid = posn.Posid
+        user.Posnid = posn.Posnid
         posn.UserList.push(user)
     }
 }
