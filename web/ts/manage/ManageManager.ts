@@ -33,10 +33,38 @@ class ManageManagerClass {
         this.InitVue(this.UrlParamCallback.bind(this))
     }
     RegisterPB() {
+        Commond.Register(PB_CMD.MANAGE_PROJ_ADD, this.PB_ProjAdd.bind(this))
+        Commond.Register(PB_CMD.MANAGE_PROJ_DEL, this.PB_ProjDel.bind(this))
+        Commond.Register(PB_CMD.MANAGE_PROJ_EDIT_NAME, this.PB_ProjEditName.bind(this))
         Commond.Register(PB_CMD.MANAGE_DEPT_ADD, this.PB_DeptAdd.bind(this))
         Commond.Register(PB_CMD.MANAGE_DEPT_DEL, this.PB_DeptDel.bind(this))
         Commond.Register(PB_CMD.MANAGE_DEPT_EDIT_NAME, this.PB_DeptEditName.bind(this))
         Commond.Register(PB_CMD.MANAGE_DEPT_EDIT_SORT, this.PB_DeptEditSort.bind(this))
+    }
+    PB_ProjAdd(proj: ProjectSingle) {
+        proj.MasterUid = 0
+        proj.UserList = []
+        //因为只有一个默认的dept只处理这一个就行
+        var dept = proj.DeptTree[0]
+        dept.Children = []
+        for (var i = 0; i < dept.PosnList.length; i++) {
+            var posn: PositionSingle = dept.PosnList[i]
+            posn.UserList = []
+            posn.AuthList == null ? posn.AuthList = [] : undefined
+        }
+        dept.Depth = 0
+        this.Data.DeptDict[dept.Did] = dept
+        //
+        this.Data.ProjList.push(proj)
+    }
+    PB_ProjDel(data: C2L_ManageProjDel) {
+        this.Data.ProjList.RemoveByKey(FieldName.PID, data.Pid)
+        delete this.Data.ProjDict[data.Pid]
+    }
+    PB_ProjEditName(data: C2L_ManageProjEditName) {
+        if (this.Data.ProjDict[data.Pid]) {
+            this.Data.ProjDict[data.Pid].Name = data.Name
+        }
     }
     PB_DeptAdd(dept: DepartmentSingle) {
         dept.Children = []
@@ -266,7 +294,11 @@ class ManageManagerClass {
                                     return
                                 }
                                 Common.ConfirmWarning(`即将把项目 "${proj.Name}" 改名为 "${newName}"`, null, () => {
-                                    proj.Name = newName
+                                    var data: C2L_ManageProjEditName = {
+                                        Pid: proj.Pid,
+                                        Name: newName.toString(),
+                                    }
+                                    WSConn.sendMsg(PB_CMD.MANAGE_PROJ_EDIT_NAME, data)
                                 }, () => {
                                     (e.target as HTMLInputElement).value = proj.Name
                                 })
@@ -288,7 +320,10 @@ class ManageManagerClass {
                         },
                         onDel: (e, proj: ProjectSingle, index: int) => {
                             Common.ConfirmDelete(() => {
-                                this.VueProjectList.projectList.splice(index, 1)
+                                var data: C2L_ManageProjDel = {
+                                    Pid: proj.Pid,
+                                }
+                                WSConn.sendMsg(PB_CMD.MANAGE_PROJ_DEL, data)
                             }, `即将删除项目 "${proj.Name}"`)
                         },
                         onAdd: () => {
@@ -301,16 +336,11 @@ class ManageManagerClass {
                                 Common.AlertError(`项目名称 ${newName} 已经存在`)
                                 return
                             }
-                            this.Data.ProjList.push(
-                                {
-                                    Pid: this.Data.ProjList[this.VueProjectList.projectList.length - 1].Pid + 1,
-                                    Name: this.VueProjectList.newName.toString(),
-                                    MasterUid: 0, UserList: [],
-                                    CreateTime: new Date().getTime(),
-                                    DeptTree: [this.Data.NewDeptManager()],
-                                }
-                            )
+                            var data: C2L_ManageProjAdd = {
+                                Name: newName
+                            }
                             this.VueProjectList.newName = ''
+                            WSConn.sendMsg(PB_CMD.MANAGE_PROJ_ADD, data)
                         }
                     },
                 }
@@ -430,17 +460,6 @@ class ManageManagerClass {
                         }
                     },
                     onAddChild: (parentDp: DepartmentSingle, i0: int) => {
-                        /*  var dp: DepartmentSingle = {
-                             Did: this.Data.NewDepartmentUuid, Name: ``, Depth: parentDp.Depth + 1, Children: [], PositionList: [
-                                 { Posnid: this.Data.NewPositionUuid, Did: this.Data.NewDepartmentUuid, Name: ``, AuthorityList: [], UserList: [], },//给一个默认的职位
-                             ],
-                             Fid: parentDp.Did,
-                             Sort: 1,
-                         }
-                         this.Data.NewDepartmentUuid++
-                         this.Data.NewPositionUuid++
-                         this.Data.DeptDict[dp.Did] = dp
-                         parentDp.Children.push(dp) */
                         var data: C2L_ManageDeptAdd = {
                             Pid: this.Data.CurrProj.Pid,
                             Fid: parentDp.Did,
@@ -544,27 +563,20 @@ class ManageManagerClass {
                     },
                     methods: {
                         onAdd: () => {
-                            /*  var dp: DepartmentSingle = {
-                                 Did: this.Data.NewDepartmentUuid, Name: this.VueDepartmentList.newName.toString(), Depth: 0, Children: [], PositionList: [
-                                     {//给一个默认的职位
-                                         Posnid: this.Data.NewPositionUuid,
-                                         Did: this.Data.NewDepartmentUuid,
-                                         Name: this.VueDepartmentList.newName.toString(),
-                                         AuthorityList: [],
-                                         UserList: [],
-                                     },
-                                 ],
-                                 Fid: 0, Sort: 1,
-                             }
-                             this.VueDepartmentList.newName = ''
-                             this.Data.NewDepartmentUuid++
-                             this.Data.NewPositionUuid++
-                             this.Data.DeptDict[dp.Did] = dp
-                             this.Data.CurrProj.DeptTree.push(dp) */
+                            var newName: string = this.VueDepartmentList.newName.toString().trim()
+                            if (!newName) {
+                                Common.AlertError(`部门名称 ${newName} 不可以为空`)
+                                return
+                            }
+                            if (TreeUtil.FindByKey(this.Data.CurrProj.DeptTree, FieldName.Name, newName)) {
+                                Common.AlertError(`部门名称 ${newName} 已经存在`)
+                                return
+                            }
                             var data: C2L_ManageDeptAdd = {
                                 Pid: this.Data.CurrProj.Pid,
-                                Name: this.VueDepartmentList.newName.toString(),
+                                Name: newName,
                             }
+                            this.VueDepartmentList.newName = ''
                             WSConn.sendMsg(PB_CMD.MANAGE_DEPT_ADD, data)
                         },
                     },

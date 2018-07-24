@@ -42,7 +42,7 @@ type ProjectSingle struct {
 	CreateTime uint32
 	// user list 其实 是 mag_user_proj_relation表的数据, 但结构被UserSingle包含了 所以就用UserSingle吧
 	// UserList []*UserSingle
-	DeptList []*DepartmentSingle
+	DeptTree []*DepartmentSingle
 }
 
 type UserSingle struct {

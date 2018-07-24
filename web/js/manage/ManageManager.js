@@ -27,10 +27,38 @@ var ManageManagerClass = /** @class */ (function () {
         this.InitVue(this.UrlParamCallback.bind(this));
     };
     ManageManagerClass.prototype.RegisterPB = function () {
+        Commond.Register(PB_CMD.MANAGE_PROJ_ADD, this.PB_ProjAdd.bind(this));
+        Commond.Register(PB_CMD.MANAGE_PROJ_DEL, this.PB_ProjDel.bind(this));
+        Commond.Register(PB_CMD.MANAGE_PROJ_EDIT_NAME, this.PB_ProjEditName.bind(this));
         Commond.Register(PB_CMD.MANAGE_DEPT_ADD, this.PB_DeptAdd.bind(this));
         Commond.Register(PB_CMD.MANAGE_DEPT_DEL, this.PB_DeptDel.bind(this));
         Commond.Register(PB_CMD.MANAGE_DEPT_EDIT_NAME, this.PB_DeptEditName.bind(this));
         Commond.Register(PB_CMD.MANAGE_DEPT_EDIT_SORT, this.PB_DeptEditSort.bind(this));
+    };
+    ManageManagerClass.prototype.PB_ProjAdd = function (proj) {
+        proj.MasterUid = 0;
+        proj.UserList = [];
+        //因为只有一个默认的dept只处理这一个就行
+        var dept = proj.DeptTree[0];
+        dept.Children = [];
+        for (var i = 0; i < dept.PosnList.length; i++) {
+            var posn = dept.PosnList[i];
+            posn.UserList = [];
+            posn.AuthList == null ? posn.AuthList = [] : undefined;
+        }
+        dept.Depth = 0;
+        this.Data.DeptDict[dept.Did] = dept;
+        //
+        this.Data.ProjList.push(proj);
+    };
+    ManageManagerClass.prototype.PB_ProjDel = function (data) {
+        this.Data.ProjList.RemoveByKey(FieldName.PID, data.Pid);
+        delete this.Data.ProjDict[data.Pid];
+    };
+    ManageManagerClass.prototype.PB_ProjEditName = function (data) {
+        if (this.Data.ProjDict[data.Pid]) {
+            this.Data.ProjDict[data.Pid].Name = data.Name;
+        }
     };
     ManageManagerClass.prototype.PB_DeptAdd = function (dept) {
         var _this = this;
@@ -267,7 +295,11 @@ var ManageManagerClass = /** @class */ (function () {
                                 return;
                             }
                             Common.ConfirmWarning("\u5373\u5C06\u628A\u9879\u76EE \"" + proj.Name + "\" \u6539\u540D\u4E3A \"" + newName + "\"", null, function () {
-                                proj.Name = newName;
+                                var data = {
+                                    Pid: proj.Pid,
+                                    Name: newName.toString(),
+                                };
+                                WSConn.sendMsg(PB_CMD.MANAGE_PROJ_EDIT_NAME, data);
                             }, function () {
                                 e.target.value = proj.Name;
                             });
@@ -289,7 +321,10 @@ var ManageManagerClass = /** @class */ (function () {
                     },
                     onDel: function (e, proj, index) {
                         Common.ConfirmDelete(function () {
-                            _this.VueProjectList.projectList.splice(index, 1);
+                            var data = {
+                                Pid: proj.Pid,
+                            };
+                            WSConn.sendMsg(PB_CMD.MANAGE_PROJ_DEL, data);
                         }, "\u5373\u5C06\u5220\u9664\u9879\u76EE \"" + proj.Name + "\"");
                     },
                     onAdd: function () {
@@ -302,14 +337,11 @@ var ManageManagerClass = /** @class */ (function () {
                             Common.AlertError("\u9879\u76EE\u540D\u79F0 " + newName + " \u5DF2\u7ECF\u5B58\u5728");
                             return;
                         }
-                        _this.Data.ProjList.push({
-                            Pid: _this.Data.ProjList[_this.VueProjectList.projectList.length - 1].Pid + 1,
-                            Name: _this.VueProjectList.newName.toString(),
-                            MasterUid: 0, UserList: [],
-                            CreateTime: new Date().getTime(),
-                            DeptTree: [_this.Data.NewDeptManager()],
-                        });
+                        var data = {
+                            Name: newName
+                        };
                         _this.VueProjectList.newName = '';
+                        WSConn.sendMsg(PB_CMD.MANAGE_PROJ_ADD, data);
                     }
                 },
             }).$mount();
@@ -429,17 +461,6 @@ var ManageManagerClass = /** @class */ (function () {
                         }
                     },
                     onAddChild: function (parentDp, i0) {
-                        /*  var dp: DepartmentSingle = {
-                             Did: this.Data.NewDepartmentUuid, Name: ``, Depth: parentDp.Depth + 1, Children: [], PositionList: [
-                                 { Posnid: this.Data.NewPositionUuid, Did: this.Data.NewDepartmentUuid, Name: ``, AuthorityList: [], UserList: [], },//给一个默认的职位
-                             ],
-                             Fid: parentDp.Did,
-                             Sort: 1,
-                         }
-                         this.Data.NewDepartmentUuid++
-                         this.Data.NewPositionUuid++
-                         this.Data.DeptDict[dp.Did] = dp
-                         parentDp.Children.push(dp) */
                         var data = {
                             Pid: _this.Data.CurrProj.Pid,
                             Fid: parentDp.Did,
@@ -545,27 +566,20 @@ var ManageManagerClass = /** @class */ (function () {
                 },
                 methods: {
                     onAdd: function () {
-                        /*  var dp: DepartmentSingle = {
-                             Did: this.Data.NewDepartmentUuid, Name: this.VueDepartmentList.newName.toString(), Depth: 0, Children: [], PositionList: [
-                                 {//给一个默认的职位
-                                     Posnid: this.Data.NewPositionUuid,
-                                     Did: this.Data.NewDepartmentUuid,
-                                     Name: this.VueDepartmentList.newName.toString(),
-                                     AuthorityList: [],
-                                     UserList: [],
-                                 },
-                             ],
-                             Fid: 0, Sort: 1,
-                         }
-                         this.VueDepartmentList.newName = ''
-                         this.Data.NewDepartmentUuid++
-                         this.Data.NewPositionUuid++
-                         this.Data.DeptDict[dp.Did] = dp
-                         this.Data.CurrProj.DeptTree.push(dp) */
+                        var newName = _this.VueDepartmentList.newName.toString().trim();
+                        if (!newName) {
+                            Common.AlertError("\u90E8\u95E8\u540D\u79F0 " + newName + " \u4E0D\u53EF\u4EE5\u4E3A\u7A7A");
+                            return;
+                        }
+                        if (TreeUtil.FindByKey(_this.Data.CurrProj.DeptTree, FieldName.Name, newName)) {
+                            Common.AlertError("\u90E8\u95E8\u540D\u79F0 " + newName + " \u5DF2\u7ECF\u5B58\u5728");
+                            return;
+                        }
                         var data = {
                             Pid: _this.Data.CurrProj.Pid,
-                            Name: _this.VueDepartmentList.newName.toString(),
+                            Name: newName,
                         };
+                        _this.VueDepartmentList.newName = '';
                         WSConn.sendMsg(PB_CMD.MANAGE_DEPT_ADD, data);
                     },
                 },

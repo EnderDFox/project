@@ -85,7 +85,7 @@ func (this *Manage) View() *L2C_ManageView {
 
 func (this *Manage) ProjAdd(name string) *ProjectSingle {
 	createTime := time.Now().Unix()
-	stmt, err := db.GetDb().Prepare(`INSERT INTO ` + config.Pm + `.pm_project (name,creat_time) VALUES (?,?)`)
+	stmt, err := db.GetDb().Prepare(`INSERT INTO ` + config.Pm + `.pm_project (name,create_time) VALUES (?,?)`)
 	defer stmt.Close()
 	db.CheckErr(err)
 	res, err := stmt.Exec(name, createTime)
@@ -100,7 +100,7 @@ func (this *Manage) ProjAdd(name string) *ProjectSingle {
 		Pid:        pid,
 		Name:       name,
 		CreateTime: uint32(createTime),
-		DeptList:   []*DepartmentSingle{dept},
+		DeptTree:   []*DepartmentSingle{dept},
 	}
 	return proj
 }

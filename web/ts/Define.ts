@@ -430,6 +430,19 @@ interface L2C_ManageView {
     UserProjReltList?: UserSingle[]
 }
 
+interface C2L_ManageProjAdd {
+    Name: string
+}
+
+interface C2L_ManageProjDel {
+    Pid: uint64
+}
+
+interface C2L_ManageProjEditName {
+    Pid: uint64
+    Name: string
+}
+
 interface C2L_ManageDeptAdd {
     Pid: uint64
     Name: string
