@@ -29,14 +29,12 @@ var ManageManagerClass = /** @class */ (function () {
     ManageManagerClass.prototype.RegisterPB = function () {
         Commond.Register(PB_CMD.MANAGE_DEPT_ADD, this.PB_DeptAdd.bind(this));
     };
-    ManageManagerClass.prototype.PB_DeptAdd = function (data) {
-        var dept = data.Dept;
+    ManageManagerClass.prototype.PB_DeptAdd = function (dept) {
         dept.Children = [];
-        dept.PositionList = data.PosnList;
-        for (var i = 0; i < dept.PositionList.length; i++) {
-            var posn = dept.PositionList[i];
+        for (var i = 0; i < dept.PosnList.length; i++) {
+            var posn = dept.PosnList[i];
             posn.UserList = [];
-            posn.AuthorityList == null ? posn.AuthorityList = [] : undefined;
+            posn.AuthList == null ? posn.AuthList = [] : undefined;
         }
         //
         if (dept.Fid == 0) {
@@ -625,6 +623,7 @@ var ManageManagerClass = /** @class */ (function () {
     };
     ManageManagerClass.prototype.ShowPositionList = function () {
         var _this = this;
+        this.VueProjectEdit.currPage = ProjectEditPageIndex.Position;
         Loader.LoadVueTemplateList([this.VuePath + "PosnList", this.VuePath + "PosnListComp"], function (tplList) {
             Vue.component("PosnListComp", {
                 template: tplList[1],
@@ -652,19 +651,19 @@ var ManageManagerClass = /** @class */ (function () {
                         _this.ShowAuthList(posn);
                     },
                     checkDeptMgrChecked: function (posn) {
-                        return posn.AuthorityList.IndexOfByKey(FieldName.Authid, AUTH.DEPARTMENT_MANAGE) > -1
-                            && posn.AuthorityList.IndexOfByKey(FieldName.Authid, AUTH.DEPARTMENT_PROCESS) > -1;
+                        return posn.AuthList.IndexOfByKey(FieldName.Authid, AUTH.DEPARTMENT_MANAGE) > -1
+                            && posn.AuthList.IndexOfByKey(FieldName.Authid, AUTH.DEPARTMENT_PROCESS) > -1;
                     },
                     onChangeDeptMgrChecked: function (posn) {
-                        var has = posn.AuthorityList.IndexOfByKey(FieldName.Authid, AUTH.DEPARTMENT_MANAGE) > -1
-                            && posn.AuthorityList.IndexOfByKey(FieldName.Authid, AUTH.DEPARTMENT_PROCESS) > -1;
+                        var has = posn.AuthList.IndexOfByKey(FieldName.Authid, AUTH.DEPARTMENT_MANAGE) > -1
+                            && posn.AuthList.IndexOfByKey(FieldName.Authid, AUTH.DEPARTMENT_PROCESS) > -1;
                         if (has) {
-                            posn.AuthorityList.RemoveByKey(FieldName.Authid, AUTH.DEPARTMENT_MANAGE);
-                            posn.AuthorityList.RemoveByKey(FieldName.Authid, AUTH.DEPARTMENT_PROCESS);
+                            posn.AuthList.RemoveByKey(FieldName.Authid, AUTH.DEPARTMENT_MANAGE);
+                            posn.AuthList.RemoveByKey(FieldName.Authid, AUTH.DEPARTMENT_PROCESS);
                         }
                         else {
-                            posn.AuthorityList.push(_this.Data.AuthDict[AUTH.DEPARTMENT_MANAGE]);
-                            posn.AuthorityList.push(_this.Data.AuthDict[AUTH.DEPARTMENT_PROCESS]);
+                            posn.AuthList.push(_this.Data.AuthDict[AUTH.DEPARTMENT_MANAGE]);
+                            posn.AuthList.push(_this.Data.AuthDict[AUTH.DEPARTMENT_PROCESS]);
                         }
                     },
                     onEditUserList: function (dept, posn) {
@@ -675,31 +674,33 @@ var ManageManagerClass = /** @class */ (function () {
                         return index > 0;
                     },
                     CheckSortDown: function (dept, posn, index) {
-                        return index < dept.PositionList.length - 1;
+                        return index < dept.PosnList.length - 1;
                     },
                     onSortDown: function (dept, posn, index) {
-                        if (index < dept.PositionList.length - 1) {
-                            dept.PositionList.splice(index + 1, 0, dept.PositionList.splice(index, 1)[0]);
+                        if (index < dept.PosnList.length - 1) {
+                            dept.PosnList.splice(index + 1, 0, dept.PosnList.splice(index, 1)[0]);
                         }
                     },
                     onSortUp: function (dept, posn, index) {
                         if (index > 0) {
-                            dept.PositionList.splice(index - 1, 0, dept.PositionList.splice(index, 1)[0]);
+                            dept.PosnList.splice(index - 1, 0, dept.PosnList.splice(index, 1)[0]);
                         }
                     },
                     onDel: function (dept, posn, index) {
-                        if (dept.PositionList.length == 1) {
+                        if (dept.PosnList.length == 1) {
                             Common.AlertError("\u6BCF\u4E2A\u90E8\u95E8\u4E0B\u81F3\u5C11\u8981\u4FDD\u7559\u4E00\u4E2A\u804C\u4F4D");
                         }
                         else {
                             Common.ConfirmDelete(function () {
-                                dept.PositionList.splice(index, 1);
+                                dept.PosnList.splice(index, 1);
                             }, "\u5373\u5C06\u5220\u9664\u804C\u4F4D \"" + (posn.Name || '空') + "\"");
                         }
                     },
                 },
             });
             var _did = UrlParam.Get(URL_PARAM_KEY.DID, 0);
+            console.log("[debug]", _did, ":[_did]");
+            console.log("[debug]", _this.Data.DeptDict);
             var currDept;
             if (_did > 0) {
                 currDept = _this.Data.DeptDict[_did];
@@ -777,14 +778,15 @@ var ManageManagerClass = /** @class */ (function () {
                         if (currDept) {
                             var posn = {
                                 Posnid: _this.Data.NewPositionUuid++, Did: currDept.Did, Name: _this.VuePositionList.newName.toString(), UserList: [],
-                                AuthorityList: currDept.Sort == 0 ? [_this.Data.AuthDict[AUTH.DEPARTMENT_MANAGE]] : [],
+                                AuthList: currDept.Sort == 0 ? [_this.Data.AuthDict[AUTH.DEPARTMENT_MANAGE]] : [],
                             };
                             _this.VuePositionList.newName = '';
-                            currDept.PositionList.push(posn);
+                            currDept.PosnList.push(posn);
                         }
                     },
                 },
             }).$mount();
+            console.log("[debug]", vue.deptTree, ":[vue.deptTree]");
             _this.VuePositionList = vue;
             //#show
             Common.InsertIntoDom(vue.$el, _this.VueProjectEdit.$refs.pageContent);
@@ -794,14 +796,14 @@ var ManageManagerClass = /** @class */ (function () {
         var _this = this;
         Loader.LoadVueTemplate(this.VuePath + "AuthList", function (tpl) {
             var checkedDict = {};
-            for (var i = 0; i < posn.AuthorityList.length; i++) {
-                var auth = posn.AuthorityList[i];
+            for (var i = 0; i < posn.AuthList.length; i++) {
+                var auth = posn.AuthList[i];
                 checkedDict[auth.Authid] = auth;
             }
             var _checkModChecked = function (_, mod) {
                 // console.log("[debug]", '_checkAllModSelected')
-                for (var i = 0; i < mod.AuthorityList.length; i++) {
-                    var auth = mod.AuthorityList[i];
+                for (var i = 0; i < mod.AuthList.length; i++) {
+                    var auth = mod.AuthList[i];
                     if (!checkedDict[auth.Authid]) {
                         return false;
                     }
@@ -823,8 +825,8 @@ var ManageManagerClass = /** @class */ (function () {
                     },
                     onSwitchMod: function (mod) {
                         var allSelected = _checkModChecked(null, mod);
-                        for (var i = 0; i < mod.AuthorityList.length; i++) {
-                            var auth = mod.AuthorityList[i];
+                        for (var i = 0; i < mod.AuthList.length; i++) {
+                            var auth = mod.AuthList[i];
                             if (allSelected) {
                                 delete checkedDict[auth.Authid];
                             }
@@ -845,9 +847,9 @@ var ManageManagerClass = /** @class */ (function () {
                         _this.VueAuthList.checkedChange = !_this.VueAuthList.checkedChange;
                     },
                     onSave: function () {
-                        posn.AuthorityList.splice(0, posn.AuthorityList.length);
+                        posn.AuthList.splice(0, posn.AuthList.length);
                         for (var authIdStr in checkedDict) {
-                            posn.AuthorityList.push(checkedDict[authIdStr]);
+                            posn.AuthList.push(checkedDict[authIdStr]);
                         }
                         _this.VueAuthList.$el.remove();
                         _this.VueAuthList = null;
@@ -856,8 +858,8 @@ var ManageManagerClass = /** @class */ (function () {
                         for (var authIdStr in checkedDict) {
                             delete checkedDict[authIdStr];
                         }
-                        for (var i = 0; i < posn.AuthorityList.length; i++) {
-                            var auth = posn.AuthorityList[i];
+                        for (var i = 0; i < posn.AuthList.length; i++) {
+                            var auth = posn.AuthList[i];
                             checkedDict[auth.Authid] = auth;
                         }
                         _this.VueAuthList.checkedChange = !_this.VueAuthList.checkedChange;
@@ -873,10 +875,10 @@ var ManageManagerClass = /** @class */ (function () {
         var _this = this;
         if (backDept === void 0) { backDept = null; }
         if (backPosn === void 0) { backPosn = null; }
-        var proj = this.Data.CurrProj;
-        var filterText = UrlParam.Get(URL_PARAM_KEY.FKEY, '');
         this.VueProjectEdit.currPage = ProjectEditPageIndex.User;
         Loader.LoadVueTemplate(this.VuePath + "UserList", function (tpl) {
+            var proj = _this.Data.CurrProj;
+            var filterText = UrlParam.Get(URL_PARAM_KEY.FKEY, '');
             var vue = new Vue({
                 template: tpl,
                 data: {
@@ -905,8 +907,8 @@ var ManageManagerClass = /** @class */ (function () {
                                             dict[user.Uid] = true;
                                         }
                                         else {
-                                            for (var i = 0; i < dept.PositionList.length; i++) {
-                                                var posn = dept.PositionList[i];
+                                            for (var i = 0; i < dept.PosnList.length; i++) {
+                                                var posn = dept.PosnList[i];
                                                 if (posn.Posnid == user.Posnid && StringUtil.IndexOfKeyArr(posn.Name.toLowerCase(), _filterTextSp) > -1) {
                                                     dict[user.Uid] = true;
                                                     break;
@@ -941,7 +943,7 @@ var ManageManagerClass = /** @class */ (function () {
                         var dp = _this.Data.DeptDict[did];
                         if (dp) {
                             if (posnid > 0) {
-                                var posn = dp.PositionList.FindByKey(FieldName.Posnid, posnid);
+                                var posn = dp.PosnList.FindByKey(FieldName.Posnid, posnid);
                                 return posn ? posn.Name : '--';
                             }
                             else {
@@ -965,7 +967,7 @@ var ManageManagerClass = /** @class */ (function () {
                     GetPosList: function (did) {
                         var dp = _this.Data.DeptDict[did];
                         if (dp) {
-                            return dp.PositionList;
+                            return dp.PosnList;
                         }
                         else {
                             return [];

@@ -27,7 +27,7 @@ func (this *C2L_M_MANAGE_VIEW) execute(client *websocket.Conn, msg *Message) boo
 	if user == nil {
 		return false
 	}
-	user.Manage().View()
+	user.SendTo(PB_CMD_MANAGE_VIEW, user.Manage().View())
 	return true
 }
 
@@ -44,6 +44,7 @@ func (this *C2L_M_MANAGE_DEPT_ADD) execute(client *websocket.Conn, msg *Message)
 	if user == nil {
 		return false
 	}
-	user.Manage().DeptAdd(param.Pid, param.Fid, param.Name)
+	dept := user.Manage().DeptAdd(param.Pid, param.Fid, param.Name)
+	user.SendToAll(PB_CMD_MANAGE_DEPT_ADD, dept)
 	return true
 }

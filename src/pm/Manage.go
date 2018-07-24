@@ -1,27 +1,79 @@
 package main
 
+import (
+	"log"
+	"strconv"
+	"strings"
+)
+
 type Manage struct {
-	owner *User
+	user *User
 }
 
 func NewManage(user *User) *Manage {
 	instance := &Manage{}
-	instance.owner = user
+	instance.user = user
 	return instance
 }
 
-func (this *Manage) View() bool {
+func (this *Manage) View() *L2C_ManageView {
+	//#超级 sql :  proj+dept+posn
+	stmt, err := db.GetDb().Prepare(`
+	SELECT t_proj_dept.*,t_posn.posnid,t_posn.name AS posn_name,t_posn.sort AS posn_sort
+	FROM (
+		SELECT t_proj.*,t_dept.did,t_dept.fid,t_dept.name AS d_name,t_dept.sort AS d_sort
+		FROM (
+			SELECT pid,name AS proj_name,create_time FROM pm.pm_project WHERE is_del=0
+		)	AS t_proj
+		LEFT JOIN manager.mag_department AS t_dept ON t_dept.pid = t_proj.pid ORDER BY t_dept.pid,t_dept.fid,t_dept.sort
+	) AS t_proj_dept
+	LEFT JOIN manager.mag_position AS t_posn ON t_posn.did = t_proj_dept.did ORDER BY t_posn.did,t_posn.sort `)
+	//
+	defer stmt.Close()
+	db.CheckErr(err)
+	rows, err := stmt.Query()
+	defer rows.Close()
+	db.CheckErr(err)
+	//
+	projDict := make(map[uint64]*ProjectSingle)
+	deptDict := make(map[uint64]*DepartmentSingle)
+	var projList []*ProjectSingle
+	var deptList []*DepartmentSingle
+	var posnList []*PositionSingle
+	for rows.Next() {
+		proj := &ProjectSingle{}
+		dept := &DepartmentSingle{}
+		posn := &PositionSingle{}
+		rows.Scan(&proj.Pid, &proj.Name, &proj.CreateTime, &dept.Did, &dept.Fid, &dept.Name, &dept.Sort, &posn.Posnid, &posn.Name, &posn.Sort)
+		dept.Pid = proj.Pid
+		posn.Did = dept.Did
+		if _, ok := projDict[proj.Pid]; !ok {
+			projDict[proj.Pid] = proj
+			projList = append(projList, proj)
+		}
+		if dept.Did > 0 {
+			if _, ok := deptDict[dept.Did]; !ok {
+				deptDict[dept.Did] = dept
+				deptList = append(deptList, dept)
+			}
+		}
+		if posn.Posnid > 0 {
+			posnList = append(posnList, posn)
+		}
+	}
 	//#
 	data := &L2C_ManageView{
-		AuthList: this.GetAuthList(),
-		UserList: this.GetUserList(),
-		ProjList: this.GetProjectList(),
+		AuthList:         this.GetAuthList(),
+		UserList:         this.GetUserList(),
+		ProjList:         projList,
+		DeptList:         deptList,
+		PosnList:         posnList,
+		UserProjReltList: this.GetUserMgRelationList(projList),
 	}
-	this.owner.SendTo(PB_CMD_MANAGE_VIEW, data)
-	return true
+	return data
 }
 
-func (this *Manage) DeptAdd(pid uint64, fid uint64, name string) bool {
+func (this *Manage) DeptAdd(pid uint64, fid uint64, name string) *DepartmentSingle {
 	//# 插入 dept IF(?,1,0) 是 IF(fid,1,0) 根从 sort=0 开始 因为sort=0是`管理部``
 	stmt, err := db.GetDb().Prepare(`INSERT INTO ` + config.Mg + `.mag_department (pid,fid,name,sort) VALUES (?,?,?,(
 			(SELECT IFNULL(
@@ -41,27 +93,23 @@ func (this *Manage) DeptAdd(pid uint64, fid uint64, name string) bool {
 	var posn *PositionSingle
 	if dept.Sort == 0 {
 		//管理部 需要增加 三个默认职位
-		posn = this.DoPosnAdd(did, `制作人`)
+		posn = this.PosnAdd(did, `制作人`)
 		posnList = append(posnList, posn)
-		posn = this.DoPosnAdd(did, `PM`)
+		posn = this.PosnAdd(did, `PM`)
 		posnList = append(posnList, posn)
-		posn = this.DoPosnAdd(did, `管理员`)
+		posn = this.PosnAdd(did, `管理员`)
 		posnList = append(posnList, posn)
 	} else {
 		//其它部门 增加一个和部门同名的职位
-		posn = this.DoPosnAdd(did, name)
+		posn = this.PosnAdd(did, name)
 		posnList = append(posnList, posn)
 	}
 	//#
-	data := &L2C_ManageDeptAdd{
-		Dept:     dept,
-		PosnList: posnList,
-	}
-	this.owner.SendTo(PB_CMD_MANAGE_DEPT_ADD, data)
-	return true
+	dept.PosnList = posnList
+	return dept
 }
 
-func (this *Manage) DoPosnAdd(did uint64, name string) *PositionSingle {
+func (this *Manage) PosnAdd(did uint64, name string) *PositionSingle {
 	//# 插入 dept IF(?,1,0) 是 IF(fid,1,0) 根从 sort=0 开始 因为sort=0是`管理部``
 	stmt, err := db.GetDb().Prepare(`INSERT INTO ` + config.Mg + `.mag_position (did,name,sort) VALUES (?,?,(
 	(SELECT IFNULL(
@@ -142,4 +190,28 @@ func (this *Manage) GetDeptSingle(did uint64) *DepartmentSingle {
 	single := &DepartmentSingle{}
 	stmt.QueryRow(did).Scan(&single.Did, &single.Pid, &single.Fid, &single.Name, &single.Sort)
 	return single
+}
+
+//玩家关系表   是 mag_user_proj_relation表的数据, 但结构被UserSingle包含了 所以就用UserSingle吧
+func (this *Manage) GetUserMgRelationList(projList []*ProjectSingle) []*UserSingle {
+	var pidList []string
+	for _, proj := range projList {
+		// pidList = append(pidList, strconv.Itoa(int(proj.Pid)))
+		pidList = append(pidList, strconv.FormatInt(int64(proj.Pid), 10))
+	}
+	log.Println("[log]", pidList, ":[pidList]")
+	log.Println(strings.Join(pidList, `,`))
+	stmt, err := db.GetDb().Prepare(`SELECT uid,pid,did,posnid FROM ` + config.Mg + `.mag_user_proj_relation WHERE pid IN (` + strings.Join(pidList, `,`) + `)`)
+	defer stmt.Close()
+	db.CheckErr(err)
+	rows, err := stmt.Query()
+	defer rows.Close()
+	db.CheckErr(err)
+	var list []*UserSingle
+	for rows.Next() {
+		single := &UserSingle{}
+		rows.Scan(&single.Uid, &single.Pid, &single.Did, &single.Posnid)
+		list = append(list, single)
+	}
+	return list
 }

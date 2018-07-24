@@ -1,5 +1,5 @@
 <transition-group name="list-complete" tag="div">
-    <div class="list-complete-item" v-for="posn,index in dept.PositionList" :key="posn.Posnid">
+    <div class="list-complete-item" v-for="posn,index in dept.PosnList" :key="posn.Posnid" v-if="posn">
         <div class="divrow PosnList-row">
             <div class="text-middle">
                 <span class="glyphicon glyphicon-minus" aria-hidden="true" v-for="dep,index in (dept.Depth-startDepth)*2"></span>
@@ -20,9 +20,9 @@
             <!-- 权限 -->
             <div>
                 <button class="btn btn-default " type="button" @click="onEditAuth(dept,posn,index)
-                        " :title="'该职位有`+posn.AuthorityList.length+`个权限'">
+                        " :title="'该职位有`+posn.AuthList.length+`个权限'">
                     <span class="glyphicon glyphicon-briefcase" aria-hidden="true ">
-                        {{posn.AuthorityList.length}}
+                        {{posn.AuthList.length}}
                     </span>
                 </button>
             </div>

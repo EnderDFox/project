@@ -3,14 +3,15 @@ class ManageDataClass {
     AuthModList: AuthModSingle[]
     AuthModDict: { [key: number]: AuthModSingle };
     AuthDict: { [key: number]: AuthSingle };
-    //
+    //全部
     ProjList: ProjectSingle[]
+    ProjDict: { [key: number]: ProjectSingle }
     /**全部user */
     UserList: UserSingle[]
     UserDict: { [key: number]: UserSingle };
-    /**部门字典 */
+    /**全部部门字典 */
     DeptDict: { [key: number]: DepartmentSingle };
-    //
+    //当前
     CurrUser: UserSingle
     /**我的权限 */
     MyAuth: { [key: number]: boolean } = {};
@@ -22,8 +23,10 @@ class ManageDataClass {
         this.InitAuthData(data.AuthList)
         this.InitUserData(data.UserList)
         this.InitProjData(data.ProjList)
-        //
-        this.InitSimulateData()
+        this.InitDeptData(data.DeptList)
+        this.InitPosnData(data.PosnList)
+        // this.InitDeptData(data.PosnList)
+        // this.InitDeptData(data.PosnList)
         //
         var uid = Number(UrlParam.Get('uid'))
         if (isNaN(uid)) {
@@ -44,22 +47,13 @@ class ManageDataClass {
         //# auth module
         this.AuthModList = [
             {
-                Modid: 10, Name: '后台管理', Description: `包括 部门 职位 权限修改等`, AuthorityList: [],
+                Modid: 10, Name: '后台管理', Description: `包括 部门 职位 权限修改等`, AuthList: [],
                 CheckedChange: false,
             },
             {
-                Modid: 20, Name: '工作管理', Description: `包括 模块 流程 工作 评价等`, AuthorityList: [],
+                Modid: 20, Name: '工作管理', Description: `包括 模块 流程 工作 评价等`, AuthList: [],
                 CheckedChange: false,
             },
-            /*  {
-                 Modid: 2, Name: '所属部门管理', Description: `该员工所在部门及其子部门的管理权限`,
-                 AuthorityList: [
-                     /*  { Authid: 21, Name: '成员管理', Description: `所在部门及其子部门内所有成员的增加/修改/删除` },
-                      { Authid: 22, Name: '职位管理' },
-                      { Authid: 23, Name: '子部门管理', Description: `可以增加/修改/删除子部门` },
-                      { Authid: 24, Name: '功能管理', Description: `功能/流程的修改` },
-                      { Authid: 25, Name: '工作编辑', Description: `工作的修改` },
-                      { Authid: 26, Name: '工作评论', Description: `对已有工作进行评论` }, */
         ]
         //#
         this.AuthModDict = {}
@@ -74,7 +68,7 @@ class ManageDataClass {
             auth.CheckedChange = false
             this.AuthDict[auth.Authid] = auth
             if (auth.Modid > 0) {//Modid=0是顶级权限
-                this.AuthModDict[auth.Modid].AuthorityList.push(auth)
+                this.AuthModDict[auth.Modid].AuthList.push(auth)
             }
         }
     }
@@ -91,10 +85,12 @@ class ManageDataClass {
     }
     private InitProjData(projList: ProjectSingle[]) {
         this.ProjList = projList
+        this.ProjDict = {}
         for (var i = 0; i < projList.length; i++) {
             var proj: ProjectSingle = projList[i]
-            proj.UserList = []
+            this.ProjDict[proj.Pid] = proj
             proj.DeptTree = []
+            proj.UserList = []
             proj.MasterUid = 0;//TODO:
         }
         //# TODO:
@@ -103,83 +99,28 @@ class ManageDataClass {
             this.ProjList[0].UserList[i].Sort = i + 1
         }
     }
-    /**初始化虚拟数据 */
-    private InitSimulateData() {
+    private InitDeptData(deptList: DepartmentSingle[]) {
         this.DeptDict = {}
-        //#department
-        // var proj: ProjectSingle = this.ProjList[0]
-        var proj: ProjectSingle = {}
-        proj.DeptTree = [
-            this.NewDeptManager(),
-            {
-                Did: 1, Fid: 0, Name: '策划', Depth: 0, Children: [],
-                PositionList: [
-                    { Posnid: 100, Did: 2, Name: '策划', UserList: [], AuthorityList: [] },
-                    { Posnid: 101, Did: 2, Name: '策划主管', UserList: [], AuthorityList: [] },
-                ]
-            },
-            {
-                Did: 2, Fid: 0, Name: '美术', Depth: 0,
-                PositionList: [
-                    { Posnid: 201, Did: 2, Name: '美术主管', UserList: [], AuthorityList: [] },
-                ], Children: [
-                    {
-                        Did: 21, Fid: 2, Name: 'UI', Depth: 1, Children: [],
-                        PositionList: [{ Posnid: 2102, Did: 2, Name: 'UI', UserList: [], AuthorityList: [] },]
-                    },
-                    {
-                        Did: 22, Fid: 2, Name: '3D', Depth: 1, Children: [],
-                        PositionList: [
-                            { Posnid: 2200, Did: 2, Name: '3D主管', UserList: [], AuthorityList: [] },
-                            { Posnid: 2201, Did: 2, Name: '3D建模', UserList: [], AuthorityList: [] },
-                            { Posnid: 2202, Did: 2, Name: '3D渲染', UserList: [], AuthorityList: [] },
-                            { Posnid: 2203, Did: 2, Name: '3D动作', UserList: [], AuthorityList: [] },
-                        ]
-                    },
-                    {
-                        Did: 23, Fid: 2, Name: '原画', Depth: 1,
-                        PositionList: [{ Posnid: 301, Did: 2, Name: '原画主管', UserList: [], AuthorityList: [] }],
-                        Children: [
-                            {
-                                Did: 231, Fid: 23, Name: '角色原画', Depth: 2, Children: [],
-                                PositionList: [{ Posnid: 23100, Did: 2, Name: '角色原画', UserList: [], AuthorityList: [] },]
-                            },
-                            {
-                                Did: 232, Fid: 23, Name: '场景原画', Depth: 2, Children: [],
-                                PositionList: [{ Posnid: 23200, Did: 2, Name: '场景原画', UserList: [], AuthorityList: [] },]
-                            },
-                        ],
-                    },
-                ],
-            },
-            {
-                Did: 3, Fid: 0, Name: '后端', Depth: 0, Children: [],
-                PositionList: [
-                    { Posnid: 300, Did: 2, Name: '后端', UserList: [], AuthorityList: [] },
-                    { Posnid: 301, Did: 2, Name: '后端主管', UserList: [], AuthorityList: [] },
-                ]
-            },
-            {
-                Did: 4, Fid: 0, Name: '前端', Depth: 0, Children: [],
-                PositionList: [
-                    { Posnid: 400, Did: 2, Name: '前端', UserList: [], AuthorityList: [] },
-                    { Posnid: 401, Did: 2, Name: '前端主管', UserList: [], AuthorityList: [] },
-                ]
-            },
-        ]
-        //
-        this.InitAllDeptDict(proj.DeptTree)
-    }
-    InitAllDeptDict(deptTree: DepartmentSingle[] = null) {
-        for (var i = 0; i < deptTree.length; i++) {
-            var dept = deptTree[i]
-            if (dept.Sort == null) {
-                dept.Sort = 1
-            }
+        for (var i = 0; i < deptList.length; i++) {
+            var dept = deptList[i]
+            dept.Children = []
+            dept.PosnList = []
             this.DeptDict[dept.Did] = dept
-            if (dept.Children.length > 0) {
-                this.InitAllDeptDict(dept.Children)
+            if (dept.Fid == 0) {
+                dept.Depth = 0
+                this.ProjDict[dept.Pid].DeptTree.push(dept)
+            } else {
+                dept.Depth = this.DeptDict[dept.Fid].Depth + 1
+                this.DeptDict[dept.Fid].Children.push(dept)
             }
+        }
+    }
+    private InitPosnData(posnList: PositionSingle[]) {
+        for (var i = 0; i < posnList.length; i++) {
+            var posn = posnList[i]
+            posn.AuthList = []
+            posn.UserList = []
+            this.DeptDict[posn.Did].PosnList.push(posn)
         }
     }
     AddMyAuth(auth: AUTH) {
@@ -227,7 +168,7 @@ class ManageDataClass {
     /**一个部门及其子部门下所有的职位 */
     GetDeptAllPosnList(dept: DepartmentSingle, rs: PositionSingle[] = null): PositionSingle[] {
         rs = rs || [];
-        rs.push.apply(rs, dept.PositionList)
+        rs.push.apply(rs, dept.PosnList)
         for (var i = 0; i < dept.Children.length; i++) {
             var child = dept.Children[i]
             this.GetDeptAllPosnList(child, rs)
@@ -237,8 +178,8 @@ class ManageDataClass {
     /**一个部门下的成员,不包括子部门 */
     GetDeptUserList(dept: DepartmentSingle, rs: UserSingle[] = null): UserSingle[] {
         rs = rs || [];
-        for (var i = 0; i < dept.PositionList.length; i++) {
-            var posn = dept.PositionList[i]
+        for (var i = 0; i < dept.PosnList.length; i++) {
+            var posn = dept.PosnList[i]
             rs.push.apply(rs, posn.UserList)
         }
         return rs
@@ -246,8 +187,8 @@ class ManageDataClass {
     /**一个部门及其子部门下所有的user */
     GetDeptAllUserList(dept: DepartmentSingle, rs: UserSingle[] = null): UserSingle[] {
         rs = rs || [];
-        for (var i = 0; i < dept.PositionList.length; i++) {
-            var posn = dept.PositionList[i]
+        for (var i = 0; i < dept.PosnList.length; i++) {
+            var posn = dept.PosnList[i]
             rs.push.apply(rs, posn.UserList)
         }
         for (var i = 0; i < dept.Children.length; i++) {
@@ -262,18 +203,18 @@ class ManageDataClass {
             Did: this.NewDepartmentUuid, Name: '管理部', Fid: 0, Depth: 0,
             Sort: 0,//标记管理员部门主要靠sort=0
             Children: [],
-            PositionList: [
+            PosnList: [
                 {
                     Posnid: this.NewPositionUuid++, Did: this.NewDepartmentUuid, Name: '制作人', UserList: [],
-                    AuthorityList: [this.AuthDict[AUTH.PROJECT_MANAGE], this.AuthDict[AUTH.DEPARTMENT_MANAGE]]
+                    AuthList: [this.AuthDict[AUTH.PROJECT_MANAGE], this.AuthDict[AUTH.DEPARTMENT_MANAGE]]
                 },
                 {
                     Posnid: this.NewPositionUuid++, Did: this.NewDepartmentUuid, Name: 'PM', UserList: [],
-                    AuthorityList: [this.AuthDict[AUTH.PROJECT_MANAGE], this.AuthDict[AUTH.DEPARTMENT_MANAGE]]
+                    AuthList: [this.AuthDict[AUTH.PROJECT_MANAGE], this.AuthDict[AUTH.DEPARTMENT_MANAGE]]
                 },
                 {
                     Posnid: this.NewPositionUuid++, Did: this.NewDepartmentUuid, Name: '管理员', UserList: [],
-                    AuthorityList: [this.AuthDict[AUTH.PROJECT_MANAGE], this.AuthDict[AUTH.DEPARTMENT_MANAGE]]
+                    AuthList: [this.AuthDict[AUTH.PROJECT_MANAGE], this.AuthDict[AUTH.DEPARTMENT_MANAGE]]
                 },
             ]
         }
@@ -321,7 +262,7 @@ class ManageDataClass {
     RemoveUserPosnid(user: UserSingle) {
         if (user.Did) {
             var oldDept: DepartmentSingle = ManageData.DeptDict[user.Did]
-            var oldPosn: PositionSingle = oldDept.PositionList.FindByKey(FieldName.Posnid, user.Posnid)
+            var oldPosn: PositionSingle = oldDept.PosnList.FindByKey(FieldName.Posnid, user.Posnid)
             if (oldPosn) {
                 oldPosn.UserList.RemoveByKey(FieldName.Uid, user.Uid)
             }
@@ -332,9 +273,9 @@ class ManageDataClass {
         user.Did = dept.Did
         var posn: PositionSingle
         if (posnid == -1) {
-            posn = dept.PositionList[0]
+            posn = dept.PosnList[0]
         } else {
-            posn = dept.PositionList.FindByKey(FieldName.Posnid, posnid)
+            posn = dept.PosnList.FindByKey(FieldName.Posnid, posnid)
         }
         user.Posnid = posn.Posnid
         posn.UserList.push(user)

@@ -18,7 +18,7 @@
                         </div>
                     </td>
                     <td>
-                        <div class="checkbox" v-for="auth,index in am.AuthorityList" :key="auth.Authid" style="display:inline-block;margin-left: 10px;margin-right: 10px;"
+                        <div class="checkbox" v-for="auth,index in am.AuthList" :key="auth.Authid" style="display:inline-block;margin-left: 10px;margin-right: 10px;"
                             :title="auth.Description">
                             <label>
                                 <input type="checkbox" :name="auth.Name" :value="auth.Uid" :checked="checkAuthChecked(checkedChange,auth)" @click="onSwitchAuth($event,auth)"> {{auth.Name}}

@@ -104,6 +104,18 @@ interface UserSingle {
     Sort?: number
 }
 
+interface ProjectSingle {
+    Pid?: number
+    Name?: string
+    CreateTime?: number
+    //负责人id
+    MasterUid?: number
+    //client cache data
+    DeptTree?: DepartmentSingle[]
+    UserList?: UserSingle[]
+    ModeList?: ModeSingle[]
+}
+
 interface DepartmentSingle {
     Did?: DidField
     Pid?: PidFeild
@@ -113,21 +125,21 @@ interface DepartmentSingle {
     //client
     Depth?: number
     Children?: DepartmentSingle[]
-    PositionList?: PositionSingle[]
+    PosnList?: PositionSingle[]
 }
 
 interface PositionSingle {
     Posnid?: int
     Did?: DidField
     Name?: string
-    AuthorityList?: AuthSingle[]
+    AuthList?: AuthSingle[]
     //client
     UserList?: UserSingle[]
 }
 interface AuthModSingle {
     Modid?: int
     Name?: string
-    AuthorityList?: AuthSingle[]
+    AuthList?: AuthSingle[]
     Description?: string //dsc/descr
     //client
     CheckedChange?: boolean
@@ -148,18 +160,6 @@ interface DepartmentInfo {
     user?: UserSingle[]
 }
 
-interface ProjectSingle {
-    Pid?: number
-    Name?: string
-    //负责人id
-    MasterUid?: number
-    CreateTime?: number
-    //
-    DeptTree?: DepartmentSingle[]
-    //client cache data
-    ModeList?: ModeSingle[]
-    UserList?: UserSingle[]
-}
 
 interface ModeSingle {
     Mid?: number
@@ -425,6 +425,9 @@ interface L2C_ManageView {
     AuthList?: AuthSingle[]
     UserList?: UserSingle[]
     ProjList?: ProjectSingle[]
+    DeptList?: DepartmentSingle[]
+    PosnList?: PositionSingle[]
+    UserProjReltList?: UserSingle[]
 }
 
 interface C2L_ManageDeptAdd {
@@ -432,13 +435,6 @@ interface C2L_ManageDeptAdd {
     Name: string
     Fid?: uint64
 }
-
-
-interface L2C_ManageDeptAdd {
-    Dept: DepartmentSingle
-    PosnList: PositionSingle[]
-}
-
 
 enum AUTH {
     PROJECT_LIST = 70,

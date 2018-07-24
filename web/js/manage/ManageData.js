@@ -10,8 +10,10 @@ var ManageDataClass = /** @class */ (function () {
         this.InitAuthData(data.AuthList);
         this.InitUserData(data.UserList);
         this.InitProjData(data.ProjList);
-        //
-        this.InitSimulateData();
+        this.InitDeptData(data.DeptList);
+        this.InitPosnData(data.PosnList);
+        // this.InitDeptData(data.PosnList)
+        // this.InitDeptData(data.PosnList)
         //
         var uid = Number(UrlParam.Get('uid'));
         if (isNaN(uid)) {
@@ -32,11 +34,11 @@ var ManageDataClass = /** @class */ (function () {
         //# auth module
         this.AuthModList = [
             {
-                Modid: 10, Name: '后台管理', Description: "\u5305\u62EC \u90E8\u95E8 \u804C\u4F4D \u6743\u9650\u4FEE\u6539\u7B49", AuthorityList: [],
+                Modid: 10, Name: '后台管理', Description: "\u5305\u62EC \u90E8\u95E8 \u804C\u4F4D \u6743\u9650\u4FEE\u6539\u7B49", AuthList: [],
                 CheckedChange: false,
             },
             {
-                Modid: 20, Name: '工作管理', Description: "\u5305\u62EC \u6A21\u5757 \u6D41\u7A0B \u5DE5\u4F5C \u8BC4\u4EF7\u7B49", AuthorityList: [],
+                Modid: 20, Name: '工作管理', Description: "\u5305\u62EC \u6A21\u5757 \u6D41\u7A0B \u5DE5\u4F5C \u8BC4\u4EF7\u7B49", AuthList: [],
                 CheckedChange: false,
             },
         ];
@@ -53,7 +55,7 @@ var ManageDataClass = /** @class */ (function () {
             auth.CheckedChange = false;
             this.AuthDict[auth.Authid] = auth;
             if (auth.Modid > 0) { //Modid=0是顶级权限
-                this.AuthModDict[auth.Modid].AuthorityList.push(auth);
+                this.AuthModDict[auth.Modid].AuthList.push(auth);
             }
         }
     };
@@ -70,10 +72,12 @@ var ManageDataClass = /** @class */ (function () {
     };
     ManageDataClass.prototype.InitProjData = function (projList) {
         this.ProjList = projList;
+        this.ProjDict = {};
         for (var i = 0; i < projList.length; i++) {
             var proj = projList[i];
-            proj.UserList = [];
+            this.ProjDict[proj.Pid] = proj;
             proj.DeptTree = [];
+            proj.UserList = [];
             proj.MasterUid = 0; //TODO:
         }
         //# TODO:
@@ -82,84 +86,29 @@ var ManageDataClass = /** @class */ (function () {
             this.ProjList[0].UserList[i].Sort = i + 1;
         }
     };
-    /**初始化虚拟数据 */
-    ManageDataClass.prototype.InitSimulateData = function () {
+    ManageDataClass.prototype.InitDeptData = function (deptList) {
         this.DeptDict = {};
-        //#department
-        // var proj: ProjectSingle = this.ProjList[0]
-        var proj = {};
-        proj.DeptTree = [
-            this.NewDeptManager(),
-            {
-                Did: 1, Fid: 0, Name: '策划', Depth: 0, Children: [],
-                PositionList: [
-                    { Posnid: 100, Did: 2, Name: '策划', UserList: [], AuthorityList: [] },
-                    { Posnid: 101, Did: 2, Name: '策划主管', UserList: [], AuthorityList: [] },
-                ]
-            },
-            {
-                Did: 2, Fid: 0, Name: '美术', Depth: 0,
-                PositionList: [
-                    { Posnid: 201, Did: 2, Name: '美术主管', UserList: [], AuthorityList: [] },
-                ], Children: [
-                    {
-                        Did: 21, Fid: 2, Name: 'UI', Depth: 1, Children: [],
-                        PositionList: [{ Posnid: 2102, Did: 2, Name: 'UI', UserList: [], AuthorityList: [] },]
-                    },
-                    {
-                        Did: 22, Fid: 2, Name: '3D', Depth: 1, Children: [],
-                        PositionList: [
-                            { Posnid: 2200, Did: 2, Name: '3D主管', UserList: [], AuthorityList: [] },
-                            { Posnid: 2201, Did: 2, Name: '3D建模', UserList: [], AuthorityList: [] },
-                            { Posnid: 2202, Did: 2, Name: '3D渲染', UserList: [], AuthorityList: [] },
-                            { Posnid: 2203, Did: 2, Name: '3D动作', UserList: [], AuthorityList: [] },
-                        ]
-                    },
-                    {
-                        Did: 23, Fid: 2, Name: '原画', Depth: 1,
-                        PositionList: [{ Posnid: 301, Did: 2, Name: '原画主管', UserList: [], AuthorityList: [] }],
-                        Children: [
-                            {
-                                Did: 231, Fid: 23, Name: '角色原画', Depth: 2, Children: [],
-                                PositionList: [{ Posnid: 23100, Did: 2, Name: '角色原画', UserList: [], AuthorityList: [] },]
-                            },
-                            {
-                                Did: 232, Fid: 23, Name: '场景原画', Depth: 2, Children: [],
-                                PositionList: [{ Posnid: 23200, Did: 2, Name: '场景原画', UserList: [], AuthorityList: [] },]
-                            },
-                        ],
-                    },
-                ],
-            },
-            {
-                Did: 3, Fid: 0, Name: '后端', Depth: 0, Children: [],
-                PositionList: [
-                    { Posnid: 300, Did: 2, Name: '后端', UserList: [], AuthorityList: [] },
-                    { Posnid: 301, Did: 2, Name: '后端主管', UserList: [], AuthorityList: [] },
-                ]
-            },
-            {
-                Did: 4, Fid: 0, Name: '前端', Depth: 0, Children: [],
-                PositionList: [
-                    { Posnid: 400, Did: 2, Name: '前端', UserList: [], AuthorityList: [] },
-                    { Posnid: 401, Did: 2, Name: '前端主管', UserList: [], AuthorityList: [] },
-                ]
-            },
-        ];
-        //
-        this.InitAllDeptDict(proj.DeptTree);
-    };
-    ManageDataClass.prototype.InitAllDeptDict = function (deptTree) {
-        if (deptTree === void 0) { deptTree = null; }
-        for (var i = 0; i < deptTree.length; i++) {
-            var dept = deptTree[i];
-            if (dept.Sort == null) {
-                dept.Sort = 1;
-            }
+        for (var i = 0; i < deptList.length; i++) {
+            var dept = deptList[i];
+            dept.Children = [];
+            dept.PosnList = [];
             this.DeptDict[dept.Did] = dept;
-            if (dept.Children.length > 0) {
-                this.InitAllDeptDict(dept.Children);
+            if (dept.Fid == 0) {
+                dept.Depth = 0;
+                this.ProjDict[dept.Pid].DeptTree.push(dept);
             }
+            else {
+                dept.Depth = this.DeptDict[dept.Fid].Depth + 1;
+                this.DeptDict[dept.Fid].Children.push(dept);
+            }
+        }
+    };
+    ManageDataClass.prototype.InitPosnData = function (posnList) {
+        for (var i = 0; i < posnList.length; i++) {
+            var posn = posnList[i];
+            posn.AuthList = [];
+            posn.UserList = [];
+            this.DeptDict[posn.Did].PosnList.push(posn);
         }
     };
     ManageDataClass.prototype.AddMyAuth = function (auth) {
@@ -209,7 +158,7 @@ var ManageDataClass = /** @class */ (function () {
     ManageDataClass.prototype.GetDeptAllPosnList = function (dept, rs) {
         if (rs === void 0) { rs = null; }
         rs = rs || [];
-        rs.push.apply(rs, dept.PositionList);
+        rs.push.apply(rs, dept.PosnList);
         for (var i = 0; i < dept.Children.length; i++) {
             var child = dept.Children[i];
             this.GetDeptAllPosnList(child, rs);
@@ -220,8 +169,8 @@ var ManageDataClass = /** @class */ (function () {
     ManageDataClass.prototype.GetDeptUserList = function (dept, rs) {
         if (rs === void 0) { rs = null; }
         rs = rs || [];
-        for (var i = 0; i < dept.PositionList.length; i++) {
-            var posn = dept.PositionList[i];
+        for (var i = 0; i < dept.PosnList.length; i++) {
+            var posn = dept.PosnList[i];
             rs.push.apply(rs, posn.UserList);
         }
         return rs;
@@ -230,8 +179,8 @@ var ManageDataClass = /** @class */ (function () {
     ManageDataClass.prototype.GetDeptAllUserList = function (dept, rs) {
         if (rs === void 0) { rs = null; }
         rs = rs || [];
-        for (var i = 0; i < dept.PositionList.length; i++) {
-            var posn = dept.PositionList[i];
+        for (var i = 0; i < dept.PosnList.length; i++) {
+            var posn = dept.PosnList[i];
             rs.push.apply(rs, posn.UserList);
         }
         for (var i = 0; i < dept.Children.length; i++) {
@@ -246,18 +195,18 @@ var ManageDataClass = /** @class */ (function () {
             Did: this.NewDepartmentUuid, Name: '管理部', Fid: 0, Depth: 0,
             Sort: 0,
             Children: [],
-            PositionList: [
+            PosnList: [
                 {
                     Posnid: this.NewPositionUuid++, Did: this.NewDepartmentUuid, Name: '制作人', UserList: [],
-                    AuthorityList: [this.AuthDict[AUTH.PROJECT_MANAGE], this.AuthDict[AUTH.DEPARTMENT_MANAGE]]
+                    AuthList: [this.AuthDict[AUTH.PROJECT_MANAGE], this.AuthDict[AUTH.DEPARTMENT_MANAGE]]
                 },
                 {
                     Posnid: this.NewPositionUuid++, Did: this.NewDepartmentUuid, Name: 'PM', UserList: [],
-                    AuthorityList: [this.AuthDict[AUTH.PROJECT_MANAGE], this.AuthDict[AUTH.DEPARTMENT_MANAGE]]
+                    AuthList: [this.AuthDict[AUTH.PROJECT_MANAGE], this.AuthDict[AUTH.DEPARTMENT_MANAGE]]
                 },
                 {
                     Posnid: this.NewPositionUuid++, Did: this.NewDepartmentUuid, Name: '管理员', UserList: [],
-                    AuthorityList: [this.AuthDict[AUTH.PROJECT_MANAGE], this.AuthDict[AUTH.DEPARTMENT_MANAGE]]
+                    AuthList: [this.AuthDict[AUTH.PROJECT_MANAGE], this.AuthDict[AUTH.DEPARTMENT_MANAGE]]
                 },
             ]
         };
@@ -309,7 +258,7 @@ var ManageDataClass = /** @class */ (function () {
     ManageDataClass.prototype.RemoveUserPosnid = function (user) {
         if (user.Did) {
             var oldDept = ManageData.DeptDict[user.Did];
-            var oldPosn = oldDept.PositionList.FindByKey(FieldName.Posnid, user.Posnid);
+            var oldPosn = oldDept.PosnList.FindByKey(FieldName.Posnid, user.Posnid);
             if (oldPosn) {
                 oldPosn.UserList.RemoveByKey(FieldName.Uid, user.Uid);
             }
@@ -321,10 +270,10 @@ var ManageDataClass = /** @class */ (function () {
         user.Did = dept.Did;
         var posn;
         if (posnid == -1) {
-            posn = dept.PositionList[0];
+            posn = dept.PosnList[0];
         }
         else {
-            posn = dept.PositionList.FindByKey(FieldName.Posnid, posnid);
+            posn = dept.PosnList.FindByKey(FieldName.Posnid, posnid);
         }
         user.Posnid = posn.Posnid;
         posn.UserList.push(user);

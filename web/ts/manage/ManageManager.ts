@@ -35,14 +35,12 @@ class ManageManagerClass {
     RegisterPB() {
         Commond.Register(PB_CMD.MANAGE_DEPT_ADD, this.PB_DeptAdd.bind(this))
     }
-    PB_DeptAdd(data: L2C_ManageDeptAdd) {
-        var dept: DepartmentSingle = data.Dept
+    PB_DeptAdd(dept: DepartmentSingle) {
         dept.Children = []
-        dept.PositionList = data.PosnList
-        for (var i = 0; i < dept.PositionList.length; i++) {
-            var posn:PositionSingle = dept.PositionList[i]
+        for (var i = 0; i < dept.PosnList.length; i++) {
+            var posn:PositionSingle = dept.PosnList[i]
             posn.UserList = []
-            posn.AuthorityList==null?posn.AuthorityList=[]:undefined
+            posn.AuthList==null?posn.AuthList=[]:undefined
         }
         //
         if (dept.Fid == 0) {
@@ -624,6 +622,7 @@ class ManageManagerClass {
         return true
     }
     ShowPositionList() {
+        this.VueProjectEdit.currPage = ProjectEditPageIndex.Position
         Loader.LoadVueTemplateList([`${this.VuePath}PosnList`, `${this.VuePath}PosnListComp`], (tplList: string[]) => {
             Vue.component(`PosnListComp`, {
                 template: tplList[1],
@@ -651,18 +650,18 @@ class ManageManagerClass {
                         this.ShowAuthList(posn)
                     },
                     checkDeptMgrChecked: (posn: PositionSingle) => {
-                        return posn.AuthorityList.IndexOfByKey(FieldName.Authid, AUTH.DEPARTMENT_MANAGE) > -1
-                            && posn.AuthorityList.IndexOfByKey(FieldName.Authid, AUTH.DEPARTMENT_PROCESS) > -1
+                        return posn.AuthList.IndexOfByKey(FieldName.Authid, AUTH.DEPARTMENT_MANAGE) > -1
+                            && posn.AuthList.IndexOfByKey(FieldName.Authid, AUTH.DEPARTMENT_PROCESS) > -1
                     },
                     onChangeDeptMgrChecked: (posn: PositionSingle) => {
-                        var has = posn.AuthorityList.IndexOfByKey(FieldName.Authid, AUTH.DEPARTMENT_MANAGE) > -1
-                            && posn.AuthorityList.IndexOfByKey(FieldName.Authid, AUTH.DEPARTMENT_PROCESS) > -1
+                        var has = posn.AuthList.IndexOfByKey(FieldName.Authid, AUTH.DEPARTMENT_MANAGE) > -1
+                            && posn.AuthList.IndexOfByKey(FieldName.Authid, AUTH.DEPARTMENT_PROCESS) > -1
                         if (has) {
-                            posn.AuthorityList.RemoveByKey(FieldName.Authid, AUTH.DEPARTMENT_MANAGE)
-                            posn.AuthorityList.RemoveByKey(FieldName.Authid, AUTH.DEPARTMENT_PROCESS)
+                            posn.AuthList.RemoveByKey(FieldName.Authid, AUTH.DEPARTMENT_MANAGE)
+                            posn.AuthList.RemoveByKey(FieldName.Authid, AUTH.DEPARTMENT_PROCESS)
                         } else {
-                            posn.AuthorityList.push(this.Data.AuthDict[AUTH.DEPARTMENT_MANAGE])
-                            posn.AuthorityList.push(this.Data.AuthDict[AUTH.DEPARTMENT_PROCESS])
+                            posn.AuthList.push(this.Data.AuthDict[AUTH.DEPARTMENT_MANAGE])
+                            posn.AuthList.push(this.Data.AuthDict[AUTH.DEPARTMENT_PROCESS])
                         }
                     },
                     onEditUserList: (dept: DepartmentSingle, posn: PositionSingle) => {
@@ -673,30 +672,32 @@ class ManageManagerClass {
                         return index > 0
                     },
                     CheckSortDown: (dept: DepartmentSingle, posn: PositionSingle, index: int) => {
-                        return index < dept.PositionList.length - 1
+                        return index < dept.PosnList.length - 1
                     },
                     onSortDown: (dept: DepartmentSingle, posn: PositionSingle, index: int) => {
-                        if (index < dept.PositionList.length - 1) {
-                            dept.PositionList.splice(index + 1, 0, dept.PositionList.splice(index, 1)[0])
+                        if (index < dept.PosnList.length - 1) {
+                            dept.PosnList.splice(index + 1, 0, dept.PosnList.splice(index, 1)[0])
                         }
                     },
                     onSortUp: (dept: DepartmentSingle, posn: PositionSingle, index: int) => {
                         if (index > 0) {
-                            dept.PositionList.splice(index - 1, 0, dept.PositionList.splice(index, 1)[0])
+                            dept.PosnList.splice(index - 1, 0, dept.PosnList.splice(index, 1)[0])
                         }
                     },
                     onDel: (dept: DepartmentSingle, posn: PositionSingle, index: int) => {
-                        if (dept.PositionList.length == 1) {
+                        if (dept.PosnList.length == 1) {
                             Common.AlertError(`每个部门下至少要保留一个职位`)
                         } else {
                             Common.ConfirmDelete(() => {
-                                dept.PositionList.splice(index, 1)
+                                dept.PosnList.splice(index, 1)
                             }, `即将删除职位 "${posn.Name || '空'}"`)
                         }
                     },
                 },
             })
             var _did = UrlParam.Get(URL_PARAM_KEY.DID, 0)
+            console.log("[debug]",_did,":[_did]")
+            console.log("[debug]",this.Data.DeptDict)
             var currDept: DepartmentSingle;
             if (_did > 0) {
                 currDept = this.Data.DeptDict[_did]
@@ -772,15 +773,16 @@ class ManageManagerClass {
                             if (currDept) {
                                 var posn: PositionSingle = {
                                     Posnid: this.Data.NewPositionUuid++, Did: currDept.Did, Name: this.VuePositionList.newName.toString(), UserList: [],
-                                    AuthorityList: currDept.Sort == 0 ? [this.Data.AuthDict[AUTH.DEPARTMENT_MANAGE]] : [],
+                                    AuthList: currDept.Sort == 0 ? [this.Data.AuthDict[AUTH.DEPARTMENT_MANAGE]] : [],
                                 }
                                 this.VuePositionList.newName = ''
-                                currDept.PositionList.push(posn)
+                                currDept.PosnList.push(posn)
                             }
                         },
                     },
                 }
             ).$mount()
+            console.log("[debug]",vue.deptTree,":[vue.deptTree]")
             this.VuePositionList = vue
             //#show
             Common.InsertIntoDom(vue.$el, this.VueProjectEdit.$refs.pageContent)
@@ -789,14 +791,14 @@ class ManageManagerClass {
     ShowAuthList(posn: PositionSingle) {
         Loader.LoadVueTemplate(this.VuePath + "AuthList", (tpl: string) => {
             var checkedDict: { [key: number]: AuthSingle } = {};
-            for (var i = 0; i < posn.AuthorityList.length; i++) {
-                var auth: AuthSingle = posn.AuthorityList[i]
+            for (var i = 0; i < posn.AuthList.length; i++) {
+                var auth: AuthSingle = posn.AuthList[i]
                 checkedDict[auth.Authid] = auth
             }
             var _checkModChecked = (_, mod: AuthModSingle): boolean => {
                 // console.log("[debug]", '_checkAllModSelected')
-                for (var i = 0; i < mod.AuthorityList.length; i++) {
-                    var auth = mod.AuthorityList[i]
+                for (var i = 0; i < mod.AuthList.length; i++) {
+                    var auth = mod.AuthList[i]
                     if (!checkedDict[auth.Authid]) {
                         return false
                     }
@@ -818,8 +820,8 @@ class ManageManagerClass {
                     },
                     onSwitchMod: (mod: AuthModSingle) => {
                         var allSelected = _checkModChecked(null, mod)
-                        for (var i = 0; i < mod.AuthorityList.length; i++) {
-                            var auth = mod.AuthorityList[i]
+                        for (var i = 0; i < mod.AuthList.length; i++) {
+                            var auth = mod.AuthList[i]
                             if (allSelected) {
                                 delete checkedDict[auth.Authid]
                             } else {
@@ -838,9 +840,9 @@ class ManageManagerClass {
                         this.VueAuthList.checkedChange = !this.VueAuthList.checkedChange
                     },
                     onSave: () => {
-                        posn.AuthorityList.splice(0, posn.AuthorityList.length)
+                        posn.AuthList.splice(0, posn.AuthList.length)
                         for (var authIdStr in checkedDict) {
-                            posn.AuthorityList.push(checkedDict[authIdStr])
+                            posn.AuthList.push(checkedDict[authIdStr])
                         }
                         this.VueAuthList.$el.remove()
                         this.VueAuthList = null
@@ -849,8 +851,8 @@ class ManageManagerClass {
                         for (var authIdStr in checkedDict) {
                             delete checkedDict[authIdStr]
                         }
-                        for (var i = 0; i < posn.AuthorityList.length; i++) {
-                            var auth: AuthSingle = posn.AuthorityList[i]
+                        for (var i = 0; i < posn.AuthList.length; i++) {
+                            var auth: AuthSingle = posn.AuthList[i]
                             checkedDict[auth.Authid] = auth
                         }
                         this.VueAuthList.checkedChange = !this.VueAuthList.checkedChange
@@ -863,10 +865,10 @@ class ManageManagerClass {
         })
     }
     ShowUserList(backDept: DepartmentSingle = null, backPosn: PositionSingle = null) {
-        var proj: ProjectSingle = this.Data.CurrProj
-        var filterText = UrlParam.Get(URL_PARAM_KEY.FKEY, '')
         this.VueProjectEdit.currPage = ProjectEditPageIndex.User
         Loader.LoadVueTemplate(this.VuePath + "UserList", (tpl: string) => {
+            var proj: ProjectSingle = this.Data.CurrProj
+            var filterText = UrlParam.Get(URL_PARAM_KEY.FKEY, '')
             var vue = new Vue(
                 {
                     template: tpl,
@@ -894,8 +896,8 @@ class ManageManagerClass {
                                             if (StringUtil.IndexOfKeyArr(dept.Name.toLowerCase(), _filterTextSp) > -1) {
                                                 dict[user.Uid] = true
                                             } else {
-                                                for (var i = 0; i < dept.PositionList.length; i++) {
-                                                    var posn = dept.PositionList[i]
+                                                for (var i = 0; i < dept.PosnList.length; i++) {
+                                                    var posn = dept.PosnList[i]
                                                     if (posn.Posnid == user.Posnid && StringUtil.IndexOfKeyArr(posn.Name.toLowerCase(), _filterTextSp) > -1) {
                                                         dict[user.Uid] = true
                                                         break;
@@ -929,7 +931,7 @@ class ManageManagerClass {
                             var dp = this.Data.DeptDict[did]
                             if (dp) {
                                 if (posnid > 0) {
-                                    var posn: PositionSingle = dp.PositionList.FindByKey(FieldName.Posnid, posnid)
+                                    var posn: PositionSingle = dp.PosnList.FindByKey(FieldName.Posnid, posnid)
                                     return posn ? posn.Name : '--'
                                 } else {
                                     return '空'
@@ -951,7 +953,7 @@ class ManageManagerClass {
                         GetPosList: (did: number): PositionSingle[] => {
                             var dp = this.Data.DeptDict[did]
                             if (dp) {
-                                return dp.PositionList;
+                                return dp.PosnList;
                             } else {
                                 return []
                             }

@@ -2,8 +2,11 @@ package main
 
 const (
 	//# Manage
-	PB_CMD_MANAGE_VIEW     = 90101
-	PB_CMD_MANAGE_DEPT_ADD = 90121
+	PB_CMD_MANAGE_VIEW           = 90101
+	PB_CMD_MANAGE_DEPT_ADD       = 90121
+	PB_CMD_MANAGE_DEPT_DELETE    = 90122
+	PB_CMD_MANAGE_DEPT_EDIT_NAME = 90123
+	PB_CMD_MANAGE_DEPT_EDIT_SORT = 90124
 )
 
 //=======================通讯数据结构=======================
@@ -34,23 +37,28 @@ type ProjectSingle struct {
 	Pid        uint64
 	Name       string
 	CreateTime uint32
+	// user list 其实 是 mag_user_proj_relation表的数据, 但结构被UserSingle包含了 所以就用UserSingle吧
+	// UserList []*UserSingle
+	DeptList []*DepartmentSingle
 }
 
 type UserSingle struct {
 	Uid    uint64
-	Did    uint64
 	Pid    uint64
+	Did    uint64
+	Posnid uint64
 	Name   string
 	IsDel  uint64
 	IsHide uint64
 }
 
 type DepartmentSingle struct {
-	Did  uint64
-	Pid  uint64
-	Fid  uint64
-	Name string
-	Sort uint32
+	Did      uint64
+	Pid      uint64
+	Fid      uint64
+	Name     string
+	Sort     uint32
+	PosnList []*PositionSingle
 }
 
 type PositionSingle struct {
