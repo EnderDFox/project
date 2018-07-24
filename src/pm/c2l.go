@@ -310,3 +310,16 @@ type C2L_ManageDeptEditSort struct {
 	Fid  uint64
 	Sort uint32
 }
+
+type C2L_ManageProjAdd struct {
+	Name string
+}
+
+type C2L_ManageProjDel struct {
+	Pid uint64
+}
+
+type C2L_ManageProjEditName struct {
+	Pid  uint64
+	Name string
+}

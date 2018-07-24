@@ -1,9 +1,9 @@
 package main
 
 import (
-	"log"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type Manage struct {
@@ -46,7 +46,7 @@ func (this *Manage) View() *L2C_ManageView {
 		dept := &DepartmentSingle{}
 		posn := &PositionSingle{}
 		rows.Scan(&proj.Pid, &proj.Name, &proj.CreateTime, &dept.Did, &dept.Fid, &dept.Name, &dept.Sort, &posn.Posnid, &posn.Name, &posn.Sort)
-		log.Println("[log]", proj.Pid, proj.Name, proj.CreateTime, dept.Did, dept.Fid, dept.Name, dept.Sort, posn.Posnid, posn.Name, posn.Sort)
+		// log.Println("[log]", proj.Pid, proj.Name, proj.CreateTime, dept.Did, dept.Fid, dept.Name, dept.Sort, posn.Posnid, posn.Name, posn.Sort)
 		dept.Pid = proj.Pid
 		posn.Did = dept.Did
 		if _, ok := projMap[proj.Pid]; !ok {
@@ -55,16 +55,8 @@ func (this *Manage) View() *L2C_ManageView {
 		}
 		if dept.Did > 0 {
 			if _, ok := deptMap[dept.Did]; !ok {
-				if dept.Fid > 0 {
-					//有fid 则必定有fid数据才放进去, 因为都是按照fid排序放入的,所以父dept如果存在,肯定提前放进去了
-					if _, ok := deptMap[dept.Fid]; ok {
-						deptMap[dept.Did] = dept
-						deptList = append(deptList, dept)
-					}
-				} else {
-					deptMap[dept.Did] = dept
-					deptList = append(deptList, dept)
-				}
+				deptMap[dept.Did] = dept
+				deptList = append(deptList, dept)
 			}
 		}
 		if posn.Posnid > 0 {
@@ -89,6 +81,51 @@ func (this *Manage) View() *L2C_ManageView {
 		UserProjReltList: this.GetUserMgRelationList(pidList...),
 	}
 	return data
+}
+
+func (this *Manage) ProjAdd(name string) *ProjectSingle {
+	createTime := time.Now().Unix()
+	stmt, err := db.GetDb().Prepare(`INSERT INTO ` + config.Pm + `.pm_project (name,creat_time) VALUES (?,?)`)
+	defer stmt.Close()
+	db.CheckErr(err)
+	res, err := stmt.Exec(name, createTime)
+	db.CheckErr(err)
+	_pid, err := res.LastInsertId()
+	pid := uint64(_pid)
+	db.CheckErr(err)
+	//
+	dept := this.DeptAdd(pid, 0, `管理部`)
+	//#
+	proj := &ProjectSingle{
+		Pid:        pid,
+		Name:       name,
+		CreateTime: uint32(createTime),
+		DeptList:   []*DepartmentSingle{dept},
+	}
+	return proj
+}
+
+func (this *Manage) ProjDel(pid uint64) int64 {
+	stmt, err := db.GetDb().Prepare(`
+	UPDATE ` + config.Pm + `.pm_project AS t_proj, ` + config.Mg + `.mag_department AS t_dept 
+	SET t_proj.is_del=1,t_dept.is_del=1
+	WHERE t_proj.pid=? AND t_dept.pid=?`)
+	db.CheckErr(err)
+	res, err := stmt.Exec(pid, pid)
+	db.CheckErr(err)
+	num, err := res.RowsAffected()
+	db.CheckErr(err)
+	return num
+}
+
+func (this *Manage) ProjEditName(pid uint64, name string) int64 {
+	stmt, err := db.GetDb().Prepare(`UPDATE ` + config.Pm + `.pm_project SET name = ? WHERE pid = ?`)
+	db.CheckErr(err)
+	res, err := stmt.Exec(name, pid)
+	db.CheckErr(err)
+	num, err := res.RowsAffected()
+	db.CheckErr(err)
+	return num
 }
 
 func (this *Manage) DeptAdd(pid uint64, fid uint64, name string) *DepartmentSingle {
@@ -162,16 +199,35 @@ func (this *Manage) DeptEditName(did uint64, name string) int64 {
 }
 func (this *Manage) DeptEditSort(did uint64, fid uint64, sort uint32) int64 {
 	//直接换就行, 比sort大的值都+1  因为sort不连续也没关系
-	stmt, err := db.GetDb().Prepare(`
+	sql := `
 	UPDATE manager.mag_department AS ta, manager.mag_department AS tb
-	SET ta.sort = ?,ta.fid=?, tb.sort = tb.sort + 1
-	WHERE	ta.did = ?
-	AND tb.did <> ? AND tb.sort >= ?`)
+	SET ta.fid=?, ta.sort = ?,tb.sort = tb.sort + 1
+	WHERE ta.did = ?
+	AND tb.pid=ta.pid AND tb.fid=? AND tb.sort >= ? AND tb.did <> ? `
+	// log.Println("[log]", sort, fid, did, fid, did, sort)
+	// log.Println("[log]", sql, ":[sql]")
+	stmt, err := db.GetDb().Prepare(sql)
 	db.CheckErr(err)
-	res, err := stmt.Exec(sort, fid, did, did, sort)
+	res, err := stmt.Exec(fid, sort, did, fid, sort, did)
 	db.CheckErr(err)
 	num, err := res.RowsAffected()
 	db.CheckErr(err)
+	if num == 0 {
+		//放到最后会导致上面的代码无法生效,因为tb没有符合条件的,需要用另一个中简单的修改方法
+		sql = `
+		UPDATE manager.mag_department AS ta
+		SET ta.fid=?, ta.sort = ?
+		WHERE ta.did = ?`
+		// log.Println("[log]", sort, fid, did, fid, did, sort)
+		// log.Println("[log]", sql, ":[sql]")
+		stmt, err = db.GetDb().Prepare(sql)
+		db.CheckErr(err)
+		res, err = stmt.Exec(fid, sort, did)
+		db.CheckErr(err)
+		num, err = res.RowsAffected()
+		db.CheckErr(err)
+	}
+	// log.Println("[log]", num, ":[num]")
 	return num
 }
 

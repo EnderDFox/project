@@ -106,17 +106,30 @@ class ManageDataClass {
             dept.Children = []
             dept.PosnList = []
             this.DeptDict[dept.Did] = dept
+        }
+        //DeptDict有数据了再统一放置childre
+        for (var i = 0; i < deptList.length; i++) {
+            var dept = deptList[i]
             if (dept.Fid == 0) {
-                dept.Depth = 0
                 this.ProjDict[dept.Pid].DeptTree.push(dept)
             } else {
-                console.log("[debug]", dept, ":[dept]")
                 var parent = this.DeptDict[dept.Fid]
                 if (parent) {//需要判断,因为可能是fid已经被删除的部门 还残留
-                    dept.Depth = parent.Depth + 1
                     parent.Children.push(dept)
                 }
             }
+        }
+        //再重新计算深度
+        for (var i = 0; i < this.ProjList.length; i++) {
+            var proj = this.ProjList[i]
+            this.ReCountDeptTreeDepth(proj.DeptTree)
+        }
+    }
+    ReCountDeptTreeDepth(deptTree: DepartmentSingle[], depth = 0) {
+        for (var i = 0; i < deptTree.length; i++) {
+            var dept = deptTree[i]
+            dept.Depth = depth
+            this.ReCountDeptTreeDepth(dept.Children, depth + 1)
         }
     }
     private InitPosnData(posnList: PositionSingle[]) {

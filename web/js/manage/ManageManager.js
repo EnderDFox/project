@@ -33,6 +33,7 @@ var ManageManagerClass = /** @class */ (function () {
         Commond.Register(PB_CMD.MANAGE_DEPT_EDIT_SORT, this.PB_DeptEditSort.bind(this));
     };
     ManageManagerClass.prototype.PB_DeptAdd = function (dept) {
+        var _this = this;
         dept.Children = [];
         for (var i = 0; i < dept.PosnList.length; i++) {
             var posn = dept.PosnList[i];
@@ -51,7 +52,9 @@ var ManageManagerClass = /** @class */ (function () {
         }
         this.Data.DeptDict[dept.Did] = dept;
         //重新刷新排序功能
-        this.DoDeptListSortabled();
+        Vue.nextTick(function () {
+            _this.DoDeptListSortabled();
+        });
     };
     ManageManagerClass.prototype.PB_DeptDel = function (data) {
         for (var i = 0; i < data.DidList.length; i++) {

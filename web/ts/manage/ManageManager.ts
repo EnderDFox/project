@@ -56,7 +56,9 @@ class ManageManagerClass {
         }
         this.Data.DeptDict[dept.Did] = dept
         //重新刷新排序功能
-        this.DoDeptListSortabled()
+        Vue.nextTick(() => {
+            this.DoDeptListSortabled()
+        })
     }
     PB_DeptDel(data: C2L_ManageDeptDel) {
         for (var i = 0; i < data.DidList.length; i++) {
@@ -415,10 +417,10 @@ class ManageManagerClass {
                                 return
                             }
                             var data: C2L_ManageDeptEditName = { Did: dept.Did, Name: newName }
-                            if(!dept.Name){
+                            if (!dept.Name) {
                                 //原本没名字
                                 WSConn.sendMsg(PB_CMD.MANAGE_DEPT_EDIT_NAME, data)
-                            }else{
+                            } else {
                                 Common.ConfirmWarning(`即将把部门 "${dept.Name}" 改名为 "${newName}"`, null, () => {
                                     WSConn.sendMsg(PB_CMD.MANAGE_DEPT_EDIT_NAME, data)
                                 }, () => {
@@ -576,9 +578,9 @@ class ManageManagerClass {
         })
     }
     /**设置可以排序 */
-    private DeptListSortableArr:Sortable[]
+    private DeptListSortableArr: Sortable[]
     DoDeptListSortabled() {
-        if(this.DeptListSortableArr){
+        if (this.DeptListSortableArr) {
             for (var i = 0; i < this.DeptListSortableArr.length; i++) {
                 var item = this.DeptListSortableArr[i]
                 item.destroy()
