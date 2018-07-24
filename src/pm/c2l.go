@@ -295,3 +295,12 @@ type C2L_ManageDeptAdd struct {
 	Name string
 	Fid  uint64
 }
+
+type C2L_ManageDeptDel struct {
+	DidList []uint64
+}
+
+type C2L_ManageDeptEditName struct {
+	Did  uint64
+	Name string
+}

@@ -34,13 +34,16 @@ class ManageManagerClass {
     }
     RegisterPB() {
         Commond.Register(PB_CMD.MANAGE_DEPT_ADD, this.PB_DeptAdd.bind(this))
+        Commond.Register(PB_CMD.MANAGE_DEPT_DEL, this.PB_DeptDel.bind(this))
+        Commond.Register(PB_CMD.MANAGE_DEPT_EDIT_NAME, this.PB_DeptEditName.bind(this))
+        // Commond.Register(PB_CMD.MANAGE_DEPT_EDIT_SORT, this.PB_DeptAdd.bind(this))
     }
     PB_DeptAdd(dept: DepartmentSingle) {
         dept.Children = []
         for (var i = 0; i < dept.PosnList.length; i++) {
-            var posn:PositionSingle = dept.PosnList[i]
+            var posn: PositionSingle = dept.PosnList[i]
             posn.UserList = []
-            posn.AuthList==null?posn.AuthList=[]:undefined
+            posn.AuthList == null ? posn.AuthList = [] : undefined
         }
         //
         if (dept.Fid == 0) {
@@ -52,6 +55,33 @@ class ManageManagerClass {
             parentDept.Children.push(dept)
         }
         this.Data.DeptDict[dept.Did] = dept
+    }
+    PB_DeptDel(data: C2L_ManageDeptDel) {
+        for (var i = 0; i < data.DidList.length; i++) {
+            var did = data.DidList[i]
+            var dept: DepartmentSingle = this.Data.DeptDict[did]
+            if (dept) {
+                var brothers: DepartmentSingle[] = this.Data.GetBrotherDepartmentList(dept)
+                if (brothers) {
+                    var brotherIndex = ArrayUtil.IndexOfByKey(brothers, FieldName.Did, dept.Did)
+                    brothers.splice(brotherIndex, 1)
+                }
+                //
+                delete this.Data.DeptDict[dept.Did]
+            }
+        }
+    }
+    PB_DeptEditName(data: C2L_ManageDeptEditName) {
+        var dept: DepartmentSingle = this.Data.DeptDict[data.Did]
+        if (dept) {
+            dept.Name = data.Name
+            for (var i = 0; i < dept.PosnList.length; i++) {
+                var posn = dept.PosnList[i]
+                if (!posn.Name) {//空名职位 也 同步为部门名
+                    posn.Name = dept.Name
+                }
+            }
+        }
     }
     //#
     UrlParamCallback() {
@@ -318,9 +348,25 @@ class ManageManagerClass {
                     CheckCanMoveParentDp: this.CheckCanMoveParentDp.bind(this),
                     CheckSortDown: this.DeptListCheckSortDown.bind(this),
                     CheckSortUp: this.DeptListCheckSortUp.bind(this),
-                    onEditName: (e: Event, dp: DepartmentSingle, i0: int) => {
-                        var newName = (e.target as HTMLInputElement).value
-                        dp.Name = newName
+                    onEditName: (e: Event, dept: DepartmentSingle, i0: int) => {
+                        var newName = (e.target as HTMLInputElement).value.trim()
+                        if (!newName) {
+                            (e.target as HTMLInputElement).value = dept.Name
+                            return
+                        }
+                        if (newName != dept.Name) {
+                            if (TreeUtil.FindByKey(this.Data.CurrProj.DeptTree, FieldName.Name, newName)) {
+                                Common.AlertError(`即将把部门 "${dept.Name}" 改名为 "${newName}" <br/><br/>但职位名称 "${newName}" 已经存在`);
+                                (e.target as HTMLInputElement).value = dept.Name;
+                                return
+                            }
+                            var data: C2L_ManageDeptEditName = { Did: dept.Did, Name: newName }
+                            Common.ConfirmWarning(`即将把部门 "${dept.Name}" 改名为 "${newName}"`, null, () => {
+                                WSConn.sendMsg(PB_CMD.MANAGE_DEPT_EDIT_NAME, data)
+                            }, () => {
+                                (e.target as HTMLInputElement).value = dept.Name
+                            })
+                        }
                     },
                     onAddChild: (parentDp: DepartmentSingle, i0: int) => {
                         /*  var dp: DepartmentSingle = {
@@ -408,14 +454,15 @@ class ManageManagerClass {
                         brothers.splice(brotherIndex, 1)
                         brothers.splice(brotherIndex - 1, 0, dp)
                     },
-                    onDel: (dp: DepartmentSingle, i0: int) => {
+                    onDel: (dept: DepartmentSingle, i0: int) => {
                         Common.ConfirmDelete(() => {
-                            var brothers: DepartmentSingle[] = this.Data.GetBrotherDepartmentList(dp)
-                            var brotherIndex = ArrayUtil.IndexOfByKey(brothers, FieldName.Did, dp.Did)
-                            brothers.splice(brotherIndex, 1)
-                            //
-                            delete this.Data.DeptDict[dp.Did]
-                        }, `即将删除部门 "${dp.Name || '空'}" 及其子部门<br/>
+                            //所有子的did都拿出来发给后端
+                            var didList: uint64[] = TreeUtil.Map([dept], (dept: DepartmentSingle): uint64 => {
+                                return dept.Did
+                            })
+                            var data: C2L_ManageDeptDel = { DidList: didList }
+                            WSConn.sendMsg(PB_CMD.MANAGE_DEPT_DEL, data)
+                        }, `即将删除部门 "${dept.Name}" 及其子部门<br/>
                         该部门及其子部门的所有职位都将被删除`)
                     },
                 }
@@ -643,8 +690,23 @@ class ManageManagerClass {
                         this.ShowPositionList()
                     },
                     onEditName: (e: Event, dept: DepartmentSingle, posn: PositionSingle, index: number) => {
-                        var newName = (e.target as HTMLInputElement).value
-                        posn.Name = newName
+                        var newName = (e.target as HTMLInputElement).value.trim()
+                        if (!newName) {
+                            (e.target as HTMLInputElement).value = posn.Name
+                            return
+                        }
+                        if (newName != posn.Name) {
+                            if (this.Data.GetPosnByName(this.Data.CurrProj.DeptTree, newName)) {
+                                Common.AlertError(`即将把职位 "${posn.Name}" 改名为 "${newName}" <br/><br/>但职位名称 "${newName}" 已经存在`);
+                                (e.target as HTMLInputElement).value = posn.Name;
+                                return
+                            }
+                            Common.ConfirmWarning(`即将把职位 "${posn.Name}" 改名为 "${newName}"`, null, () => {
+                                posn.Name = newName//TODO:
+                            }, () => {
+                                (e.target as HTMLInputElement).value = posn.Name
+                            })
+                        }
                     },
                     onEditAuth: (dept: DepartmentSingle, posn: PositionSingle, index: number) => {
                         this.ShowAuthList(posn)
@@ -696,8 +758,8 @@ class ManageManagerClass {
                 },
             })
             var _did = UrlParam.Get(URL_PARAM_KEY.DID, 0)
-            console.log("[debug]",_did,":[_did]")
-            console.log("[debug]",this.Data.DeptDict)
+            console.log("[debug]", _did, ":[_did]")
+            console.log("[debug]", this.Data.DeptDict)
             var currDept: DepartmentSingle;
             if (_did > 0) {
                 currDept = this.Data.DeptDict[_did]
@@ -782,7 +844,7 @@ class ManageManagerClass {
                     },
                 }
             ).$mount()
-            console.log("[debug]",vue.deptTree,":[vue.deptTree]")
+            console.log("[debug]", vue.deptTree, ":[vue.deptTree]")
             this.VuePositionList = vue
             //#show
             Common.InsertIntoDom(vue.$el, this.VueProjectEdit.$refs.pageContent)

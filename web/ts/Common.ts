@@ -560,7 +560,7 @@ class TreeUtil {
 		return rs
 	}
 	/**返回 使用 在每个tree/Children的位置数组 例如   2.1.3   没找到则返回length=0的数组*/
-	static IndexOfAttr(tree: Tree, key: string, value: any, indexArr: number[]): number[] {
+	static IndexOfByKey(tree: Tree, key: string, value: any, indexArr: number[]): number[] {
 		indexArr = indexArr || []
 		for (var i = 0; i < tree.length; i++) {
 			var item: TreeItem = tree[i]
@@ -569,7 +569,7 @@ class TreeUtil {
 				return indexArr;
 			} else {//没有匹配,则继续找子
 				if (item.Children) {
-					var rs = TreeUtil.FindOfAttr(item.Children, key, value, indexArr)
+					var rs = TreeUtil.FindByKey(item.Children, key, value, indexArr)
 					if (rs) {
 						//Children中找到了, 直接返回吧
 						return indexArr
@@ -579,7 +579,7 @@ class TreeUtil {
 		}
 		return indexArr
 	}
-	static FindOfAttr(tree: Tree, key: string, value: any, indexArr: number[] = null): TreeItem {
+	static FindByKey(tree: Tree, key: string, value: any, indexArr: number[] = null): TreeItem {
 		indexArr = indexArr || []
 		for (var i = 0; i < tree.length; i++) {
 			var item: TreeItem = tree[i]
@@ -588,7 +588,7 @@ class TreeUtil {
 				return item;
 			} else {//没有匹配,则继续找子
 				if (item.Children) {
-					var rs = TreeUtil.FindOfAttr(item.Children, key, value, indexArr)
+					var rs = TreeUtil.FindByKey(item.Children, key, value, indexArr)
 					if (rs) {
 						//Children中找到了, 直接返回吧
 						return rs
@@ -598,7 +598,7 @@ class TreeUtil {
 		}
 		return null
 	}
-	static RemoveByAttr(tree: Tree, key: string, value: any, indexArr: number[] = null): TreeItem {
+	static RemoveByKey(tree: Tree, key: string, value: any, indexArr: number[] = null): TreeItem {
 		indexArr = indexArr || []
 		for (var i = 0; i < tree.length; i++) {
 			var item: TreeItem = tree[i]
@@ -608,7 +608,7 @@ class TreeUtil {
 				return item;
 			} else {//没有匹配,则继续找子
 				if (item.Children) {
-					var rs = TreeUtil.RemoveByAttr(item.Children, key, value, indexArr)
+					var rs = TreeUtil.RemoveByKey(item.Children, key, value, indexArr)
 					if (rs) {
 						//Children中找到了, 直接返回吧
 						return rs

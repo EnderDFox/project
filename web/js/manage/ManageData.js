@@ -80,7 +80,7 @@ var ManageDataClass = /** @class */ (function () {
             proj.UserList = [];
             proj.MasterUid = 0; //TODO:
         }
-        //# TODO:
+        //# TODO: 加入user吧
         this.ProjList[0].UserList.push.apply(this.ProjList[0].UserList, this.UserList.slice(0, 10));
         for (var i = 0; i < this.ProjList[0].UserList.length; i++) {
             this.ProjList[0].UserList[i].Sort = i + 1;
@@ -98,8 +98,12 @@ var ManageDataClass = /** @class */ (function () {
                 this.ProjDict[dept.Pid].DeptTree.push(dept);
             }
             else {
-                dept.Depth = this.DeptDict[dept.Fid].Depth + 1;
-                this.DeptDict[dept.Fid].Children.push(dept);
+                console.log("[debug]", dept, ":[dept]");
+                var parent = this.DeptDict[dept.Fid];
+                if (parent) { //需要判断,因为可能是fid已经被删除的部门 还残留
+                    dept.Depth = parent.Depth + 1;
+                    parent.Children.push(dept);
+                }
             }
         }
     };
@@ -249,7 +253,12 @@ var ManageDataClass = /** @class */ (function () {
             fid = args[0].Fid;
         }
         if (fid) {
-            return ManageData.DeptDict[fid].Children;
+            if (ManageData.DeptDict[fid]) {
+                return ManageData.DeptDict[fid].Children;
+            }
+            else {
+                return null;
+            }
         }
         else { //顶级部门
             return this.CurrProj.DeptTree;
@@ -277,6 +286,23 @@ var ManageDataClass = /** @class */ (function () {
         }
         user.Posnid = posn.Posnid;
         posn.UserList.push(user);
+    };
+    /**通过名称获取职位 */
+    ManageDataClass.prototype.GetPosnByName = function (deptTree, posnName) {
+        for (var i = 0; i < deptTree.length; i++) {
+            var dept = deptTree[i];
+            var posn = dept.PosnList.FindByKey(FieldName.Name, posnName);
+            if (posn) {
+                return posn;
+            }
+            if (dept.Children) {
+                var posnChild = this.GetPosnByName(dept.Children, posnName);
+                if (posnChild) {
+                    return posnChild;
+                }
+            }
+        }
+        return null;
     };
     return ManageDataClass;
 }());

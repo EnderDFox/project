@@ -123,4 +123,7 @@ class L2C {
 class PB_CMD {
     static MANAGE_VIEW = 90101
     static MANAGE_DEPT_ADD = 90121
+    static MANAGE_DEPT_DEL = 90122
+    static MANAGE_DEPT_EDIT_NAME = 90123
+    static MANAGE_DEPT_EDIT_SORT = 90124
 }

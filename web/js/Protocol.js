@@ -123,6 +123,9 @@ var PB_CMD = /** @class */ (function () {
     }
     PB_CMD.MANAGE_VIEW = 90101;
     PB_CMD.MANAGE_DEPT_ADD = 90121;
+    PB_CMD.MANAGE_DEPT_DEL = 90122;
+    PB_CMD.MANAGE_DEPT_EDIT_NAME = 90123;
+    PB_CMD.MANAGE_DEPT_EDIT_SORT = 90124;
     return PB_CMD;
 }());
 //# sourceMappingURL=Protocol.js.map

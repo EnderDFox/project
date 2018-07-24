@@ -435,6 +435,13 @@ interface C2L_ManageDeptAdd {
     Name: string
     Fid?: uint64
 }
+interface C2L_ManageDeptDel {
+    DidList: uint64[]
+}
+interface C2L_ManageDeptEditName {
+    Did: uint64
+    Name: string
+}
 
 enum AUTH {
     PROJECT_LIST = 70,

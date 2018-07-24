@@ -28,6 +28,9 @@ var ManageManagerClass = /** @class */ (function () {
     };
     ManageManagerClass.prototype.RegisterPB = function () {
         Commond.Register(PB_CMD.MANAGE_DEPT_ADD, this.PB_DeptAdd.bind(this));
+        Commond.Register(PB_CMD.MANAGE_DEPT_DEL, this.PB_DeptDel.bind(this));
+        Commond.Register(PB_CMD.MANAGE_DEPT_EDIT_NAME, this.PB_DeptEditName.bind(this));
+        // Commond.Register(PB_CMD.MANAGE_DEPT_EDIT_SORT, this.PB_DeptAdd.bind(this))
     };
     ManageManagerClass.prototype.PB_DeptAdd = function (dept) {
         dept.Children = [];
@@ -47,6 +50,33 @@ var ManageManagerClass = /** @class */ (function () {
             parentDept.Children.push(dept);
         }
         this.Data.DeptDict[dept.Did] = dept;
+    };
+    ManageManagerClass.prototype.PB_DeptDel = function (data) {
+        for (var i = 0; i < data.DidList.length; i++) {
+            var did = data.DidList[i];
+            var dept = this.Data.DeptDict[did];
+            if (dept) {
+                var brothers = this.Data.GetBrotherDepartmentList(dept);
+                if (brothers) {
+                    var brotherIndex = ArrayUtil.IndexOfByKey(brothers, FieldName.Did, dept.Did);
+                    brothers.splice(brotherIndex, 1);
+                }
+                //
+                delete this.Data.DeptDict[dept.Did];
+            }
+        }
+    };
+    ManageManagerClass.prototype.PB_DeptEditName = function (data) {
+        var dept = this.Data.DeptDict[data.Did];
+        if (dept) {
+            dept.Name = data.Name;
+            for (var i = 0; i < dept.PosnList.length; i++) {
+                var posn = dept.PosnList[i];
+                if (!posn.Name) { //空名职位 也 同步为部门名
+                    posn.Name = dept.Name;
+                }
+            }
+        }
     };
     //#
     ManageManagerClass.prototype.UrlParamCallback = function () {
@@ -313,9 +343,25 @@ var ManageManagerClass = /** @class */ (function () {
                     CheckCanMoveParentDp: _this.CheckCanMoveParentDp.bind(_this),
                     CheckSortDown: _this.DeptListCheckSortDown.bind(_this),
                     CheckSortUp: _this.DeptListCheckSortUp.bind(_this),
-                    onEditName: function (e, dp, i0) {
-                        var newName = e.target.value;
-                        dp.Name = newName;
+                    onEditName: function (e, dept, i0) {
+                        var newName = e.target.value.trim();
+                        if (!newName) {
+                            e.target.value = dept.Name;
+                            return;
+                        }
+                        if (newName != dept.Name) {
+                            if (TreeUtil.FindByKey(_this.Data.CurrProj.DeptTree, FieldName.Name, newName)) {
+                                Common.AlertError("\u5373\u5C06\u628A\u90E8\u95E8 \"" + dept.Name + "\" \u6539\u540D\u4E3A \"" + newName + "\" <br/><br/>\u4F46\u804C\u4F4D\u540D\u79F0 \"" + newName + "\" \u5DF2\u7ECF\u5B58\u5728");
+                                e.target.value = dept.Name;
+                                return;
+                            }
+                            var data = { Did: dept.Did, Name: newName };
+                            Common.ConfirmWarning("\u5373\u5C06\u628A\u90E8\u95E8 \"" + dept.Name + "\" \u6539\u540D\u4E3A \"" + newName + "\"", null, function () {
+                                WSConn.sendMsg(PB_CMD.MANAGE_DEPT_EDIT_NAME, data);
+                            }, function () {
+                                e.target.value = dept.Name;
+                            });
+                        }
                     },
                     onAddChild: function (parentDp, i0) {
                         /*  var dp: DepartmentSingle = {
@@ -407,14 +453,15 @@ var ManageManagerClass = /** @class */ (function () {
                         brothers.splice(brotherIndex, 1);
                         brothers.splice(brotherIndex - 1, 0, dp);
                     },
-                    onDel: function (dp, i0) {
+                    onDel: function (dept, i0) {
                         Common.ConfirmDelete(function () {
-                            var brothers = _this.Data.GetBrotherDepartmentList(dp);
-                            var brotherIndex = ArrayUtil.IndexOfByKey(brothers, FieldName.Did, dp.Did);
-                            brothers.splice(brotherIndex, 1);
-                            //
-                            delete _this.Data.DeptDict[dp.Did];
-                        }, "\u5373\u5C06\u5220\u9664\u90E8\u95E8 \"" + (dp.Name || '空') + "\" \u53CA\u5176\u5B50\u90E8\u95E8<br/>\n                        \u8BE5\u90E8\u95E8\u53CA\u5176\u5B50\u90E8\u95E8\u7684\u6240\u6709\u804C\u4F4D\u90FD\u5C06\u88AB\u5220\u9664");
+                            //所有子的did都拿出来发给后端
+                            var didList = TreeUtil.Map([dept], function (dept) {
+                                return dept.Did;
+                            });
+                            var data = { DidList: didList };
+                            WSConn.sendMsg(PB_CMD.MANAGE_DEPT_DEL, data);
+                        }, "\u5373\u5C06\u5220\u9664\u90E8\u95E8 \"" + dept.Name + "\" \u53CA\u5176\u5B50\u90E8\u95E8<br/>\n                        \u8BE5\u90E8\u95E8\u53CA\u5176\u5B50\u90E8\u95E8\u7684\u6240\u6709\u804C\u4F4D\u90FD\u5C06\u88AB\u5220\u9664");
                     },
                 }
             });
@@ -644,8 +691,23 @@ var ManageManagerClass = /** @class */ (function () {
                         _this.ShowPositionList();
                     },
                     onEditName: function (e, dept, posn, index) {
-                        var newName = e.target.value;
-                        posn.Name = newName;
+                        var newName = e.target.value.trim();
+                        if (!newName) {
+                            e.target.value = posn.Name;
+                            return;
+                        }
+                        if (newName != posn.Name) {
+                            if (_this.Data.GetPosnByName(_this.Data.CurrProj.DeptTree, newName)) {
+                                Common.AlertError("\u5373\u5C06\u628A\u804C\u4F4D \"" + posn.Name + "\" \u6539\u540D\u4E3A \"" + newName + "\" <br/><br/>\u4F46\u804C\u4F4D\u540D\u79F0 \"" + newName + "\" \u5DF2\u7ECF\u5B58\u5728");
+                                e.target.value = posn.Name;
+                                return;
+                            }
+                            Common.ConfirmWarning("\u5373\u5C06\u628A\u804C\u4F4D \"" + posn.Name + "\" \u6539\u540D\u4E3A \"" + newName + "\"", null, function () {
+                                posn.Name = newName; //TODO:
+                            }, function () {
+                                e.target.value = posn.Name;
+                            });
+                        }
                     },
                     onEditAuth: function (dept, posn, index) {
                         _this.ShowAuthList(posn);

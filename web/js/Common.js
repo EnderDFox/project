@@ -567,7 +567,7 @@ var TreeUtil = /** @class */ (function () {
         return rs;
     };
     /**返回 使用 在每个tree/Children的位置数组 例如   2.1.3   没找到则返回length=0的数组*/
-    TreeUtil.IndexOfAttr = function (tree, key, value, indexArr) {
+    TreeUtil.IndexOfByKey = function (tree, key, value, indexArr) {
         indexArr = indexArr || [];
         for (var i = 0; i < tree.length; i++) {
             var item = tree[i];
@@ -577,7 +577,7 @@ var TreeUtil = /** @class */ (function () {
             }
             else { //没有匹配,则继续找子
                 if (item.Children) {
-                    var rs = TreeUtil.FindOfAttr(item.Children, key, value, indexArr);
+                    var rs = TreeUtil.FindByKey(item.Children, key, value, indexArr);
                     if (rs) {
                         //Children中找到了, 直接返回吧
                         return indexArr;
@@ -587,7 +587,7 @@ var TreeUtil = /** @class */ (function () {
         }
         return indexArr;
     };
-    TreeUtil.FindOfAttr = function (tree, key, value, indexArr) {
+    TreeUtil.FindByKey = function (tree, key, value, indexArr) {
         if (indexArr === void 0) { indexArr = null; }
         indexArr = indexArr || [];
         for (var i = 0; i < tree.length; i++) {
@@ -598,7 +598,7 @@ var TreeUtil = /** @class */ (function () {
             }
             else { //没有匹配,则继续找子
                 if (item.Children) {
-                    var rs = TreeUtil.FindOfAttr(item.Children, key, value, indexArr);
+                    var rs = TreeUtil.FindByKey(item.Children, key, value, indexArr);
                     if (rs) {
                         //Children中找到了, 直接返回吧
                         return rs;
@@ -608,7 +608,7 @@ var TreeUtil = /** @class */ (function () {
         }
         return null;
     };
-    TreeUtil.RemoveByAttr = function (tree, key, value, indexArr) {
+    TreeUtil.RemoveByKey = function (tree, key, value, indexArr) {
         if (indexArr === void 0) { indexArr = null; }
         indexArr = indexArr || [];
         for (var i = 0; i < tree.length; i++) {
@@ -620,7 +620,7 @@ var TreeUtil = /** @class */ (function () {
             }
             else { //没有匹配,则继续找子
                 if (item.Children) {
-                    var rs = TreeUtil.RemoveByAttr(item.Children, key, value, indexArr);
+                    var rs = TreeUtil.RemoveByKey(item.Children, key, value, indexArr);
                     if (rs) {
                         //Children中找到了, 直接返回吧
                         return rs;
