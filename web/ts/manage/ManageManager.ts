@@ -44,17 +44,16 @@ class ManageManagerClass {
     PB_ProjAdd(proj: ProjectSingle) {
         proj.MasterUid = 0
         proj.UserList = []
-        //因为只有一个默认的dept只处理这一个就行
+        //#因为只有一个默认的dept只处理这一个就行
         var dept = proj.DeptTree[0]
+        //
         dept.Children = []
         for (var i = 0; i < dept.PosnList.length; i++) {
-            var posn: PositionSingle = dept.PosnList[i]
-            posn.UserList = []
-            posn.AuthList == null ? posn.AuthList = [] : undefined
+            this.Data.FormatPosnSingle(dept.PosnList[i])
         }
         dept.Depth = 0
         this.Data.DeptDict[dept.Did] = dept
-        //
+        //#
         this.Data.ProjList.push(proj)
     }
     PB_ProjDel(data: C2L_ManageProjDel) {
@@ -69,9 +68,7 @@ class ManageManagerClass {
     PB_DeptAdd(dept: DepartmentSingle) {
         dept.Children = []
         for (var i = 0; i < dept.PosnList.length; i++) {
-            var posn: PositionSingle = dept.PosnList[i]
-            posn.UserList = []
-            posn.AuthList == null ? posn.AuthList = [] : undefined
+            this.Data.FormatPosnSingle(dept.PosnList[i])
         }
         //
         if (dept.Fid == 0) {

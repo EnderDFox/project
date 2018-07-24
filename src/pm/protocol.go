@@ -65,10 +65,16 @@ type DepartmentSingle struct {
 }
 
 type PositionSingle struct {
+	Posnid     uint64
+	Did        uint64
+	Name       string
+	Sort       uint32
+	AuthidList []uint64
+}
+
+type PosnAuthSingle struct {
 	Posnid uint64
-	Did    uint64
-	Name   string
-	Sort   uint32
+	Authid uint64
 }
 
 type ScoreNoticeSingle struct {

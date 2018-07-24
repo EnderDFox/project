@@ -6,6 +6,17 @@ import (
 	"time"
 )
 
+const (
+	AUTH_PROJECT_LIST = 70
+	//后台
+	AUTH_PROJECT_MANAGE    = 101
+	AUTH_DEPARTMENT_MANAGE = 110 //所属部门的管理权限
+	//前台
+	AUTH_PROJECT_PROCESS    = 201 //所属项目的前台
+	AUTH_DEPARTMENT_PROCESS = 210 //所属部门的后台
+	AUTH_COLLATE_EDIT       = 230 //晨会权限 修改状态
+)
+
 type Manage struct {
 	user *User
 }
@@ -38,6 +49,7 @@ func (this *Manage) View() *L2C_ManageView {
 	//
 	projMap := make(map[uint64]*ProjectSingle)
 	deptMap := make(map[uint64]*DepartmentSingle)
+	posnMap := make(map[uint64]*PositionSingle)
 	var projList []*ProjectSingle
 	var deptList []*DepartmentSingle
 	var posnList []*PositionSingle
@@ -62,8 +74,16 @@ func (this *Manage) View() *L2C_ManageView {
 		if posn.Posnid > 0 {
 			//判断没有 dept存在也不要放进去了
 			if _, ok := deptMap[dept.Did]; ok {
+				posnMap[posn.Posnid] = posn
 				posnList = append(posnList, posn)
 			}
+		}
+	}
+	//posn auth
+	posnAuthList := this.GetPosnAuthList()
+	for _, posnAuthSingle := range posnAuthList {
+		if posn, ok := posnMap[posnAuthSingle.Posnid]; ok {
+			posn.AuthidList = append(posn.AuthidList, posnAuthSingle.Authid)
 		}
 	}
 	//
@@ -150,8 +170,10 @@ func (this *Manage) DeptAdd(pid uint64, fid uint64, name string) *DepartmentSing
 		//管理部 需要增加 三个默认职位
 		posn = this.PosnAdd(did, `制作人`)
 		posnList = append(posnList, posn)
+		//
 		posn = this.PosnAdd(did, `PM`)
 		posnList = append(posnList, posn)
+		//
 		posn = this.PosnAdd(did, `管理员`)
 		posnList = append(posnList, posn)
 	} else {
@@ -251,6 +273,12 @@ func (this *Manage) PosnAdd(did uint64, name string) *PositionSingle {
 		Posnid: posnid,
 		Name:   name,
 	}
+	//加默认权限
+	if this.GetDeptSingle(did).Sort == 0 {
+		authidList := []uint64{AUTH_PROJECT_MANAGE, AUTH_PROJECT_PROCESS, AUTH_COLLATE_EDIT, AUTH_DEPARTMENT_MANAGE, AUTH_DEPARTMENT_PROCESS}
+		this.PosnAuthAdd(posn.Posnid, authidList...)
+		posn.AuthidList = append(posn.AuthidList, authidList...)
+	}
 	return posn
 }
 
@@ -267,6 +295,30 @@ func (this *Manage) PosDelByDid(didList ...uint64) int64 {
 	db.CheckErr(err)
 	return num
 }
+
+/**增加或设置权限*/
+func (this *Manage) PosnAuthAdd(posnid uint64, authidList ...uint64) []*PosnAuthSingle {
+	var list []*PosnAuthSingle
+	for _, authid := range authidList {
+		stmt, err := db.GetDb().Prepare(`REPLACE INTO ` + config.Mg + `.mag_posn_auth (posnid,authid) VALUES (?,?)`)
+		defer stmt.Close()
+		db.CheckErr(err)
+		res, err := stmt.Exec(posnid, authid)
+		db.CheckErr(err)
+		_, err = res.RowsAffected()
+		db.CheckErr(err)
+		single := &PosnAuthSingle{
+			Posnid: posnid,
+			Authid: authid,
+		}
+		list = append(list, single)
+	}
+	return list
+}
+
+// func (this *Manage) PosnAuthDel(posnid uint64, auth uint64) uint32 {
+
+// }
 
 //全部项目
 func (this *Manage) GetProjectList() []*ProjectSingle {
@@ -314,6 +366,23 @@ func (this *Manage) GetUserList() []*UserSingle {
 	for rows.Next() {
 		single := &UserSingle{}
 		rows.Scan(&single.Uid, &single.Name)
+		list = append(list, single)
+	}
+	return list
+}
+
+//全部 posn_auth
+func (this *Manage) GetPosnAuthList() []*PosnAuthSingle {
+	stmt, err := db.GetDb().Prepare(`SELECT posnid,authid FROM ` + config.Mg + `.mag_posn_auth`)
+	defer stmt.Close()
+	db.CheckErr(err)
+	rows, err := stmt.Query()
+	defer rows.Close()
+	db.CheckErr(err)
+	var list []*PosnAuthSingle
+	for rows.Next() {
+		single := &PosnAuthSingle{}
+		rows.Scan(&single.Posnid, &single.Authid)
 		list = append(list, single)
 	}
 	return list

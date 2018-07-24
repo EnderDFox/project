@@ -135,8 +135,7 @@ class ManageDataClass {
     private InitPosnData(posnList: PositionSingle[]) {
         for (var i = 0; i < posnList.length; i++) {
             var posn = posnList[i]
-            posn.AuthList = []
-            posn.UserList = []
+            this.FormatPosnSingle(posn)
             this.DeptDict[posn.Did].PosnList.push(posn)
         }
     }
@@ -321,5 +320,18 @@ class ManageDataClass {
         }
         return null
     }
+    /* FormatDeptSingle(dept: DepartmentSingle) {
+
+    }*/
+    FormatPosnSingle(posn: PositionSingle) {
+        posn.UserList = []
+        posn.AuthList = []
+        if(posn.AuthidList){
+            for (var i = 0; i < posn.AuthidList.length; i++) {
+                var authid = posn.AuthidList[i]
+                posn.AuthList.push(this.AuthDict[authid])
+            }
+        }
+    } 
 }
 var ManageData = new ManageDataClass()

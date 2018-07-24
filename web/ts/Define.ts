@@ -133,6 +133,7 @@ interface PositionSingle {
     Did?: DidField
     Name?: string
     AuthList?: AuthSingle[]
+    AuthidList?: uint64[]
     //client
     UserList?: UserSingle[]
 }

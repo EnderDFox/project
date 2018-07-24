@@ -38,17 +38,16 @@ var ManageManagerClass = /** @class */ (function () {
     ManageManagerClass.prototype.PB_ProjAdd = function (proj) {
         proj.MasterUid = 0;
         proj.UserList = [];
-        //因为只有一个默认的dept只处理这一个就行
+        //#因为只有一个默认的dept只处理这一个就行
         var dept = proj.DeptTree[0];
+        //
         dept.Children = [];
         for (var i = 0; i < dept.PosnList.length; i++) {
-            var posn = dept.PosnList[i];
-            posn.UserList = [];
-            posn.AuthList == null ? posn.AuthList = [] : undefined;
+            this.Data.FormatPosnSingle(dept.PosnList[i]);
         }
         dept.Depth = 0;
         this.Data.DeptDict[dept.Did] = dept;
-        //
+        //#
         this.Data.ProjList.push(proj);
     };
     ManageManagerClass.prototype.PB_ProjDel = function (data) {
@@ -64,9 +63,7 @@ var ManageManagerClass = /** @class */ (function () {
         var _this = this;
         dept.Children = [];
         for (var i = 0; i < dept.PosnList.length; i++) {
-            var posn = dept.PosnList[i];
-            posn.UserList = [];
-            posn.AuthList == null ? posn.AuthList = [] : undefined;
+            this.Data.FormatPosnSingle(dept.PosnList[i]);
         }
         //
         if (dept.Fid == 0) {

@@ -124,8 +124,7 @@ var ManageDataClass = /** @class */ (function () {
     ManageDataClass.prototype.InitPosnData = function (posnList) {
         for (var i = 0; i < posnList.length; i++) {
             var posn = posnList[i];
-            posn.AuthList = [];
-            posn.UserList = [];
+            this.FormatPosnSingle(posn);
             this.DeptDict[posn.Did].PosnList.push(posn);
         }
     };
@@ -320,6 +319,19 @@ var ManageDataClass = /** @class */ (function () {
             }
         }
         return null;
+    };
+    /* FormatDeptSingle(dept: DepartmentSingle) {
+
+    }*/
+    ManageDataClass.prototype.FormatPosnSingle = function (posn) {
+        posn.UserList = [];
+        posn.AuthList = [];
+        if (posn.AuthidList) {
+            for (var i = 0; i < posn.AuthidList.length; i++) {
+                var authid = posn.AuthidList[i];
+                posn.AuthList.push(this.AuthDict[authid]);
+            }
+        }
     };
     return ManageDataClass;
 }());
