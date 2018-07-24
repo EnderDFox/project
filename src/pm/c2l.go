@@ -304,3 +304,9 @@ type C2L_ManageDeptEditName struct {
 	Did  uint64
 	Name string
 }
+
+type C2L_ManageDeptEditSort struct {
+	Did  uint64
+	Fid  uint64
+	Sort uint32
+}

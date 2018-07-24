@@ -240,6 +240,19 @@ var ManageDataClass = /** @class */ (function () {
         }
         return rs;
     };
+    ManageDataClass.prototype.GetBrotherDeptListByFid = function (fid) {
+        if (fid) {
+            if (ManageData.DeptDict[fid]) {
+                return ManageData.DeptDict[fid].Children;
+            }
+            else {
+                return null;
+            }
+        }
+        else { //顶级部门
+            return this.CurrProj.DeptTree;
+        }
+    };
     ManageDataClass.prototype.GetBrotherDepartmentList = function () {
         var args = [];
         for (var _i = 0; _i < arguments.length; _i++) {
@@ -252,17 +265,7 @@ var ManageDataClass = /** @class */ (function () {
         else {
             fid = args[0].Fid;
         }
-        if (fid) {
-            if (ManageData.DeptDict[fid]) {
-                return ManageData.DeptDict[fid].Children;
-            }
-            else {
-                return null;
-            }
-        }
-        else { //顶级部门
-            return this.CurrProj.DeptTree;
-        }
+        return this.GetBrotherDeptListByFid(fid);
     };
     ManageDataClass.prototype.RemoveUserPosnid = function (user) {
         if (user.Did) {

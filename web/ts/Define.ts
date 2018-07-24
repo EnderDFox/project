@@ -442,6 +442,13 @@ interface C2L_ManageDeptEditName {
     Did: uint64
     Name: string
 }
+interface C2L_ManageDeptEditSort {
+    Did: uint64
+    /**新的父部门did */
+    Fid: uint64
+    /**新位置sort值, 之后的sort都会增加+1 */
+    Sort: uint32
+}
 
 enum AUTH {
     PROJECT_LIST = 70,

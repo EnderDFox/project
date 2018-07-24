@@ -19,6 +19,7 @@ func (this *ManageManager) RegisterFunction() {
 	command.Register(PB_CMD_MANAGE_DEPT_ADD, &C2L_M_MANAGE_DEPT_ADD{})
 	command.Register(PB_CMD_MANAGE_DEPT_DEL, &C2L_M_MANAGE_DEPT_DEL{})
 	command.Register(PB_CMD_MANAGE_DEPT_EDIT_NAME, &C2L_M_MANAGE_DEPT_EDIT_NAME{})
+	command.Register(PB_CMD_MANAGE_DEPT_EDIT_SORT, &C2L_M_MANAGE_DEPT_EDIT_SORT{})
 }
 
 //
@@ -90,5 +91,25 @@ func (this *C2L_M_MANAGE_DEPT_EDIT_NAME) execute(client *websocket.Conn, msg *Me
 	if num > 0 {
 		user.SendToAll(PB_CMD_MANAGE_DEPT_EDIT_NAME, param)
 	}
+	return true
+}
+
+/* 部门改位置和sort */
+type C2L_M_MANAGE_DEPT_EDIT_SORT struct{}
+
+func (this *C2L_M_MANAGE_DEPT_EDIT_SORT) execute(client *websocket.Conn, msg *Message) bool {
+	param := &C2L_ManageDeptEditSort{}
+	err := json.Unmarshal([]byte(msg.Param), param)
+	if err != nil {
+		return false
+	}
+	user := session.GetUser(msg.Uid)
+	if user == nil {
+		return false
+	}
+	// num := user.Manage().DeptEditName(param.Did, param.Name)
+	// if num > 0 {
+	user.SendToAll(PB_CMD_MANAGE_DEPT_EDIT_SORT, param)
+	// }
 	return true
 }

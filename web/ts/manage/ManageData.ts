@@ -110,9 +110,9 @@ class ManageDataClass {
                 dept.Depth = 0
                 this.ProjDict[dept.Pid].DeptTree.push(dept)
             } else {
-                console.log("[debug]",dept,":[dept]")
+                console.log("[debug]", dept, ":[dept]")
                 var parent = this.DeptDict[dept.Fid]
-                if(parent){//需要判断,因为可能是fid已经被删除的部门 还残留
+                if (parent) {//需要判断,因为可能是fid已经被删除的部门 还残留
                     dept.Depth = parent.Depth + 1
                     parent.Children.push(dept)
                 }
@@ -247,6 +247,17 @@ class ManageDataClass {
         }
         return rs
     }
+    GetBrotherDeptListByFid(fid: number): DepartmentSingle[] {
+        if (fid) {
+            if (ManageData.DeptDict[fid]) {
+                return ManageData.DeptDict[fid].Children
+            } else {
+                return null
+            }
+        } else {//顶级部门
+            return this.CurrProj.DeptTree
+        }
+    }
     /**得到一个 部门的兄弟部门数组 */
     GetBrotherDepartmentList(did: number): DepartmentSingle[];
     GetBrotherDepartmentList(dp: DepartmentSingle): DepartmentSingle[];
@@ -257,15 +268,7 @@ class ManageDataClass {
         } else {
             fid = (args[0] as DepartmentSingle).Fid
         }
-        if (fid) {
-            if(ManageData.DeptDict[fid]){
-                return ManageData.DeptDict[fid].Children
-            }else{
-                return null
-            }
-        } else {//顶级部门
-            return this.CurrProj.DeptTree
-        }
+        return this.GetBrotherDeptListByFid(fid)
     }
     RemoveUserPosnid(user: UserSingle) {
         if (user.Did) {

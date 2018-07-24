@@ -36,7 +36,7 @@ class ManageManagerClass {
         Commond.Register(PB_CMD.MANAGE_DEPT_ADD, this.PB_DeptAdd.bind(this))
         Commond.Register(PB_CMD.MANAGE_DEPT_DEL, this.PB_DeptDel.bind(this))
         Commond.Register(PB_CMD.MANAGE_DEPT_EDIT_NAME, this.PB_DeptEditName.bind(this))
-        // Commond.Register(PB_CMD.MANAGE_DEPT_EDIT_SORT, this.PB_DeptAdd.bind(this))
+        Commond.Register(PB_CMD.MANAGE_DEPT_EDIT_SORT, this.PB_DeptEditSort.bind(this))
     }
     PB_DeptAdd(dept: DepartmentSingle) {
         dept.Children = []
@@ -80,6 +80,58 @@ class ManageManagerClass {
                 if (!posn.Name) {//空名职位 也 同步为部门名
                     posn.Name = dept.Name
                 }
+            }
+        }
+    }
+    PB_DeptEditSort(data: C2L_ManageDeptEditSort) {
+        var dept: DepartmentSingle = this.Data.DeptDict[data.Did]
+        if (dept) {
+            if (dept.Fid != data.Fid) {
+                //移动到新表中
+                var oldBrothers = this.Data.GetBrotherDeptListByFid(dept.Fid)
+                if (oldBrothers) {
+                    oldBrothers.RemoveByKey(FieldName.Did, dept.Did)//从自己的表中删除
+                }
+                dept.Fid = data.Fid
+                //加入新列表中,后面会把它删除掉的
+                var newBrothers = this.Data.GetBrotherDeptListByFid(data.Fid)
+                if (newBrothers) {
+                    newBrothers.push(dept)
+                }
+                //改深度
+                if (data.Fid > 0) {
+                    dept.Depth = 0
+                } else {
+                    var toParentDept = this.Data.DeptDict[data.Fid]
+                    dept.Depth = toParentDept.Depth + 1
+                }
+                //子部门的深度改变
+                TreeUtil.Every(dept.Children, (child: DepartmentSingle, _, __, depthChild: number): boolean => {
+                    child.Depth = dept.Depth + depthChild + 1
+                    return true
+                })
+            }
+            //
+            dept.Sort = data.Sort
+            //
+            var brothers = this.Data.GetBrotherDeptListByFid(data.Fid)
+            if (brothers) {
+                //目标sort之后的sort都+1
+                for (var i = brothers.length - 1; i >= 0; i--) {
+                    var brother: DepartmentSingle = brothers[i]
+                    if (brother.Did != dept.Did && brother.Sort >= data.Sort) {
+                        brother.Sort += 1
+                    }
+                }
+                //重新排序
+                brothers.sort((a, b): number => {
+                    if (a.Sort < b.Sort) {
+                        return -1
+                    } else if (a.Sort > b.Sort) {
+                        return 1
+                    }
+                    return 0
+                })
             }
         }
     }
@@ -570,50 +622,42 @@ class ManageManagerClass {
                     $curr.find('.tag-depth').show()
                     $curr.find('.tag-depth-drag').hide()
                 },
+                onUpdate: (evt: SortableEvent) => {//在原列表中移动
+                    var dept: DepartmentSingle = this.Data.DeptDict[parseInt($(evt.item).attr(FieldName.Did))]
+                    var brothers = this.Data.GetBrotherDepartmentList(dept)
+                    var toIndex: number = evt.newIndex
+                    if (dept.Fid == 0) {
+                        toIndex += 1;
+                    }
+                    var data: C2L_ManageDeptEditSort = {
+                        Did: dept.Did,
+                        Fid: dept.Fid,
+                        Sort: brothers[toIndex].Sort,
+                    }
+                    WSConn.sendMsg(PB_CMD.MANAGE_DEPT_EDIT_SORT, data)
+                },
                 onAdd: (evt: SortableEvent) => {//从一个列表挪到另一个列表
+                    var toDid = parseInt($(evt.to).attr(FieldName.Did))
+                    var brothers = this.Data.GetBrotherDeptListByFid(toDid)
+                    var toIndex: number = evt.newIndex
+                    if (toDid == 0) {
+                        toIndex += 1;//因为顶级有个`管理部`占用了一格,因此要+1
+                    }
+                    var data: C2L_ManageDeptEditSort = {
+                        Did: dept.Did,
+                        Fid: toDid,
+                        Sort: brothers[toIndex].Sort,
+                    }
+                    WSConn.sendMsg(PB_CMD.MANAGE_DEPT_EDIT_SORT, data)
                     // console.log("[debug] onAdd:", $(evt.item).attr(FieldName.Did), $(evt.from).attr(FieldName.Did),evt.oldIndex, '->', $(evt.to).attr(FieldName.Did), evt.newIndex)
                     var dept: DepartmentSingle = this.Data.DeptDict[parseInt($(evt.item).attr(FieldName.Did))]
                     var fromBrothers = this.Data.GetBrotherDepartmentList(dept)
-                    var toDid = parseInt($(evt.to).attr(FieldName.Did))
-                    var toParentDept: DepartmentSingle = this.Data.DeptDict[toDid]
                     var toIndex: number = evt.newIndex
                     //
                     //从当前父tree中删除
                     var brothers: DepartmentSingle[] = this.Data.GetBrotherDepartmentList(dept)
                     brothers.RemoveByKey(FieldName.Did, dept.Did)
-                    //
-                    if (toParentDept == null) {
-                        //改为顶级部门
-                        dept.Fid = 0
-                        dept.Depth = 0
-                        this.Data.CurrProj.DeptTree.splice(toIndex + 1, 0, dept)//因为顶级有个`管理部`占用了一格,因此要+1
-                    } else {
-                        //放到其他部门下
-                        dept.Fid = toParentDept.Did
-                        dept.Depth = toParentDept.Depth + 1
-                        toParentDept.Children.splice(toIndex, 0, dept)
-                    }
-                    //子部门的深度改变
-                    TreeUtil.Every(dept.Children, (child: DepartmentSingle, _, __, depthChild: number): boolean => {
-                        child.Depth = dept.Depth + depthChild + 1
-                        return true
-                    })
-
                 },
-                onUpdate: (evt: SortableEvent) => {//在一个列表中移动
-                    // console.log("[debug] onUpdate:", $(evt.item).attr(FieldName.Did), 'index:', evt.oldIndex, '->', evt.newIndex)
-                    var dept: DepartmentSingle = this.Data.DeptDict[parseInt($(evt.item).attr(FieldName.Did))]
-                    var fromBrothers = this.Data.GetBrotherDepartmentList(dept)
-                    var fromIndex: number = evt.oldIndex
-                    var toIndex: number = evt.newIndex
-                    if (dept.Fid == 0) {
-                        fromBrothers.splice(fromIndex + 1, 1)
-                        fromBrothers.splice(toIndex + 1, 0, dept)
-                    } else {
-                        fromBrothers.splice(fromIndex, 1)
-                        fromBrothers.splice(toIndex, 0, dept)
-                    }
-                }
             }
             var $listComp = $('.listComp')
             // console.log("[debug]", $('.listComp'), ":[$('.listComp').length]")
