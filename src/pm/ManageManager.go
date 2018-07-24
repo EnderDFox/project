@@ -107,9 +107,7 @@ func (this *C2L_M_MANAGE_DEPT_EDIT_SORT) execute(client *websocket.Conn, msg *Me
 	if user == nil {
 		return false
 	}
-	// num := user.Manage().DeptEditName(param.Did, param.Name)
-	// if num > 0 {
+	user.Manage().DeptEditSort(param.Did, param.Fid, param.Sort)
 	user.SendToAll(PB_CMD_MANAGE_DEPT_EDIT_SORT, param)
-	// }
 	return true
 }

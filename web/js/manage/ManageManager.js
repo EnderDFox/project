@@ -50,6 +50,8 @@ var ManageManagerClass = /** @class */ (function () {
             parentDept.Children.push(dept);
         }
         this.Data.DeptDict[dept.Did] = dept;
+        //重新刷新排序功能
+        this.DoDeptListSortabled();
     };
     ManageManagerClass.prototype.PB_DeptDel = function (data) {
         for (var i = 0; i < data.DidList.length; i++) {
@@ -94,7 +96,7 @@ var ManageManagerClass = /** @class */ (function () {
                     newBrothers.push(dept);
                 }
                 //改深度
-                if (data.Fid > 0) {
+                if (data.Fid == 0) {
                     dept.Depth = 0;
                 }
                 else {
@@ -410,11 +412,17 @@ var ManageManagerClass = /** @class */ (function () {
                                 return;
                             }
                             var data = { Did: dept.Did, Name: newName };
-                            Common.ConfirmWarning("\u5373\u5C06\u628A\u90E8\u95E8 \"" + dept.Name + "\" \u6539\u540D\u4E3A \"" + newName + "\"", null, function () {
+                            if (!dept.Name) {
+                                //原本没名字
                                 WSConn.sendMsg(PB_CMD.MANAGE_DEPT_EDIT_NAME, data);
-                            }, function () {
-                                e.target.value = dept.Name;
-                            });
+                            }
+                            else {
+                                Common.ConfirmWarning("\u5373\u5C06\u628A\u90E8\u95E8 \"" + dept.Name + "\" \u6539\u540D\u4E3A \"" + newName + "\"", null, function () {
+                                    WSConn.sendMsg(PB_CMD.MANAGE_DEPT_EDIT_NAME, data);
+                                }, function () {
+                                    e.target.value = dept.Name;
+                                });
+                            }
                         }
                     },
                     onAddChild: function (parentDp, i0) {
@@ -562,108 +570,135 @@ var ManageManagerClass = /** @class */ (function () {
             _this.VueDepartmentList = vue;
             //#show
             Common.InsertIntoDom(vue.$el, _this.VueProjectEdit.$refs.pageContent);
-            //#drag Sortable
-            var _renderTagDepthDrag = function ($curr, depth) {
-                var $eleArr = $curr.find('.tag-depth-drag');
-                for (var eleI = 0; eleI < $eleArr.length; eleI++) {
-                    var $ele = $($eleArr[eleI]);
-                    var __originDepth = parseInt($ele.attr('depth'));
-                    var __cDepth = __originDepth + (depth - _originDepth);
-                    var rs = [];
-                    for (var i = 0; i < __cDepth * 2; i++) {
-                        rs.push("<span class=\"glyphicon glyphicon-minus\" aria-hidden=\"true\"></span>");
-                    }
-                    $ele.html(rs.join(''));
+            //
+            _this.DoDeptListSortabled();
+        });
+    };
+    ManageManagerClass.prototype.DoDeptListSortabled = function () {
+        var _this = this;
+        if (this.DeptListSortableArr) {
+            for (var i = 0; i < this.DeptListSortableArr.length; i++) {
+                var item = this.DeptListSortableArr[i];
+                item.destroy();
+            }
+            this.DeptListSortableArr = null;
+        }
+        //#drag Sortable
+        var _renderTagDepthDrag = function ($curr, depth) {
+            var $eleArr = $curr.find('.tag-depth-drag');
+            for (var eleI = 0; eleI < $eleArr.length; eleI++) {
+                var $ele = $($eleArr[eleI]);
+                var __originDepth = parseInt($ele.attr('depth'));
+                var __cDepth = __originDepth + (depth - _originDepth);
+                var rs = [];
+                for (var i = 0; i < __cDepth * 2; i++) {
+                    rs.push("<span class=\"glyphicon glyphicon-minus\" aria-hidden=\"true\"></span>");
                 }
-            };
-            var _originDepth; //托转项目原始的depth
-            var _lastDepth = 0; //上一次render时使用的depth
-            var opt = {
-                draggable: ".list-complete-item",
-                handle: ".btn-drag",
-                group: 'dragGroup',
-                scorll: true,
-                // animation: 150, //动画参数
-                // ghostClass: 'sortable-ghostClass',
-                chosenClass: 'sortable-chosenClass',
-                onStart: function (evt) {
-                    var $curr = $(evt.item);
-                    $curr.find('.tag-depth').hide();
-                    var dept = _this.Data.DeptDict[parseInt($(evt.item).attr(FieldName.Did))];
-                    $curr.find('.tag-depth-drag').show();
-                    _originDepth = parseInt($curr.find('.tag-depth-drag:first').attr('depth'));
-                    _lastDepth = dept.Depth;
-                    _renderTagDepthDrag($curr, dept.Depth);
-                },
-                onMove: function (evt) {
-                    var $curr = $(evt.dragged);
-                    var dept = _this.Data.DeptDict[parseInt($curr.attr(FieldName.Did))];
-                    var toDid = parseInt($(evt.to).attr(FieldName.Did));
-                    var toParentDept = _this.Data.DeptDict[toDid];
-                    var depth;
-                    if (toParentDept == null) {
-                        depth = 0;
+                $ele.html(rs.join(''));
+            }
+        };
+        var _originDepth; //托转项目原始的depth
+        var _lastDepth = 0; //上一次render时使用的depth
+        var opt = {
+            draggable: ".list-complete-item",
+            handle: ".btn-drag",
+            group: 'dragGroup',
+            scorll: true,
+            // animation: 150, //动画参数
+            // ghostClass: 'sortable-ghostClass',
+            chosenClass: 'sortable-chosenClass',
+            onStart: function (evt) {
+                var $curr = $(evt.item);
+                $curr.find('.tag-depth').hide();
+                var dept = _this.Data.DeptDict[parseInt($(evt.item).attr(FieldName.Did))];
+                $curr.find('.tag-depth-drag').show();
+                _originDepth = parseInt($curr.find('.tag-depth-drag:first').attr('depth'));
+                _lastDepth = dept.Depth;
+                _renderTagDepthDrag($curr, dept.Depth);
+            },
+            onMove: function (evt) {
+                var $curr = $(evt.dragged);
+                var dept = _this.Data.DeptDict[parseInt($curr.attr(FieldName.Did))];
+                var toDid = parseInt($(evt.to).attr(FieldName.Did));
+                var toParentDept = _this.Data.DeptDict[toDid];
+                var depth;
+                if (toParentDept == null) {
+                    depth = 0;
+                }
+                else {
+                    //判断目标不是自己活自己的子成员
+                    if (dept.Did == toParentDept.Did || _this.Data.IsDepartmentChild(dept, toParentDept)) {
+                        return;
+                    }
+                    depth = toParentDept.Depth + 1;
+                }
+                if (_lastDepth != depth) {
+                    _lastDepth = depth;
+                    _renderTagDepthDrag($curr, depth);
+                }
+            },
+            onEnd: function (evt) {
+                var $curr = $(evt.item);
+                $curr.find('.tag-depth').show();
+                $curr.find('.tag-depth-drag').hide();
+            },
+            onUpdate: function (evt) {
+                var dept = _this.Data.DeptDict[parseInt($(evt.item).attr(FieldName.Did))];
+                var brothers = _this.Data.GetBrotherDepartmentList(dept);
+                var oldIndex = brothers.IndexOfByKey(FieldName.Did, dept.Did);
+                var toIndex = evt.newIndex;
+                oldIndex += 1;
+                if (dept.Fid == 0) {
+                    toIndex += 1;
+                }
+                var toSort;
+                if (oldIndex < toIndex) {
+                    //从上挪到下,则移动
+                    toIndex += 1;
+                    if (toIndex >= brothers.length) {
+                        toSort = brothers[brothers.length - 1].Sort + 1;
                     }
                     else {
-                        //判断目标不是自己活自己的子成员
-                        if (dept.Did == toParentDept.Did || _this.Data.IsDepartmentChild(dept, toParentDept)) {
-                            return;
-                        }
-                        depth = toParentDept.Depth + 1;
+                        toSort = brothers[toIndex].Sort;
                     }
-                    if (_lastDepth != depth) {
-                        _lastDepth = depth;
-                        _renderTagDepthDrag($curr, depth);
-                    }
-                },
-                onEnd: function (evt) {
-                    var $curr = $(evt.item);
-                    $curr.find('.tag-depth').show();
-                    $curr.find('.tag-depth-drag').hide();
-                },
-                onUpdate: function (evt) {
-                    var dept = _this.Data.DeptDict[parseInt($(evt.item).attr(FieldName.Did))];
-                    var brothers = _this.Data.GetBrotherDepartmentList(dept);
-                    var toIndex = evt.newIndex;
-                    if (dept.Fid == 0) {
-                        toIndex += 1;
-                    }
-                    var data = {
-                        Did: dept.Did,
-                        Fid: dept.Fid,
-                        Sort: brothers[toIndex].Sort,
-                    };
-                    WSConn.sendMsg(PB_CMD.MANAGE_DEPT_EDIT_SORT, data);
-                },
-                onAdd: function (evt) {
-                    var toDid = parseInt($(evt.to).attr(FieldName.Did));
-                    var brothers = _this.Data.GetBrotherDeptListByFid(toDid);
-                    var toIndex = evt.newIndex;
-                    if (toDid == 0) {
-                        toIndex += 1; //因为顶级有个`管理部`占用了一格,因此要+1
-                    }
-                    var data = {
-                        Did: dept.Did,
-                        Fid: toDid,
-                        Sort: brothers[toIndex].Sort,
-                    };
-                    WSConn.sendMsg(PB_CMD.MANAGE_DEPT_EDIT_SORT, data);
-                    // console.log("[debug] onAdd:", $(evt.item).attr(FieldName.Did), $(evt.from).attr(FieldName.Did),evt.oldIndex, '->', $(evt.to).attr(FieldName.Did), evt.newIndex)
-                    var dept = _this.Data.DeptDict[parseInt($(evt.item).attr(FieldName.Did))];
-                    var fromBrothers = _this.Data.GetBrotherDepartmentList(dept);
-                    var toIndex = evt.newIndex;
-                    //
-                    //从当前父tree中删除
-                    var brothers = _this.Data.GetBrotherDepartmentList(dept);
-                    brothers.RemoveByKey(FieldName.Did, dept.Did);
-                },
-            };
-            var $listComp = $('.listComp');
-            // console.log("[debug]", $('.listComp'), ":[$('.listComp').length]")
-            for (var i = 1; i < $listComp.length; i++) {
-                Sortable.create($listComp.get(i), opt);
-            }
-        });
+                }
+                else {
+                    //从下挪到上
+                    toSort = brothers[toIndex].Sort;
+                }
+                var data = {
+                    Did: dept.Did,
+                    Fid: dept.Fid,
+                    Sort: toSort,
+                };
+                WSConn.sendMsg(PB_CMD.MANAGE_DEPT_EDIT_SORT, data);
+            },
+            onAdd: function (evt) {
+                var dept = _this.Data.DeptDict[parseInt($(evt.item).attr(FieldName.Did))];
+                var toParentDid = parseInt($(evt.to).attr(FieldName.Did));
+                var brothers = _this.Data.GetBrotherDeptListByFid(toParentDid);
+                var toIndex = evt.newIndex;
+                if (toParentDid == 0) {
+                    toIndex += 1; //因为顶级有个`管理部`占用了一格,因此要+1
+                }
+                var brother = brothers[toIndex];
+                var data = {
+                    Did: dept.Did,
+                    Fid: toParentDid,
+                    Sort: brother ? brother.Sort : brothers[brothers.length - 1].Sort,
+                };
+                var toParentDept = _this.Data.DeptDict[toParentDid];
+                console.log("[debug]", toParentDept ? toParentDept.Name : null, ":[toParentDept]");
+                console.log("[debug]", data, brother ? brother.Name : null);
+                WSConn.sendMsg(PB_CMD.MANAGE_DEPT_EDIT_SORT, data);
+            },
+        };
+        var $listComp = $('.listComp');
+        // console.log("[debug]", $('.listComp'), ":[$('.listComp').length]")
+        this.DeptListSortableArr = [];
+        for (var i = 1; i < $listComp.length; i++) {
+            this.DeptListSortableArr.push(Sortable.create($listComp.get(i), opt));
+        }
     };
     ManageManagerClass.prototype.DeptOption = function (dp) {
         if (dp.Depth == 0) {

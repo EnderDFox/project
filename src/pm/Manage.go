@@ -25,9 +25,10 @@ func (this *Manage) View() *L2C_ManageView {
 		FROM (
 			SELECT pid,name AS proj_name,create_time FROM ` + config.Pm + `.pm_project WHERE is_del=0
 		)	AS t_proj
-		LEFT JOIN ` + config.Mg + `.mag_department AS t_dept ON t_dept.is_del=0 AND t_dept.pid = t_proj.pid ORDER BY t_dept.pid,t_dept.fid,t_dept.sort
+		LEFT JOIN ` + config.Mg + `.mag_department AS t_dept ON t_dept.is_del=0 AND t_dept.pid = t_proj.pid
 	) AS t_proj_dept
-	LEFT JOIN ` + config.Mg + `.mag_position AS t_posn ON t_posn.is_del=0 AND t_posn.did = t_proj_dept.did ORDER BY t_posn.did,t_posn.sort `)
+	LEFT JOIN ` + config.Mg + `.mag_position AS t_posn ON t_posn.is_del=0 AND t_posn.did = t_proj_dept.did 
+	ORDER BY t_proj_dept.pid,t_proj_dept.fid,t_proj_dept.d_sort,t_posn.did,t_posn.sort `)
 	//
 	defer stmt.Close()
 	db.CheckErr(err)
@@ -156,6 +157,20 @@ func (this *Manage) DeptEditName(did uint64, name string) int64 {
 	res, err = stmt.Exec(name, did)
 	db.CheckErr(err)
 	_, err = res.RowsAffected()
+	db.CheckErr(err)
+	return num
+}
+func (this *Manage) DeptEditSort(did uint64, fid uint64, sort uint32) int64 {
+	//直接换就行, 比sort大的值都+1  因为sort不连续也没关系
+	stmt, err := db.GetDb().Prepare(`
+	UPDATE manager.mag_department AS ta, manager.mag_department AS tb
+	SET ta.sort = ?,ta.fid=?, tb.sort = tb.sort + 1
+	WHERE	ta.did = ?
+	AND tb.did <> ? AND tb.sort >= ?`)
+	db.CheckErr(err)
+	res, err := stmt.Exec(sort, fid, did, did, sort)
+	db.CheckErr(err)
+	num, err := res.RowsAffected()
 	db.CheckErr(err)
 	return num
 }

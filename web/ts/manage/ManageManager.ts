@@ -55,6 +55,8 @@ class ManageManagerClass {
             parentDept.Children.push(dept)
         }
         this.Data.DeptDict[dept.Did] = dept
+        //重新刷新排序功能
+        this.DoDeptListSortabled()
     }
     PB_DeptDel(data: C2L_ManageDeptDel) {
         for (var i = 0; i < data.DidList.length; i++) {
@@ -99,7 +101,7 @@ class ManageManagerClass {
                     newBrothers.push(dept)
                 }
                 //改深度
-                if (data.Fid > 0) {
+                if (data.Fid == 0) {
                     dept.Depth = 0
                 } else {
                     var toParentDept = this.Data.DeptDict[data.Fid]
@@ -413,11 +415,16 @@ class ManageManagerClass {
                                 return
                             }
                             var data: C2L_ManageDeptEditName = { Did: dept.Did, Name: newName }
-                            Common.ConfirmWarning(`即将把部门 "${dept.Name}" 改名为 "${newName}"`, null, () => {
+                            if(!dept.Name){
+                                //原本没名字
                                 WSConn.sendMsg(PB_CMD.MANAGE_DEPT_EDIT_NAME, data)
-                            }, () => {
-                                (e.target as HTMLInputElement).value = dept.Name
-                            })
+                            }else{
+                                Common.ConfirmWarning(`即将把部门 "${dept.Name}" 改名为 "${newName}"`, null, () => {
+                                    WSConn.sendMsg(PB_CMD.MANAGE_DEPT_EDIT_NAME, data)
+                                }, () => {
+                                    (e.target as HTMLInputElement).value = dept.Name
+                                })
+                            }
                         }
                     },
                     onAddChild: (parentDp: DepartmentSingle, i0: int) => {
@@ -564,107 +571,133 @@ class ManageManagerClass {
             this.VueDepartmentList = vue
             //#show
             Common.InsertIntoDom(vue.$el, this.VueProjectEdit.$refs.pageContent)
-            //#drag Sortable
-            var _renderTagDepthDrag = ($curr: JQuery, depth: number) => {
-                var $eleArr = $curr.find('.tag-depth-drag')
-                for (var eleI = 0; eleI < $eleArr.length; eleI++) {
-                    var $ele = $($eleArr[eleI])
-                    var __originDepth = parseInt($ele.attr('depth'))
-                    var __cDepth = __originDepth + (depth - _originDepth)
-                    var rs: string[] = []
-                    for (var i = 0; i < __cDepth * 2; i++) {
-                        rs.push(`<span class="glyphicon glyphicon-minus" aria-hidden="true"></span>`)
-                    }
-                    $ele.html(rs.join(''))
-                }
-            }
-            var _originDepth: number;//托转项目原始的depth
-            var _lastDepth: number = 0;//上一次render时使用的depth
-            var opt = {
-                draggable: ".list-complete-item",
-                handle: ".btn-drag",
-                group: 'dragGroup',
-                scorll: true,
-                // animation: 150, //动画参数
-                // ghostClass: 'sortable-ghostClass',
-                chosenClass: 'sortable-chosenClass',
-                onStart: (evt: SortableEvent) => {
-                    var $curr: JQuery = $(evt.item)
-                    $curr.find('.tag-depth').hide()
-                    var dept: DepartmentSingle = this.Data.DeptDict[parseInt($(evt.item).attr(FieldName.Did))]
-                    $curr.find('.tag-depth-drag').show()
-                    _originDepth = parseInt($curr.find('.tag-depth-drag:first').attr('depth'))
-                    _lastDepth = dept.Depth
-                    _renderTagDepthDrag($curr, dept.Depth)
-                },
-                onMove: (evt: SortableEvent) => {
-                    var $curr: JQuery = $(evt.dragged)
-                    var dept: DepartmentSingle = this.Data.DeptDict[parseInt($curr.attr(FieldName.Did))]
-                    var toDid = parseInt($(evt.to).attr(FieldName.Did))
-                    var toParentDept: DepartmentSingle = this.Data.DeptDict[toDid]
-                    var depth: number
-                    if (toParentDept == null) {
-                        depth = 0
-                    } else {
-                        //判断目标不是自己活自己的子成员
-                        if (dept.Did == toParentDept.Did || this.Data.IsDepartmentChild(dept, toParentDept)) {
-                            return
-                        }
-                        depth = toParentDept.Depth + 1
-                    }
-                    if (_lastDepth != depth) {
-                        _lastDepth = depth
-                        _renderTagDepthDrag($curr, depth)
-                    }
-                },
-                onEnd: (evt: SortableEvent) => {
-                    var $curr: JQuery = $(evt.item)
-                    $curr.find('.tag-depth').show()
-                    $curr.find('.tag-depth-drag').hide()
-                },
-                onUpdate: (evt: SortableEvent) => {//在原列表中移动
-                    var dept: DepartmentSingle = this.Data.DeptDict[parseInt($(evt.item).attr(FieldName.Did))]
-                    var brothers = this.Data.GetBrotherDepartmentList(dept)
-                    var toIndex: number = evt.newIndex
-                    if (dept.Fid == 0) {
-                        toIndex += 1;
-                    }
-                    var data: C2L_ManageDeptEditSort = {
-                        Did: dept.Did,
-                        Fid: dept.Fid,
-                        Sort: brothers[toIndex].Sort,
-                    }
-                    WSConn.sendMsg(PB_CMD.MANAGE_DEPT_EDIT_SORT, data)
-                },
-                onAdd: (evt: SortableEvent) => {//从一个列表挪到另一个列表
-                    var toDid = parseInt($(evt.to).attr(FieldName.Did))
-                    var brothers = this.Data.GetBrotherDeptListByFid(toDid)
-                    var toIndex: number = evt.newIndex
-                    if (toDid == 0) {
-                        toIndex += 1;//因为顶级有个`管理部`占用了一格,因此要+1
-                    }
-                    var data: C2L_ManageDeptEditSort = {
-                        Did: dept.Did,
-                        Fid: toDid,
-                        Sort: brothers[toIndex].Sort,
-                    }
-                    WSConn.sendMsg(PB_CMD.MANAGE_DEPT_EDIT_SORT, data)
-                    // console.log("[debug] onAdd:", $(evt.item).attr(FieldName.Did), $(evt.from).attr(FieldName.Did),evt.oldIndex, '->', $(evt.to).attr(FieldName.Did), evt.newIndex)
-                    var dept: DepartmentSingle = this.Data.DeptDict[parseInt($(evt.item).attr(FieldName.Did))]
-                    var fromBrothers = this.Data.GetBrotherDepartmentList(dept)
-                    var toIndex: number = evt.newIndex
-                    //
-                    //从当前父tree中删除
-                    var brothers: DepartmentSingle[] = this.Data.GetBrotherDepartmentList(dept)
-                    brothers.RemoveByKey(FieldName.Did, dept.Did)
-                },
-            }
-            var $listComp = $('.listComp')
-            // console.log("[debug]", $('.listComp'), ":[$('.listComp').length]")
-            for (var i = 1; i < $listComp.length; i++) {
-                Sortable.create($listComp.get(i), opt)
-            }
+            //
+            this.DoDeptListSortabled()
         })
+    }
+    /**设置可以排序 */
+    private DeptListSortableArr:Sortable[]
+    DoDeptListSortabled() {
+        if(this.DeptListSortableArr){
+            for (var i = 0; i < this.DeptListSortableArr.length; i++) {
+                var item = this.DeptListSortableArr[i]
+                item.destroy()
+            }
+            this.DeptListSortableArr = null;
+        }
+        //#drag Sortable
+        var _renderTagDepthDrag = ($curr: JQuery, depth: number) => {
+            var $eleArr = $curr.find('.tag-depth-drag')
+            for (var eleI = 0; eleI < $eleArr.length; eleI++) {
+                var $ele = $($eleArr[eleI])
+                var __originDepth = parseInt($ele.attr('depth'))
+                var __cDepth = __originDepth + (depth - _originDepth)
+                var rs: string[] = []
+                for (var i = 0; i < __cDepth * 2; i++) {
+                    rs.push(`<span class="glyphicon glyphicon-minus" aria-hidden="true"></span>`)
+                }
+                $ele.html(rs.join(''))
+            }
+        }
+        var _originDepth: number;//托转项目原始的depth
+        var _lastDepth: number = 0;//上一次render时使用的depth
+        var opt = {
+            draggable: ".list-complete-item",
+            handle: ".btn-drag",
+            group: 'dragGroup',
+            scorll: true,
+            // animation: 150, //动画参数
+            // ghostClass: 'sortable-ghostClass',
+            chosenClass: 'sortable-chosenClass',
+            onStart: (evt: SortableEvent) => {
+                var $curr: JQuery = $(evt.item)
+                $curr.find('.tag-depth').hide()
+                var dept: DepartmentSingle = this.Data.DeptDict[parseInt($(evt.item).attr(FieldName.Did))]
+                $curr.find('.tag-depth-drag').show()
+                _originDepth = parseInt($curr.find('.tag-depth-drag:first').attr('depth'))
+                _lastDepth = dept.Depth
+                _renderTagDepthDrag($curr, dept.Depth)
+            },
+            onMove: (evt: SortableEvent) => {
+                var $curr: JQuery = $(evt.dragged)
+                var dept: DepartmentSingle = this.Data.DeptDict[parseInt($curr.attr(FieldName.Did))]
+                var toDid = parseInt($(evt.to).attr(FieldName.Did))
+                var toParentDept: DepartmentSingle = this.Data.DeptDict[toDid]
+                var depth: number
+                if (toParentDept == null) {
+                    depth = 0
+                } else {
+                    //判断目标不是自己活自己的子成员
+                    if (dept.Did == toParentDept.Did || this.Data.IsDepartmentChild(dept, toParentDept)) {
+                        return
+                    }
+                    depth = toParentDept.Depth + 1
+                }
+                if (_lastDepth != depth) {
+                    _lastDepth = depth
+                    _renderTagDepthDrag($curr, depth)
+                }
+            },
+            onEnd: (evt: SortableEvent) => {
+                var $curr: JQuery = $(evt.item)
+                $curr.find('.tag-depth').show()
+                $curr.find('.tag-depth-drag').hide()
+            },
+            onUpdate: (evt: SortableEvent) => {//在原列表中移动
+                var dept: DepartmentSingle = this.Data.DeptDict[parseInt($(evt.item).attr(FieldName.Did))]
+                var brothers = this.Data.GetBrotherDepartmentList(dept)
+                var oldIndex = brothers.IndexOfByKey(FieldName.Did, dept.Did)
+                var toIndex: number = evt.newIndex
+                oldIndex += 1;
+                if (dept.Fid == 0) {
+                    toIndex += 1;
+                }
+                var toSort: number
+                if (oldIndex < toIndex) {
+                    //从上挪到下,则移动
+                    toIndex += 1
+                    if (toIndex >= brothers.length) {
+                        toSort = brothers[brothers.length - 1].Sort + 1
+                    } else {
+                        toSort = brothers[toIndex].Sort
+                    }
+                } else {
+                    //从下挪到上
+                    toSort = brothers[toIndex].Sort
+                }
+                var data: C2L_ManageDeptEditSort = {
+                    Did: dept.Did,
+                    Fid: dept.Fid,
+                    Sort: toSort,
+                }
+                WSConn.sendMsg(PB_CMD.MANAGE_DEPT_EDIT_SORT, data)
+            },
+            onAdd: (evt: SortableEvent) => {//从一个列表挪到另一个列表
+                var dept: DepartmentSingle = this.Data.DeptDict[parseInt($(evt.item).attr(FieldName.Did))]
+                var toParentDid = parseInt($(evt.to).attr(FieldName.Did))
+                var brothers = this.Data.GetBrotherDeptListByFid(toParentDid)
+                var toIndex: number = evt.newIndex
+                if (toParentDid == 0) {
+                    toIndex += 1;//因为顶级有个`管理部`占用了一格,因此要+1
+                }
+                var brother: DepartmentSingle = brothers[toIndex]
+                var data: C2L_ManageDeptEditSort = {
+                    Did: dept.Did,
+                    Fid: toParentDid,
+                    Sort: brother ? brother.Sort : brothers[brothers.length - 1].Sort,
+                }
+                var toParentDept = this.Data.DeptDict[toParentDid]
+                console.log("[debug]", toParentDept ? toParentDept.Name : null, ":[toParentDept]")
+                console.log("[debug]", data, brother ? brother.Name : null)
+                WSConn.sendMsg(PB_CMD.MANAGE_DEPT_EDIT_SORT, data)
+            },
+        }
+        var $listComp = $('.listComp')
+        // console.log("[debug]", $('.listComp'), ":[$('.listComp').length]")
+        this.DeptListSortableArr = []
+        for (var i = 1; i < $listComp.length; i++) {
+            this.DeptListSortableArr.push(Sortable.create($listComp.get(i), opt))
+        }
     }
     DeptOption(dp: DepartmentSingle) {
         if (dp.Depth == 0) {
