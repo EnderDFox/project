@@ -1459,97 +1459,29 @@ var ManageManagerClass = /** @class */ (function () {
     };
     /**为proj选择 用户 */
     ManageManagerClass.prototype.ShowSelectUserForProj = function (proj, userList) {
-        var _this = this;
         if (userList.length == 0) {
             Common.AlertWarning('所有用户都已经被添加到了这个项目中');
             return;
         }
-        Loader.LoadVueTemplate(this.VuePath + "SelectUser", function (tpl) {
-            var checkedDict = {};
-            var _GetFilterList = function (userList, filterText) {
-                var _filterText = filterText.toString().toLowerCase().trim();
-                if (_filterText) {
-                    var _filterTextSp = _filterText.split(/[\s\,]/g);
-                    return userList.filter(function (user) {
-                        if (checkedDict[user.Uid]) {
-                            return true;
-                        }
-                        return StringUtil.IndexOfKeyArr(user.Name.toLowerCase(), _filterTextSp) > -1;
-                    });
+        this.ShowSelectUser(userList, [], function (checkedDict) {
+            var rlatList = [];
+            for (var i = 0; i < userList.length; i++) {
+                var user = userList[i];
+                if (checkedDict[user.Uid]) {
+                    var rlat = {
+                        Uid: user.Uid,
+                        Pid: proj.Pid,
+                        Did: 0,
+                        Posnid: 0,
+                    };
+                    rlatList.push(rlat);
                 }
-                else {
-                    return userList;
-                }
-            };
-            var vue = new Vue({
-                template: tpl,
-                data: {
-                    auth: _this.Data.MyAuth,
-                    userList: userList,
-                    filterText: '',
-                    checkedChange: false,
-                },
-                methods: {
-                    GetFilterList: _GetFilterList.bind(_this),
-                    checkChecked: function (_, user) {
-                        return checkedDict[user.Uid] != null;
-                    },
-                    onChangeChecked: function (user) {
-                        if (checkedDict[user.Uid]) {
-                            delete checkedDict[user.Uid];
-                        }
-                        else {
-                            checkedDict[user.Uid] = user;
-                        }
-                        _this.VueSelectUser.checkedChange = !_this.VueSelectUser.checkedChange;
-                    },
-                    OnCheckedAll: function () {
-                        var _userList = _GetFilterList(userList, _this.VueSelectUser.filterText);
-                        var isAllCheck = true;
-                        for (var i = 0; i < _userList.length; i++) {
-                            var user = _userList[i];
-                            if (!checkedDict[user.Uid]) {
-                                isAllCheck = false;
-                                break;
-                            }
-                        }
-                        for (var i = 0; i < _userList.length; i++) {
-                            var user = _userList[i];
-                            if (isAllCheck) {
-                                delete checkedDict[user.Uid];
-                            }
-                            else {
-                                checkedDict[user.Uid] = user;
-                            }
-                        }
-                        _this.VueSelectUser.checkedChange = !_this.VueSelectUser.checkedChange;
-                    },
-                    onOk: function () {
-                        var rlatList = [];
-                        for (var i = 0; i < userList.length; i++) {
-                            var user = userList[i];
-                            if (checkedDict[user.Uid]) {
-                                var rlat = {
-                                    Uid: user.Uid,
-                                    Pid: proj.Pid,
-                                    Did: 0,
-                                    Posnid: 0,
-                                };
-                                rlatList.push(rlat);
-                            }
-                        }
-                        WSConn.sendMsg(PB_CMD.MANAGE_USER_RLAT_EDIT, {
-                            RlatList: rlatList
-                        });
-                        //
-                        $(_this.VueSelectUser.$el).remove();
-                        _this.VueSelectUser = null;
-                    }
-                },
-            }).$mount();
-            _this.VueSelectUser = vue;
-            // $(vue.$el).alert('close');
-            Common.Popup($(vue.$el));
+            }
+            if (rlatList.length) {
+                WSConn.sendMsg(PB_CMD.MANAGE_USER_RLAT_EDIT, {
+                    RlatList: rlatList
+                });
+            }
         });
     };
     /* 为posn选择用户 */
@@ -1562,17 +1494,54 @@ var ManageManagerClass = /** @class */ (function () {
             return false;
         });
         if (userList.length == 0) {
-            Common.ConfirmWarning("\u9879\u76EE\u4E2D\u8FD8\u6CA1\u6709\u6210\u5458, \u662F\u5426\u53BB \"\u6210\u5458\u9875\u9762\" \u6DFB\u52A0\u6210\u5458", null, function () {
+            Common.ConfirmWarning("\u9879\u76EE\u4E2D\u6CA1\u6709\"\u7A7A\u804C\u4F4D\"\u7684\u6210\u5458\u4E86, \u662F\u5426\u53BB \"\u6210\u5458\u9875\u9762\" \u6DFB\u52A0\u65B0\u6210\u5458?", null, function () {
                 UrlParam.Set(URL_PARAM_KEY.PAGE, ProjectEditPageIndex.User).Reset();
                 _this.ShowUserList();
             });
             return;
         }
+        this.ShowSelectUser(userList, posn.UserList, function (checkedDict) {
+            var rlatList = [];
+            for (var i = 0; i < posn.UserList.length; i++) {
+                var _user = posn.UserList[i];
+                if (!checkedDict[_user.Uid]) {
+                    //以前在,现在不在列表中了
+                    var rlat = {
+                        Uid: _user.Uid,
+                        Pid: _this.Data.CurrProj.Pid,
+                        Did: 0,
+                        Posnid: 0,
+                    };
+                    rlatList.push(rlat);
+                }
+            }
+            for (var uidStr in checkedDict) {
+                var _uid = parseInt(uidStr);
+                if (posn.UserList.IndexOfByKey(FieldName.Uid, _uid) == -1) {
+                    //原本不在,现在加进来
+                    var rlat = {
+                        Uid: _uid,
+                        Pid: _this.Data.CurrProj.Pid,
+                        Did: posn.Did,
+                        Posnid: posn.Posnid,
+                    };
+                    rlatList.push(rlat);
+                }
+            }
+            if (rlatList.length) {
+                WSConn.sendMsg(PB_CMD.MANAGE_USER_RLAT_EDIT, {
+                    RlatList: rlatList
+                });
+            }
+        });
+    };
+    ManageManagerClass.prototype.ShowSelectUser = function (userList, checkedUserList, onOkCb) {
+        var _this = this;
         Loader.LoadVueTemplate(this.VuePath + "SelectUser", function (tpl) {
             var checkedDict = {};
             //初始化check字典
-            for (var i = 0; i < posn.UserList.length; i++) {
-                var _user = posn.UserList[i];
+            for (var i = 0; i < checkedUserList.length; i++) {
+                var _user = checkedUserList[i];
                 checkedDict[_user.Uid] = _user;
             }
             //
@@ -1613,9 +1582,6 @@ var ManageManagerClass = /** @class */ (function () {
                         }
                         _this.VueSelectUser.checkedChange = !_this.VueSelectUser.checkedChange;
                     },
-                    isCheckedAll: function () {
-                        return false;
-                    },
                     OnCheckedAll: function () {
                         var _userList = _GetFilterList(userList, _this.VueSelectUser.filterText);
                         var isAllCheck = true;
@@ -1638,36 +1604,7 @@ var ManageManagerClass = /** @class */ (function () {
                         _this.VueSelectUser.checkedChange = !_this.VueSelectUser.checkedChange;
                     },
                     onOk: function () {
-                        var rlatList = [];
-                        for (var i = 0; i < posn.UserList.length; i++) {
-                            var _user = posn.UserList[i];
-                            if (!checkedDict[_user.Uid]) {
-                                //以前在,现在不在列表中了
-                                var rlat = {
-                                    Uid: _user.Uid,
-                                    Pid: _this.Data.CurrProj.Pid,
-                                    Did: 0,
-                                    Posnid: 0,
-                                };
-                                rlatList.push(rlat);
-                            }
-                        }
-                        for (var uidStr in checkedDict) {
-                            var _uid = parseInt(uidStr);
-                            if (posn.UserList.IndexOfByKey(FieldName.Uid, _uid) == -1) {
-                                //原本不在,现在加进来
-                                var rlat = {
-                                    Uid: _uid,
-                                    Pid: _this.Data.CurrProj.Pid,
-                                    Did: posn.Did,
-                                    Posnid: posn.Posnid,
-                                };
-                                rlatList.push(rlat);
-                            }
-                        }
-                        WSConn.sendMsg(PB_CMD.MANAGE_USER_RLAT_EDIT, {
-                            RlatList: rlatList
-                        });
+                        onOkCb(checkedDict);
                         //
                         $(_this.VueSelectUser.$el).remove();
                         _this.VueSelectUser = null;

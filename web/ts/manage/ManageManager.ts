@@ -1441,89 +1441,25 @@ class ManageManagerClass {
             Common.AlertWarning('所有用户都已经被添加到了这个项目中')
             return
         }
-        Loader.LoadVueTemplate(this.VuePath + "SelectUser", (tpl: string) => {
-            var checkedDict: { [key: number]: UserSingle } = {};
-            var _GetFilterList = (userList: UserSingle[], filterText: string): UserSingle[] => {
-                var _filterText = filterText.toString().toLowerCase().trim()
-                if (_filterText) {
-                    var _filterTextSp = _filterText.split(/[\s\,]/g)
-                    return userList.filter((user: UserSingle) => {
-                        if (checkedDict[user.Uid]) {
-                            return true
-                        }
-                        return StringUtil.IndexOfKeyArr(user.Name.toLowerCase(), _filterTextSp) > -1
-                    })
-                } else {
-                    return userList
+        this.ShowSelectUser(userList, [], (checkedDict: { [key: number]: UserSingle }) => {
+            var rlatList: UserRlatSingle[] = []
+            for (var i = 0; i < userList.length; i++) {
+                var user: UserSingle = userList[i]
+                if (checkedDict[user.Uid]) {
+                    var rlat: UserRlatSingle = {
+                        Uid: user.Uid,
+                        Pid: proj.Pid,
+                        Did: 0,
+                        Posnid: 0,
+                    }
+                    rlatList.push(rlat)
                 }
             }
-            var vue = new Vue({
-                template: tpl,
-                data: {
-                    auth: this.Data.MyAuth,
-                    userList: userList,
-                    filterText: '',
-                    checkedChange: false,//为了让check函数被触发,
-                },
-                methods: {
-                    GetFilterList: _GetFilterList.bind(this),
-                    checkChecked: (_, user: UserSingle) => {
-                        return checkedDict[user.Uid] != null
-                    },
-                    onChangeChecked: (user: UserSingle) => {
-                        if (checkedDict[user.Uid]) {
-                            delete checkedDict[user.Uid]
-                        } else {
-                            checkedDict[user.Uid] = user
-                        }
-                        this.VueSelectUser.checkedChange = !this.VueSelectUser.checkedChange
-                    },
-                    OnCheckedAll: () => {
-                        var _userList: UserSingle[] = _GetFilterList(userList, this.VueSelectUser.filterText)
-                        var isAllCheck: boolean = true
-                        for (var i = 0; i < _userList.length; i++) {
-                            var user: UserSingle = _userList[i]
-                            if (!checkedDict[user.Uid]) {
-                                isAllCheck = false
-                                break;
-                            }
-                        }
-                        for (var i = 0; i < _userList.length; i++) {
-                            var user: UserSingle = _userList[i]
-                            if (isAllCheck) {
-                                delete checkedDict[user.Uid]
-                            } else {
-                                checkedDict[user.Uid] = user
-                            }
-                        }
-                        this.VueSelectUser.checkedChange = !this.VueSelectUser.checkedChange
-                    },
-                    onOk: () => {
-                        var rlatList: UserRlatSingle[] = []
-                        for (var i = 0; i < userList.length; i++) {
-                            var user: UserSingle = userList[i]
-                            if (checkedDict[user.Uid]) {
-                                var rlat: UserRlatSingle = {
-                                    Uid: user.Uid,
-                                    Pid: proj.Pid,
-                                    Did: 0,
-                                    Posnid: 0,
-                                }
-                                rlatList.push(rlat)
-                            }
-                        }
-                        WSConn.sendMsg<C2L_ManageUserRlatEdit>(PB_CMD.MANAGE_USER_RLAT_EDIT, {
-                            RlatList: rlatList
-                        })
-                        //
-                        $(this.VueSelectUser.$el).remove()
-                        this.VueSelectUser = null
-                    }
-                },
-            }).$mount()
-            this.VueSelectUser = vue
-            // $(vue.$el).alert('close');
-            Common.Popup($(vue.$el))
+            if (rlatList.length) {
+                WSConn.sendMsg<C2L_ManageUserRlatEdit>(PB_CMD.MANAGE_USER_RLAT_EDIT, {
+                    RlatList: rlatList
+                })
+            }
         })
     }
     /* 为posn选择用户 */
@@ -1535,17 +1471,53 @@ class ManageManagerClass {
             return false
         })
         if (userList.length == 0) {
-            Common.ConfirmWarning(`项目中还没有成员, 是否去 "成员页面" 添加成员`, null, () => {
+            Common.ConfirmWarning(`项目中没有"空职位"的成员了, 是否去 "成员页面" 添加新成员?`, null, () => {
                 UrlParam.Set(URL_PARAM_KEY.PAGE, ProjectEditPageIndex.User).Reset()
                 this.ShowUserList()
             })
             return
         }
+        this.ShowSelectUser(userList, posn.UserList, (checkedDict: { [key: number]: UserSingle }) => {
+            var rlatList: UserRlatSingle[] = []
+            for (var i = 0; i < posn.UserList.length; i++) {
+                var _user = posn.UserList[i]
+                if (!checkedDict[_user.Uid]) {
+                    //以前在,现在不在列表中了
+                    var rlat: UserRlatSingle = {
+                        Uid: _user.Uid,
+                        Pid: this.Data.CurrProj.Pid,
+                        Did: 0,
+                        Posnid: 0,
+                    }
+                    rlatList.push(rlat)
+                }
+            }
+            for (var uidStr in checkedDict) {
+                var _uid = parseInt(uidStr)
+                if (posn.UserList.IndexOfByKey(FieldName.Uid, _uid) == -1) {
+                    //原本不在,现在加进来
+                    var rlat: UserRlatSingle = {
+                        Uid: _uid,
+                        Pid: this.Data.CurrProj.Pid,
+                        Did: posn.Did,
+                        Posnid: posn.Posnid,
+                    }
+                    rlatList.push(rlat)
+                }
+            }
+            if (rlatList.length) {
+                WSConn.sendMsg<C2L_ManageUserRlatEdit>(PB_CMD.MANAGE_USER_RLAT_EDIT, {
+                    RlatList: rlatList
+                })
+            }
+        })
+    }
+    ShowSelectUser(userList: UserSingle[], checkedUserList: UserSingle[], onOkCb: (checkedDict: { [key: number]: UserSingle }) => void) {
         Loader.LoadVueTemplate(this.VuePath + "SelectUser", (tpl: string) => {
             var checkedDict: { [key: number]: UserSingle } = {};
             //初始化check字典
-            for (var i = 0; i < posn.UserList.length; i++) {
-                var _user = posn.UserList[i]
+            for (var i = 0; i < checkedUserList.length; i++) {
+                var _user = checkedUserList[i]
                 checkedDict[_user.Uid] = _user
             }
             //
@@ -1584,9 +1556,6 @@ class ManageManagerClass {
                         }
                         this.VueSelectUser.checkedChange = !this.VueSelectUser.checkedChange
                     },
-                    isCheckedAll:()=>{
-                        return false
-                    },
                     OnCheckedAll: () => {
                         var _userList: UserSingle[] = _GetFilterList(userList, this.VueSelectUser.filterText)
                         var isAllCheck: boolean = true
@@ -1608,36 +1577,7 @@ class ManageManagerClass {
                         this.VueSelectUser.checkedChange = !this.VueSelectUser.checkedChange
                     },
                     onOk: () => {
-                        var rlatList: UserRlatSingle[] = []
-                        for (var i = 0; i < posn.UserList.length; i++) {
-                            var _user = posn.UserList[i]
-                            if (!checkedDict[_user.Uid]) {
-                                //以前在,现在不在列表中了
-                                var rlat: UserRlatSingle = {
-                                    Uid: _user.Uid,
-                                    Pid: this.Data.CurrProj.Pid,
-                                    Did: 0,
-                                    Posnid: 0,
-                                }
-                                rlatList.push(rlat)
-                            }
-                        }
-                        for (var uidStr in checkedDict) {
-                            var _uid = parseInt(uidStr)
-                            if (posn.UserList.IndexOfByKey(FieldName.Uid, _uid) == -1) {
-                                //原本不在,现在加进来
-                                var rlat: UserRlatSingle = {
-                                    Uid: _uid,
-                                    Pid: this.Data.CurrProj.Pid,
-                                    Did: posn.Did,
-                                    Posnid: posn.Posnid,
-                                }
-                                rlatList.push(rlat)
-                            }
-                        }
-                        WSConn.sendMsg<C2L_ManageUserRlatEdit>(PB_CMD.MANAGE_USER_RLAT_EDIT, {
-                            RlatList: rlatList
-                        })
+                        onOkCb(checkedDict)
                         //
                         $(this.VueSelectUser.$el).remove()
                         this.VueSelectUser = null
