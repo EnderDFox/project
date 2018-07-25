@@ -40,14 +40,14 @@ var ManageManagerClass = /** @class */ (function () {
         Commond.Register(PB_CMD.MANAGE_POSN_DEL, this.PB_PosnDel.bind(this));
         Commond.Register(PB_CMD.MANAGE_POSN_EDIT_NAME, this.PB_PosnEditName.bind(this));
         Commond.Register(PB_CMD.MANAGE_POSN_EDIT_SORT, this.PB_PosnEditSort.bind(this));
-        Commond.Register(PB_CMD.MANAGE_POSN_EDIT_SORT, this.PB_PosnEditAuth.bind(this));
+        Commond.Register(PB_CMD.MANAGE_POSN_EDIT_AUTH, this.PB_PosnEditAuth.bind(this));
         //
         Commond.Register(PB_CMD.MANAGE_USER_RLAT_EDIT, this.PB_UserRlatEdit.bind(this));
         Commond.Register(PB_CMD.MANAGE_PROJ_DEL_USER, this.PB_ProjDelUser.bind(this));
     };
     ManageManagerClass.prototype.PB_ManageView = function (data) {
-        if (ManageData.IsInit == false) {
-            ManageData.Init(data);
+        if (this.Data.IsInit == false) { //第一次
+            this.Data.Init(data);
             //
             var uid = Number(UrlParam.Get('uid'));
             if (isNaN(uid)) {
@@ -64,16 +64,18 @@ var ManageManagerClass = /** @class */ (function () {
             //
             this.Data.CurrUser = this.Data.UserDict[uid];
             //
-            if (ManageData.CurrUser == null) {
+            if (this.Data.CurrUser == null) {
                 Common.ShowNoAccountPage();
             }
             else {
                 UrlParam.Callback = this.UrlParamCallback.bind(this);
+                //初始化 vue 然后 根据网址参数跳转页面
                 this.InitVue(this.UrlParamCallback.bind(this));
             }
         }
         else {
-            ManageData.Init(data);
+            this.Data.Init(data);
+            //根据网址参数跳转页面
             this.UrlParamCallback();
         }
     };
@@ -908,7 +910,10 @@ var ManageManagerClass = /** @class */ (function () {
                                 return;
                             }
                             Common.ConfirmWarning("\u5373\u5C06\u628A\u804C\u4F4D \"" + posn.Name + "\" \u6539\u540D\u4E3A \"" + newName + "\"", null, function () {
-                                posn.Name = newName; //TODO:
+                                WSConn.sendMsg(PB_CMD.MANAGE_POSN_EDIT_NAME, {
+                                    Posnid: posn.Posnid,
+                                    Name: newName,
+                                });
                             }, function () {
                                 e.target.value = posn.Name;
                             });
@@ -917,21 +922,31 @@ var ManageManagerClass = /** @class */ (function () {
                     onEditAuth: function (dept, posn, index) {
                         _this.ShowAuthList(posn);
                     },
+                    /**检查是否有部门管理权限 */
                     checkDeptMgrChecked: function (posn) {
                         return posn.AuthList.IndexOfByKey(FieldName.Authid, AUTH.DEPARTMENT_MANAGE) > -1
                             && posn.AuthList.IndexOfByKey(FieldName.Authid, AUTH.DEPARTMENT_PROCESS) > -1;
                     },
+                    /**修改是否有部门管理权限 */
                     onChangeDeptMgrChecked: function (posn) {
+                        var _authidList = [];
                         var has = posn.AuthList.IndexOfByKey(FieldName.Authid, AUTH.DEPARTMENT_MANAGE) > -1
                             && posn.AuthList.IndexOfByKey(FieldName.Authid, AUTH.DEPARTMENT_PROCESS) > -1;
-                        if (has) {
-                            posn.AuthList.RemoveByKey(FieldName.Authid, AUTH.DEPARTMENT_MANAGE);
-                            posn.AuthList.RemoveByKey(FieldName.Authid, AUTH.DEPARTMENT_PROCESS);
+                        for (var i = 0; i < posn.AuthList.length; i++) {
+                            var auth = posn.AuthList[i];
+                            if (auth.Authid != AUTH.DEPARTMENT_MANAGE && auth.Authid != AUTH.DEPARTMENT_PROCESS) {
+                                _authidList.push(auth.Authid);
+                            }
                         }
-                        else {
-                            posn.AuthList.push(_this.Data.AuthDict[AUTH.DEPARTMENT_MANAGE]);
-                            posn.AuthList.push(_this.Data.AuthDict[AUTH.DEPARTMENT_PROCESS]);
+                        if (!has) {
+                            //无 改成 有
+                            _authidList.push(AUTH.DEPARTMENT_MANAGE);
+                            _authidList.push(AUTH.DEPARTMENT_PROCESS);
                         }
+                        WSConn.sendMsg(PB_CMD.MANAGE_POSN_EDIT_AUTH, {
+                            Posnid: posn.Posnid,
+                            AuthidList: _authidList,
+                        });
                     },
                     onEditUserList: function (dept, posn) {
                         UrlParam.Set(URL_PARAM_KEY.PAGE, ProjectEditPageIndex.User).Set(URL_PARAM_KEY.FKEY, posn.Name).Reset();
@@ -959,15 +974,16 @@ var ManageManagerClass = /** @class */ (function () {
                         }
                         else {
                             Common.ConfirmDelete(function () {
-                                dept.PosnList.splice(index, 1);
-                            }, "\u5373\u5C06\u5220\u9664\u804C\u4F4D \"" + (posn.Name || '空') + "\"");
+                                var data = {
+                                    Posnid: posn.Posnid,
+                                };
+                                WSConn.sendMsg(PB_CMD.MANAGE_POSN_DEL, data);
+                            }, "\u5373\u5C06\u5220\u9664\u804C\u4F4D \"" + posn.Name + "\"");
                         }
                     },
                 },
             });
             var _did = UrlParam.Get(URL_PARAM_KEY.DID, 0);
-            console.log("[debug]", _did, ":[_did]");
-            console.log("[debug]", _this.Data.DeptDict);
             var currDept;
             if (_did > 0) {
                 currDept = _this.Data.DeptDict[_did];
@@ -1043,12 +1059,21 @@ var ManageManagerClass = /** @class */ (function () {
                     },
                     onAdd: function () {
                         if (currDept) {
-                            var posn = {
-                                Posnid: _this.Data.NewPositionUuid++, Did: currDept.Did, Name: _this.VuePositionList.newName.toString(), UserList: [],
-                                AuthList: currDept.Sort == 0 ? [_this.Data.AuthDict[AUTH.DEPARTMENT_MANAGE]] : [],
+                            var newName = _this.VuePositionList.newName.toString().trim();
+                            if (!newName) {
+                                Common.AlertError("\u804C\u4F4D\u540D\u79F0 " + newName + " \u4E0D\u53EF\u4EE5\u4E3A\u7A7A");
+                                return;
+                            }
+                            if (_this.Data.GetPosnByName(_this.Data.CurrProj.DeptTree, newName)) {
+                                Common.AlertError("\u804C\u4F4D\u540D\u79F0 " + newName + " \u5DF2\u7ECF\u5B58\u5728");
+                                return;
+                            }
+                            var data = {
+                                Did: currDept.Did,
+                                Name: newName,
                             };
                             _this.VuePositionList.newName = '';
-                            currDept.PosnList.push(posn);
+                            WSConn.sendMsg(PB_CMD.MANAGE_POSN_ADD, data);
                         }
                     },
                 },
@@ -1114,10 +1139,16 @@ var ManageManagerClass = /** @class */ (function () {
                         _this.VueAuthList.checkedChange = !_this.VueAuthList.checkedChange;
                     },
                     onSave: function () {
-                        posn.AuthList.splice(0, posn.AuthList.length);
+                        // posn.AuthList.splice(0, posn.AuthList.length)
+                        var authidList = [];
                         for (var authIdStr in checkedDict) {
-                            posn.AuthList.push(checkedDict[authIdStr]);
+                            authidList.push(parseInt(authIdStr));
                         }
+                        WSConn.sendMsg(PB_CMD.MANAGE_POSN_EDIT_AUTH, {
+                            Posnid: posn.Posnid,
+                            AuthidList: authidList,
+                        });
+                        //
                         _this.VueAuthList.$el.remove();
                         _this.VueAuthList = null;
                     },

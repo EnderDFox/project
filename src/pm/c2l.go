@@ -352,3 +352,8 @@ type C2L_ManagePosnEditAuth struct {
 type C2L_ManageUserRlatEdit struct {
 	RlatList []*UserRlatSingle
 }
+
+type C2L_ManageProjDelUser struct {
+	Pid uint64
+	Uid uint64
+}

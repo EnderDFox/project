@@ -374,6 +374,10 @@ func (this *Manage) UserRlatEdit(userRlatList ...*UserRlatSingle) int64 {
 	return 0
 }
 
+func (this *Manage) ProjDelUser(pid uint64, uid uint64) int64 {
+	return 0
+}
+
 // func (this *Manage) PosnAuthDel(posnid uint64, auth uint64) uint32 {
 
 // }

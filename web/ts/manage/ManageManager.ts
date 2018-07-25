@@ -30,7 +30,7 @@ class ManageManagerClass {
         this.RegisterPB()
         this.Data = ManageData
         WSConn.sendMsg(PB_CMD.MANAGE_VIEW, null)
-        
+
     }
     RegisterPB() {
         Commond.Register(PB_CMD.MANAGE_VIEW, this.PB_ManageView.bind(this))
@@ -47,14 +47,14 @@ class ManageManagerClass {
         Commond.Register(PB_CMD.MANAGE_POSN_DEL, this.PB_PosnDel.bind(this))
         Commond.Register(PB_CMD.MANAGE_POSN_EDIT_NAME, this.PB_PosnEditName.bind(this))
         Commond.Register(PB_CMD.MANAGE_POSN_EDIT_SORT, this.PB_PosnEditSort.bind(this))
-        Commond.Register(PB_CMD.MANAGE_POSN_EDIT_SORT, this.PB_PosnEditAuth.bind(this))
+        Commond.Register(PB_CMD.MANAGE_POSN_EDIT_AUTH, this.PB_PosnEditAuth.bind(this))
         //
         Commond.Register(PB_CMD.MANAGE_USER_RLAT_EDIT, this.PB_UserRlatEdit.bind(this))
         Commond.Register(PB_CMD.MANAGE_PROJ_DEL_USER, this.PB_ProjDelUser.bind(this))
     }
     PB_ManageView(data: L2C_ManageView) {
-        if(ManageData.IsInit==false){
-            ManageData.Init(data)
+        if (this.Data.IsInit == false) {//第一次
+            this.Data.Init(data)
             //
             var uid = Number(UrlParam.Get('uid'))
             if (isNaN(uid)) {
@@ -71,14 +71,16 @@ class ManageManagerClass {
             //
             this.Data.CurrUser = this.Data.UserDict[uid]
             //
-            if (ManageData.CurrUser == null) {
+            if (this.Data.CurrUser == null) {
                 Common.ShowNoAccountPage()
-            }else{
+            } else {
                 UrlParam.Callback = this.UrlParamCallback.bind(this)
+                //初始化 vue 然后 根据网址参数跳转页面
                 this.InitVue(this.UrlParamCallback.bind(this))
             }
-        }else{
-            ManageData.Init(data)
+        } else {
+            this.Data.Init(data)
+            //根据网址参数跳转页面
             this.UrlParamCallback()
         }
     }
@@ -902,7 +904,10 @@ class ManageManagerClass {
                                 return
                             }
                             Common.ConfirmWarning(`即将把职位 "${posn.Name}" 改名为 "${newName}"`, null, () => {
-                                posn.Name = newName//TODO:
+                                WSConn.sendMsg<C2L_ManagePosnEditName>(PB_CMD.MANAGE_POSN_EDIT_NAME, {
+                                    Posnid: posn.Posnid,
+                                    Name: newName,
+                                })
                             }, () => {
                                 (e.target as HTMLInputElement).value = posn.Name
                             })
@@ -911,20 +916,31 @@ class ManageManagerClass {
                     onEditAuth: (dept: DepartmentSingle, posn: PositionSingle, index: number) => {
                         this.ShowAuthList(posn)
                     },
+                    /**检查是否有部门管理权限 */
                     checkDeptMgrChecked: (posn: PositionSingle) => {
                         return posn.AuthList.IndexOfByKey(FieldName.Authid, AUTH.DEPARTMENT_MANAGE) > -1
                             && posn.AuthList.IndexOfByKey(FieldName.Authid, AUTH.DEPARTMENT_PROCESS) > -1
                     },
+                    /**修改是否有部门管理权限 */
                     onChangeDeptMgrChecked: (posn: PositionSingle) => {
+                        var _authidList: number[] = []
                         var has = posn.AuthList.IndexOfByKey(FieldName.Authid, AUTH.DEPARTMENT_MANAGE) > -1
                             && posn.AuthList.IndexOfByKey(FieldName.Authid, AUTH.DEPARTMENT_PROCESS) > -1
-                        if (has) {
-                            posn.AuthList.RemoveByKey(FieldName.Authid, AUTH.DEPARTMENT_MANAGE)
-                            posn.AuthList.RemoveByKey(FieldName.Authid, AUTH.DEPARTMENT_PROCESS)
-                        } else {
-                            posn.AuthList.push(this.Data.AuthDict[AUTH.DEPARTMENT_MANAGE])
-                            posn.AuthList.push(this.Data.AuthDict[AUTH.DEPARTMENT_PROCESS])
+                        for (var i = 0; i < posn.AuthList.length; i++) {
+                            var auth: AuthSingle = posn.AuthList[i]
+                            if (auth.Authid != AUTH.DEPARTMENT_MANAGE && auth.Authid != AUTH.DEPARTMENT_PROCESS) {
+                                _authidList.push(auth.Authid)
+                            }
                         }
+                        if (!has) {
+                            //无 改成 有
+                            _authidList.push(AUTH.DEPARTMENT_MANAGE)
+                            _authidList.push(AUTH.DEPARTMENT_PROCESS)
+                        }
+                        WSConn.sendMsg<C2L_ManagePosnEditAuth>(PB_CMD.MANAGE_POSN_EDIT_AUTH, {
+                            Posnid: posn.Posnid,
+                            AuthidList: _authidList,
+                        })
                     },
                     onEditUserList: (dept: DepartmentSingle, posn: PositionSingle) => {
                         UrlParam.Set(URL_PARAM_KEY.PAGE, ProjectEditPageIndex.User).Set(URL_PARAM_KEY.FKEY, posn.Name).Reset()
@@ -951,15 +967,16 @@ class ManageManagerClass {
                             Common.AlertError(`每个部门下至少要保留一个职位`)
                         } else {
                             Common.ConfirmDelete(() => {
-                                dept.PosnList.splice(index, 1)
-                            }, `即将删除职位 "${posn.Name || '空'}"`)
+                                var data: C2L_ManagePosnDel = {
+                                    Posnid: posn.Posnid,
+                                }
+                                WSConn.sendMsg(PB_CMD.MANAGE_POSN_DEL, data)
+                            }, `即将删除职位 "${posn.Name}"`)
                         }
                     },
                 },
             })
             var _did = UrlParam.Get(URL_PARAM_KEY.DID, 0)
-            console.log("[debug]", _did, ":[_did]")
-            console.log("[debug]", this.Data.DeptDict)
             var currDept: DepartmentSingle;
             if (_did > 0) {
                 currDept = this.Data.DeptDict[_did]
@@ -1033,12 +1050,21 @@ class ManageManagerClass {
                         },
                         onAdd: () => {
                             if (currDept) {
-                                var posn: PositionSingle = {
-                                    Posnid: this.Data.NewPositionUuid++, Did: currDept.Did, Name: this.VuePositionList.newName.toString(), UserList: [],
-                                    AuthList: currDept.Sort == 0 ? [this.Data.AuthDict[AUTH.DEPARTMENT_MANAGE]] : [],
+                                var newName: string = this.VuePositionList.newName.toString().trim()
+                                if (!newName) {
+                                    Common.AlertError(`职位名称 ${newName} 不可以为空`)
+                                    return
+                                }
+                                if (this.Data.GetPosnByName(this.Data.CurrProj.DeptTree, newName)) {
+                                    Common.AlertError(`职位名称 ${newName} 已经存在`)
+                                    return
+                                }
+                                var data: C2L_ManagePosnAdd = {
+                                    Did: currDept.Did,
+                                    Name: newName,
                                 }
                                 this.VuePositionList.newName = ''
-                                currDept.PosnList.push(posn)
+                                WSConn.sendMsg(PB_CMD.MANAGE_POSN_ADD, data)
                             }
                         },
                     },
@@ -1102,10 +1128,16 @@ class ManageManagerClass {
                         this.VueAuthList.checkedChange = !this.VueAuthList.checkedChange
                     },
                     onSave: () => {
-                        posn.AuthList.splice(0, posn.AuthList.length)
+                        // posn.AuthList.splice(0, posn.AuthList.length)
+                        var authidList: number[] = []
                         for (var authIdStr in checkedDict) {
-                            posn.AuthList.push(checkedDict[authIdStr])
+                            authidList.push(parseInt(authIdStr))
                         }
+                        WSConn.sendMsg<C2L_ManagePosnEditAuth>(PB_CMD.MANAGE_POSN_EDIT_AUTH, {
+                            Posnid: posn.Posnid,
+                            AuthidList: authidList,
+                        })
+                        //
                         this.VueAuthList.$el.remove()
                         this.VueAuthList = null
                     },

@@ -4,6 +4,7 @@ package main
 
 import (
 	"encoding/json"
+	"log"
 
 	"github.com/gorilla/websocket"
 )
@@ -32,6 +33,7 @@ func (this *ManageManager) RegisterFunction() {
 	command.Register(PB_CMD_MANAGE_POSN_EDIT_AUTH, &C2L_M_MANAGE_POSN_EDIT_AUTH{})
 	//#
 	command.Register(PB_CMD_MANAGE_USER_RLAT_EDIT, &C2L_M_MANAGE_USER_RLAT_EDIT{})
+	command.Register(PB_CMD_MANAGE_PROJ_DEL_USER, &C2L_M_MANAGE_PROJ_DEL_USER{})
 }
 
 //
@@ -218,6 +220,8 @@ func (this *C2L_M_MANAGE_POSN_DEL) execute(client *websocket.Conn, msg *Message)
 	num := user.Manage().PosnDel(param.Posnid)
 	if num > 0 {
 		user.SendToAll(PB_CMD_MANAGE_POSN_DEL, param)
+	} else {
+		log.Println("[log]", "PosnDel", num, ":[num]", param.Posnid, ":[param.Posnid]]")
 	}
 	return true
 }
@@ -290,5 +294,22 @@ func (this *C2L_M_MANAGE_USER_RLAT_EDIT) execute(client *websocket.Conn, msg *Me
 	}
 	user.Manage().UserRlatEdit(param.RlatList...)
 	user.SendToAll(PB_CMD_MANAGE_USER_RLAT_EDIT, param)
+	return true
+}
+
+type C2L_M_MANAGE_PROJ_DEL_USER struct{}
+
+func (this *C2L_M_MANAGE_PROJ_DEL_USER) execute(client *websocket.Conn, msg *Message) bool {
+	param := &C2L_ManageProjDelUser{}
+	err := json.Unmarshal([]byte(msg.Param), param)
+	if err != nil {
+		return false
+	}
+	user := session.GetUser(msg.Uid)
+	if user == nil {
+		return false
+	}
+	user.Manage().ProjDelUser(param.Pid, param.Uid)
+	user.SendToAll(PB_CMD_MANAGE_PROJ_DEL_USER, param)
 	return true
 }

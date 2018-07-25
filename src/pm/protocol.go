@@ -20,6 +20,7 @@ const (
 	PB_CMD_MANAGE_POSN_EDIT_AUTH = 90135
 	//#user
 	PB_CMD_MANAGE_USER_RLAT_EDIT = 90141
+	PB_CMD_MANAGE_PROJ_DEL_USER  = 90142
 )
 
 //=======================通讯数据结构=======================
