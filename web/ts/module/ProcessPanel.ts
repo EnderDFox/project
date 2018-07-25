@@ -219,7 +219,7 @@ class ProcessPanelClass {
 			if (info.w < 6) {
 				html += `<td type="step"></td>`
 			} else {
-				html += `<td type="step" class="weekend">${link.Lid}</td>`
+				html += `<td type="step" class="weekend"></td>`
 			}
 		})
 		html += '</tr>'
