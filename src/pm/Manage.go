@@ -198,7 +198,7 @@ func (this *Manage) DeptDel(didList ...uint64) int64 {
 	num, err := res.RowsAffected()
 	db.CheckErr(err)
 	if num > 0 {
-		this.PosDelByDid(didList...)
+		this.PosnDelByDid(didList...)
 	}
 	return num
 }
@@ -276,13 +276,21 @@ func (this *Manage) PosnAdd(did uint64, name string) *PositionSingle {
 	//加默认权限
 	if this.GetDeptSingle(did).Sort == 0 {
 		authidList := []uint64{AUTH_PROJECT_MANAGE, AUTH_PROJECT_PROCESS, AUTH_COLLATE_EDIT, AUTH_DEPARTMENT_MANAGE, AUTH_DEPARTMENT_PROCESS}
-		this.PosnAuthAdd(posn.Posnid, authidList...)
+		this.PosnEditAuth(posn.Posnid, authidList...)
 		posn.AuthidList = append(posn.AuthidList, authidList...)
 	}
 	return posn
 }
 
-func (this *Manage) PosDelByDid(didList ...uint64) int64 {
+func (this *Manage) PosnDel(posnid uint64) int64 {
+	return 0
+}
+
+func (this *Manage) PosnEditName(posnid uint64, name string) int64 {
+	return 0
+}
+
+func (this *Manage) PosnDelByDid(didList ...uint64) int64 {
 	var didStrList []string
 	for _, did := range didList {
 		didStrList = append(didStrList, strconv.FormatInt(int64(did), 10))
@@ -296,8 +304,12 @@ func (this *Manage) PosDelByDid(didList ...uint64) int64 {
 	return num
 }
 
+func (this *Manage) PosnEditSort(posnid uint64, sort uint32) int64 {
+	return 0
+}
+
 /**增加或设置权限*/
-func (this *Manage) PosnAuthAdd(posnid uint64, authidList ...uint64) []*PosnAuthSingle {
+func (this *Manage) PosnEditAuth(posnid uint64, authidList ...uint64) []*PosnAuthSingle {
 	var list []*PosnAuthSingle
 	for _, authid := range authidList {
 		stmt, err := db.GetDb().Prepare(`REPLACE INTO ` + config.Mg + `.mag_posn_auth (posnid,authid) VALUES (?,?)`)
@@ -314,6 +326,10 @@ func (this *Manage) PosnAuthAdd(posnid uint64, authidList ...uint64) []*PosnAuth
 		list = append(list, single)
 	}
 	return list
+}
+
+func (this *Manage) UserRlatEdit(userRlatList ...*UserRlatSingle) int64 {
+	return 0
 }
 
 // func (this *Manage) PosnAuthDel(posnid uint64, auth uint64) uint32 {

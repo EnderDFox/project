@@ -19,10 +19,19 @@ func (this *ManageManager) RegisterFunction() {
 	command.Register(PB_CMD_MANAGE_PROJ_ADD, &C2L_M_MANAGE_PROJ_ADD{})
 	command.Register(PB_CMD_MANAGE_PROJ_DEL, &C2L_M_MANAGE_PROJ_DEL{})
 	command.Register(PB_CMD_MANAGE_PROJ_EDIT_NAME, &C2L_M_MANAGE_PROJ_EDIT_NAME{})
+	//#
 	command.Register(PB_CMD_MANAGE_DEPT_ADD, &C2L_M_MANAGE_DEPT_ADD{})
 	command.Register(PB_CMD_MANAGE_DEPT_DEL, &C2L_M_MANAGE_DEPT_DEL{})
 	command.Register(PB_CMD_MANAGE_DEPT_EDIT_NAME, &C2L_M_MANAGE_DEPT_EDIT_NAME{})
 	command.Register(PB_CMD_MANAGE_DEPT_EDIT_SORT, &C2L_M_MANAGE_DEPT_EDIT_SORT{})
+	//#
+	command.Register(PB_CMD_MANAGE_POSN_ADD, &C2L_M_MANAGE_POSN_ADD{})
+	command.Register(PB_CMD_MANAGE_POSN_DEL, &C2L_M_MANAGE_POSN_DEL{})
+	command.Register(PB_CMD_MANAGE_POSN_EDIT_NAME, &C2L_M_MANAGE_POSN_EDIT_NAME{})
+	command.Register(PB_CMD_MANAGE_POSN_EDIT_SORT, &C2L_M_MANAGE_POSN_EDIT_SORT{})
+	command.Register(PB_CMD_MANAGE_POSN_EDIT_AUTH, &C2L_M_MANAGE_POSN_EDIT_AUTH{})
+	//#
+	command.Register(PB_CMD_MANAGE_USER_RLAT_EDIT, &C2L_M_MANAGE_USER_RLAT_EDIT{})
 }
 
 //
@@ -170,5 +179,116 @@ func (this *C2L_M_MANAGE_DEPT_EDIT_SORT) execute(client *websocket.Conn, msg *Me
 	}
 	user.Manage().DeptEditSort(param.Did, param.Fid, param.Sort)
 	user.SendToAll(PB_CMD_MANAGE_DEPT_EDIT_SORT, param)
+	return true
+}
+
+//# Posn
+type C2L_M_MANAGE_POSN_ADD struct{}
+
+func (this *C2L_M_MANAGE_POSN_ADD) execute(client *websocket.Conn, msg *Message) bool {
+	param := &C2L_ManagePosnAdd{}
+	err := json.Unmarshal([]byte(msg.Param), param)
+	if err != nil {
+		return false
+	}
+	user := session.GetUser(msg.Uid)
+	if user == nil {
+		return false
+	}
+	posn := user.Manage().PosnAdd(param.Did, param.Name)
+	if posn != nil {
+		user.SendToAll(PB_CMD_MANAGE_POSN_ADD, posn)
+	}
+	return true
+}
+
+/* 部门 删除    客户端会把一个部门和它所有子部门的id都传过来, 一起del*/
+type C2L_M_MANAGE_POSN_DEL struct{}
+
+func (this *C2L_M_MANAGE_POSN_DEL) execute(client *websocket.Conn, msg *Message) bool {
+	param := &C2L_ManagePosnDel{}
+	err := json.Unmarshal([]byte(msg.Param), param)
+	if err != nil {
+		return false
+	}
+	user := session.GetUser(msg.Uid)
+	if user == nil {
+		return false
+	}
+	num := user.Manage().PosnDel(param.Posnid)
+	if num > 0 {
+		user.SendToAll(PB_CMD_MANAGE_POSN_DEL, param)
+	}
+	return true
+}
+
+/* 部门 编辑 */
+type C2L_M_MANAGE_POSN_EDIT_NAME struct{}
+
+func (this *C2L_M_MANAGE_POSN_EDIT_NAME) execute(client *websocket.Conn, msg *Message) bool {
+	param := &C2L_ManagePosnEditName{}
+	err := json.Unmarshal([]byte(msg.Param), param)
+	if err != nil {
+		return false
+	}
+	user := session.GetUser(msg.Uid)
+	if user == nil {
+		return false
+	}
+	num := user.Manage().PosnEditName(param.Posnid, param.Name)
+	if num > 0 {
+		user.SendToAll(PB_CMD_MANAGE_POSN_EDIT_NAME, param)
+	}
+	return true
+}
+
+type C2L_M_MANAGE_POSN_EDIT_SORT struct{}
+
+func (this *C2L_M_MANAGE_POSN_EDIT_SORT) execute(client *websocket.Conn, msg *Message) bool {
+	param := &C2L_ManagePosnEditSort{}
+	err := json.Unmarshal([]byte(msg.Param), param)
+	if err != nil {
+		return false
+	}
+	user := session.GetUser(msg.Uid)
+	if user == nil {
+		return false
+	}
+	user.Manage().PosnEditSort(param.Posnid, param.Sort)
+	user.SendToAll(PB_CMD_MANAGE_POSN_EDIT_SORT, param)
+	return true
+}
+
+type C2L_M_MANAGE_POSN_EDIT_AUTH struct{}
+
+func (this *C2L_M_MANAGE_POSN_EDIT_AUTH) execute(client *websocket.Conn, msg *Message) bool {
+	param := &C2L_ManagePosnEditAuth{}
+	err := json.Unmarshal([]byte(msg.Param), param)
+	if err != nil {
+		return false
+	}
+	user := session.GetUser(msg.Uid)
+	if user == nil {
+		return false
+	}
+	user.Manage().PosnEditAuth(param.Posnid, param.AuthidList...)
+	user.SendToAll(PB_CMD_MANAGE_POSN_EDIT_AUTH, param)
+	return true
+}
+
+type C2L_M_MANAGE_USER_RLAT_EDIT struct{}
+
+func (this *C2L_M_MANAGE_USER_RLAT_EDIT) execute(client *websocket.Conn, msg *Message) bool {
+	param := &C2L_ManageUserRlatEdit{}
+	err := json.Unmarshal([]byte(msg.Param), param)
+	if err != nil {
+		return false
+	}
+	user := session.GetUser(msg.Uid)
+	if user == nil {
+		return false
+	}
+	user.Manage().UserRlatEdit(param.RlatList...)
+	user.SendToAll(PB_CMD_MANAGE_USER_RLAT_EDIT, param)
 	return true
 }

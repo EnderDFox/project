@@ -2,14 +2,24 @@ package main
 
 const (
 	//# Manage
-	PB_CMD_MANAGE_VIEW           = 90101
+	PB_CMD_MANAGE_VIEW = 90101
+	//#proj
 	PB_CMD_MANAGE_PROJ_ADD       = 90111
 	PB_CMD_MANAGE_PROJ_DEL       = 90112
 	PB_CMD_MANAGE_PROJ_EDIT_NAME = 90113
+	//#dept
 	PB_CMD_MANAGE_DEPT_ADD       = 90121
 	PB_CMD_MANAGE_DEPT_DEL       = 90122
 	PB_CMD_MANAGE_DEPT_EDIT_NAME = 90123
 	PB_CMD_MANAGE_DEPT_EDIT_SORT = 90124
+	//#posn
+	PB_CMD_MANAGE_POSN_ADD       = 90131
+	PB_CMD_MANAGE_POSN_DEL       = 90132
+	PB_CMD_MANAGE_POSN_EDIT_NAME = 90133
+	PB_CMD_MANAGE_POSN_EDIT_SORT = 90134
+	PB_CMD_MANAGE_POSN_EDIT_AUTH = 90135
+	//#user
+	PB_CMD_MANAGE_USER_RLAT_EDIT = 90141
 )
 
 //=======================通讯数据结构=======================
@@ -193,4 +203,11 @@ type FileSingle struct {
 	Kind       uint32
 	Name       string
 	CreateTime uint32
+}
+
+type UserRlatSingle struct {
+	Uid    uint64
+	Pid    uint64
+	Did    uint64
+	Posnid uint64
 }

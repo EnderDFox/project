@@ -290,6 +290,21 @@ type C2L_UpdateWorkDelete struct {
 	Fids []uint64
 }
 
+//#proj
+type C2L_ManageProjAdd struct {
+	Name string
+}
+
+type C2L_ManageProjDel struct {
+	Pid uint64
+}
+
+type C2L_ManageProjEditName struct {
+	Pid  uint64
+	Name string
+}
+
+//#dept
 type C2L_ManageDeptAdd struct {
 	Pid  uint64
 	Name string
@@ -307,19 +322,32 @@ type C2L_ManageDeptEditName struct {
 
 type C2L_ManageDeptEditSort struct {
 	Did  uint64
-	Fid  uint64
-	Sort uint32
+	Fid  uint64 //新的fid
+	Sort uint32 //目标sort
 }
 
-type C2L_ManageProjAdd struct {
+//#posn
+type C2L_ManagePosnAdd struct {
+	Did  uint64
 	Name string
 }
-
-type C2L_ManageProjDel struct {
-	Pid uint64
+type C2L_ManagePosnDel struct {
+	Posnid uint64
+}
+type C2L_ManagePosnEditName struct {
+	Posnid uint64
+	Name   string
+}
+type C2L_ManagePosnEditSort struct {
+	Posnid uint64
+	Sort   uint32 //目标sort
+}
+type C2L_ManagePosnEditAuth struct {
+	Posnid     uint64
+	AuthidList []uint64 //权限id列表 (现有的,旧的新的都在里面就可以了)
 }
 
-type C2L_ManageProjEditName struct {
-	Pid  uint64
-	Name string
+//#user
+type C2L_ManageUserRlatEdit struct {
+	RlatList []*UserRlatSingle
 }
