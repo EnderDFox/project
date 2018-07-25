@@ -4,20 +4,9 @@ var ManageMainClass = /** @class */ (function () {
     ManageMainClass.prototype.Init = function () {
         Common.InitUrlParams();
         VueManager.Init(this.OnInitVueCpl);
-        Commond.Register(PB_CMD.MANAGE_VIEW, this.L2C_ManageView.bind(this));
     };
     ManageMainClass.prototype.OnInitVueCpl = function () {
-        WSConn.sendMsg(PB_CMD.MANAGE_VIEW, null);
-    };
-    ManageMainClass.prototype.L2C_ManageView = function (data) {
-        ManageData.Init(data);
-        //
-        if (ManageData.CurrUser == null) {
-            Common.ShowNoAccountPage();
-        }
-        else {
-            ManageManager.Init();
-        }
+        ManageManager.Init();
     };
     return ManageMainClass;
 }());

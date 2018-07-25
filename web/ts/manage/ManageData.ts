@@ -19,7 +19,9 @@ class ManageDataClass {
     //
     NewDepartmentUuid = 100001
     NewPositionUuid = 200001
+    IsInit: boolean = false
     Init(data: L2C_ManageView) {
+        this.IsInit = true
         this.InitAuthData(data.AuthList)
         this.InitUserData(data.UserList)
         this.InitProjData(data.ProjList)
@@ -27,21 +29,6 @@ class ManageDataClass {
         this.InitPosnData(data.PosnList)
         // this.InitDeptData(data.PosnList)
         // this.InitDeptData(data.PosnList)
-        //
-        var uid = Number(UrlParam.Get('uid'))
-        if (isNaN(uid)) {
-            uid = 0
-        }
-        //#权限
-        switch (uid) {
-            case 0:
-                uid = 67//超级管理员id
-                this.AddMyAuth(AUTH.PROJECT_LIST)
-                this.AddMyAuth(AUTH.PROJECT_MANAGE)
-                break;
-        }
-        //
-        this.CurrUser = this.UserDict[uid]
     }
     private InitAuthData(authList: AuthSingle[]) {
         //# auth module
@@ -324,14 +311,61 @@ class ManageDataClass {
 
     }*/
     FormatPosnSingle(posn: PositionSingle) {
-        posn.UserList = []
-        posn.AuthList = []
-        if(posn.AuthidList){
-            for (var i = 0; i < posn.AuthidList.length; i++) {
-                var authid = posn.AuthidList[i]
+        posn.UserList == null ? posn.UserList = [] : undefined
+        this.FormatPosnAuthidList(posn, posn.AuthidList)
+    }
+    FormatPosnAuthidList(posn: PositionSingle, authidList: uint64[]) {
+        if (posn.AuthList) {
+            posn.AuthList.splice(0, posn.AuthList.length)
+        } else {
+            posn.AuthList = []
+        }
+        if (authidList) {
+            for (var i = 0; i < authidList.length; i++) {
+                var authid = authidList[i]
                 posn.AuthList.push(this.AuthDict[authid])
             }
         }
-    } 
+    }
+    /**根据posnid获取posn */
+    GetPosnByPosnid(posnid: number): [DepartmentSingle, PositionSingle] {
+        for (var i = 0; i < this.ProjList.length; i++) {
+            var proj = this.ProjList[i]
+            var [_dept, _posn] = this.GetPosnByPosnidInDeptTree(posnid, proj.DeptTree)
+            if (_dept && _posn) {
+                return [_dept, _posn]
+            }
+        }
+        return [null, null]
+    }
+    GetPosnByPosnidInDeptTree(posnid: number, deptTree: DepartmentSingle[]): [DepartmentSingle, PositionSingle] {
+        for (var i = 0; i < deptTree.length; i++) {
+            var dept = deptTree[i]
+            var posn: PositionSingle = dept.PosnList.FindByKey(FieldName.Posnid, posnid)
+            if (posn) {
+                return [dept, posn]
+            } else {
+                var [_dept, _posn] = this.GetPosnByPosnidInDeptTree(posnid, dept.Children)
+                if (_dept && _posn) {
+                    return [_dept, _posn]
+                }
+            }
+        }
+        return [null, null]
+    }
+    /*职位的UserList中删除uid*/
+    PosnDelUidInDeptTree(uid: number, deptTree: DepartmentSingle[]): void {
+        for (var i = 0; i < deptTree.length; i++) {
+            var dept = deptTree[i]
+            this.PosnListDelUid(uid, dept.PosnList)
+            this.PosnDelUidInDeptTree(uid, dept.Children)
+        }
+    }
+    PosnListDelUid(uid: number, posnList: PositionSingle[]) {
+        for (var i = 0; i < posnList.length; i++) {
+            var posn = posnList[i]
+            posn.UserList.RemoveByKey(FieldName.Uid, uid)
+        }
+    }
 }
 var ManageData = new ManageDataClass()

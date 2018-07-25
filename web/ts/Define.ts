@@ -95,13 +95,15 @@ interface IXY {
 
 interface UserSingle {
     Uid?: number
+    //只有在当前项目选定后才会有下面的设定
     Pid?: PidFeild
     Did?: DidField
     Posnid?: DidField
+    Sort?: number
+    //
     Name?: string
     IsDel?: number
     IsHide?: number
-    Sort?: number
 }
 
 interface ProjectSingle {
@@ -137,6 +139,14 @@ interface PositionSingle {
     //client
     UserList?: UserSingle[]
 }
+
+interface UserRlatSingle {
+    Uid: uint64
+    Pid: uint64
+    Did: uint64
+    Posnid: uint64
+}
+
 interface AuthModSingle {
     Modid?: int
     Name?: string
@@ -462,6 +472,40 @@ interface C2L_ManageDeptEditSort {
     Fid: uint64
     /**新位置sort值, 之后的sort都会增加+1 */
     Sort: uint32
+}
+
+
+//#posn
+interface C2L_ManagePosnAdd {
+    Did: uint64
+    Name: string
+}
+interface C2L_ManagePosnDel {
+    Posnid: uint64
+}
+interface C2L_ManagePosnEditName {
+    Posnid: uint64
+    Name: string
+}
+interface C2L_ManagePosnEditSort {
+    Did: uint64
+    Posnid: uint64
+    Sort: uint32 //目标sort
+}
+interface C2L_ManagePosnEditAuth {
+    Posnid: uint64
+    AuthidList: uint64[] //权限id列表 (现有的,旧的新的都在里面就可以了)
+}
+
+//#user
+/**工程 增加用户  用户修改部门职位都用这个 */
+interface C2L_ManageUserRlatEdit {
+    RlatList: UserRlatSingle[]
+}
+/**Proj删除用户 */
+interface C2L_ManageProjDelUser {
+    Pid :uint64
+    Uid: uint64
 }
 
 enum AUTH {

@@ -5,8 +5,10 @@ var ManageDataClass = /** @class */ (function () {
         //
         this.NewDepartmentUuid = 100001;
         this.NewPositionUuid = 200001;
+        this.IsInit = false;
     }
     ManageDataClass.prototype.Init = function (data) {
+        this.IsInit = true;
         this.InitAuthData(data.AuthList);
         this.InitUserData(data.UserList);
         this.InitProjData(data.ProjList);
@@ -14,21 +16,6 @@ var ManageDataClass = /** @class */ (function () {
         this.InitPosnData(data.PosnList);
         // this.InitDeptData(data.PosnList)
         // this.InitDeptData(data.PosnList)
-        //
-        var uid = Number(UrlParam.Get('uid'));
-        if (isNaN(uid)) {
-            uid = 0;
-        }
-        //#权限
-        switch (uid) {
-            case 0:
-                uid = 67; //超级管理员id
-                this.AddMyAuth(AUTH.PROJECT_LIST);
-                this.AddMyAuth(AUTH.PROJECT_MANAGE);
-                break;
-        }
-        //
-        this.CurrUser = this.UserDict[uid];
     };
     ManageDataClass.prototype.InitAuthData = function (authList) {
         //# auth module
@@ -324,13 +311,62 @@ var ManageDataClass = /** @class */ (function () {
 
     }*/
     ManageDataClass.prototype.FormatPosnSingle = function (posn) {
-        posn.UserList = [];
-        posn.AuthList = [];
-        if (posn.AuthidList) {
-            for (var i = 0; i < posn.AuthidList.length; i++) {
-                var authid = posn.AuthidList[i];
+        posn.UserList == null ? posn.UserList = [] : undefined;
+        this.FormatPosnAuthidList(posn, posn.AuthidList);
+    };
+    ManageDataClass.prototype.FormatPosnAuthidList = function (posn, authidList) {
+        if (posn.AuthList) {
+            posn.AuthList.splice(0, posn.AuthList.length);
+        }
+        else {
+            posn.AuthList = [];
+        }
+        if (authidList) {
+            for (var i = 0; i < authidList.length; i++) {
+                var authid = authidList[i];
                 posn.AuthList.push(this.AuthDict[authid]);
             }
+        }
+    };
+    /**根据posnid获取posn */
+    ManageDataClass.prototype.GetPosnByPosnid = function (posnid) {
+        for (var i = 0; i < this.ProjList.length; i++) {
+            var proj = this.ProjList[i];
+            var _a = this.GetPosnByPosnidInDeptTree(posnid, proj.DeptTree), _dept = _a[0], _posn = _a[1];
+            if (_dept && _posn) {
+                return [_dept, _posn];
+            }
+        }
+        return [null, null];
+    };
+    ManageDataClass.prototype.GetPosnByPosnidInDeptTree = function (posnid, deptTree) {
+        for (var i = 0; i < deptTree.length; i++) {
+            var dept = deptTree[i];
+            var posn = dept.PosnList.FindByKey(FieldName.Posnid, posnid);
+            if (posn) {
+                return [dept, posn];
+            }
+            else {
+                var _a = this.GetPosnByPosnidInDeptTree(posnid, dept.Children), _dept = _a[0], _posn = _a[1];
+                if (_dept && _posn) {
+                    return [_dept, _posn];
+                }
+            }
+        }
+        return [null, null];
+    };
+    /*职位的UserList中删除uid*/
+    ManageDataClass.prototype.PosnDelUidInDeptTree = function (uid, deptTree) {
+        for (var i = 0; i < deptTree.length; i++) {
+            var dept = deptTree[i];
+            this.PosnListDelUid(uid, dept.PosnList);
+            this.PosnDelUidInDeptTree(uid, dept.Children);
+        }
+    };
+    ManageDataClass.prototype.PosnListDelUid = function (uid, posnList) {
+        for (var i = 0; i < posnList.length; i++) {
+            var posn = posnList[i];
+            posn.UserList.RemoveByKey(FieldName.Uid, uid);
         }
     };
     return ManageDataClass;

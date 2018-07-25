@@ -29,17 +29,58 @@ class ManageManagerClass {
     Init() {
         this.RegisterPB()
         this.Data = ManageData
-        UrlParam.Callback = this.UrlParamCallback.bind(this)
-        this.InitVue(this.UrlParamCallback.bind(this))
+        WSConn.sendMsg(PB_CMD.MANAGE_VIEW, null)
+        
     }
     RegisterPB() {
+        Commond.Register(PB_CMD.MANAGE_VIEW, this.PB_ManageView.bind(this))
         Commond.Register(PB_CMD.MANAGE_PROJ_ADD, this.PB_ProjAdd.bind(this))
         Commond.Register(PB_CMD.MANAGE_PROJ_DEL, this.PB_ProjDel.bind(this))
         Commond.Register(PB_CMD.MANAGE_PROJ_EDIT_NAME, this.PB_ProjEditName.bind(this))
+        //
         Commond.Register(PB_CMD.MANAGE_DEPT_ADD, this.PB_DeptAdd.bind(this))
         Commond.Register(PB_CMD.MANAGE_DEPT_DEL, this.PB_DeptDel.bind(this))
         Commond.Register(PB_CMD.MANAGE_DEPT_EDIT_NAME, this.PB_DeptEditName.bind(this))
         Commond.Register(PB_CMD.MANAGE_DEPT_EDIT_SORT, this.PB_DeptEditSort.bind(this))
+        //
+        Commond.Register(PB_CMD.MANAGE_POSN_ADD, this.PB_PosnAdd.bind(this))
+        Commond.Register(PB_CMD.MANAGE_POSN_DEL, this.PB_PosnDel.bind(this))
+        Commond.Register(PB_CMD.MANAGE_POSN_EDIT_NAME, this.PB_PosnEditName.bind(this))
+        Commond.Register(PB_CMD.MANAGE_POSN_EDIT_SORT, this.PB_PosnEditSort.bind(this))
+        Commond.Register(PB_CMD.MANAGE_POSN_EDIT_SORT, this.PB_PosnEditAuth.bind(this))
+        //
+        Commond.Register(PB_CMD.MANAGE_USER_RLAT_EDIT, this.PB_UserRlatEdit.bind(this))
+        Commond.Register(PB_CMD.MANAGE_PROJ_DEL_USER, this.PB_ProjDelUser.bind(this))
+    }
+    PB_ManageView(data: L2C_ManageView) {
+        if(ManageData.IsInit==false){
+            ManageData.Init(data)
+            //
+            var uid = Number(UrlParam.Get('uid'))
+            if (isNaN(uid)) {
+                uid = 0
+            }
+            //#权限
+            switch (uid) {
+                case 0:
+                    uid = 67//超级管理员id
+                    this.Data.AddMyAuth(AUTH.PROJECT_LIST)
+                    this.Data.AddMyAuth(AUTH.PROJECT_MANAGE)
+                    break;
+            }
+            //
+            this.Data.CurrUser = this.Data.UserDict[uid]
+            //
+            if (ManageData.CurrUser == null) {
+                Common.ShowNoAccountPage()
+            }else{
+                UrlParam.Callback = this.UrlParamCallback.bind(this)
+                this.InitVue(this.UrlParamCallback.bind(this))
+            }
+        }else{
+            ManageData.Init(data)
+            this.UrlParamCallback()
+        }
     }
     PB_ProjAdd(proj: ProjectSingle) {
         proj.MasterUid = 0
@@ -164,6 +205,75 @@ class ManageManagerClass {
             }
         }
     }
+    PB_PosnAdd(posn: PositionSingle) {
+        var dept: DepartmentSingle = this.Data.DeptDict[posn.Did]
+        if (dept) {
+            this.Data.FormatPosnSingle(posn)
+            dept.PosnList.push(posn)
+        }
+    }
+    PB_PosnDel(data: C2L_ManagePosnDel) {
+        var [dept, posn] = this.Data.GetPosnByPosnid(data.Posnid)
+        if (dept && posn) {
+            dept.PosnList.RemoveByKey(FieldName.Posnid, data.Posnid)
+        }
+    }
+    PB_PosnEditName(data: C2L_ManagePosnEditName) {
+        var [dept, posn] = this.Data.GetPosnByPosnid(data.Posnid)
+        if (dept && posn) {
+            posn.Name = data.Name
+        }
+
+    }
+    PB_PosnEditSort(data: C2L_ManagePosnEditSort) {
+        var dept: DepartmentSingle = this.Data.DeptDict[data.Did]
+        if (dept) {
+
+        }
+    }
+    PB_PosnEditAuth(data: C2L_ManagePosnEditAuth) {
+        var [dept, posn] = this.Data.GetPosnByPosnid(data.Posnid)
+        if (dept && posn) {
+            this.Data.FormatPosnAuthidList(posn, data.AuthidList)
+        }
+    }
+    PB_UserRlatEdit(data: C2L_ManageUserRlatEdit) {
+        for (var i = 0; i < data.RlatList.length; i++) {
+            var rlat: UserRlatSingle = data.RlatList[i]
+            var user = this.Data.UserDict[rlat.Uid]
+            if (user) {
+                var proj: ProjectSingle = this.Data.ProjDict[rlat.Pid]
+                if (proj) {
+                    if (proj.UserList.IndexOfByKey(FieldName.Uid, rlat.Uid) == -1) {
+                        proj.UserList.push(user)
+                        //旧的职位先删除该玩家
+                        this.Data.PosnDelUidInDeptTree(rlat.Uid, proj.DeptTree)
+                        if (rlat.Posnid > 0) {
+                            //user 必定 did 和 posid一起设置因此这里一起改就行了
+                            var [_, posn] = this.Data.GetPosnByPosnidInDeptTree(rlat.Posnid, proj.DeptTree)
+                            if (posn) {
+                                posn.UserList.push(user)
+                            }
+                        }
+                    }
+                }
+                if (this.Data.CurrProj && this.Data.CurrProj.Pid == rlat.Pid) {
+                    //设置为当前工程
+                    user.Pid = rlat.Pid
+                    user.Did = rlat.Did
+                    user.Posnid = rlat.Posnid
+                }
+            }
+        }
+    }
+    PB_ProjDelUser(data: C2L_ManageProjDelUser) {
+        var proj: ProjectSingle = this.Data.ProjDict[data.Pid]
+        if (proj) {
+            proj.UserList.RemoveByKey(FieldName.Uid, data.Uid)
+            //职位里也要删除
+            this.Data.PosnDelUidInDeptTree(data.Uid, proj.DeptTree)
+        }
+    }
     //#
     UrlParamCallback() {
         Common.PopupHideAll()
@@ -188,12 +298,14 @@ class ManageManagerClass {
                     }
                 },
                 methods: {
+                    /**回到 全部功臣管列表 */
                     OnShowProjList: () => {
                         if (this.VueProjectEdit) {
                             $(this.VueProjectEdit.$el).remove()
                         }
                         UrlParam.RemoveAll().Reset()
-                        this.ShowProjectList()
+                        WSConn.sendMsg(PB_CMD.MANAGE_VIEW, null)//重新拉数据 然后根据网址参数跳转到 ShowProjectList
+                        // this.ShowProjectList()
                     },
                 }
             })

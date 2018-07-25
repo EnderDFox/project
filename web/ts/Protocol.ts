@@ -122,11 +122,23 @@ class L2C {
 
 class PB_CMD {
     static MANAGE_VIEW = 90101
+    ///
     static MANAGE_PROJ_ADD = 90111
     static MANAGE_PROJ_DEL = 90112
     static MANAGE_PROJ_EDIT_NAME = 90113
+    //
     static MANAGE_DEPT_ADD = 90121
     static MANAGE_DEPT_DEL = 90122
     static MANAGE_DEPT_EDIT_NAME = 90123
     static MANAGE_DEPT_EDIT_SORT = 90124
+    //#posn
+    static MANAGE_POSN_ADD = 90131
+    static MANAGE_POSN_DEL = 90132
+    static MANAGE_POSN_EDIT_NAME = 90133
+    static MANAGE_POSN_EDIT_SORT = 90134
+    static MANAGE_POSN_EDIT_AUTH = 90135
+    //#user
+    static MANAGE_USER_RLAT_EDIT = 90141
+    static MANAGE_PROJ_DEL_USER = 90142
+
 }

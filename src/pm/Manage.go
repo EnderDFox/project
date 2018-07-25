@@ -462,7 +462,7 @@ func (this *Manage) GetUserMgRelationList(pidList ...uint64) []*UserSingle {
 		// pidStrList = append(pidStrList, strconv.Itoa(int(pid)))
 		pidStrList = append(pidStrList, strconv.FormatInt(int64(pid), 10))
 	}
-	stmt, err := db.GetDb().Prepare(`SELECT uid,pid,did,posnid FROM ` + config.Mg + `.mag_user_proj_relation WHERE pid IN (` + strings.Join(pidStrList, `,`) + `)`)
+	stmt, err := db.GetDb().Prepare(`SELECT uid,pid,did,posnid FROM ` + config.Mg + `.mag_user_rlat WHERE pid IN (` + strings.Join(pidStrList, `,`) + `)`)
 	defer stmt.Close()
 	db.CheckErr(err)
 	rows, err := stmt.Query()
