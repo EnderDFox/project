@@ -217,9 +217,9 @@ class ProcessPanelClass {
 		$.each(this.DateList.list, (k, info: IDateItem) => {
 			//填充
 			if (info.w < 6) {
-				html += '<td type="step"></td>'
+				html += `<td type="step"></td>`
 			} else {
-				html += '<td type="step" class="weekend"></td>'
+				html += `<td type="step" class="weekend">${link.Lid}</td>`
 			}
 		})
 		html += '</tr>'

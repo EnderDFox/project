@@ -103,7 +103,13 @@ class ProcessManagerClass {
 		}
 		if (_prevLid) {
 			var add = $(ProcessPanel.GetWorkHtml(data.LinkSingle))
-			this.GetTrWork(_prevLid).after(add)
+			var _prevLink = ProcessData.LinkMap[_prevLid]
+			if(_prevLink.Children && _prevLink.Children.length>0){
+				//有字link, 是无法通过this.GetTrWork(_prevLid)找到的
+				this.GetTrWork(_prevLink.Children[_prevLink.Children.length-1].Lid).after(add)
+			}else{
+				this.GetTrWork(_prevLid).after(add)
+			}
 			ProcessPanel.SetWorkData(data.LinkSingle.Lid, add.get(0))
 		}
 		if (removeParentTrWork) {
