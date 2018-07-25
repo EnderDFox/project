@@ -261,6 +261,8 @@ var ManageManagerClass = /** @class */ (function () {
         }
     };
     ManageManagerClass.prototype.PB_UserRlatEdit = function (data) {
+        // this.Data.RemoveUserPosnid(user)
+        // this.Data.SetUserPosnid(user, user.Did, posn.Posnid)
         for (var i = 0; i < data.RlatList.length; i++) {
             var rlat = data.RlatList[i];
             var user = this.Data.UserDict[rlat.Uid];
@@ -268,15 +270,17 @@ var ManageManagerClass = /** @class */ (function () {
                 var proj = this.Data.ProjDict[rlat.Pid];
                 if (proj) {
                     if (proj.UserList.IndexOfByKey(FieldName.Uid, rlat.Uid) == -1) {
+                        //原本不在工程中
                         proj.UserList.push(user);
-                        //旧的职位先删除该玩家
-                        this.Data.PosnDelUidInDeptTree(rlat.Uid, proj.DeptTree);
-                        if (rlat.Posnid > 0) {
-                            //user 必定 did 和 posid一起设置因此这里一起改就行了
-                            var _a = this.Data.GetPosnByPosnidInDeptTree(rlat.Posnid, proj.DeptTree), _ = _a[0], posn = _a[1];
-                            if (posn) {
-                                posn.UserList.push(user);
-                            }
+                    }
+                    //旧的职位先删除该玩家
+                    this.Data.PosnDelUidInDeptTree(rlat.Uid, proj.DeptTree);
+                    //加入到职位中
+                    if (rlat.Posnid > 0) {
+                        //user 必定 did 和 posid一起设置因此这里一起改就行了
+                        var _a = this.Data.GetPosnByPosnidInDeptTree(rlat.Posnid, proj.DeptTree), _ = _a[0], posn = _a[1];
+                        if (posn) {
+                            posn.UserList.push(user);
                         }
                     }
                 }
@@ -488,6 +492,7 @@ var ManageManagerClass = /** @class */ (function () {
         var _this = this;
         var proj = this.Data.GetProjectListHasAuth().FindByKey(FieldName.PID, UrlParam.Get(URL_PARAM_KEY.PID));
         this.Data.CurrProj = proj;
+        this.Data.FormatUserListInProj(proj);
         Loader.LoadVueTemplateList([this.VuePath + "ProjectEdit"], function (tplList) {
             var currPage = UrlParam.Get(URL_PARAM_KEY.PAGE, [ProjectEditPageIndex.Department, ProjectEditPageIndex.Position, ProjectEditPageIndex.User]);
             TreeUtil.Every(_this.Data.CurrProj.DeptTree, function (dept) {
@@ -1274,45 +1279,73 @@ var ManageManagerClass = /** @class */ (function () {
                 },
                 methods: {
                     filterUserList: function (userList, filterText) {
-                        var rs = userList.concat();
-                        var dict = {};
-                        if (filterText) {
-                            var _filterText = filterText.toString().toLowerCase().trim();
-                            var _filterTextSp = _filterText.split(/[\s\,]/g);
-                            rs.every(function (user) {
-                                if (StringUtil.IndexOfKeyArr(user.Name.toLowerCase(), _filterTextSp) > -1) {
-                                    dict[user.Uid] = true;
-                                }
-                                else {
-                                    if (user.Did) {
-                                        var dept = _this.Data.DeptDict[user.Did];
-                                        if (StringUtil.IndexOfKeyArr(dept.Name.toLowerCase(), _filterTextSp) > -1) {
-                                            dict[user.Uid] = true;
-                                        }
-                                        else {
-                                            for (var i = 0; i < dept.PosnList.length; i++) {
-                                                var posn = dept.PosnList[i];
-                                                if (posn.Posnid == user.Posnid && StringUtil.IndexOfKeyArr(posn.Name.toLowerCase(), _filterTextSp) > -1) {
-                                                    dict[user.Uid] = true;
-                                                    break;
-                                                }
+                        //标准过滤方式
+                        var _filterText = filterText.toString().toLowerCase().trim();
+                        if (!_filterText) {
+                            return userList;
+                        }
+                        var _filterTextSp = _filterText.split(/[\s\,]/g);
+                        return userList.filter(function (user) {
+                            if (StringUtil.IndexOfKeyArr(user.Name.toLowerCase(), _filterTextSp) > -1) {
+                                return true;
+                            }
+                            else {
+                                if (user.Did) {
+                                    var dept = _this.Data.DeptDict[user.Did];
+                                    if (StringUtil.IndexOfKeyArr(dept.Name.toLowerCase(), _filterTextSp) > -1) {
+                                        return true;
+                                    }
+                                    else {
+                                        for (var i = 0; i < dept.PosnList.length; i++) {
+                                            var posn = dept.PosnList[i];
+                                            if (posn.Posnid == user.Posnid && StringUtil.IndexOfKeyArr(posn.Name.toLowerCase(), _filterTextSp) > -1) {
+                                                return true;
+                                                break;
                                             }
                                         }
                                     }
                                 }
-                                return true;
-                            });
-                            rs.sort(function (u0, u1) {
-                                if (dict[u0.Uid] && !dict[u1.Uid]) {
-                                    return -1;
-                                }
-                                else if (!dict[u0.Uid] && dict[u1.Uid]) {
-                                    return 1;
-                                }
-                                return 0;
-                            });
-                        }
-                        return rs;
+                            }
+                            return false;
+                        });
+                        //标准筛选
+                        //下面是 符合条件 排列到前面的效果,
+                        /*  var rs = userList.concat()
+                         var dict: { [key: number]: boolean } = {};
+                         if (filterText) {
+                             var _filterText = filterText.toString().toLowerCase().trim()
+                             var _filterTextSp = _filterText.split(/[\s\,]/g)
+                             rs.every((user: UserSingle): boolean => {
+                                 if (StringUtil.IndexOfKeyArr(user.Name.toLowerCase(), _filterTextSp) > -1) {
+                                     dict[user.Uid] = true
+                                 } else {
+                                     if (user.Did) {
+                                         var dept: DepartmentSingle = this.Data.DeptDict[user.Did]
+                                         if (StringUtil.IndexOfKeyArr(dept.Name.toLowerCase(), _filterTextSp) > -1) {
+                                             dict[user.Uid] = true
+                                         } else {
+                                             for (var i = 0; i < dept.PosnList.length; i++) {
+                                                 var posn = dept.PosnList[i]
+                                                 if (posn.Posnid == user.Posnid && StringUtil.IndexOfKeyArr(posn.Name.toLowerCase(), _filterTextSp) > -1) {
+                                                     dict[user.Uid] = true
+                                                     break;
+                                                 }
+                                             }
+                                         }
+                                     }
+                                 }
+                                 return true
+                             })
+                             rs.sort((u0: UserSingle, u1: UserSingle): number => {
+                                 if (dict[u0.Uid] && !dict[u1.Uid]) {
+                                     return -1
+                                 } else if (!dict[u0.Uid] && dict[u1.Uid]) {
+                                     return 1
+                                 }
+                                 return 0
+                             })
+                         }
+                         return rs; */
                     },
                     OnBackPosn: function () {
                         UrlParam.Set(URL_PARAM_KEY.PAGE, ProjectEditPageIndex.Position).Set(URL_PARAM_KEY.DID, backDept.Did).Set(URL_PARAM_KEY.FKEY, null).Reset();
@@ -1357,14 +1390,45 @@ var ManageManagerClass = /** @class */ (function () {
                         }
                     },
                     OnDeptChange: function (user, dept) {
-                        _this.Data.RemoveUserPosnid(user);
                         if (dept) {
-                            _this.Data.SetUserPosnid(user, dept.Did);
+                            var dept = ManageData.DeptDict[dept.Did];
+                            var posn;
+                            posn = dept.PosnList[0];
+                            WSConn.sendMsg(PB_CMD.MANAGE_USER_RLAT_EDIT, {
+                                RlatList: [
+                                    {
+                                        Uid: user.Uid,
+                                        Pid: _this.Data.CurrProj.Pid,
+                                        Did: dept.Did,
+                                        Posnid: posn.Posnid,
+                                    }
+                                ]
+                            });
+                        }
+                        else {
+                            WSConn.sendMsg(PB_CMD.MANAGE_USER_RLAT_EDIT, {
+                                RlatList: [
+                                    {
+                                        Uid: user.Uid,
+                                        Pid: _this.Data.CurrProj.Pid,
+                                        Did: 0,
+                                        Posnid: 0,
+                                    }
+                                ]
+                            });
                         }
                     },
                     onPosChange: function (user, posn) {
-                        _this.Data.RemoveUserPosnid(user);
-                        _this.Data.SetUserPosnid(user, user.Did, posn.Posnid);
+                        WSConn.sendMsg(PB_CMD.MANAGE_USER_RLAT_EDIT, {
+                            RlatList: [
+                                {
+                                    Uid: user.Uid,
+                                    Pid: user.Pid,
+                                    Did: user.Did,
+                                    Posnid: posn.Posnid,
+                                }
+                            ]
+                        });
                     },
                     onSortDown: function (user, index) {
                         if (index < proj.UserList.length - 1) {
@@ -1378,20 +1442,14 @@ var ManageManagerClass = /** @class */ (function () {
                     },
                     onDel: function (user, index) {
                         Common.ConfirmDelete(function () {
-                            proj.UserList.splice(index, 1);
-                            _this.VueUserList.otherUserList = ArrayUtil.SubByAttr(_this.Data.UserList, proj.UserList, FieldName.Uid);
+                            WSConn.sendMsg(PB_CMD.MANAGE_PROJ_DEL_USER, {
+                                Uid: user.Uid,
+                                Pid: _this.Data.CurrProj.Pid,
+                            });
                         }, "\u5373\u5C06\u5220\u9664\u6210\u5458 \"" + user.Name + "\"");
                     },
                     onAddSelect: function () {
                         _this.ShowSelectUser(proj, ArrayUtil.SubByAttr(_this.Data.UserList, proj.UserList, FieldName.Uid));
-                    },
-                    onAdd: function () {
-                        var newUser = ArrayUtil.FindByKey(_this.VueUserList.otherUserList, FieldName.Uid, _this.VueUserList.newUserUid);
-                        if (newUser) {
-                            proj.UserList.push(newUser);
-                            _this.VueUserList.newUserUid = 0;
-                            _this.VueUserList.otherUserList = ArrayUtil.SubByAttr(_this.Data.UserList, proj.UserList, FieldName.Uid);
-                        }
                     },
                 },
             }).$mount();
@@ -1468,13 +1526,25 @@ var ManageManagerClass = /** @class */ (function () {
                         _this.VueSelectUser.checkedChange = !_this.VueSelectUser.checkedChange;
                     },
                     onOk: function () {
+                        var rlatList = [];
                         for (var i = 0; i < userList.length; i++) {
                             var user = userList[i];
                             if (checkedDict[user.Uid]) {
-                                proj.UserList.push(user);
+                                var rlat = {
+                                    Uid: user.Uid,
+                                    Pid: proj.Pid,
+                                    Did: 0,
+                                    Posnid: 0,
+                                };
+                                rlatList.push(rlat);
                             }
                         }
+                        WSConn.sendMsg(PB_CMD.MANAGE_USER_RLAT_EDIT, {
+                            RlatList: rlatList
+                        });
+                        //
                         $(_this.VueSelectUser.$el).remove();
+                        _this.VueSelectUser = null;
                     }
                 },
             }).$mount();

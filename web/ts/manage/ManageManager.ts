@@ -21,7 +21,7 @@ class ManageManagerClass {
     VuePath = "manage/"
     VueProjectList: CombinedVueInstance1<{ auth: { [key: number]: boolean }, projectList: ProjectSingle[], newName: string }>
     VueProjectEdit: CombinedVueInstance1<{ projectList: ProjectSingle[], project: ProjectSingle, newName: string, dpTree: DepartmentSingle[], currPage: ProjectEditPageIndex }>
-    VueUserList: CombinedVueInstance1<{ userList: UserSingle[], otherUserList: UserSingle[], newUserUid: number, filterText: string }>
+    VueUserList: CombinedVueInstance1<{ userList: UserSingle[], newUserUid: number, filterText: string }>
     VueDepartmentList: CombinedVueInstance1<{ newName: string }>
     VuePosnList: CombinedVueInstance1<{ newName: string }>
     VueAuthList: CombinedVueInstance1<{ checkedChange: boolean }>
@@ -228,8 +228,8 @@ class ManageManagerClass {
 
     }
     PB_PosnEditSort(data: C2L_ManagePosnEditSort) {
-        var [_,_posn] = this.Data.GetPosnByPosnid(data.Posnid)
-        if(_posn){
+        var [_, _posn] = this.Data.GetPosnByPosnid(data.Posnid)
+        if (_posn) {
             var dept: DepartmentSingle = this.Data.DeptDict[_posn.Did]
             if (dept) {
                 for (var i = 0; i < dept.PosnList.length; i++) {
@@ -261,6 +261,8 @@ class ManageManagerClass {
         }
     }
     PB_UserRlatEdit(data: C2L_ManageUserRlatEdit) {
+        // this.Data.RemoveUserPosnid(user)
+        // this.Data.SetUserPosnid(user, user.Did, posn.Posnid)
         for (var i = 0; i < data.RlatList.length; i++) {
             var rlat: UserRlatSingle = data.RlatList[i]
             var user = this.Data.UserDict[rlat.Uid]
@@ -268,15 +270,17 @@ class ManageManagerClass {
                 var proj: ProjectSingle = this.Data.ProjDict[rlat.Pid]
                 if (proj) {
                     if (proj.UserList.IndexOfByKey(FieldName.Uid, rlat.Uid) == -1) {
+                        //原本不在工程中
                         proj.UserList.push(user)
-                        //旧的职位先删除该玩家
-                        this.Data.PosnDelUidInDeptTree(rlat.Uid, proj.DeptTree)
-                        if (rlat.Posnid > 0) {
-                            //user 必定 did 和 posid一起设置因此这里一起改就行了
-                            var [_, posn] = this.Data.GetPosnByPosnidInDeptTree(rlat.Posnid, proj.DeptTree)
-                            if (posn) {
-                                posn.UserList.push(user)
-                            }
+                    }
+                    //旧的职位先删除该玩家
+                    this.Data.PosnDelUidInDeptTree(rlat.Uid, proj.DeptTree)
+                    //加入到职位中
+                    if (rlat.Posnid > 0) {
+                        //user 必定 did 和 posid一起设置因此这里一起改就行了
+                        var [_, posn] = this.Data.GetPosnByPosnidInDeptTree(rlat.Posnid, proj.DeptTree)
+                        if (posn) {
+                            posn.UserList.push(user)
                         }
                     }
                 }
@@ -485,6 +489,7 @@ class ManageManagerClass {
     ShowProjectEdit() {
         var proj: ProjectSingle = this.Data.GetProjectListHasAuth().FindByKey(FieldName.PID, UrlParam.Get(URL_PARAM_KEY.PID))
         this.Data.CurrProj = proj
+        this.Data.FormatUserListInProj(proj)
         Loader.LoadVueTemplateList([`${this.VuePath}ProjectEdit`], (tplList: string[]) => {
             var currPage = UrlParam.Get(URL_PARAM_KEY.PAGE, [ProjectEditPageIndex.Department, ProjectEditPageIndex.Position, ProjectEditPageIndex.User])
             TreeUtil.Every(this.Data.CurrProj.DeptTree, (dept: DepartmentSingle): boolean => {
@@ -1257,42 +1262,71 @@ class ManageManagerClass {
                     },
                     methods: {
                         filterUserList: (userList: UserSingle[], filterText: string): UserSingle[] => {
-                            var rs = userList.concat()
-                            var dict: { [key: number]: boolean } = {};
-                            if (filterText) {
-                                var _filterText = filterText.toString().toLowerCase().trim()
-                                var _filterTextSp = _filterText.split(/[\s\,]/g)
-                                rs.every((user: UserSingle): boolean => {
-                                    if (StringUtil.IndexOfKeyArr(user.Name.toLowerCase(), _filterTextSp) > -1) {
-                                        dict[user.Uid] = true
-                                    } else {
-                                        if (user.Did) {
-                                            var dept: DepartmentSingle = this.Data.DeptDict[user.Did]
-                                            if (StringUtil.IndexOfKeyArr(dept.Name.toLowerCase(), _filterTextSp) > -1) {
-                                                dict[user.Uid] = true
-                                            } else {
-                                                for (var i = 0; i < dept.PosnList.length; i++) {
-                                                    var posn = dept.PosnList[i]
-                                                    if (posn.Posnid == user.Posnid && StringUtil.IndexOfKeyArr(posn.Name.toLowerCase(), _filterTextSp) > -1) {
-                                                        dict[user.Uid] = true
-                                                        break;
-                                                    }
+                            //标准过滤方式
+                            var _filterText = filterText.toString().toLowerCase().trim()
+                            if (!_filterText) {
+                                return userList
+                            }
+                            var _filterTextSp = _filterText.split(/[\s\,]/g)
+                            return userList.filter((user: UserSingle): boolean => {
+                                if (StringUtil.IndexOfKeyArr(user.Name.toLowerCase(), _filterTextSp) > -1) {
+                                    return true
+                                } else {
+                                    if (user.Did) {
+                                        var dept: DepartmentSingle = this.Data.DeptDict[user.Did]
+                                        if (StringUtil.IndexOfKeyArr(dept.Name.toLowerCase(), _filterTextSp) > -1) {
+                                            return true
+                                        } else {
+                                            for (var i = 0; i < dept.PosnList.length; i++) {
+                                                var posn = dept.PosnList[i]
+                                                if (posn.Posnid == user.Posnid && StringUtil.IndexOfKeyArr(posn.Name.toLowerCase(), _filterTextSp) > -1) {
+                                                    return true
+                                                    break;
                                                 }
                                             }
                                         }
                                     }
-                                    return true
-                                })
-                                rs.sort((u0: UserSingle, u1: UserSingle): number => {
-                                    if (dict[u0.Uid] && !dict[u1.Uid]) {
-                                        return -1
-                                    } else if (!dict[u0.Uid] && dict[u1.Uid]) {
-                                        return 1
-                                    }
-                                    return 0
-                                })
-                            }
-                            return rs;
+                                }
+                                return false
+                            })
+                            //标准筛选
+                            //下面是 符合条件 排列到前面的效果,
+                            /*  var rs = userList.concat()
+                             var dict: { [key: number]: boolean } = {};
+                             if (filterText) {
+                                 var _filterText = filterText.toString().toLowerCase().trim()
+                                 var _filterTextSp = _filterText.split(/[\s\,]/g)
+                                 rs.every((user: UserSingle): boolean => {
+                                     if (StringUtil.IndexOfKeyArr(user.Name.toLowerCase(), _filterTextSp) > -1) {
+                                         dict[user.Uid] = true
+                                     } else {
+                                         if (user.Did) {
+                                             var dept: DepartmentSingle = this.Data.DeptDict[user.Did]
+                                             if (StringUtil.IndexOfKeyArr(dept.Name.toLowerCase(), _filterTextSp) > -1) {
+                                                 dict[user.Uid] = true
+                                             } else {
+                                                 for (var i = 0; i < dept.PosnList.length; i++) {
+                                                     var posn = dept.PosnList[i]
+                                                     if (posn.Posnid == user.Posnid && StringUtil.IndexOfKeyArr(posn.Name.toLowerCase(), _filterTextSp) > -1) {
+                                                         dict[user.Uid] = true
+                                                         break;
+                                                     }
+                                                 }
+                                             }
+                                         }
+                                     }
+                                     return true
+                                 })
+                                 rs.sort((u0: UserSingle, u1: UserSingle): number => {
+                                     if (dict[u0.Uid] && !dict[u1.Uid]) {
+                                         return -1
+                                     } else if (!dict[u0.Uid] && dict[u1.Uid]) {
+                                         return 1
+                                     }
+                                     return 0
+                                 })
+                             }
+                             return rs; */
                         },
                         OnBackPosn: () => {
                             UrlParam.Set(URL_PARAM_KEY.PAGE, ProjectEditPageIndex.Position).Set(URL_PARAM_KEY.DID, backDept.Did).Set(URL_PARAM_KEY.FKEY, null).Reset()
@@ -1334,14 +1368,44 @@ class ManageManagerClass {
                             }
                         },
                         OnDeptChange: (user: UserSingle, dept: DepartmentSingle) => {
-                            this.Data.RemoveUserPosnid(user)
                             if (dept) {
-                                this.Data.SetUserPosnid(user, dept.Did)
+                                var dept: DepartmentSingle = ManageData.DeptDict[dept.Did]
+                                var posn: PositionSingle
+                                posn = dept.PosnList[0]
+                                WSConn.sendMsg<C2L_ManageUserRlatEdit>(PB_CMD.MANAGE_USER_RLAT_EDIT, {
+                                    RlatList: [
+                                        {
+                                            Uid: user.Uid,
+                                            Pid: this.Data.CurrProj.Pid,
+                                            Did: dept.Did,
+                                            Posnid: posn.Posnid,
+                                        }
+                                    ]
+                                })
+                            } else {
+                                WSConn.sendMsg<C2L_ManageUserRlatEdit>(PB_CMD.MANAGE_USER_RLAT_EDIT, {
+                                    RlatList: [
+                                        {
+                                            Uid: user.Uid,
+                                            Pid: this.Data.CurrProj.Pid,
+                                            Did: 0,
+                                            Posnid: 0,
+                                        }
+                                    ]
+                                })
                             }
                         },
                         onPosChange: (user: UserSingle, posn: PositionSingle) => {
-                            this.Data.RemoveUserPosnid(user)
-                            this.Data.SetUserPosnid(user, user.Did, posn.Posnid)
+                            WSConn.sendMsg<C2L_ManageUserRlatEdit>(PB_CMD.MANAGE_USER_RLAT_EDIT, {
+                                RlatList: [
+                                    {
+                                        Uid: user.Uid,
+                                        Pid: user.Pid,
+                                        Did: user.Did,
+                                        Posnid: posn.Posnid,
+                                    }
+                                ]
+                            })
                         },
                         onSortDown: (user: UserSingle, index: int) => {
                             if (index < proj.UserList.length - 1) {
@@ -1355,20 +1419,14 @@ class ManageManagerClass {
                         },
                         onDel: (user: UserSingle, index: int) => {
                             Common.ConfirmDelete(() => {
-                                proj.UserList.splice(index, 1)
-                                this.VueUserList.otherUserList = ArrayUtil.SubByAttr(this.Data.UserList, proj.UserList, FieldName.Uid)
+                                WSConn.sendMsg<C2L_ManageProjDelUser>(PB_CMD.MANAGE_PROJ_DEL_USER, {
+                                    Uid: user.Uid,
+                                    Pid: this.Data.CurrProj.Pid,
+                                })
                             }, `即将删除成员 "${user.Name}"`)
                         },
                         onAddSelect: () => {
                             this.ShowSelectUser(proj, ArrayUtil.SubByAttr(this.Data.UserList, proj.UserList, FieldName.Uid))
-                        },
-                        onAdd: () => {
-                            var newUser: UserSingle = ArrayUtil.FindByKey<PositionSingle>(this.VueUserList.otherUserList, FieldName.Uid, this.VueUserList.newUserUid)
-                            if (newUser) {
-                                proj.UserList.push(newUser)
-                                this.VueUserList.newUserUid = 0
-                                this.VueUserList.otherUserList = ArrayUtil.SubByAttr(this.Data.UserList, proj.UserList, FieldName.Uid)
-                            }
                         },
                     },
                 }
@@ -1442,13 +1500,25 @@ class ManageManagerClass {
                         this.VueSelectUser.checkedChange = !this.VueSelectUser.checkedChange
                     },
                     onOk: () => {
+                        var rlatList: UserRlatSingle[] = []
                         for (var i = 0; i < userList.length; i++) {
                             var user: UserSingle = userList[i]
                             if (checkedDict[user.Uid]) {
-                                proj.UserList.push(user)
+                                var rlat: UserRlatSingle = {
+                                    Uid: user.Uid,
+                                    Pid: proj.Pid,
+                                    Did: 0,
+                                    Posnid: 0,
+                                }
+                                rlatList.push(rlat)
                             }
                         }
+                        WSConn.sendMsg<C2L_ManageUserRlatEdit>(PB_CMD.MANAGE_USER_RLAT_EDIT, {
+                            RlatList: rlatList
+                        })
+                        //
                         $(this.VueSelectUser.$el).remove()
+                        this.VueSelectUser = null
                     }
                 },
             }).$mount()

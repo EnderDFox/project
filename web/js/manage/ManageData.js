@@ -9,13 +9,12 @@ var ManageDataClass = /** @class */ (function () {
     }
     ManageDataClass.prototype.Init = function (data) {
         this.IsInit = true;
-        this.InitAuthData(data.AuthList);
-        this.InitUserData(data.UserList);
-        this.InitProjData(data.ProjList);
-        this.InitDeptData(data.DeptList);
-        this.InitPosnData(data.PosnList);
-        // this.InitDeptData(data.PosnList)
-        // this.InitDeptData(data.PosnList)
+        this.InitAuthData(data.AuthList || []);
+        this.InitUserData(data.UserList || []);
+        this.InitProjData(data.ProjList || []);
+        this.InitDeptData(data.DeptList || []);
+        this.InitPosnData(data.PosnList || []);
+        this.InitUserRlatData(data.UserRlatList || []);
     };
     ManageDataClass.prototype.InitAuthData = function (authList) {
         //# auth module
@@ -113,6 +112,32 @@ var ManageDataClass = /** @class */ (function () {
             var posn = posnList[i];
             this.FormatPosnSingle(posn);
             this.DeptDict[posn.Did].PosnList.push(posn);
+        }
+    };
+    ManageDataClass.prototype.InitUserRlatData = function (rlatList) {
+        for (var i = 0; i < rlatList.length; i++) {
+            var rlat = rlatList[i];
+            var user = this.UserDict[rlat.Uid];
+            if (user) {
+                if (rlat.Pid) {
+                    var proj = this.ProjDict[rlat.Pid];
+                    if (proj) {
+                        proj.UserList.push(user);
+                        if (rlat.Posnid > 0) {
+                            var _a = this.GetPosnByPosnidInDeptTree(rlat.Posnid, proj.DeptTree), _ = _a[0], posn = _a[1];
+                            if (posn) {
+                                posn.UserList.push(user);
+                            }
+                            else {
+                                //该职位可能已经被删除了
+                            }
+                        }
+                    }
+                }
+                else {
+                    //超级管理员记录 TODO:
+                }
+            }
         }
     };
     ManageDataClass.prototype.AddMyAuth = function (auth) {
@@ -267,26 +292,10 @@ var ManageDataClass = /** @class */ (function () {
         }
         return this.GetBrotherDeptListByFid(fid);
     };
-    ManageDataClass.prototype.RemoveUserPosnid = function (user) {
-        if (user.Did) {
-            var oldDept = ManageData.DeptDict[user.Did];
-            var oldPosn = oldDept.PosnList.FindByKey(FieldName.Posnid, user.Posnid);
-            if (oldPosn) {
-                oldPosn.UserList.RemoveByKey(FieldName.Uid, user.Uid);
-            }
-        }
-    };
     ManageDataClass.prototype.SetUserPosnid = function (user, did, posnid) {
-        if (posnid === void 0) { posnid = -1; }
         var dept = ManageData.DeptDict[did];
         user.Did = dept.Did;
-        var posn;
-        if (posnid == -1) {
-            posn = dept.PosnList[0];
-        }
-        else {
-            posn = dept.PosnList.FindByKey(FieldName.Posnid, posnid);
-        }
+        var posn = dept.PosnList.FindByKey(FieldName.Posnid, posnid);
         user.Posnid = posn.Posnid;
         posn.UserList.push(user);
     };
@@ -367,6 +376,33 @@ var ManageDataClass = /** @class */ (function () {
         for (var i = 0; i < posnList.length; i++) {
             var posn = posnList[i];
             posn.UserList.RemoveByKey(FieldName.Uid, uid);
+        }
+    };
+    /**设置工程userList的一些值都设置为这个工程内的 */
+    ManageDataClass.prototype.FormatUserListInProj = function (proj) {
+        for (var i = 0; i < proj.UserList.length; i++) {
+            var user = proj.UserList[i];
+            user.Pid = proj.Pid;
+        }
+        //
+        this.FormatUserListInDeptTree(proj.DeptTree);
+    };
+    ManageDataClass.prototype.FormatUserListInDeptTree = function (deptTree) {
+        for (var i = 0; i < deptTree.length; i++) {
+            var dept = deptTree[i];
+            this.FormatUserListInPosnList(dept.PosnList);
+            //递归子dept
+            this.FormatUserListInDeptTree(dept.Children);
+        }
+    };
+    ManageDataClass.prototype.FormatUserListInPosnList = function (posnList) {
+        for (var i = 0; i < posnList.length; i++) {
+            var posn = posnList[i];
+            posn.UserList.every(function (user) {
+                user.Did = posn.Did;
+                user.Posnid = posn.Posnid;
+                return true;
+            });
         }
     };
     return ManageDataClass;

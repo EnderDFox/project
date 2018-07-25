@@ -26,7 +26,7 @@
                     <th style="width: 150px;">成员</th>
                     <th otherUser style="width: 130px;">部门</th>
                     <th otherUser style="width: 130px;">职位</th>
-                    <th style="width: 120px;">排序</th>
+                    <!-- <th style="width: 120px;">排序</th> -->
                     <th>删除</th>
                 </tr>
             </thead>
@@ -38,6 +38,7 @@
                     <td class="text-middle">
                         {{user.Name}}
                     </td>
+                    <!-- 部门列表 -->
                     <td>
                         <DeptDropdownComp :btnId="'ddmUserListDid'+index" :btnLabel="ShowDpName(user.Did)" @OnSelect="OnDeptChange(user,arguments[0])">
                             <template slot="before">
@@ -47,6 +48,7 @@
                             </template>
                         </DeptDropdownComp>
                     </td>
+                    <!-- 职位列表 -->
                     <td>
                         <div class="dropdown">
                             <button class="btn btn-default dropdown-toggle" type="button" :id="'ddmUserListPos'+index" data-toggle="dropdown" aria-haspopup="true"
@@ -61,14 +63,15 @@
                             </ul>
                         </div>
                     </td>
-                    <td>
+                    <!-- sort -->
+                   <!--  <td>
                         <button class="btn btn-default " type="button" @click="onSortUp(user,index)" :disabled="!(index > 0)">
                             <span class="glyphicon glyphicon-arrow-up " aria-hidden="true "></span>
                         </button>
                         <button class="btn btn-default " type="button" @click="onSortDown(user,index)" :disabled="!(index < userList.length - 1)">
                             <span class="glyphicon glyphicon-arrow-down " aria-hidden="true "></span>
                         </button>
-                    </td>
+                    </td> -->
                     <td>
                         <button class="btn btn-warning" type="button" @click="onDel(user,index)">
                             <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
@@ -84,23 +87,8 @@
                                 增加新成员
                             </span>
                         </button>
-                        <!-- <div class="dropdown">
-                            <button class="btn btn-default dropdown-toggle" type="button" id="ddmUserListNewUser" data-toggle="dropdown" aria-haspopup="true"
-                                aria-expanded="true">
-                                {{ShowUserName(newUserUid)}}
-                                <span class="caret"></span>
-                            </button>
-                            <ul class="dropdown-menu" aria-labelledby="ddmUserListNewUser">
-                                <li v-for="otherUser,otherUserIndex in otherUserList" :key="otherUser.Uid">
-                                    <a @click="newUserUid=otherUser.Uid">{{otherUser.Name}}</a>
-                                </li>
-                            </ul>
-                        </div> -->
                     </td>
                     <td>
-                        <!-- <button class="btn btn-default" type="button" @click="onAdd()">
-                            <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
-                        </button> -->
                     </td>
                     <td>
                     </td>

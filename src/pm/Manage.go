@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"strconv"
 	"strings"
 	"time"
@@ -93,12 +94,12 @@ func (this *Manage) View() *L2C_ManageView {
 	}
 	//#
 	data := &L2C_ManageView{
-		AuthList:         this.GetAuthList(),
-		UserList:         this.GetUserList(),
-		ProjList:         projList,
-		DeptList:         deptList,
-		PosnList:         posnList,
-		UserProjReltList: this.GetUserMgRelationList(pidList...),
+		AuthList:     this.GetAuthList(),
+		UserList:     this.GetUserList(),
+		ProjList:     projList,
+		DeptList:     deptList,
+		PosnList:     posnList,
+		UserRlatList: this.GetUserReltList(pidList...),
 	}
 	return data
 }
@@ -366,12 +367,32 @@ func (this *Manage) PosnEditAuth(removeOld bool, posnid uint64, authidList ...ui
 	return list
 }
 
+/**工程新增user 或者 修改 user的职位*/
 func (this *Manage) UserRlatEdit(userRlatList ...*UserRlatSingle) int64 {
+	var numAll int64
+	for _, userRlat := range userRlatList {
+		stmt, err := db.GetDb().Prepare(`REPLACE INTO ` + config.Mg + `.mag_user_rlat (uid,pid,did,posnid) VALUES (?,?,?,?)`)
+		defer stmt.Close()
+		db.CheckErr(err)
+		res, err := stmt.Exec(userRlat.Uid, userRlat.Pid, userRlat.Did, userRlat.Posnid)
+		db.CheckErr(err)
+		num, err := res.RowsAffected()
+		db.CheckErr(err)
+		numAll += num
+	}
 	return 0
 }
 
-func (this *Manage) ProjDelUser(pid uint64, uid uint64) int64 {
-	return 0
+/**工程移除user*/
+func (this *Manage) ProjDelUser(uid uint64, pid uint64) int64 {
+	stmt, err := db.GetDb().Prepare(`DELETE FROM ` + config.Mg + `.mag_user_rlat WHERE uid = ? AND pid = ?`)
+	defer stmt.Close()
+	db.CheckErr(err)
+	res, err := stmt.Exec(uid, pid)
+	db.CheckErr(err)
+	num, err := res.RowsAffected()
+	db.CheckErr(err)
+	return num
 }
 
 // func (this *Manage) PosnAuthDel(posnid uint64, auth uint64) uint32 {
@@ -464,22 +485,25 @@ func (this *Manage) GetPosnSingle(posnid uint64) *PositionSingle {
 }
 
 //玩家关系表   是 mag_user_proj_relation表的数据, 但结构被UserSingle包含了 所以就用UserSingle吧
-func (this *Manage) GetUserMgRelationList(pidList ...uint64) []*UserSingle {
+func (this *Manage) GetUserReltList(pidList ...uint64) []*UserRlatSingle {
 	var pidStrList []string
 	for _, pid := range pidList {
-		// pidStrList = append(pidStrList, strconv.Itoa(int(pid)))
+		log.Println("[log]", pid, ":[pid]")
 		pidStrList = append(pidStrList, strconv.FormatInt(int64(pid), 10))
 	}
-	stmt, err := db.GetDb().Prepare(`SELECT uid,pid,did,posnid FROM ` + config.Mg + `.mag_user_rlat WHERE pid IN (` + strings.Join(pidStrList, `,`) + `)`)
+	sql := `SELECT uid,pid,did,posnid FROM ` + config.Mg + `.mag_user_rlat WHERE pid IN (` + strings.Join(pidStrList, `,`) + `)`
+	log.Println("[log]", sql, ":[sql]")
+	stmt, err := db.GetDb().Prepare(sql)
 	defer stmt.Close()
 	db.CheckErr(err)
 	rows, err := stmt.Query()
 	defer rows.Close()
 	db.CheckErr(err)
-	var list []*UserSingle
+	var list []*UserRlatSingle
 	for rows.Next() {
-		single := &UserSingle{}
+		single := &UserRlatSingle{}
 		rows.Scan(&single.Uid, &single.Pid, &single.Did, &single.Posnid)
+		log.Println("[log]", single.Uid, ":[single.Uid]")
 		list = append(list, single)
 	}
 	return list

@@ -22,13 +22,12 @@ class ManageDataClass {
     IsInit: boolean = false
     Init(data: L2C_ManageView) {
         this.IsInit = true
-        this.InitAuthData(data.AuthList)
-        this.InitUserData(data.UserList)
-        this.InitProjData(data.ProjList)
-        this.InitDeptData(data.DeptList)
-        this.InitPosnData(data.PosnList)
-        // this.InitDeptData(data.PosnList)
-        // this.InitDeptData(data.PosnList)
+        this.InitAuthData(data.AuthList || [])
+        this.InitUserData(data.UserList || [])
+        this.InitProjData(data.ProjList || [])
+        this.InitDeptData(data.DeptList || [])
+        this.InitPosnData(data.PosnList || [])
+        this.InitUserRlatData(data.UserRlatList || [])
     }
     private InitAuthData(authList: AuthSingle[]) {
         //# auth module
@@ -124,6 +123,30 @@ class ManageDataClass {
             var posn = posnList[i]
             this.FormatPosnSingle(posn)
             this.DeptDict[posn.Did].PosnList.push(posn)
+        }
+    }
+    private InitUserRlatData(rlatList: UserRlatSingle[]) {
+        for (var i = 0; i < rlatList.length; i++) {
+            var rlat = rlatList[i]
+            var user = this.UserDict[rlat.Uid]
+            if (user) {
+                if (rlat.Pid) {
+                    var proj: ProjectSingle = this.ProjDict[rlat.Pid]
+                    if (proj) {
+                        proj.UserList.push(user)
+                        if (rlat.Posnid > 0) {
+                            var [_, posn] = this.GetPosnByPosnidInDeptTree(rlat.Posnid, proj.DeptTree)
+                            if (posn) {
+                                posn.UserList.push(user)
+                            } else {
+                                //该职位可能已经被删除了
+                            }
+                        }
+                    }
+                } else {
+                    //超级管理员记录 TODO:
+                }
+            }
         }
     }
     AddMyAuth(auth: AUTH) {
@@ -269,24 +292,10 @@ class ManageDataClass {
         }
         return this.GetBrotherDeptListByFid(fid)
     }
-    RemoveUserPosnid(user: UserSingle) {
-        if (user.Did) {
-            var oldDept: DepartmentSingle = ManageData.DeptDict[user.Did]
-            var oldPosn: PositionSingle = oldDept.PosnList.FindByKey(FieldName.Posnid, user.Posnid)
-            if (oldPosn) {
-                oldPosn.UserList.RemoveByKey(FieldName.Uid, user.Uid)
-            }
-        }
-    }
-    SetUserPosnid(user: UserSingle, did: number, posnid: number = -1) {
+    SetUserPosnid(user: UserSingle, did: number, posnid: number) {
         var dept: DepartmentSingle = ManageData.DeptDict[did]
         user.Did = dept.Did
-        var posn: PositionSingle
-        if (posnid == -1) {
-            posn = dept.PosnList[0]
-        } else {
-            posn = dept.PosnList.FindByKey(FieldName.Posnid, posnid)
-        }
+        var posn: PositionSingle = dept.PosnList.FindByKey(FieldName.Posnid, posnid)
         user.Posnid = posn.Posnid
         posn.UserList.push(user)
     }
@@ -365,6 +374,33 @@ class ManageDataClass {
         for (var i = 0; i < posnList.length; i++) {
             var posn = posnList[i]
             posn.UserList.RemoveByKey(FieldName.Uid, uid)
+        }
+    }
+    /**设置工程userList的一些值都设置为这个工程内的 */
+    FormatUserListInProj(proj: ProjectSingle) {
+        for (var i = 0; i < proj.UserList.length; i++) {
+            var user = proj.UserList[i]
+            user.Pid = proj.Pid
+        }
+        //
+        this.FormatUserListInDeptTree(proj.DeptTree)
+    }
+    private FormatUserListInDeptTree(deptTree: DepartmentSingle[]) {
+        for (var i = 0; i < deptTree.length; i++) {
+            var dept = deptTree[i]
+            this.FormatUserListInPosnList(dept.PosnList)
+            //递归子dept
+            this.FormatUserListInDeptTree(dept.Children)
+        }
+    }
+    private FormatUserListInPosnList(posnList: PositionSingle[]) {
+        for (var i = 0; i < posnList.length; i++) {
+            var posn = posnList[i]
+            posn.UserList.every((user:UserSingle):boolean=>{
+                user.Did = posn.Did
+                user.Posnid = posn.Posnid
+                return true
+            })
         }
     }
 }

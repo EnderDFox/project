@@ -439,7 +439,7 @@ interface L2C_ManageView {
     ProjList?: ProjectSingle[]
     DeptList?: DepartmentSingle[]
     PosnList?: PositionSingle[]
-    UserProjReltList?: UserSingle[]
+    UserRlatList?: UserRlatSingle[]
 }
 
 interface C2L_ManageProjAdd {

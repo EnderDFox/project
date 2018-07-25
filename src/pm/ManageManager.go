@@ -309,7 +309,7 @@ func (this *C2L_M_MANAGE_PROJ_DEL_USER) execute(client *websocket.Conn, msg *Mes
 	if user == nil {
 		return false
 	}
-	user.Manage().ProjDelUser(param.Pid, param.Uid)
+	user.Manage().ProjDelUser(param.Uid, param.Pid)
 	user.SendToAll(PB_CMD_MANAGE_PROJ_DEL_USER, param)
 	return true
 }
