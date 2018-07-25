@@ -1,14 +1,14 @@
-<transition-group name="list-complete" tag="div">
-    <div class="list-complete-item" v-for="posn,index in dept.PosnList" :key="posn.Posnid" v-if="posn">
+<transition-group name="list-complete" tag="div" class="posnListComp" :did="dept.Did">
+    <div class="list-complete-item" v-for="posn,index in dept.PosnList" :key="posn.Posnid" :did="posn.Did" :posnid="posn.Posnid">
         <div class="divrow PosnList-row">
             <div class="text-middle">
                 <span class="glyphicon glyphicon-minus" aria-hidden="true" v-for="dep,index in (dept.Depth-startDepth)*2"></span>
                 <span v-if="currDept && currDept.Depth==dept.Depth">
-                    {{dept.Name}}
+                    {{dept.Name || '空'}}
                 </span>
                 <button class="btn btn-default " type="button" @click="OnEnterDept(dept)" v-else>
                     <span aria-hidden="true ">
-                        {{dept.Name}}
+                        {{dept.Name || '空'}}
                     </span>
                 </button>
             </div>
@@ -30,8 +30,8 @@
             <div class="text-center">
                 <div class="checkbox">
                     <label>
-                        <input type="checkbox" :name="posn.Name" :value="posn.Posnid" :checked="checkDeptMgrChecked(posn)" @click="onChangeDeptMgrChecked(posn)" :title="'拥有管理部门`'+dept.Name+'`及其子部门的`后台`和`工作`管理权限'"
-                            :disabled="dept.Sort==0" />
+                        <input type="checkbox" :name="posn.Name" :value="posn.Posnid" :checked="checkDeptMgrChecked(posn)" @click="onChangeDeptMgrChecked(posn)"
+                            :title="'拥有管理部门`'+dept.Name+'`及其子部门的`后台`和`工作`管理权限'" :disabled="dept.Sort==0" />
                     </label>
                 </div>
             </div>
@@ -43,7 +43,13 @@
                     </span>
                 </button>
             </div>
+            <!-- sort buttons -->
             <div>
+                <button class="btn btn-default btn-drag" title="拖动" type="button" :disabled="!auth['PROJECT_MANAGE'] || dept.PosnList.length<=1">
+                    <span class="glyphicon glyphicon-move " aria-hidden="true "></span>
+                </button>
+            </div>
+            <!--  <div>
                 <span class="glyphicon glyphicon-minus" aria-hidden="true" v-for="dep,index in (dept.Depth-startDepth)*2"></span>
                 <button class="btn btn-default " type="button" @click="onSortUp(dept,posn,index)" :disabled="!CheckSortUp(dept,posn,index)">
                     <span class="glyphicon glyphicon-arrow-up " aria-hidden="true "></span>
@@ -51,7 +57,7 @@
                 <button class="btn btn-default " type="button" @click="onSortDown(dept,posn,index)" :disabled="!CheckSortDown(dept,posn,index)">
                     <span class="glyphicon glyphicon-arrow-down " aria-hidden="true "></span>
                 </button>
-            </div>
+            </div> -->
             <div>
                 <button class="btn btn-warning " type="button" @click="onDel(dept,posn,index)">
                     <span class="glyphicon glyphicon-remove " aria-hidden="true "></span>

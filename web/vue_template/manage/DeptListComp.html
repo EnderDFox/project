@@ -1,4 +1,4 @@
-<transition-group name="list-complete" tag="div" class="listComp" :did="parentDept?parentDept.Did:0">
+<transition-group name="list-complete" tag="div" class="deptListComp" :did="parentDept?parentDept.Did:0">
     <div class="list-complete-item" v-for="dp,index in deptTree" :dp="dp" :index="index" :key="dp.Did" :did="dp.Did">
         <div class="divrow DeptList-row">
             <div>

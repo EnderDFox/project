@@ -28,10 +28,10 @@
                     </template>
                 </DeptDropdownComp>
             </div>
-            <div class="navbar-header" role="cell" style="margin-top: 4px;margin-left: 8px;">
+            <div class="navbar-header" role="cell" style="margin-top: 4px;margin-left: 8px;" :disabled="!EnabledToggleShownDeptChildren()">
                 <div class="checkbox">
                     <label>
-                        <input type="checkbox" name="shownDeptChildren" value="0" :checked="userConfig.ShownDeptChildren" @click="OnToggleShownDeptChildren()"
+                        <input type="checkbox" name="shownDeptChildren" value="0"  :disabled="!EnabledToggleShownDeptChildren()" :checked="EnabledToggleShownDeptChildren() && userConfig.ShownDeptChildren" @click="OnToggleShownDeptChildren()"
                         /> 显示子部门的职位
                     </label>
                 </div>

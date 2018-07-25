@@ -23,7 +23,7 @@ class ManageManagerClass {
     VueProjectEdit: CombinedVueInstance1<{ projectList: ProjectSingle[], project: ProjectSingle, newName: string, dpTree: DepartmentSingle[], currPage: ProjectEditPageIndex }>
     VueUserList: CombinedVueInstance1<{ userList: UserSingle[], otherUserList: UserSingle[], newUserUid: number, filterText: string }>
     VueDepartmentList: CombinedVueInstance1<{ newName: string }>
-    VuePositionList: CombinedVueInstance1<{ newName: string }>
+    VuePosnList: CombinedVueInstance1<{ newName: string }>
     VueAuthList: CombinedVueInstance1<{ checkedChange: boolean }>
     VueSelectUser: CombinedVueInstance1<{ checkedChange: boolean, filterText: string }>
     Init() {
@@ -228,9 +228,30 @@ class ManageManagerClass {
 
     }
     PB_PosnEditSort(data: C2L_ManagePosnEditSort) {
-        var dept: DepartmentSingle = this.Data.DeptDict[data.Did]
-        if (dept) {
-
+        var [_,_posn] = this.Data.GetPosnByPosnid(data.Posnid)
+        if(_posn){
+            var dept: DepartmentSingle = this.Data.DeptDict[_posn.Did]
+            if (dept) {
+                for (var i = 0; i < dept.PosnList.length; i++) {
+                    var posn = dept.PosnList[i]
+                    if (posn.Posnid == data.Posnid) {
+                        posn.Sort = data.Sort
+                    } else {
+                        if (posn.Sort >= data.Sort) {
+                            posn.Sort += 1
+                        }
+                    }
+                }
+                //重新排序
+                dept.PosnList.sort((a, b): number => {
+                    if (a.Sort < b.Sort) {
+                        return -1
+                    } else if (a.Sort > b.Sort) {
+                        return 1
+                    }
+                    return 0
+                })
+            }
         }
     }
     PB_PosnEditAuth(data: C2L_ManagePosnEditAuth) {
@@ -516,7 +537,7 @@ class ManageManagerClass {
                 this.ShowDepartmentList()
                 break;
             case ProjectEditPageIndex.Position:
-                this.ShowPositionList()
+                this.ShowPosnList()
                 break;
             case ProjectEditPageIndex.User:
                 this.ShowUserList()
@@ -620,7 +641,7 @@ class ManageManagerClass {
                     },
                     onEditPosition: (dp: DepartmentSingle, i0: int) => {
                         UrlParam.Set(URL_PARAM_KEY.PAGE, ProjectEditPageIndex.Position).Set(URL_PARAM_KEY.DID, dp.Did).Reset()
-                        this.ShowPositionList()
+                        this.ShowPosnList()
                     },
                     onEditUserList: (dept: DepartmentSingle) => {
                         UrlParam.Set(URL_PARAM_KEY.PAGE, ProjectEditPageIndex.User).Set(URL_PARAM_KEY.FKEY, dept.Name).Reset()
@@ -729,7 +750,7 @@ class ManageManagerClass {
         var opt = {
             draggable: ".list-complete-item",
             handle: ".btn-drag",
-            group: 'dragGroup',
+            group: 'deptDragGroup',
             scorll: true,
             // animation: 150, //动画参数
             // ghostClass: 'sortable-ghostClass',
@@ -779,7 +800,7 @@ class ManageManagerClass {
                 }
                 var toSort: number
                 if (oldIndex < toIndex) {
-                    //从上挪到下,则移动
+                    //从上挪到下
                     toIndex += 1
                     if (toIndex >= brothers.length) {
                         toSort = brothers[brothers.length - 1].Sort + 1
@@ -817,8 +838,7 @@ class ManageManagerClass {
                 WSConn.sendMsg(PB_CMD.MANAGE_DEPT_EDIT_SORT, data)
             },
         }
-        var $listComp = $('.listComp')
-        // console.log("[debug]", $('.listComp'), ":[$('.listComp').length]")
+        var $listComp = $('.deptListComp')
         this.DeptListSortableArr = []
         for (var i = 1; i < $listComp.length; i++) {
             this.DeptListSortableArr.push(Sortable.create($listComp.get(i), opt))
@@ -870,7 +890,7 @@ class ManageManagerClass {
         }
         return true
     }
-    ShowPositionList() {
+    ShowPosnList() {
         this.VueProjectEdit.currPage = ProjectEditPageIndex.Position
         Loader.LoadVueTemplateList([`${this.VuePath}PosnList`, `${this.VuePath}PosnListComp`], (tplList: string[]) => {
             Vue.component(`PosnListComp`, {
@@ -889,7 +909,7 @@ class ManageManagerClass {
                 methods: {
                     OnEnterDept: (toDept: DepartmentSingle) => {
                         UrlParam.Set(URL_PARAM_KEY.DID, toDept.Did).Reset()
-                        this.ShowPositionList()
+                        this.ShowPosnList()
                     },
                     onEditName: (e: Event, dept: DepartmentSingle, posn: PositionSingle, index: number) => {
                         var newName = (e.target as HTMLInputElement).value.trim()
@@ -1033,24 +1053,32 @@ class ManageManagerClass {
                         onBackDepartmentList: () => {
                             this.ShowDepartmentList()
                         },
+                        /**显示子部门的职位 的按钮是否可用*/
+                        EnabledToggleShownDeptChildren: (): boolean => {
+                            if (!currDept) {
+                                return false
+                            }
+                            return currDept.Children.length > 0
+                        },
+                        /**显示子部门的职位 */
                         OnToggleShownDeptChildren: () => {
                             this.UserConfig.ShownDeptChildren = !this.UserConfig.ShownDeptChildren
                         },
                         OnDeptChange: (toDept: DepartmentSingle) => {
                             UrlParam.Set(URL_PARAM_KEY.DID, toDept ? toDept.Did : 0).Reset()
-                            this.ShowPositionList()
+                            this.ShowPosnList()
                         },
                         OnEnterDeptById: (did: number) => {
                             UrlParam.Set(URL_PARAM_KEY.DID, did).Reset()
-                            this.ShowPositionList()
+                            this.ShowPosnList()
                         },
                         OnEnterDept: (toDept: DepartmentSingle) => {
                             UrlParam.Set(URL_PARAM_KEY.DID, toDept ? toDept.Did : 0).Reset()
-                            this.ShowPositionList()
+                            this.ShowPosnList()
                         },
                         onAdd: () => {
                             if (currDept) {
-                                var newName: string = this.VuePositionList.newName.toString().trim()
+                                var newName: string = this.VuePosnList.newName.toString().trim()
                                 if (!newName) {
                                     Common.AlertError(`职位名称 ${newName} 不可以为空`)
                                     return
@@ -1063,18 +1091,71 @@ class ManageManagerClass {
                                     Did: currDept.Did,
                                     Name: newName,
                                 }
-                                this.VuePositionList.newName = ''
+                                this.VuePosnList.newName = ''
                                 WSConn.sendMsg(PB_CMD.MANAGE_POSN_ADD, data)
                             }
                         },
                     },
                 }
             ).$mount()
-            console.log("[debug]", vue.deptTree, ":[vue.deptTree]")
-            this.VuePositionList = vue
+            this.VuePosnList = vue
             //#show
             Common.InsertIntoDom(vue.$el, this.VueProjectEdit.$refs.pageContent)
+            //
+            this.DoPosnListSortabled()
         })
+    }
+    /**设置可以排序 */
+    private PosnListSortableArr: Sortable[]
+    DoPosnListSortabled() {
+        if (this.PosnListSortableArr) {
+            for (var i = 0; i < this.PosnListSortableArr.length; i++) {
+                var item = this.PosnListSortableArr[i]
+                item.destroy()
+            }
+            this.PosnListSortableArr = null;
+        }
+        //#drag Sortable
+        var opt = {
+            draggable: ".list-complete-item",
+            handle: ".btn-drag",
+            scorll: true,
+            // animation: 150, //动画参数
+            // ghostClass: 'sortable-ghostClass',
+            chosenClass: 'sortable-chosenClass',
+            onUpdate: (evt: SortableEvent) => {
+                var dept: DepartmentSingle = this.Data.DeptDict[parseInt($(evt.item).attr(FieldName.Did))]
+                var posnid: number = parseInt($(evt.item).attr(FieldName.Posnid))
+                var oldIndex = evt.oldIndex
+                var toIndex = evt.newIndex
+                var toSort: number
+                if (oldIndex < toIndex) {
+                    //从上挪到下
+                    toIndex += 1
+                    if (toIndex >= dept.PosnList.length) {
+                        toSort = dept.PosnList[dept.PosnList.length - 1].Sort + 1
+                    } else {
+                        toSort = dept.PosnList[toIndex].Sort
+                    }
+                } else {
+                    //从下挪到上
+                    toSort = dept.PosnList[toIndex].Sort
+                }
+                WSConn.sendMsg<C2L_ManagePosnEditSort>(PB_CMD.MANAGE_POSN_EDIT_SORT, {
+                    Posnid: posnid,
+                    Sort: toSort,
+                })
+            },
+        }
+        var $listComp = $('.posnListComp')
+        // console.log("[debug]",$listComp.length,":[listComp.length]")
+        // console.log("[debug]",$listComp)
+        this.PosnListSortableArr = []
+        for (var i = 0; i < $listComp.length; i++) {
+            // console.log("[debug]",i,$listComp.get(i),)
+            // console.log("[debug]",i,$($listComp.get(i)).find('.list-complete-item').length)
+            this.PosnListSortableArr.push(Sortable.create($listComp.get(i), opt))
+        }
     }
     ShowAuthList(posn: PositionSingle) {
         Loader.LoadVueTemplate(this.VuePath + "AuthList", (tpl: string) => {
@@ -1215,7 +1296,7 @@ class ManageManagerClass {
                         },
                         OnBackPosn: () => {
                             UrlParam.Set(URL_PARAM_KEY.PAGE, ProjectEditPageIndex.Position).Set(URL_PARAM_KEY.DID, backDept.Did).Set(URL_PARAM_KEY.FKEY, null).Reset()
-                            this.ShowPositionList()
+                            this.ShowPosnList()
                         },
                         ShowDpName: (did: number): string => {
                             var dp = this.Data.DeptDict[did]

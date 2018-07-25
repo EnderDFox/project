@@ -263,11 +263,7 @@ func (this *Manage) PosnAdd(did uint64, name string) *PositionSingle {
 	posnid := uint64(_posnid)
 	db.CheckErr(err)
 	//
-	posn := &PositionSingle{
-		Did:    did,
-		Posnid: posnid,
-		Name:   name,
-	}
+	posn := this.GetPosnSingle(posnid)
 	//管理部门 加默认权限
 	if this.GetDeptSingle(did).Sort == 0 {
 		authidList := []uint64{AUTH_PROJECT_MANAGE, AUTH_PROJECT_PROCESS, AUTH_COLLATE_EDIT, AUTH_DEPARTMENT_MANAGE, AUTH_DEPARTMENT_PROCESS}
@@ -313,16 +309,16 @@ func (this *Manage) PosnDelByDid(didList ...uint64) int64 {
 	return num
 }
 
-func (this *Manage) PosnEditSort(posnid uint64, did uint64, sort uint32) int64 {
+func (this *Manage) PosnEditSort(posnid uint64, sort uint32) int64 {
 	//直接换就行, 比sort大的值都+1  因为sort不连续也没关系
 	sql := `
 	UPDATE manager.mag_position AS ta, manager.mag_position AS tb
 	SET ta.sort = ?,tb.sort = tb.sort + 1
 	WHERE ta.posnid = ?
-	AND tb.pid=ta.pid AND tb.did=? AND tb.sort >= ? AND tb.posnid <> ? `
+	AND tb.did=ta.did AND tb.sort >= ? AND tb.posnid <> ? `
 	stmt, err := db.GetDb().Prepare(sql)
 	db.CheckErr(err)
-	res, err := stmt.Exec(sort, posnid, did, sort, posnid)
+	res, err := stmt.Exec(sort, posnid, sort, posnid)
 	db.CheckErr(err)
 	num, err := res.RowsAffected()
 	db.CheckErr(err)
@@ -331,7 +327,7 @@ func (this *Manage) PosnEditSort(posnid uint64, did uint64, sort uint32) int64 {
 		sql = `
 		UPDATE manager.mag_position AS ta
 		SET ta.sort = ?
-		WHERE ta.posn = ?`
+		WHERE ta.posnid = ?`
 		stmt, err = db.GetDb().Prepare(sql)
 		db.CheckErr(err)
 		res, err = stmt.Exec(sort, posnid)
@@ -456,6 +452,14 @@ func (this *Manage) GetDeptSingle(did uint64) *DepartmentSingle {
 	db.CheckErr(err)
 	single := &DepartmentSingle{}
 	stmt.QueryRow(did).Scan(&single.Did, &single.Pid, &single.Fid, &single.Name, &single.Sort)
+	return single
+}
+func (this *Manage) GetPosnSingle(posnid uint64) *PositionSingle {
+	stmt, err := db.GetDb().Prepare(`SELECT posnid,did,name,sort FROM ` + config.Mg + `.mag_position WHERE posnid = ?`)
+	defer stmt.Close()
+	db.CheckErr(err)
+	single := &PositionSingle{}
+	stmt.QueryRow(posnid).Scan(&single.Posnid, &single.Did, &single.Name, &single.Sort)
 	return single
 }
 

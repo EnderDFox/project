@@ -134,9 +134,10 @@ interface PositionSingle {
     Posnid?: int
     Did?: DidField
     Name?: string
-    AuthList?: AuthSingle[]
+    Sort?: number,
     AuthidList?: uint64[]
     //client
+    AuthList?: AuthSingle[]
     UserList?: UserSingle[]
 }
 
@@ -488,7 +489,6 @@ interface C2L_ManagePosnEditName {
     Name: string
 }
 interface C2L_ManagePosnEditSort {
-    Did: uint64
     Posnid: uint64
     Sort: uint32 //目标sort
 }
@@ -504,7 +504,7 @@ interface C2L_ManageUserRlatEdit {
 }
 /**Proj删除用户 */
 interface C2L_ManageProjDelUser {
-    Pid :uint64
+    Pid: uint64
     Uid: uint64
 }
 

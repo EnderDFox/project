@@ -226,8 +226,32 @@ var ManageManagerClass = /** @class */ (function () {
         }
     };
     ManageManagerClass.prototype.PB_PosnEditSort = function (data) {
-        var dept = this.Data.DeptDict[data.Did];
-        if (dept) {
+        var _a = this.Data.GetPosnByPosnid(data.Posnid), _ = _a[0], _posn = _a[1];
+        if (_posn) {
+            var dept = this.Data.DeptDict[_posn.Did];
+            if (dept) {
+                for (var i = 0; i < dept.PosnList.length; i++) {
+                    var posn = dept.PosnList[i];
+                    if (posn.Posnid == data.Posnid) {
+                        posn.Sort = data.Sort;
+                    }
+                    else {
+                        if (posn.Sort >= data.Sort) {
+                            posn.Sort += 1;
+                        }
+                    }
+                }
+                //重新排序
+                dept.PosnList.sort(function (a, b) {
+                    if (a.Sort < b.Sort) {
+                        return -1;
+                    }
+                    else if (a.Sort > b.Sort) {
+                        return 1;
+                    }
+                    return 0;
+                });
+            }
         }
     };
     ManageManagerClass.prototype.PB_PosnEditAuth = function (data) {
@@ -514,7 +538,7 @@ var ManageManagerClass = /** @class */ (function () {
                 this.ShowDepartmentList();
                 break;
             case ProjectEditPageIndex.Position:
-                this.ShowPositionList();
+                this.ShowPosnList();
                 break;
             case ProjectEditPageIndex.User:
                 this.ShowUserList();
@@ -624,7 +648,7 @@ var ManageManagerClass = /** @class */ (function () {
                     },
                     onEditPosition: function (dp, i0) {
                         UrlParam.Set(URL_PARAM_KEY.PAGE, ProjectEditPageIndex.Position).Set(URL_PARAM_KEY.DID, dp.Did).Reset();
-                        _this.ShowPositionList();
+                        _this.ShowPosnList();
                     },
                     onEditUserList: function (dept) {
                         UrlParam.Set(URL_PARAM_KEY.PAGE, ProjectEditPageIndex.User).Set(URL_PARAM_KEY.FKEY, dept.Name).Reset();
@@ -729,7 +753,7 @@ var ManageManagerClass = /** @class */ (function () {
         var opt = {
             draggable: ".list-complete-item",
             handle: ".btn-drag",
-            group: 'dragGroup',
+            group: 'deptDragGroup',
             scorll: true,
             // animation: 150, //动画参数
             // ghostClass: 'sortable-ghostClass',
@@ -780,7 +804,7 @@ var ManageManagerClass = /** @class */ (function () {
                 }
                 var toSort;
                 if (oldIndex < toIndex) {
-                    //从上挪到下,则移动
+                    //从上挪到下
                     toIndex += 1;
                     if (toIndex >= brothers.length) {
                         toSort = brothers[brothers.length - 1].Sort + 1;
@@ -820,8 +844,7 @@ var ManageManagerClass = /** @class */ (function () {
                 WSConn.sendMsg(PB_CMD.MANAGE_DEPT_EDIT_SORT, data);
             },
         };
-        var $listComp = $('.listComp');
-        // console.log("[debug]", $('.listComp'), ":[$('.listComp').length]")
+        var $listComp = $('.deptListComp');
         this.DeptListSortableArr = [];
         for (var i = 1; i < $listComp.length; i++) {
             this.DeptListSortableArr.push(Sortable.create($listComp.get(i), opt));
@@ -875,7 +898,7 @@ var ManageManagerClass = /** @class */ (function () {
         }
         return true;
     };
-    ManageManagerClass.prototype.ShowPositionList = function () {
+    ManageManagerClass.prototype.ShowPosnList = function () {
         var _this = this;
         this.VueProjectEdit.currPage = ProjectEditPageIndex.Position;
         Loader.LoadVueTemplateList([this.VuePath + "PosnList", this.VuePath + "PosnListComp"], function (tplList) {
@@ -895,7 +918,7 @@ var ManageManagerClass = /** @class */ (function () {
                 methods: {
                     OnEnterDept: function (toDept) {
                         UrlParam.Set(URL_PARAM_KEY.DID, toDept.Did).Reset();
-                        _this.ShowPositionList();
+                        _this.ShowPosnList();
                     },
                     onEditName: function (e, dept, posn, index) {
                         var newName = e.target.value.trim();
@@ -1042,24 +1065,32 @@ var ManageManagerClass = /** @class */ (function () {
                     onBackDepartmentList: function () {
                         _this.ShowDepartmentList();
                     },
+                    /**显示子部门的职位 的按钮是否可用*/
+                    EnabledToggleShownDeptChildren: function () {
+                        if (!currDept) {
+                            return false;
+                        }
+                        return currDept.Children.length > 0;
+                    },
+                    /**显示子部门的职位 */
                     OnToggleShownDeptChildren: function () {
                         _this.UserConfig.ShownDeptChildren = !_this.UserConfig.ShownDeptChildren;
                     },
                     OnDeptChange: function (toDept) {
                         UrlParam.Set(URL_PARAM_KEY.DID, toDept ? toDept.Did : 0).Reset();
-                        _this.ShowPositionList();
+                        _this.ShowPosnList();
                     },
                     OnEnterDeptById: function (did) {
                         UrlParam.Set(URL_PARAM_KEY.DID, did).Reset();
-                        _this.ShowPositionList();
+                        _this.ShowPosnList();
                     },
                     OnEnterDept: function (toDept) {
                         UrlParam.Set(URL_PARAM_KEY.DID, toDept ? toDept.Did : 0).Reset();
-                        _this.ShowPositionList();
+                        _this.ShowPosnList();
                     },
                     onAdd: function () {
                         if (currDept) {
-                            var newName = _this.VuePositionList.newName.toString().trim();
+                            var newName = _this.VuePosnList.newName.toString().trim();
                             if (!newName) {
                                 Common.AlertError("\u804C\u4F4D\u540D\u79F0 " + newName + " \u4E0D\u53EF\u4EE5\u4E3A\u7A7A");
                                 return;
@@ -1072,17 +1103,71 @@ var ManageManagerClass = /** @class */ (function () {
                                 Did: currDept.Did,
                                 Name: newName,
                             };
-                            _this.VuePositionList.newName = '';
+                            _this.VuePosnList.newName = '';
                             WSConn.sendMsg(PB_CMD.MANAGE_POSN_ADD, data);
                         }
                     },
                 },
             }).$mount();
-            console.log("[debug]", vue.deptTree, ":[vue.deptTree]");
-            _this.VuePositionList = vue;
+            _this.VuePosnList = vue;
             //#show
             Common.InsertIntoDom(vue.$el, _this.VueProjectEdit.$refs.pageContent);
+            //
+            _this.DoPosnListSortabled();
         });
+    };
+    ManageManagerClass.prototype.DoPosnListSortabled = function () {
+        var _this = this;
+        if (this.PosnListSortableArr) {
+            for (var i = 0; i < this.PosnListSortableArr.length; i++) {
+                var item = this.PosnListSortableArr[i];
+                item.destroy();
+            }
+            this.PosnListSortableArr = null;
+        }
+        //#drag Sortable
+        var opt = {
+            draggable: ".list-complete-item",
+            handle: ".btn-drag",
+            scorll: true,
+            // animation: 150, //动画参数
+            // ghostClass: 'sortable-ghostClass',
+            chosenClass: 'sortable-chosenClass',
+            onUpdate: function (evt) {
+                var dept = _this.Data.DeptDict[parseInt($(evt.item).attr(FieldName.Did))];
+                var posnid = parseInt($(evt.item).attr(FieldName.Posnid));
+                var oldIndex = evt.oldIndex;
+                var toIndex = evt.newIndex;
+                var toSort;
+                if (oldIndex < toIndex) {
+                    //从上挪到下
+                    toIndex += 1;
+                    if (toIndex >= dept.PosnList.length) {
+                        toSort = dept.PosnList[dept.PosnList.length - 1].Sort + 1;
+                    }
+                    else {
+                        toSort = dept.PosnList[toIndex].Sort;
+                    }
+                }
+                else {
+                    //从下挪到上
+                    toSort = dept.PosnList[toIndex].Sort;
+                }
+                WSConn.sendMsg(PB_CMD.MANAGE_POSN_EDIT_SORT, {
+                    Posnid: posnid,
+                    Sort: toSort,
+                });
+            },
+        };
+        var $listComp = $('.posnListComp');
+        // console.log("[debug]",$listComp.length,":[listComp.length]")
+        // console.log("[debug]",$listComp)
+        this.PosnListSortableArr = [];
+        for (var i = 0; i < $listComp.length; i++) {
+            // console.log("[debug]",i,$listComp.get(i),)
+            // console.log("[debug]",i,$($listComp.get(i)).find('.list-complete-item').length)
+            this.PosnListSortableArr.push(Sortable.create($listComp.get(i), opt));
+        }
     };
     ManageManagerClass.prototype.ShowAuthList = function (posn) {
         var _this = this;
@@ -1231,7 +1316,7 @@ var ManageManagerClass = /** @class */ (function () {
                     },
                     OnBackPosn: function () {
                         UrlParam.Set(URL_PARAM_KEY.PAGE, ProjectEditPageIndex.Position).Set(URL_PARAM_KEY.DID, backDept.Did).Set(URL_PARAM_KEY.FKEY, null).Reset();
-                        _this.ShowPositionList();
+                        _this.ShowPosnList();
                     },
                     ShowDpName: function (did) {
                         var dp = _this.Data.DeptDict[did];
