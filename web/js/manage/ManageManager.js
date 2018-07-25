@@ -977,8 +977,7 @@ var ManageManagerClass = /** @class */ (function () {
                         });
                     },
                     onEditUserList: function (dept, posn) {
-                        UrlParam.Set(URL_PARAM_KEY.PAGE, ProjectEditPageIndex.User).Set(URL_PARAM_KEY.FKEY, posn.Name).Reset();
-                        _this.ShowUserList(dept, posn);
+                        _this.ShowSelectUserForPosn(posn);
                     },
                     CheckSortUp: function (dept, posn, index) {
                         return index > 0;
@@ -1449,7 +1448,7 @@ var ManageManagerClass = /** @class */ (function () {
                         }, "\u5373\u5C06\u5220\u9664\u6210\u5458 \"" + user.Name + "\"");
                     },
                     onAddSelect: function () {
-                        _this.ShowSelectUser(proj, ArrayUtil.SubByAttr(_this.Data.UserList, proj.UserList, FieldName.Uid));
+                        _this.ShowSelectUserForProj(proj, ArrayUtil.SubByAttr(_this.Data.UserList, proj.UserList, FieldName.Uid));
                     },
                 },
             }).$mount();
@@ -1458,8 +1457,8 @@ var ManageManagerClass = /** @class */ (function () {
             Common.InsertIntoDom(vue.$el, _this.VueProjectEdit.$refs.pageContent);
         });
     };
-    /**选择 用户 */
-    ManageManagerClass.prototype.ShowSelectUser = function (proj, userList) {
+    /**为proj选择 用户 */
+    ManageManagerClass.prototype.ShowSelectUserForProj = function (proj, userList) {
         var _this = this;
         if (userList.length == 0) {
             Common.AlertWarning('所有用户都已经被添加到了这个项目中');
@@ -1535,6 +1534,133 @@ var ManageManagerClass = /** @class */ (function () {
                                     Pid: proj.Pid,
                                     Did: 0,
                                     Posnid: 0,
+                                };
+                                rlatList.push(rlat);
+                            }
+                        }
+                        WSConn.sendMsg(PB_CMD.MANAGE_USER_RLAT_EDIT, {
+                            RlatList: rlatList
+                        });
+                        //
+                        $(_this.VueSelectUser.$el).remove();
+                        _this.VueSelectUser = null;
+                    }
+                },
+            }).$mount();
+            _this.VueSelectUser = vue;
+            // $(vue.$el).alert('close');
+            Common.Popup($(vue.$el));
+        });
+    };
+    /* 为posn选择用户 */
+    ManageManagerClass.prototype.ShowSelectUserForPosn = function (posn) {
+        var _this = this;
+        var userList = this.Data.CurrProj.UserList.filter(function (user) {
+            if (user.Posnid == 0 || user.Posnid == posn.Posnid) {
+                return true;
+            }
+            return false;
+        });
+        if (userList.length == 0) {
+            Common.ConfirmWarning("\u9879\u76EE\u4E2D\u8FD8\u6CA1\u6709\u6210\u5458, \u662F\u5426\u53BB \"\u6210\u5458\u9875\u9762\" \u6DFB\u52A0\u6210\u5458", null, function () {
+                UrlParam.Set(URL_PARAM_KEY.PAGE, ProjectEditPageIndex.User).Reset();
+                _this.ShowUserList();
+            });
+            return;
+        }
+        Loader.LoadVueTemplate(this.VuePath + "SelectUser", function (tpl) {
+            var checkedDict = {};
+            //初始化check字典
+            for (var i = 0; i < posn.UserList.length; i++) {
+                var _user = posn.UserList[i];
+                checkedDict[_user.Uid] = _user;
+            }
+            //
+            var _GetFilterList = function (userList, filterText) {
+                var _filterText = filterText.toString().toLowerCase().trim();
+                if (_filterText) {
+                    var _filterTextSp = _filterText.split(/[\s\,]/g);
+                    return userList.filter(function (user) {
+                        if (checkedDict[user.Uid]) { //已经选中的默认显示
+                            return true;
+                        }
+                        return StringUtil.IndexOfKeyArr(user.Name.toLowerCase(), _filterTextSp) > -1;
+                    });
+                }
+                else {
+                    return userList;
+                }
+            };
+            var vue = new Vue({
+                template: tpl,
+                data: {
+                    auth: _this.Data.MyAuth,
+                    userList: userList,
+                    filterText: '',
+                    checkedChange: false,
+                },
+                methods: {
+                    GetFilterList: _GetFilterList.bind(_this),
+                    checkChecked: function (_, user) {
+                        return checkedDict[user.Uid] != null;
+                    },
+                    onChangeChecked: function (user) {
+                        if (checkedDict[user.Uid]) {
+                            delete checkedDict[user.Uid];
+                        }
+                        else {
+                            checkedDict[user.Uid] = user;
+                        }
+                        _this.VueSelectUser.checkedChange = !_this.VueSelectUser.checkedChange;
+                    },
+                    isCheckedAll: function () {
+                        return false;
+                    },
+                    OnCheckedAll: function () {
+                        var _userList = _GetFilterList(userList, _this.VueSelectUser.filterText);
+                        var isAllCheck = true;
+                        for (var i = 0; i < _userList.length; i++) {
+                            var user = _userList[i];
+                            if (!checkedDict[user.Uid]) {
+                                isAllCheck = false;
+                                break;
+                            }
+                        }
+                        for (var i = 0; i < _userList.length; i++) {
+                            var user = _userList[i];
+                            if (isAllCheck) {
+                                delete checkedDict[user.Uid];
+                            }
+                            else {
+                                checkedDict[user.Uid] = user;
+                            }
+                        }
+                        _this.VueSelectUser.checkedChange = !_this.VueSelectUser.checkedChange;
+                    },
+                    onOk: function () {
+                        var rlatList = [];
+                        for (var i = 0; i < posn.UserList.length; i++) {
+                            var _user = posn.UserList[i];
+                            if (!checkedDict[_user.Uid]) {
+                                //以前在,现在不在列表中了
+                                var rlat = {
+                                    Uid: _user.Uid,
+                                    Pid: _this.Data.CurrProj.Pid,
+                                    Did: 0,
+                                    Posnid: 0,
+                                };
+                                rlatList.push(rlat);
+                            }
+                        }
+                        for (var uidStr in checkedDict) {
+                            var _uid = parseInt(uidStr);
+                            if (posn.UserList.IndexOfByKey(FieldName.Uid, _uid) == -1) {
+                                //原本不在,现在加进来
+                                var rlat = {
+                                    Uid: _uid,
+                                    Pid: _this.Data.CurrProj.Pid,
+                                    Did: posn.Did,
+                                    Posnid: posn.Posnid,
                                 };
                                 rlatList.push(rlat);
                             }

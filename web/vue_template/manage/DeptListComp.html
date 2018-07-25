@@ -22,12 +22,15 @@
                     </span>
                 </button>
             </div>
-            <div class="~text-center text-middle">
-                <button class="btn btn-default " type="button" @click="onEditUserList(dp,index)" :title="'该部门及其子部门共有'+GetDeptAllUserList(dp).length+'名成员'">
+            <div class="text-middle">
+                <!-- <button class="btn btn-default " type="button" @click="onEditUserList(dp,index)" :title="'该部门及其子部门共有'+GetDeptAllUserList(dp).length+'名成员'">
                     <span class="glyphicon glyphicon-user" aria-hidden="true ">
                         {{GetDeptAllUserList(dp).length}}
                     </span>
-                </button>
+                </button> -->
+                <span :title="'该部门及其子部门共有'+GetDeptAllUserList(dp).length+'名成员'">
+                    {{GetDeptAllUserList(dp).length}}
+                </span>
             </div>
             <!-- sort -->
             <div>

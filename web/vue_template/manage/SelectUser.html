@@ -15,7 +15,8 @@
     <div class="navbar-form">
         <div class="checkbox" style="margin: 10px;">
             <label>
-                <input type="checkbox" @click="OnCheckedAll()" /> 全选
+                <button type="button"  class="btn btn-sm" @click="OnCheckedAll()"> 全选</button>
+                <!-- <input type="checkbox" :checked="isCheckedAll(checkedChange)" @click="OnCheckedAll()" /> 全选 -->
             </label>
         </div>
     </div>

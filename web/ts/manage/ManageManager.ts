@@ -968,8 +968,7 @@ class ManageManagerClass {
                         })
                     },
                     onEditUserList: (dept: DepartmentSingle, posn: PositionSingle) => {
-                        UrlParam.Set(URL_PARAM_KEY.PAGE, ProjectEditPageIndex.User).Set(URL_PARAM_KEY.FKEY, posn.Name).Reset()
-                        this.ShowUserList(dept, posn)
+                        this.ShowSelectUserForPosn(posn)
                     },
                     CheckSortUp: (dept: DepartmentSingle, posn: PositionSingle, index: int) => {
                         return index > 0
@@ -1426,7 +1425,7 @@ class ManageManagerClass {
                             }, `即将删除成员 "${user.Name}"`)
                         },
                         onAddSelect: () => {
-                            this.ShowSelectUser(proj, ArrayUtil.SubByAttr(this.Data.UserList, proj.UserList, FieldName.Uid))
+                            this.ShowSelectUserForProj(proj, ArrayUtil.SubByAttr(this.Data.UserList, proj.UserList, FieldName.Uid))
                         },
                     },
                 }
@@ -1436,8 +1435,8 @@ class ManageManagerClass {
             Common.InsertIntoDom(vue.$el, this.VueProjectEdit.$refs.pageContent)
         })
     }
-    /**选择 用户 */
-    ShowSelectUser(proj: ProjectSingle, userList: UserSingle[]) {
+    /**为proj选择 用户 */
+    ShowSelectUserForProj(proj: ProjectSingle, userList: UserSingle[]) {
         if (userList.length == 0) {
             Common.AlertWarning('所有用户都已经被添加到了这个项目中')
             return
@@ -1509,6 +1508,129 @@ class ManageManagerClass {
                                     Pid: proj.Pid,
                                     Did: 0,
                                     Posnid: 0,
+                                }
+                                rlatList.push(rlat)
+                            }
+                        }
+                        WSConn.sendMsg<C2L_ManageUserRlatEdit>(PB_CMD.MANAGE_USER_RLAT_EDIT, {
+                            RlatList: rlatList
+                        })
+                        //
+                        $(this.VueSelectUser.$el).remove()
+                        this.VueSelectUser = null
+                    }
+                },
+            }).$mount()
+            this.VueSelectUser = vue
+            // $(vue.$el).alert('close');
+            Common.Popup($(vue.$el))
+        })
+    }
+    /* 为posn选择用户 */
+    ShowSelectUserForPosn(posn: PositionSingle) {
+        var userList = this.Data.CurrProj.UserList.filter((user: UserSingle): boolean => {
+            if (user.Posnid == 0 || user.Posnid == posn.Posnid) {
+                return true
+            }
+            return false
+        })
+        if (userList.length == 0) {
+            Common.ConfirmWarning(`项目中还没有成员, 是否去 "成员页面" 添加成员`, null, () => {
+                UrlParam.Set(URL_PARAM_KEY.PAGE, ProjectEditPageIndex.User).Reset()
+                this.ShowUserList()
+            })
+            return
+        }
+        Loader.LoadVueTemplate(this.VuePath + "SelectUser", (tpl: string) => {
+            var checkedDict: { [key: number]: UserSingle } = {};
+            //初始化check字典
+            for (var i = 0; i < posn.UserList.length; i++) {
+                var _user = posn.UserList[i]
+                checkedDict[_user.Uid] = _user
+            }
+            //
+            var _GetFilterList = (userList: UserSingle[], filterText: string): UserSingle[] => {
+                var _filterText = filterText.toString().toLowerCase().trim()
+                if (_filterText) {
+                    var _filterTextSp = _filterText.split(/[\s\,]/g)
+                    return userList.filter((user: UserSingle) => {
+                        if (checkedDict[user.Uid]) {//已经选中的默认显示
+                            return true
+                        }
+                        return StringUtil.IndexOfKeyArr(user.Name.toLowerCase(), _filterTextSp) > -1
+                    })
+                } else {
+                    return userList
+                }
+            }
+            var vue = new Vue({
+                template: tpl,
+                data: {
+                    auth: this.Data.MyAuth,
+                    userList: userList,
+                    filterText: '',
+                    checkedChange: false,//为了让check函数被触发,
+                },
+                methods: {
+                    GetFilterList: _GetFilterList.bind(this),
+                    checkChecked: (_, user: UserSingle) => {
+                        return checkedDict[user.Uid] != null
+                    },
+                    onChangeChecked: (user: UserSingle) => {
+                        if (checkedDict[user.Uid]) {
+                            delete checkedDict[user.Uid]
+                        } else {
+                            checkedDict[user.Uid] = user
+                        }
+                        this.VueSelectUser.checkedChange = !this.VueSelectUser.checkedChange
+                    },
+                    isCheckedAll:()=>{
+                        return false
+                    },
+                    OnCheckedAll: () => {
+                        var _userList: UserSingle[] = _GetFilterList(userList, this.VueSelectUser.filterText)
+                        var isAllCheck: boolean = true
+                        for (var i = 0; i < _userList.length; i++) {
+                            var user: UserSingle = _userList[i]
+                            if (!checkedDict[user.Uid]) {
+                                isAllCheck = false
+                                break;
+                            }
+                        }
+                        for (var i = 0; i < _userList.length; i++) {
+                            var user: UserSingle = _userList[i]
+                            if (isAllCheck) {
+                                delete checkedDict[user.Uid]
+                            } else {
+                                checkedDict[user.Uid] = user
+                            }
+                        }
+                        this.VueSelectUser.checkedChange = !this.VueSelectUser.checkedChange
+                    },
+                    onOk: () => {
+                        var rlatList: UserRlatSingle[] = []
+                        for (var i = 0; i < posn.UserList.length; i++) {
+                            var _user = posn.UserList[i]
+                            if (!checkedDict[_user.Uid]) {
+                                //以前在,现在不在列表中了
+                                var rlat: UserRlatSingle = {
+                                    Uid: _user.Uid,
+                                    Pid: this.Data.CurrProj.Pid,
+                                    Did: 0,
+                                    Posnid: 0,
+                                }
+                                rlatList.push(rlat)
+                            }
+                        }
+                        for (var uidStr in checkedDict) {
+                            var _uid = parseInt(uidStr)
+                            if (posn.UserList.IndexOfByKey(FieldName.Uid, _uid) == -1) {
+                                //原本不在,现在加进来
+                                var rlat: UserRlatSingle = {
+                                    Uid: _uid,
+                                    Pid: this.Data.CurrProj.Pid,
+                                    Did: posn.Did,
+                                    Posnid: posn.Posnid,
                                 }
                                 rlatList.push(rlat)
                             }

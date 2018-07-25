@@ -94,13 +94,16 @@ fieldset[disabled] .btn {
     /* outline: solid 1px #00FF00; */
 }
 
+/* 职位 */
 .DeptList-row>div:nth-child(3) {
     width: 100px;
 }
-
+/* 成员 */
 .DeptList-row>div:nth-child(4) {
     width: 100px;
+    text-align: center;
 }
+/* 排序 */
 .DeptList-row>div:nth-child(5) {
     width: 80px;
 }
