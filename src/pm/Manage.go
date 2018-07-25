@@ -226,8 +226,6 @@ func (this *Manage) DeptEditSort(did uint64, fid uint64, sort uint32) int64 {
 	SET ta.fid=?, ta.sort = ?,tb.sort = tb.sort + 1
 	WHERE ta.did = ?
 	AND tb.pid=ta.pid AND tb.fid=? AND tb.sort >= ? AND tb.did <> ? `
-	// log.Println("[log]", sort, fid, did, fid, did, sort)
-	// log.Println("[log]", sql, ":[sql]")
 	stmt, err := db.GetDb().Prepare(sql)
 	db.CheckErr(err)
 	res, err := stmt.Exec(fid, sort, did, fid, sort, did)
@@ -235,13 +233,11 @@ func (this *Manage) DeptEditSort(did uint64, fid uint64, sort uint32) int64 {
 	num, err := res.RowsAffected()
 	db.CheckErr(err)
 	if num == 0 {
-		//放到最后会导致上面的代码无法生效,因为tb没有符合条件的,需要用另一个中简单的修改方法
+		//放到最后sort时, 因为tb没有符合条件的,会导致上面的代码无法生效,需要用另一个简单的修改方法
 		sql = `
 		UPDATE manager.mag_department AS ta
 		SET ta.fid=?, ta.sort = ?
 		WHERE ta.did = ?`
-		// log.Println("[log]", sort, fid, did, fid, did, sort)
-		// log.Println("[log]", sql, ":[sql]")
 		stmt, err = db.GetDb().Prepare(sql)
 		db.CheckErr(err)
 		res, err = stmt.Exec(fid, sort, did)
@@ -249,7 +245,6 @@ func (this *Manage) DeptEditSort(did uint64, fid uint64, sort uint32) int64 {
 		num, err = res.RowsAffected()
 		db.CheckErr(err)
 	}
-	// log.Println("[log]", num, ":[num]")
 	return num
 }
 
@@ -273,21 +268,35 @@ func (this *Manage) PosnAdd(did uint64, name string) *PositionSingle {
 		Posnid: posnid,
 		Name:   name,
 	}
-	//加默认权限
+	//管理部门 加默认权限
 	if this.GetDeptSingle(did).Sort == 0 {
 		authidList := []uint64{AUTH_PROJECT_MANAGE, AUTH_PROJECT_PROCESS, AUTH_COLLATE_EDIT, AUTH_DEPARTMENT_MANAGE, AUTH_DEPARTMENT_PROCESS}
-		this.PosnEditAuth(posn.Posnid, authidList...)
+		this.PosnEditAuth(false, posn.Posnid, authidList...)
 		posn.AuthidList = append(posn.AuthidList, authidList...)
 	}
 	return posn
 }
 
 func (this *Manage) PosnDel(posnid uint64) int64 {
-	return 0
+	stmt, err := db.GetDb().Prepare(`UPDATE ` + config.Mg + `.mag_position SET is_del=1 WHERE posnid=?`)
+	defer stmt.Close()
+	db.CheckErr(err)
+	res, err := stmt.Exec(posnid)
+	db.CheckErr(err)
+	num, err := res.RowsAffected()
+	db.CheckErr(err)
+	return num
 }
 
 func (this *Manage) PosnEditName(posnid uint64, name string) int64 {
-	return 0
+	stmt, err := db.GetDb().Prepare(`UPDATE ` + config.Mg + `.mag_position SET name=? WHERE posnid=?`)
+	defer stmt.Close()
+	db.CheckErr(err)
+	res, err := stmt.Exec(name, posnid)
+	db.CheckErr(err)
+	num, err := res.RowsAffected()
+	db.CheckErr(err)
+	return num
 }
 
 func (this *Manage) PosnDelByDid(didList ...uint64) int64 {
@@ -304,20 +313,53 @@ func (this *Manage) PosnDelByDid(didList ...uint64) int64 {
 	return num
 }
 
-func (this *Manage) PosnEditSort(posnid uint64, sort uint32) int64 {
-	return 0
+func (this *Manage) PosnEditSort(posnid uint64, did uint64, sort uint32) int64 {
+	//直接换就行, 比sort大的值都+1  因为sort不连续也没关系
+	sql := `
+	UPDATE manager.mag_position AS ta, manager.mag_position AS tb
+	SET ta.sort = ?,tb.sort = tb.sort + 1
+	WHERE ta.posnid = ?
+	AND tb.pid=ta.pid AND tb.did=? AND tb.sort >= ? AND tb.posnid <> ? `
+	stmt, err := db.GetDb().Prepare(sql)
+	db.CheckErr(err)
+	res, err := stmt.Exec(sort, posnid, did, sort, posnid)
+	db.CheckErr(err)
+	num, err := res.RowsAffected()
+	db.CheckErr(err)
+	if num == 0 {
+		//放到最后sort时, 因为tb没有符合条件的,会导致上面的代码无法生效,需要用另一个简单的修改方法
+		sql = `
+		UPDATE manager.mag_position AS ta
+		SET ta.sort = ?
+		WHERE ta.posn = ?`
+		stmt, err = db.GetDb().Prepare(sql)
+		db.CheckErr(err)
+		res, err = stmt.Exec(sort, posnid)
+		db.CheckErr(err)
+		num, err = res.RowsAffected()
+		db.CheckErr(err)
+	}
+	return num
 }
 
-/**增加或设置权限*/
-func (this *Manage) PosnEditAuth(posnid uint64, authidList ...uint64) []*PosnAuthSingle {
+/**增加或设置权限
+firstAdd 是否初次添加
+*/
+func (this *Manage) PosnEditAuth(removeOld bool, posnid uint64, authidList ...uint64) []*PosnAuthSingle {
 	var list []*PosnAuthSingle
+	//先删除旧的
+	if removeOld {
+		stmt, err := db.GetDb().Prepare(`DELETE FROM ` + config.Mg + `.mag_posn_auth WHERE posnid = ?`)
+		defer stmt.Close()
+		db.CheckErr(err)
+		_, err = stmt.Exec(posnid)
+		db.CheckErr(err)
+	}
 	for _, authid := range authidList {
 		stmt, err := db.GetDb().Prepare(`REPLACE INTO ` + config.Mg + `.mag_posn_auth (posnid,authid) VALUES (?,?)`)
 		defer stmt.Close()
 		db.CheckErr(err)
-		res, err := stmt.Exec(posnid, authid)
-		db.CheckErr(err)
-		_, err = res.RowsAffected()
+		_, err = stmt.Exec(posnid, authid)
 		db.CheckErr(err)
 		single := &PosnAuthSingle{
 			Posnid: posnid,

@@ -254,7 +254,7 @@ func (this *C2L_M_MANAGE_POSN_EDIT_SORT) execute(client *websocket.Conn, msg *Me
 	if user == nil {
 		return false
 	}
-	user.Manage().PosnEditSort(param.Posnid, param.Sort)
+	user.Manage().PosnEditSort(param.Did, param.Posnid, param.Sort)
 	user.SendToAll(PB_CMD_MANAGE_POSN_EDIT_SORT, param)
 	return true
 }
@@ -271,7 +271,7 @@ func (this *C2L_M_MANAGE_POSN_EDIT_AUTH) execute(client *websocket.Conn, msg *Me
 	if user == nil {
 		return false
 	}
-	user.Manage().PosnEditAuth(param.Posnid, param.AuthidList...)
+	user.Manage().PosnEditAuth(true, param.Posnid, param.AuthidList...)
 	user.SendToAll(PB_CMD_MANAGE_POSN_EDIT_AUTH, param)
 	return true
 }

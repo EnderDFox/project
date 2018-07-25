@@ -339,6 +339,7 @@ type C2L_ManagePosnEditName struct {
 	Name   string
 }
 type C2L_ManagePosnEditSort struct {
+	Did    uint64
 	Posnid uint64
 	Sort   uint32 //目标sort
 }
