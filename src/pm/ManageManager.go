@@ -32,8 +32,19 @@ func (this *ManageManager) RegisterFunction() {
 	command.Register(PB_CMD_MANAGE_POSN_EDIT_SORT, &C2L_M_MANAGE_POSN_EDIT_SORT{})
 	command.Register(PB_CMD_MANAGE_POSN_EDIT_AUTH, &C2L_M_MANAGE_POSN_EDIT_AUTH{})
 	//#
-	command.Register(PB_CMD_MANAGE_USER_RLAT_EDIT, &C2L_M_MANAGE_USER_RLAT_EDIT{})
+	command.Register(PB_CMD_MANAGE_USER_EDIT_DEPT, &C2L_M_MANAGE_USER_EDIT_DEPT{})
 	command.Register(PB_CMD_MANAGE_PROJ_DEL_USER, &C2L_M_MANAGE_PROJ_DEL_USER{})
+	// command.Register(PB_CMD_MANAGE_USER_EDIT_SORT, &C2L_M_MANAGE_USER_EDIT_SORT{})
+	// command.Register(PB_CMD_MANAGE_USER_EDIT_AUTH_GROUP, &C2L_M_MANAGE_USER_EDIT_SORT{})
+	//#
+	/*
+		command.Register(PB_CMD_MANAGE_AUTH_GROUP_ADD, &C2L_M_MANAGE_AUTH_GROUP_ADD{})
+		command.Register(PB_CMD_MANAGE_AUTH_GROUP_DEL, &C2L_M_MANAGE_AUTH_GROUP_DEL{})
+		command.Register(PB_CMD_MANAGE_AUTH_GROUP_EDIT_NAME, &C2L_M_MANAGE_AUTH_GROUP_EDIT_NAME{})
+		command.Register(PB_CMD_MANAGE_AUTH_GROUP_EDIT_DSC, &C2L_M_MANAGE_AUTH_GROUP_EDIT_DSC{})
+		command.Register(PB_CMD_MANAGE_AUTH_GROUP_EDIT_SORT, &C2L_M_MANAGE_AUTH_GROUP_EDIT_SORT{})
+		command.Register(PB_CMD_MANAGE_AUTH_GROUP_EDIT_AUTH, &C2L_M_MANAGE_AUTH_GROUP_EDIT_AUTH{})
+	*/
 }
 
 //
@@ -280,10 +291,10 @@ func (this *C2L_M_MANAGE_POSN_EDIT_AUTH) execute(client *websocket.Conn, msg *Me
 	return true
 }
 
-type C2L_M_MANAGE_USER_RLAT_EDIT struct{}
+type C2L_M_MANAGE_USER_EDIT_DEPT struct{}
 
-func (this *C2L_M_MANAGE_USER_RLAT_EDIT) execute(client *websocket.Conn, msg *Message) bool {
-	param := &C2L_ManageUserRlatEdit{}
+func (this *C2L_M_MANAGE_USER_EDIT_DEPT) execute(client *websocket.Conn, msg *Message) bool {
+	param := &C2L_ManageUserEditDept{}
 	err := json.Unmarshal([]byte(msg.Param), param)
 	if err != nil {
 		return false
@@ -292,8 +303,8 @@ func (this *C2L_M_MANAGE_USER_RLAT_EDIT) execute(client *websocket.Conn, msg *Me
 	if user == nil {
 		return false
 	}
-	user.Manage().UserRlatEdit(param.RlatList...)
-	user.SendToAll(PB_CMD_MANAGE_USER_RLAT_EDIT, param)
+	user.Manage().UserEditDept(param.UserDeptList...)
+	user.SendToAll(PB_CMD_MANAGE_USER_EDIT_DEPT, param)
 	return true
 }
 

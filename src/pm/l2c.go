@@ -253,5 +253,5 @@ type L2C_ManageView struct {
 	ProjList     []*ProjectSingle
 	DeptList     []*DepartmentSingle
 	PosnList     []*PositionSingle
-	UserRlatList []*UserRlatSingle
+	UserDeptList []*UserDeptSingle
 }

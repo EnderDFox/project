@@ -141,7 +141,7 @@ interface PositionSingle {
     UserList?: UserSingle[]
 }
 
-interface UserRlatSingle {
+interface UserDeptSingle {
     Uid: uint64
     Pid: uint64
     Did: uint64
@@ -439,7 +439,7 @@ interface L2C_ManageView {
     ProjList?: ProjectSingle[]
     DeptList?: DepartmentSingle[]
     PosnList?: PositionSingle[]
-    UserRlatList?: UserRlatSingle[]
+    UserDeptList?: UserDeptSingle[]
 }
 
 interface C2L_ManageProjAdd {
@@ -499,8 +499,8 @@ interface C2L_ManagePosnEditAuth {
 
 //#user
 /**工程 增加用户  用户修改部门职位都用这个 */
-interface C2L_ManageUserRlatEdit {
-    RlatList: UserRlatSingle[]
+interface C2L_ManageUserEditDept {
+    UserDeptList: UserDeptSingle[]
 }
 /**Proj删除用户 */
 interface C2L_ManageProjDelUser {

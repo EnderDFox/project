@@ -99,7 +99,7 @@ func (this *Manage) View() *L2C_ManageView {
 		ProjList:     projList,
 		DeptList:     deptList,
 		PosnList:     posnList,
-		UserRlatList: this.GetUserReltList(pidList...),
+		UserDeptList: this.GetUserDeptList(pidList...),
 	}
 	return data
 }
@@ -114,14 +114,29 @@ func (this *Manage) ProjAdd(name string) *ProjectSingle {
 	_pid, err := res.LastInsertId()
 	pid := uint64(_pid)
 	db.CheckErr(err)
-	//
-	dept := this.DeptAdd(pid, 0, `管理部`)
+	//## 加默认职位
+	// dept := this.DeptAdd(pid, 0, `管理部`)
+	//## 加默认权限组
+	//### 项目管理员
+	var authGroupSingle *AuthGroupSingle
+	authGroupSingle = this.AuthGroupAdd(pid, `项目管理员`, `可以管理该项目全部功能`)
+	//加默认权限
+	authidList := []uint64{AUTH_PROJECT_MANAGE, AUTH_PROJECT_PROCESS, AUTH_COLLATE_EDIT, AUTH_DEPARTMENT_MANAGE, AUTH_DEPARTMENT_PROCESS}
+	this.AuthGroupEditAuth(false, authGroupSingle.Agid, authidList...)
+	authGroupSingle.AuthidList = append(authGroupSingle.AuthidList, authidList...)
+	//### 部门管理员
+	authGroupSingle = this.AuthGroupAdd(pid, `部门管理员`, `可以管理所属部门全部功能`)
+	//加默认权限
+	authidList = []uint64{AUTH_DEPARTMENT_MANAGE, AUTH_DEPARTMENT_PROCESS}
+	this.AuthGroupEditAuth(false, authGroupSingle.Agid, authidList...)
+	authGroupSingle.AuthidList = append(authGroupSingle.AuthidList, authidList...)
+	//##
 	//#
 	proj := &ProjectSingle{
 		Pid:        pid,
 		Name:       name,
 		CreateTime: uint32(createTime),
-		DeptTree:   []*DepartmentSingle{dept},
+		// DeptTree:   []*DepartmentSingle{dept},
 	}
 	return proj
 }
@@ -165,25 +180,26 @@ func (this *Manage) DeptAdd(pid uint64, fid uint64, name string) *DepartmentSing
 	db.CheckErr(err)
 	//# 重新读取出 sort
 	dept := this.GetDeptSingle(did)
-	var posnList []*PositionSingle
-	var posn *PositionSingle
-	if dept.Sort == 0 {
-		//管理部 需要增加 三个默认职位
-		posn = this.PosnAdd(did, `制作人`)
-		posnList = append(posnList, posn)
-		//
-		posn = this.PosnAdd(did, `PM`)
-		posnList = append(posnList, posn)
-		//
-		posn = this.PosnAdd(did, `管理员`)
-		posnList = append(posnList, posn)
-	} else {
-		//其它部门 增加一个和部门同名的职位
-		posn = this.PosnAdd(did, name)
-		posnList = append(posnList, posn)
-	}
-	//#
-	dept.PosnList = posnList
+	/*
+		var posnList []*PositionSingle
+		var posn *PositionSingle
+		if dept.Sort == 0 {
+			//管理部 需要增加 三个默认职位
+			posn = this.PosnAdd(did, `制作人`)
+			posnList = append(posnList, posn)
+			//
+			posn = this.PosnAdd(did, `PM`)
+			posnList = append(posnList, posn)
+			//
+			posn = this.PosnAdd(did, `管理员`)
+			posnList = append(posnList, posn)
+		} else {
+			//其它部门 增加一个和部门同名的职位
+			posn = this.PosnAdd(did, name)
+			posnList = append(posnList, posn)
+		}
+		dept.PosnList = posnList
+	*/
 	return dept
 }
 
@@ -285,17 +301,6 @@ func (this *Manage) PosnDel(posnid uint64) int64 {
 	return num
 }
 
-func (this *Manage) PosnEditName(posnid uint64, name string) int64 {
-	stmt, err := db.GetDb().Prepare(`UPDATE ` + config.Mg + `.mag_position SET name=? WHERE posnid=?`)
-	defer stmt.Close()
-	db.CheckErr(err)
-	res, err := stmt.Exec(name, posnid)
-	db.CheckErr(err)
-	num, err := res.RowsAffected()
-	db.CheckErr(err)
-	return num
-}
-
 func (this *Manage) PosnDelByDid(didList ...uint64) int64 {
 	var didStrList []string
 	for _, did := range didList {
@@ -304,6 +309,17 @@ func (this *Manage) PosnDelByDid(didList ...uint64) int64 {
 	stmt, err := db.GetDb().Prepare(`UPDATE ` + config.Mg + `.mag_position SET is_del = 1 WHERE did IN (` + strings.Join(didStrList, `,`) + `)`)
 	db.CheckErr(err)
 	res, err := stmt.Exec()
+	db.CheckErr(err)
+	num, err := res.RowsAffected()
+	db.CheckErr(err)
+	return num
+}
+
+func (this *Manage) PosnEditName(posnid uint64, name string) int64 {
+	stmt, err := db.GetDb().Prepare(`UPDATE ` + config.Mg + `.mag_position SET name=? WHERE posnid=?`)
+	defer stmt.Close()
+	db.CheckErr(err)
+	res, err := stmt.Exec(name, posnid)
 	db.CheckErr(err)
 	num, err := res.RowsAffected()
 	db.CheckErr(err)
@@ -367,14 +383,129 @@ func (this *Manage) PosnEditAuth(removeOld bool, posnid uint64, authidList ...ui
 	return list
 }
 
-/**工程新增user 或者 修改 user的职位*/
-func (this *Manage) UserRlatEdit(userRlatList ...*UserRlatSingle) int64 {
-	var numAll int64
-	for _, userRlat := range userRlatList {
-		stmt, err := db.GetDb().Prepare(`REPLACE INTO ` + config.Mg + `.mag_user_rlat (uid,pid,did,posnid) VALUES (?,?,?,?)`)
+/**权限组*/
+func (this *Manage) AuthGroupAdd(pid uint64, name string, dcs string) *AuthGroupSingle {
+	//# 插入 dept IF(?,1,0) 是 IF(fid,1,0) 根从 sort=0 开始 因为sort=0是`管理部``
+	stmt, err := db.GetDb().Prepare(`INSERT INTO ` + config.Mg + `.mag_auth_group (pid,name,description,sort) VALUES (?,?,?,(
+	(SELECT IFNULL(
+		(SELECT ms FROM(SELECT max(sort)+1 AS ms FROM ` + config.Mg + `.mag_auth_group WHERE pid=?) m)
+	,1))
+))`)
+	defer stmt.Close()
+	db.CheckErr(err)
+	res, err := stmt.Exec(pid, name, dcs, pid)
+	db.CheckErr(err)
+	_agid, err := res.LastInsertId()
+	agid := uint64(_agid)
+	db.CheckErr(err)
+	//
+	return this.GetAuthGroupSingle(agid)
+}
+
+func (this *Manage) AuthGroupDel(agid uint64) int64 {
+	stmt, err := db.GetDb().Prepare(`UPDATE ` + config.Mg + `.mag_auth_group SET is_del=1 WHERE agid=?`)
+	defer stmt.Close()
+	db.CheckErr(err)
+	res, err := stmt.Exec(agid)
+	db.CheckErr(err)
+	num, err := res.RowsAffected()
+	db.CheckErr(err)
+	return num
+}
+
+func (this *Manage) AuthGroupDelByPid(pid uint64) int64 {
+	stmt, err := db.GetDb().Prepare(`UPDATE ` + config.Mg + `.mag_auth_group SET is_del = 1 WHERE pid=?)`)
+	db.CheckErr(err)
+	res, err := stmt.Exec(pid)
+	db.CheckErr(err)
+	num, err := res.RowsAffected()
+	db.CheckErr(err)
+	return num
+}
+
+func (this *Manage) AuthGroupName(agid uint64, name string) int64 {
+	stmt, err := db.GetDb().Prepare(`UPDATE ` + config.Mg + `.mag_auth_group SET name=? WHERE agid=?`)
+	defer stmt.Close()
+	db.CheckErr(err)
+	res, err := stmt.Exec(name, agid)
+	db.CheckErr(err)
+	num, err := res.RowsAffected()
+	db.CheckErr(err)
+	return num
+}
+func (this *Manage) AuthGroupDsc(agid uint64, dsc string) int64 {
+	stmt, err := db.GetDb().Prepare(`UPDATE ` + config.Mg + `.mag_auth_group SET description=? WHERE agid=?`)
+	defer stmt.Close()
+	db.CheckErr(err)
+	res, err := stmt.Exec(dsc, agid)
+	db.CheckErr(err)
+	num, err := res.RowsAffected()
+	db.CheckErr(err)
+	return num
+}
+
+func (this *Manage) AuthGroupEditSort(agid uint64, sort uint32) int64 {
+	//直接换就行, 比sort大的值都+1  因为sort不连续也没关系
+	sql := `
+	UPDATE manager.mag_auth_group AS ta, manager.mag_auth_group AS tb
+	SET ta.sort = ?,tb.sort = tb.sort + 1
+	WHERE ta.agid = ?
+	AND tb.pid=ta.pid AND tb.sort >= ? AND tb.agid <> ? `
+	stmt, err := db.GetDb().Prepare(sql)
+	db.CheckErr(err)
+	res, err := stmt.Exec(sort, agid, sort, agid)
+	db.CheckErr(err)
+	num, err := res.RowsAffected()
+	db.CheckErr(err)
+	if num == 0 {
+		//放到最后sort时, 因为tb没有符合条件的,会导致上面的代码无法生效,需要用另一个简单的修改方法
+		sql = `
+		UPDATE manager.mag_auth_group AS ta
+		SET ta.sort = ?
+		WHERE ta.agid = ?`
+		stmt, err = db.GetDb().Prepare(sql)
+		db.CheckErr(err)
+		res, err = stmt.Exec(sort, agid)
+		db.CheckErr(err)
+		num, err = res.RowsAffected()
+		db.CheckErr(err)
+	}
+	return num
+}
+
+func (this *Manage) AuthGroupEditAuth(removeOld bool, agid uint64, authidList ...uint64) []*AuthGroupAuthSingle {
+	var list []*AuthGroupAuthSingle
+	//先删除旧的
+	if removeOld {
+		stmt, err := db.GetDb().Prepare(`DELETE FROM ` + config.Mg + `.mag_auth_group WHERE agid = ?`)
 		defer stmt.Close()
 		db.CheckErr(err)
-		res, err := stmt.Exec(userRlat.Uid, userRlat.Pid, userRlat.Did, userRlat.Posnid)
+		_, err = stmt.Exec(agid)
+		db.CheckErr(err)
+	}
+	for _, authid := range authidList {
+		stmt, err := db.GetDb().Prepare(`REPLACE INTO ` + config.Mg + `.mag_auth_group (agid,authid) VALUES (?,?)`)
+		defer stmt.Close()
+		db.CheckErr(err)
+		_, err = stmt.Exec(agid, authid)
+		db.CheckErr(err)
+		single := &AuthGroupAuthSingle{
+			Agid:   agid,
+			Authid: authid,
+		}
+		list = append(list, single)
+	}
+	return list
+}
+
+/**工程新增user 或者 修改 user的职位*/
+func (this *Manage) UserEditDept(userDeptList ...*UserDeptSingle) int64 {
+	var numAll int64
+	for _, userRlat := range userDeptList {
+		stmt, err := db.GetDb().Prepare(`REPLACE INTO ` + config.Mg + `.mag_user_dept (uid,pid,did) VALUES (?,?,?)`)
+		defer stmt.Close()
+		db.CheckErr(err)
+		res, err := stmt.Exec(userRlat.Uid, userRlat.Pid, userRlat.Did)
 		db.CheckErr(err)
 		num, err := res.RowsAffected()
 		db.CheckErr(err)
@@ -385,7 +516,7 @@ func (this *Manage) UserRlatEdit(userRlatList ...*UserRlatSingle) int64 {
 
 /**工程移除user*/
 func (this *Manage) ProjDelUser(uid uint64, pid uint64) int64 {
-	stmt, err := db.GetDb().Prepare(`DELETE FROM ` + config.Mg + `.mag_user_rlat WHERE uid = ? AND pid = ?`)
+	stmt, err := db.GetDb().Prepare(`DELETE FROM ` + config.Mg + `.mag_user_dept WHERE uid = ? AND pid = ?`)
 	defer stmt.Close()
 	db.CheckErr(err)
 	res, err := stmt.Exec(uid, pid)
@@ -483,15 +614,23 @@ func (this *Manage) GetPosnSingle(posnid uint64) *PositionSingle {
 	stmt.QueryRow(posnid).Scan(&single.Posnid, &single.Did, &single.Name, &single.Sort)
 	return single
 }
+func (this *Manage) GetAuthGroupSingle(agid uint64) *AuthGroupSingle {
+	stmt, err := db.GetDb().Prepare(`SELECT agid,pid,name,description,sort FROM ` + config.Mg + `.mag_auth_group WHERE agid = ?`)
+	defer stmt.Close()
+	db.CheckErr(err)
+	single := &AuthGroupSingle{}
+	stmt.QueryRow(agid).Scan(&single.Agid, &single.Pid, &single.Name, &single.Desc, &single.Sort)
+	return single
+}
 
 //玩家关系表   是 mag_user_proj_relation表的数据, 但结构被UserSingle包含了 所以就用UserSingle吧
-func (this *Manage) GetUserReltList(pidList ...uint64) []*UserRlatSingle {
+func (this *Manage) GetUserDeptList(pidList ...uint64) []*UserDeptSingle {
 	var pidStrList []string
 	for _, pid := range pidList {
 		log.Println("[log]", pid, ":[pid]")
 		pidStrList = append(pidStrList, strconv.FormatInt(int64(pid), 10))
 	}
-	sql := `SELECT uid,pid,did,posnid FROM ` + config.Mg + `.mag_user_rlat WHERE pid IN (` + strings.Join(pidStrList, `,`) + `)`
+	sql := `SELECT uid,pid,did FROM ` + config.Mg + `.mag_user_dept WHERE pid IN (` + strings.Join(pidStrList, `,`) + `)`
 	log.Println("[log]", sql, ":[sql]")
 	stmt, err := db.GetDb().Prepare(sql)
 	defer stmt.Close()
@@ -499,10 +638,10 @@ func (this *Manage) GetUserReltList(pidList ...uint64) []*UserRlatSingle {
 	rows, err := stmt.Query()
 	defer rows.Close()
 	db.CheckErr(err)
-	var list []*UserRlatSingle
+	var list []*UserDeptSingle
 	for rows.Next() {
-		single := &UserRlatSingle{}
-		rows.Scan(&single.Uid, &single.Pid, &single.Did, &single.Posnid)
+		single := &UserDeptSingle{}
+		rows.Scan(&single.Uid, &single.Pid, &single.Did)
 		log.Println("[log]", single.Uid, ":[single.Uid]")
 		list = append(list, single)
 	}

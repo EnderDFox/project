@@ -348,8 +348,8 @@ type C2L_ManagePosnEditAuth struct {
 }
 
 //#user
-type C2L_ManageUserRlatEdit struct {
-	RlatList []*UserRlatSingle
+type C2L_ManageUserEditDept struct {
+	UserDeptList []*UserDeptSingle
 }
 
 type C2L_ManageProjDelUser struct {

@@ -19,6 +19,7 @@ class ManageDataClass {
     //
     NewDepartmentUuid = 100001
     NewPositionUuid = 200001
+    //
     IsInit: boolean = false
     Init(data: L2C_ManageView) {
         this.IsInit = true
@@ -27,7 +28,7 @@ class ManageDataClass {
         this.InitProjData(data.ProjList || [])
         this.InitDeptData(data.DeptList || [])
         this.InitPosnData(data.PosnList || [])
-        this.InitUserRlatData(data.UserRlatList || [])
+        this.InitUserDeptData(data.UserDeptList || [])
     }
     private InitAuthData(authList: AuthSingle[]) {
         //# auth module
@@ -125,7 +126,7 @@ class ManageDataClass {
             this.DeptDict[posn.Did].PosnList.push(posn)
         }
     }
-    private InitUserRlatData(rlatList: UserRlatSingle[]) {
+    private InitUserDeptData(rlatList: UserDeptSingle[]) {
         for (var i = 0; i < rlatList.length; i++) {
             var rlat = rlatList[i]
             var user = this.UserDict[rlat.Uid]

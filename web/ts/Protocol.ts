@@ -138,7 +138,7 @@ class PB_CMD {
     static MANAGE_POSN_EDIT_SORT = 90134
     static MANAGE_POSN_EDIT_AUTH = 90135
     //#user
-    static MANAGE_USER_RLAT_EDIT = 90141
+    static MANAGE_USER_EDIT_DEPT = 90141
     static MANAGE_PROJ_DEL_USER = 90142
 
 }

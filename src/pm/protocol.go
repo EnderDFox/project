@@ -19,8 +19,17 @@ const (
 	PB_CMD_MANAGE_POSN_EDIT_SORT = 90134
 	PB_CMD_MANAGE_POSN_EDIT_AUTH = 90135
 	//#user
-	PB_CMD_MANAGE_USER_RLAT_EDIT = 90141
-	PB_CMD_MANAGE_PROJ_DEL_USER  = 90142
+	PB_CMD_MANAGE_USER_EDIT_DEPT       = 90141
+	PB_CMD_MANAGE_PROJ_DEL_USER        = 90142
+	PB_CMD_MANAGE_USER_EDIT_SORT       = 90143
+	PB_CMD_MANAGE_USER_EDIT_AUTH_GROUP = 90144
+	//#auth group
+	PB_CMD_MANAGE_AUTH_GROUP_ADD       = 90151
+	PB_CMD_MANAGE_AUTH_GROUP_DEL       = 90152
+	PB_CMD_MANAGE_AUTH_GROUP_EDIT_NAME = 90153
+	PB_CMD_MANAGE_AUTH_GROUP_EDIT_DSC  = 90154
+	PB_CMD_MANAGE_AUTH_GROUP_EDIT_SORT = 90155
+	PB_CMD_MANAGE_AUTH_GROUP_EDIT_AUTH = 90156
 )
 
 //=======================通讯数据结构=======================
@@ -85,6 +94,20 @@ type PositionSingle struct {
 
 type PosnAuthSingle struct {
 	Posnid uint64
+	Authid uint64
+}
+
+type AuthGroupSingle struct {
+	Agid       uint64
+	Pid        uint64
+	Name       string
+	Desc       string
+	Sort       uint32
+	AuthidList []uint64
+}
+
+type AuthGroupAuthSingle struct {
+	Agid   uint64
 	Authid uint64
 }
 
@@ -206,9 +229,8 @@ type FileSingle struct {
 	CreateTime uint32
 }
 
-type UserRlatSingle struct {
-	Uid    uint64
-	Pid    uint64
-	Did    uint64
-	Posnid uint64
+type UserDeptSingle struct {
+	Uid uint64
+	Pid uint64
+	Did uint64
 }

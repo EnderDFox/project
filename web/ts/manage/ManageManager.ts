@@ -30,7 +30,6 @@ class ManageManagerClass {
         this.RegisterPB()
         this.Data = ManageData
         WSConn.sendMsg(PB_CMD.MANAGE_VIEW, null)
-
     }
     RegisterPB() {
         Commond.Register(PB_CMD.MANAGE_VIEW, this.PB_ManageView.bind(this))
@@ -49,7 +48,7 @@ class ManageManagerClass {
         Commond.Register(PB_CMD.MANAGE_POSN_EDIT_SORT, this.PB_PosnEditSort.bind(this))
         Commond.Register(PB_CMD.MANAGE_POSN_EDIT_AUTH, this.PB_PosnEditAuth.bind(this))
         //
-        Commond.Register(PB_CMD.MANAGE_USER_RLAT_EDIT, this.PB_UserRlatEdit.bind(this))
+        Commond.Register(PB_CMD.MANAGE_USER_EDIT_DEPT, this.PB_UserEditDept.bind(this))
         Commond.Register(PB_CMD.MANAGE_PROJ_DEL_USER, this.PB_ProjDelUser.bind(this))
     }
     PB_ManageView(data: L2C_ManageView) {
@@ -260,11 +259,11 @@ class ManageManagerClass {
             this.Data.FormatPosnAuthidList(posn, data.AuthidList)
         }
     }
-    PB_UserRlatEdit(data: C2L_ManageUserRlatEdit) {
+    PB_UserEditDept(data: C2L_ManageUserEditDept) {
         // this.Data.RemoveUserPosnid(user)
         // this.Data.SetUserPosnid(user, user.Did, posn.Posnid)
-        for (var i = 0; i < data.RlatList.length; i++) {
-            var rlat: UserRlatSingle = data.RlatList[i]
+        for (var i = 0; i < data.UserDeptList.length; i++) {
+            var rlat: UserDeptSingle = data.UserDeptList[i]
             var user = this.Data.UserDict[rlat.Uid]
             if (user) {
                 var proj: ProjectSingle = this.Data.ProjDict[rlat.Pid]
@@ -1371,8 +1370,8 @@ class ManageManagerClass {
                                 var dept: DepartmentSingle = ManageData.DeptDict[dept.Did]
                                 var posn: PositionSingle
                                 posn = dept.PosnList[0]
-                                WSConn.sendMsg<C2L_ManageUserRlatEdit>(PB_CMD.MANAGE_USER_RLAT_EDIT, {
-                                    RlatList: [
+                                WSConn.sendMsg<C2L_ManageUserEditDept>(PB_CMD.MANAGE_USER_EDIT_DEPT, {
+                                    UserDeptList: [
                                         {
                                             Uid: user.Uid,
                                             Pid: this.Data.CurrProj.Pid,
@@ -1382,8 +1381,8 @@ class ManageManagerClass {
                                     ]
                                 })
                             } else {
-                                WSConn.sendMsg<C2L_ManageUserRlatEdit>(PB_CMD.MANAGE_USER_RLAT_EDIT, {
-                                    RlatList: [
+                                WSConn.sendMsg<C2L_ManageUserEditDept>(PB_CMD.MANAGE_USER_EDIT_DEPT, {
+                                    UserDeptList: [
                                         {
                                             Uid: user.Uid,
                                             Pid: this.Data.CurrProj.Pid,
@@ -1395,8 +1394,8 @@ class ManageManagerClass {
                             }
                         },
                         onPosChange: (user: UserSingle, posn: PositionSingle) => {
-                            WSConn.sendMsg<C2L_ManageUserRlatEdit>(PB_CMD.MANAGE_USER_RLAT_EDIT, {
-                                RlatList: [
+                            WSConn.sendMsg<C2L_ManageUserEditDept>(PB_CMD.MANAGE_USER_EDIT_DEPT, {
+                                UserDeptList: [
                                     {
                                         Uid: user.Uid,
                                         Pid: user.Pid,
@@ -1442,11 +1441,11 @@ class ManageManagerClass {
             return
         }
         this.ShowSelectUser(userList, [], (checkedDict: { [key: number]: UserSingle }) => {
-            var rlatList: UserRlatSingle[] = []
+            var rlatList: UserDeptSingle[] = []
             for (var i = 0; i < userList.length; i++) {
                 var user: UserSingle = userList[i]
                 if (checkedDict[user.Uid]) {
-                    var rlat: UserRlatSingle = {
+                    var rlat: UserDeptSingle = {
                         Uid: user.Uid,
                         Pid: proj.Pid,
                         Did: 0,
@@ -1456,8 +1455,8 @@ class ManageManagerClass {
                 }
             }
             if (rlatList.length) {
-                WSConn.sendMsg<C2L_ManageUserRlatEdit>(PB_CMD.MANAGE_USER_RLAT_EDIT, {
-                    RlatList: rlatList
+                WSConn.sendMsg<C2L_ManageUserEditDept>(PB_CMD.MANAGE_USER_EDIT_DEPT, {
+                    UserDeptList: rlatList
                 })
             }
         })
@@ -1478,12 +1477,12 @@ class ManageManagerClass {
             return
         }
         this.ShowSelectUser(userList, posn.UserList, (checkedDict: { [key: number]: UserSingle }) => {
-            var rlatList: UserRlatSingle[] = []
+            var rlatList: UserDeptSingle[] = []
             for (var i = 0; i < posn.UserList.length; i++) {
                 var _user = posn.UserList[i]
                 if (!checkedDict[_user.Uid]) {
                     //以前在,现在不在列表中了
-                    var rlat: UserRlatSingle = {
+                    var rlat: UserDeptSingle = {
                         Uid: _user.Uid,
                         Pid: this.Data.CurrProj.Pid,
                         Did: 0,
@@ -1496,7 +1495,7 @@ class ManageManagerClass {
                 var _uid = parseInt(uidStr)
                 if (posn.UserList.IndexOfByKey(FieldName.Uid, _uid) == -1) {
                     //原本不在,现在加进来
-                    var rlat: UserRlatSingle = {
+                    var rlat: UserDeptSingle = {
                         Uid: _uid,
                         Pid: this.Data.CurrProj.Pid,
                         Did: posn.Did,
@@ -1506,8 +1505,8 @@ class ManageManagerClass {
                 }
             }
             if (rlatList.length) {
-                WSConn.sendMsg<C2L_ManageUserRlatEdit>(PB_CMD.MANAGE_USER_RLAT_EDIT, {
-                    RlatList: rlatList
+                WSConn.sendMsg<C2L_ManageUserEditDept>(PB_CMD.MANAGE_USER_EDIT_DEPT, {
+                    UserDeptList: rlatList
                 })
             }
         })
