@@ -1,6 +1,8 @@
 <!-- 大图片展示框 -->
 <div class="image_showcase">
-    <img class="big_img" :src="currImageSrc" @load="onImageLoad($event)" :title="currImageName" :alt="currImageName"/>
+    <a :href="currImageSrc" target="_blank">
+        <img class="big_img" :src="currImageSrc" @load="onImageLoad($event)" :title="currImageName" :alt="currImageName"/>
+    </a>
     <div class="fake_btn arrow left_arrow" @click="prevPage()" v-show="totalPage>1">&lt;</div>
     <div class="fake_btn arrow right_arrow" @click="nextPage()" v-show="totalPage>1">&gt;</div>
     <div class="txt_page">{{currPage}}/{{totalPage}}</div>
