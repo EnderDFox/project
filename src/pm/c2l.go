@@ -356,3 +356,42 @@ type C2L_ManageProjDelUser struct {
 	Pid uint64
 	Uid uint64
 }
+
+type C2L_ManageUserEditSort struct {
+	Uid  uint64
+	Pid  uint64
+	Sort uint32
+}
+
+type C2L_ManageUserEditAuthGroup struct {
+	Uid      uint64
+	Pid      uint64
+	AgidList []uint64
+}
+
+type C2L_ManageAuthGroupAdd struct {
+	Pid  uint64
+	Name string
+	Dsc  string
+}
+
+type C2L_ManageAuthGroupDel struct {
+	Agid uint64
+}
+
+type C2L_ManageAuthGroupEditName struct {
+	Agid uint64
+	Name string
+}
+type C2L_ManageAuthGroupEditDsc struct {
+	Agid uint64
+	Dsc  string
+}
+type C2L_ManageAuthGroupEditSort struct {
+	Agid uint64
+	Sort uint32
+}
+type C2L_ManageAuthGroupEditAuth struct {
+	Agid       uint64
+	AuthidList []uint64
+}

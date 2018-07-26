@@ -110,6 +110,11 @@ type AuthGroupAuthSingle struct {
 	Agid   uint64
 	Authid uint64
 }
+type UserAuthGroupSingle struct {
+	Uid  uint64
+	Pid  uint64
+	Agid uint64
+}
 
 type ScoreNoticeSingle struct {
 	Wid   uint64
@@ -230,7 +235,8 @@ type FileSingle struct {
 }
 
 type UserDeptSingle struct {
-	Uid uint64
-	Pid uint64
-	Did uint64
+	Uid  uint64
+	Pid  uint64
+	Did  uint64
+	Sort uint32
 }

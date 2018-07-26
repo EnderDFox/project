@@ -248,10 +248,10 @@ type L2C_UpdateWorkDelete struct {
 }
 
 type L2C_ManageView struct {
-	AuthList     []*AuthSingle
-	UserList     []*UserSingle
-	ProjList     []*ProjectSingle
-	DeptList     []*DepartmentSingle
-	PosnList     []*PositionSingle
-	UserDeptList []*UserDeptSingle
+	AuthList      []*AuthSingle
+	UserList      []*UserSingle
+	ProjList      []*ProjectSingle
+	DeptList      []*DepartmentSingle
+	UserDeptList  []*UserDeptSingle
+	AuthGroupList []*AuthGroupSingle
 }

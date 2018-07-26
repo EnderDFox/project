@@ -1,7 +1,6 @@
 package main
 
 import (
-	"log"
 	"strconv"
 	"strings"
 	"time"
@@ -31,16 +30,12 @@ func NewManage(user *User) *Manage {
 func (this *Manage) View() *L2C_ManageView {
 	//#超级 sql :  proj+dept+posn
 	stmt, err := db.GetDb().Prepare(`
-	SELECT t_proj_dept.*,t_posn.posnid,t_posn.name AS posn_name,t_posn.sort AS posn_sort
-	FROM (
 		SELECT t_proj.*,t_dept.did,t_dept.fid,t_dept.name AS d_name,t_dept.sort AS d_sort
 		FROM (
 			SELECT pid,name AS proj_name,create_time FROM ` + config.Pm + `.pm_project WHERE is_del=0
 		)	AS t_proj
 		LEFT JOIN ` + config.Mg + `.mag_department AS t_dept ON t_dept.is_del=0 AND t_dept.pid = t_proj.pid
-	) AS t_proj_dept
-	LEFT JOIN ` + config.Mg + `.mag_position AS t_posn ON t_posn.is_del=0 AND t_posn.did = t_proj_dept.did 
-	ORDER BY t_proj_dept.pid,t_proj_dept.fid,t_proj_dept.d_sort,t_posn.did,t_posn.sort `)
+	ORDER BY t_proj_dept.pid,t_proj_dept.fid,t_proj_dept.d_sort `)
 	//
 	defer stmt.Close()
 	db.CheckErr(err)
@@ -50,18 +45,15 @@ func (this *Manage) View() *L2C_ManageView {
 	//
 	projMap := make(map[uint64]*ProjectSingle)
 	deptMap := make(map[uint64]*DepartmentSingle)
-	posnMap := make(map[uint64]*PositionSingle)
 	var projList []*ProjectSingle
 	var deptList []*DepartmentSingle
-	var posnList []*PositionSingle
+	// var posnList []*PositionSingle
 	for rows.Next() {
 		proj := &ProjectSingle{}
 		dept := &DepartmentSingle{}
-		posn := &PositionSingle{}
-		rows.Scan(&proj.Pid, &proj.Name, &proj.CreateTime, &dept.Did, &dept.Fid, &dept.Name, &dept.Sort, &posn.Posnid, &posn.Name, &posn.Sort)
-		// log.Println("[log]", proj.Pid, proj.Name, proj.CreateTime, dept.Did, dept.Fid, dept.Name, dept.Sort, posn.Posnid, posn.Name, posn.Sort)
+		// posn := &PositionSingle{}
+		rows.Scan(&proj.Pid, &proj.Name, &proj.CreateTime, &dept.Did, &dept.Fid, &dept.Name, &dept.Sort)
 		dept.Pid = proj.Pid
-		posn.Did = dept.Did
 		if _, ok := projMap[proj.Pid]; !ok {
 			projMap[proj.Pid] = proj
 			projList = append(projList, proj)
@@ -72,21 +64,8 @@ func (this *Manage) View() *L2C_ManageView {
 				deptList = append(deptList, dept)
 			}
 		}
-		if posn.Posnid > 0 {
-			//判断没有 dept存在也不要放进去了
-			if _, ok := deptMap[dept.Did]; ok {
-				posnMap[posn.Posnid] = posn
-				posnList = append(posnList, posn)
-			}
-		}
 	}
 	//posn auth
-	posnAuthList := this.GetPosnAuthList()
-	for _, posnAuthSingle := range posnAuthList {
-		if posn, ok := posnMap[posnAuthSingle.Posnid]; ok {
-			posn.AuthidList = append(posn.AuthidList, posnAuthSingle.Authid)
-		}
-	}
 	//
 	var pidList []uint64
 	for _, proj := range projList {
@@ -94,12 +73,12 @@ func (this *Manage) View() *L2C_ManageView {
 	}
 	//#
 	data := &L2C_ManageView{
-		AuthList:     this.GetAuthList(),
-		UserList:     this.GetUserList(),
-		ProjList:     projList,
-		DeptList:     deptList,
-		PosnList:     posnList,
-		UserDeptList: this.GetUserDeptList(pidList...),
+		AuthList:      this.GetAuthList(),
+		UserList:      this.GetUserList(),
+		ProjList:      projList,
+		DeptList:      deptList,
+		UserDeptList:  this.GetUserDeptList(pidList...),
+		AuthGroupList: this.GetAuthGroupListAll(pidList...),
 	}
 	return data
 }
@@ -384,7 +363,7 @@ func (this *Manage) PosnEditAuth(removeOld bool, posnid uint64, authidList ...ui
 }
 
 /**权限组*/
-func (this *Manage) AuthGroupAdd(pid uint64, name string, dcs string) *AuthGroupSingle {
+func (this *Manage) AuthGroupAdd(pid uint64, name string, dsc string) *AuthGroupSingle {
 	//# 插入 dept IF(?,1,0) 是 IF(fid,1,0) 根从 sort=0 开始 因为sort=0是`管理部``
 	stmt, err := db.GetDb().Prepare(`INSERT INTO ` + config.Mg + `.mag_auth_group (pid,name,description,sort) VALUES (?,?,?,(
 	(SELECT IFNULL(
@@ -393,7 +372,7 @@ func (this *Manage) AuthGroupAdd(pid uint64, name string, dcs string) *AuthGroup
 ))`)
 	defer stmt.Close()
 	db.CheckErr(err)
-	res, err := stmt.Exec(pid, name, dcs, pid)
+	res, err := stmt.Exec(pid, name, dsc, pid)
 	db.CheckErr(err)
 	_agid, err := res.LastInsertId()
 	agid := uint64(_agid)
@@ -423,7 +402,7 @@ func (this *Manage) AuthGroupDelByPid(pid uint64) int64 {
 	return num
 }
 
-func (this *Manage) AuthGroupName(agid uint64, name string) int64 {
+func (this *Manage) AuthGroupEditName(agid uint64, name string) int64 {
 	stmt, err := db.GetDb().Prepare(`UPDATE ` + config.Mg + `.mag_auth_group SET name=? WHERE agid=?`)
 	defer stmt.Close()
 	db.CheckErr(err)
@@ -433,7 +412,7 @@ func (this *Manage) AuthGroupName(agid uint64, name string) int64 {
 	db.CheckErr(err)
 	return num
 }
-func (this *Manage) AuthGroupDsc(agid uint64, dsc string) int64 {
+func (this *Manage) AuthGroupEditDsc(agid uint64, dsc string) int64 {
 	stmt, err := db.GetDb().Prepare(`UPDATE ` + config.Mg + `.mag_auth_group SET description=? WHERE agid=?`)
 	defer stmt.Close()
 	db.CheckErr(err)
@@ -501,11 +480,15 @@ func (this *Manage) AuthGroupEditAuth(removeOld bool, agid uint64, authidList ..
 /**工程新增user 或者 修改 user的职位*/
 func (this *Manage) UserEditDept(userDeptList ...*UserDeptSingle) int64 {
 	var numAll int64
-	for _, userRlat := range userDeptList {
-		stmt, err := db.GetDb().Prepare(`REPLACE INTO ` + config.Mg + `.mag_user_dept (uid,pid,did) VALUES (?,?,?)`)
+	for _, userDept := range userDeptList {
+		stmt, err := db.GetDb().Prepare(`REPLACE INTO ` + config.Mg + `.mag_user_dept (uid,pid,did,sort) VALUES (?,?,?,(
+			(SELECT IFNULL(
+				(SELECT ms FROM(SELECT max(sort)+1 AS ms FROM ` + config.Mg + `.mag_user_dept WHERE pid=?) m)
+			,1))
+		))`)
 		defer stmt.Close()
 		db.CheckErr(err)
-		res, err := stmt.Exec(userRlat.Uid, userRlat.Pid, userRlat.Did)
+		res, err := stmt.Exec(userDept.Uid, userDept.Pid, userDept.Did)
 		db.CheckErr(err)
 		num, err := res.RowsAffected()
 		db.CheckErr(err)
@@ -524,6 +507,61 @@ func (this *Manage) ProjDelUser(uid uint64, pid uint64) int64 {
 	num, err := res.RowsAffected()
 	db.CheckErr(err)
 	return num
+}
+
+func (this *Manage) UserEditSort(uid uint64, pid uint64, sort uint32) int64 {
+	//直接换就行, 比sort大的值都+1  因为sort不连续也没关系
+	sql := `
+	UPDATE manager.mag_user_dept AS ta, manager.mag_user_dept AS tb
+	SET ta.sort = ?,tb.sort = tb.sort + 1
+	WHERE ta.uid = ? AND ta.pid=?
+	AND tb.pid=ta.pid AND tb.sort >= ? AND tb.uid <> ? AND tb.pid <>?`
+	stmt, err := db.GetDb().Prepare(sql)
+	db.CheckErr(err)
+	res, err := stmt.Exec(sort, uid, pid, sort, uid, pid)
+	db.CheckErr(err)
+	num, err := res.RowsAffected()
+	db.CheckErr(err)
+	if num == 0 {
+		//放到最后sort时, 因为tb没有符合条件的,会导致上面的代码无法生效,需要用另一个简单的修改方法
+		sql = `
+		UPDATE manager.mag_user_dept AS ta
+		SET ta.sort = ?
+		WHERE ta.uid = ? AND ta.pid = ?`
+		stmt, err = db.GetDb().Prepare(sql)
+		db.CheckErr(err)
+		res, err = stmt.Exec(sort, uid, pid)
+		db.CheckErr(err)
+		num, err = res.RowsAffected()
+		db.CheckErr(err)
+	}
+	return num
+}
+
+func (this *Manage) UserEditAuthGroup(removeOld bool, uid uint64, pid uint64, agidList ...uint64) []*UserAuthGroupSingle {
+	var list []*UserAuthGroupSingle
+	//先删除旧的
+	if removeOld {
+		stmt, err := db.GetDb().Prepare(`DELETE FROM ` + config.Mg + `.mag_user_auth_group WHERE uid=? AND pid = ?`)
+		defer stmt.Close()
+		db.CheckErr(err)
+		_, err = stmt.Exec(uid, pid)
+		db.CheckErr(err)
+	}
+	for _, agid := range agidList {
+		stmt, err := db.GetDb().Prepare(`REPLACE INTO ` + config.Mg + `.mag_user_auth_group (uid,pid,agid) VALUES (?,?,?)`)
+		defer stmt.Close()
+		db.CheckErr(err)
+		_, err = stmt.Exec(uid, pid, agid)
+		db.CheckErr(err)
+		single := &UserAuthGroupSingle{
+			Uid:  uid,
+			Pid:  pid,
+			Agid: agid,
+		}
+		list = append(list, single)
+	}
+	return list
 }
 
 // func (this *Manage) PosnAuthDel(posnid uint64, auth uint64) uint32 {
@@ -627,11 +665,9 @@ func (this *Manage) GetAuthGroupSingle(agid uint64) *AuthGroupSingle {
 func (this *Manage) GetUserDeptList(pidList ...uint64) []*UserDeptSingle {
 	var pidStrList []string
 	for _, pid := range pidList {
-		log.Println("[log]", pid, ":[pid]")
 		pidStrList = append(pidStrList, strconv.FormatInt(int64(pid), 10))
 	}
 	sql := `SELECT uid,pid,did FROM ` + config.Mg + `.mag_user_dept WHERE pid IN (` + strings.Join(pidStrList, `,`) + `)`
-	log.Println("[log]", sql, ":[sql]")
 	stmt, err := db.GetDb().Prepare(sql)
 	defer stmt.Close()
 	db.CheckErr(err)
@@ -642,7 +678,86 @@ func (this *Manage) GetUserDeptList(pidList ...uint64) []*UserDeptSingle {
 	for rows.Next() {
 		single := &UserDeptSingle{}
 		rows.Scan(&single.Uid, &single.Pid, &single.Did)
-		log.Println("[log]", single.Uid, ":[single.Uid]")
+		list = append(list, single)
+	}
+	return list
+}
+
+func (this *Manage) GetAuthGroupListAll(pidList ...uint64) []*AuthGroupSingle {
+	var pidStrList []string
+	for _, pid := range pidList {
+		pidStrList = append(pidStrList, strconv.FormatInt(int64(pid), 10))
+	}
+	sql := `
+	SELECT t_ag.*,t_aga.authid
+	FROM (
+	SELECT agid,pid,name,description,sort FROM  ` + config.Mg + `mag_auth_group WHERE is_del=0 AND pid IN (` + strings.Join(pidStrList, `,`) + `)
+	) AS t_ag
+	LEFT JOIN  ` + config.Mg + `mag_auth_group_auth AS t_aga ON t_aga.agid = t_ag.agid
+	ORDER BY sort, authid
+	`
+	stmt, err := db.GetDb().Prepare(sql)
+	defer stmt.Close()
+	db.CheckErr(err)
+	rows, err := stmt.Query()
+	defer rows.Close()
+	db.CheckErr(err)
+	aughGroupMap := make(map[uint64]*AuthGroupSingle)
+	var list []*AuthGroupSingle
+	for rows.Next() {
+		authGroupSingle := &AuthGroupSingle{}
+		var authid uint64
+		rows.Scan(&authGroupSingle.Agid, &authGroupSingle.Pid, &authGroupSingle.Name, &authGroupSingle.Desc, &authGroupSingle.Sort, &authid)
+		//只添加一次
+		if _, ok := aughGroupMap[authGroupSingle.Pid]; !ok {
+			aughGroupMap[authGroupSingle.Pid] = authGroupSingle
+			list = append(list, authGroupSingle)
+		}
+		//有权限就加入权限
+		if authid > 0 {
+			authGroupSingle.AuthidList = append(authGroupSingle.AuthidList, authid)
+		}
+	}
+	return list
+}
+
+func (this *Manage) GetAuthGroupList(pidList ...uint64) []*AuthGroupSingle {
+	var pidStrList []string
+	for _, pid := range pidList {
+		pidStrList = append(pidStrList, strconv.FormatInt(int64(pid), 10))
+	}
+	sql := `SELECT agid,pid,name,description,sort FROM ` + config.Mg + `.mag_auth_group WHERE pid IN (` + strings.Join(pidStrList, `,`) + `)`
+	stmt, err := db.GetDb().Prepare(sql)
+	defer stmt.Close()
+	db.CheckErr(err)
+	rows, err := stmt.Query()
+	defer rows.Close()
+	db.CheckErr(err)
+	var list []*AuthGroupSingle
+	for rows.Next() {
+		authGroupSingle := &AuthGroupSingle{}
+		rows.Scan(&authGroupSingle.Agid, &authGroupSingle.Pid, &authGroupSingle.Name, &authGroupSingle.Desc, &authGroupSingle.Sort)
+		list = append(list, authGroupSingle)
+	}
+	return list
+}
+
+func (this *Manage) GetUserAuthGroupList(pidList ...uint64) []*UserAuthGroupSingle {
+	var pidStrList []string
+	for _, pid := range pidList {
+		pidStrList = append(pidStrList, strconv.FormatInt(int64(pid), 10))
+	}
+	sql := `SELECT uid,pid,did FROM ` + config.Mg + `.mag_user_auth_group WHERE pid IN (` + strings.Join(pidStrList, `,`) + `)`
+	stmt, err := db.GetDb().Prepare(sql)
+	defer stmt.Close()
+	db.CheckErr(err)
+	rows, err := stmt.Query()
+	defer rows.Close()
+	db.CheckErr(err)
+	var list []*UserAuthGroupSingle
+	for rows.Next() {
+		single := &UserAuthGroupSingle{}
+		rows.Scan(&single.Uid, &single.Pid, &single.Agid)
 		list = append(list, single)
 	}
 	return list

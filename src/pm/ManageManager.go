@@ -34,17 +34,15 @@ func (this *ManageManager) RegisterFunction() {
 	//#
 	command.Register(PB_CMD_MANAGE_USER_EDIT_DEPT, &C2L_M_MANAGE_USER_EDIT_DEPT{})
 	command.Register(PB_CMD_MANAGE_PROJ_DEL_USER, &C2L_M_MANAGE_PROJ_DEL_USER{})
-	// command.Register(PB_CMD_MANAGE_USER_EDIT_SORT, &C2L_M_MANAGE_USER_EDIT_SORT{})
-	// command.Register(PB_CMD_MANAGE_USER_EDIT_AUTH_GROUP, &C2L_M_MANAGE_USER_EDIT_SORT{})
+	command.Register(PB_CMD_MANAGE_USER_EDIT_SORT, &C2L_M_MANAGE_USER_EDIT_SORT{})
+	command.Register(PB_CMD_MANAGE_USER_EDIT_AUTH_GROUP, &C2L_M_MANAGE_USER_EDIT_AUTH_GROUP{})
 	//#
-	/*
-		command.Register(PB_CMD_MANAGE_AUTH_GROUP_ADD, &C2L_M_MANAGE_AUTH_GROUP_ADD{})
-		command.Register(PB_CMD_MANAGE_AUTH_GROUP_DEL, &C2L_M_MANAGE_AUTH_GROUP_DEL{})
-		command.Register(PB_CMD_MANAGE_AUTH_GROUP_EDIT_NAME, &C2L_M_MANAGE_AUTH_GROUP_EDIT_NAME{})
-		command.Register(PB_CMD_MANAGE_AUTH_GROUP_EDIT_DSC, &C2L_M_MANAGE_AUTH_GROUP_EDIT_DSC{})
-		command.Register(PB_CMD_MANAGE_AUTH_GROUP_EDIT_SORT, &C2L_M_MANAGE_AUTH_GROUP_EDIT_SORT{})
-		command.Register(PB_CMD_MANAGE_AUTH_GROUP_EDIT_AUTH, &C2L_M_MANAGE_AUTH_GROUP_EDIT_AUTH{})
-	*/
+	command.Register(PB_CMD_MANAGE_AUTH_GROUP_ADD, &C2L_M_MANAGE_AUTH_GROUP_ADD{})
+	command.Register(PB_CMD_MANAGE_AUTH_GROUP_DEL, &C2L_M_MANAGE_AUTH_GROUP_DEL{})
+	command.Register(PB_CMD_MANAGE_AUTH_GROUP_EDIT_NAME, &C2L_M_MANAGE_AUTH_GROUP_EDIT_NAME{})
+	command.Register(PB_CMD_MANAGE_AUTH_GROUP_EDIT_DSC, &C2L_M_MANAGE_AUTH_GROUP_EDIT_DSC{})
+	command.Register(PB_CMD_MANAGE_AUTH_GROUP_EDIT_SORT, &C2L_M_MANAGE_AUTH_GROUP_EDIT_SORT{})
+	command.Register(PB_CMD_MANAGE_AUTH_GROUP_EDIT_AUTH, &C2L_M_MANAGE_AUTH_GROUP_EDIT_AUTH{})
 }
 
 //
@@ -322,5 +320,141 @@ func (this *C2L_M_MANAGE_PROJ_DEL_USER) execute(client *websocket.Conn, msg *Mes
 	}
 	user.Manage().ProjDelUser(param.Uid, param.Pid)
 	user.SendToAll(PB_CMD_MANAGE_PROJ_DEL_USER, param)
+	return true
+}
+
+type C2L_M_MANAGE_USER_EDIT_SORT struct{}
+
+func (this *C2L_M_MANAGE_USER_EDIT_SORT) execute(client *websocket.Conn, msg *Message) bool {
+	param := &C2L_ManageUserEditSort{}
+	err := json.Unmarshal([]byte(msg.Param), param)
+	if err != nil {
+		return false
+	}
+	user := session.GetUser(msg.Uid)
+	if user == nil {
+		return false
+	}
+	user.Manage().UserEditSort(param.Uid, param.Pid, param.Sort)
+	user.SendToAll(PB_CMD_MANAGE_USER_EDIT_SORT, param)
+	return true
+}
+
+type C2L_M_MANAGE_USER_EDIT_AUTH_GROUP struct{}
+
+func (this *C2L_M_MANAGE_USER_EDIT_AUTH_GROUP) execute(client *websocket.Conn, msg *Message) bool {
+	param := &C2L_ManageUserEditAuthGroup{}
+	err := json.Unmarshal([]byte(msg.Param), param)
+	if err != nil {
+		return false
+	}
+	user := session.GetUser(msg.Uid)
+	if user == nil {
+		return false
+	}
+	user.Manage().UserEditAuthGroup(true, param.Uid, param.Pid, param.AgidList...)
+	user.SendToAll(PB_CMD_MANAGE_USER_EDIT_AUTH_GROUP, param)
+	return true
+}
+
+type C2L_M_MANAGE_AUTH_GROUP_ADD struct{}
+
+func (this *C2L_M_MANAGE_AUTH_GROUP_ADD) execute(client *websocket.Conn, msg *Message) bool {
+	param := &C2L_ManageAuthGroupAdd{}
+	err := json.Unmarshal([]byte(msg.Param), param)
+	if err != nil {
+		return false
+	}
+	user := session.GetUser(msg.Uid)
+	if user == nil {
+		return false
+	}
+	user.Manage().AuthGroupAdd(param.Pid, param.Name, param.Dsc)
+	user.SendToAll(PB_CMD_MANAGE_AUTH_GROUP_ADD, param)
+	return true
+}
+
+type C2L_M_MANAGE_AUTH_GROUP_DEL struct{}
+
+func (this *C2L_M_MANAGE_AUTH_GROUP_DEL) execute(client *websocket.Conn, msg *Message) bool {
+	param := &C2L_ManageAuthGroupDel{}
+	err := json.Unmarshal([]byte(msg.Param), param)
+	if err != nil {
+		return false
+	}
+	user := session.GetUser(msg.Uid)
+	if user == nil {
+		return false
+	}
+	user.Manage().AuthGroupDel(param.Agid)
+	user.SendToAll(PB_CMD_MANAGE_AUTH_GROUP_DEL, param)
+	return true
+}
+
+type C2L_M_MANAGE_AUTH_GROUP_EDIT_NAME struct{}
+
+func (this *C2L_M_MANAGE_AUTH_GROUP_EDIT_NAME) execute(client *websocket.Conn, msg *Message) bool {
+	param := &C2L_ManageAuthGroupEditName{}
+	err := json.Unmarshal([]byte(msg.Param), param)
+	if err != nil {
+		return false
+	}
+	user := session.GetUser(msg.Uid)
+	if user == nil {
+		return false
+	}
+	user.Manage().AuthGroupEditName(param.Agid, param.Name)
+	user.SendToAll(PB_CMD_MANAGE_AUTH_GROUP_EDIT_NAME, param)
+	return true
+}
+
+type C2L_M_MANAGE_AUTH_GROUP_EDIT_DSC struct{}
+
+func (this *C2L_M_MANAGE_AUTH_GROUP_EDIT_DSC) execute(client *websocket.Conn, msg *Message) bool {
+	param := &C2L_ManageAuthGroupEditDsc{}
+	err := json.Unmarshal([]byte(msg.Param), param)
+	if err != nil {
+		return false
+	}
+	user := session.GetUser(msg.Uid)
+	if user == nil {
+		return false
+	}
+	user.Manage().AuthGroupEditDsc(param.Agid, param.Dsc)
+	user.SendToAll(PB_CMD_MANAGE_AUTH_GROUP_EDIT_DSC, param)
+	return true
+}
+
+type C2L_M_MANAGE_AUTH_GROUP_EDIT_SORT struct{}
+
+func (this *C2L_M_MANAGE_AUTH_GROUP_EDIT_SORT) execute(client *websocket.Conn, msg *Message) bool {
+	param := &C2L_ManageAuthGroupEditSort{}
+	err := json.Unmarshal([]byte(msg.Param), param)
+	if err != nil {
+		return false
+	}
+	user := session.GetUser(msg.Uid)
+	if user == nil {
+		return false
+	}
+	user.Manage().AuthGroupEditSort(param.Agid, param.Sort)
+	user.SendToAll(PB_CMD_MANAGE_AUTH_GROUP_EDIT_SORT, param)
+	return true
+}
+
+type C2L_M_MANAGE_AUTH_GROUP_EDIT_AUTH struct{}
+
+func (this *C2L_M_MANAGE_AUTH_GROUP_EDIT_AUTH) execute(client *websocket.Conn, msg *Message) bool {
+	param := &C2L_ManageAuthGroupEditAuth{}
+	err := json.Unmarshal([]byte(msg.Param), param)
+	if err != nil {
+		return false
+	}
+	user := session.GetUser(msg.Uid)
+	if user == nil {
+		return false
+	}
+	user.Manage().AuthGroupEditAuth(true, param.Agid, param.AuthidList...)
+	user.SendToAll(PB_CMD_MANAGE_AUTH_GROUP_EDIT_AUTH, param)
 	return true
 }
