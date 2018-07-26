@@ -72,7 +72,7 @@ var ProcessDataClass = /** @class */ (function () {
                 else {
                     _this.LinkMap[link.Lid] = link;
                     _this.LinkMap[link.ParentLid] = parentLink;
-                    if (ArrayUtil.IndexOfByKey(parentLink.Children, FieldName.Lid, link.Lid) == -1) {
+                    if (ArrayUtil.IndexOfByKey(parentLink.Children, FIELD_NAME.Lid, link.Lid) == -1) {
                         parentLink.Children.push(link);
                     }
                 }

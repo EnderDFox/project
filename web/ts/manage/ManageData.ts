@@ -11,6 +11,8 @@ class ManageDataClass {
     UserDict: { [key: number]: UserSingle };
     /**全部部门字典 */
     DeptDict: { [key: number]: DepartmentSingle };
+    /**全部权限组 */
+    AuthGroupDict: { [key: number]: AuthGroupSingle };
     //当前
     CurrUser: UserSingle
     /**我的权限 */
@@ -27,8 +29,11 @@ class ManageDataClass {
         this.InitUserData(data.UserList || [])
         this.InitProjData(data.ProjList || [])
         this.InitDeptData(data.DeptList || [])
-        this.InitPosnData(data.PosnList || [])
+        // this.InitPosnData(data.PosnList || [])
         this.InitUserDeptData(data.UserDeptList || [])
+        this.InitAughGroupData(data.AuthGroupList || [])
+        //
+        this.InitUserAughGroupData(data.UserAuthGroupList || [])
     }
     private InitAuthData(authList: AuthSingle[]) {
         //# auth module
@@ -67,6 +72,7 @@ class ManageDataClass {
             var user: UserSingle = this.UserList[i]
             user.Did = 0
             user.Posnid = 0
+            user.AuthGroupDict = {}
             this.UserDict[user.Uid] = user
         }
     }
@@ -76,14 +82,10 @@ class ManageDataClass {
         for (var i = 0; i < projList.length; i++) {
             var proj: ProjectSingle = projList[i]
             this.ProjDict[proj.Pid] = proj
-            proj.DeptTree = []
             proj.UserList = []
+            proj.DeptTree = []
+            proj.AuthGroupList = []
             proj.MasterUid = 0;//TODO:
-        }
-        //# TODO: 加入user吧
-        this.ProjList[0].UserList.push.apply(this.ProjList[0].UserList, this.UserList.slice(0, 10))
-        for (var i = 0; i < this.ProjList[0].UserList.length; i++) {
-            this.ProjList[0].UserList[i].Sort = i + 1
         }
     }
     private InitDeptData(deptList: DepartmentSingle[]) {
@@ -126,15 +128,16 @@ class ManageDataClass {
             this.DeptDict[posn.Did].PosnList.push(posn)
         }
     }
-    private InitUserDeptData(rlatList: UserDeptSingle[]) {
-        for (var i = 0; i < rlatList.length; i++) {
-            var rlat = rlatList[i]
+    private InitUserDeptData(userDeptList: UserDeptSingle[]) {
+        for (var i = 0; i < userDeptList.length; i++) {
+            var rlat = userDeptList[i]
             var user = this.UserDict[rlat.Uid]
             if (user) {
                 if (rlat.Pid) {
                     var proj: ProjectSingle = this.ProjDict[rlat.Pid]
                     if (proj) {
                         proj.UserList.push(user)
+                        user.AuthGroupDict[proj.Pid] = {}
                         if (rlat.Posnid > 0) {
                             var [_, posn] = this.GetPosnByPosnidInDeptTree(rlat.Posnid, proj.DeptTree)
                             if (posn) {
@@ -150,6 +153,20 @@ class ManageDataClass {
             }
         }
     }
+    private InitAughGroupData(agList:AuthGroupSingle[]){
+        this.AuthGroupDict = {}
+        //
+        agList.forEach((ag:AuthGroupSingle,index,)=>{
+            this.AuthGroupDict[ag.Agid] = ag
+            this.ProjDict[ag.Pid].AuthGroupList.push(ag)
+        })
+    }
+    private InitUserAughGroupData(uagList:UserAuthGroupSingle[]){
+        uagList.forEach((uag:UserAuthGroupSingle)=>{
+            var user = this.UserDict[uag.Uid]
+            user.AuthGroupDict[uag.Pid][uag.Agid] = uag
+        })
+    }
     AddMyAuth(auth: AUTH) {
         this.MyAuth[auth] = this.MyAuth[AUTH[auth]] = true
         // Object.freeze(this.MyAuth)
@@ -160,7 +177,7 @@ class ManageDataClass {
         this.MyAuth[auth] = this.MyAuth[AUTH[auth]] = false
     }
     GetProjByPid(pid: number): ProjectSingle {
-        return this.ProjList.FindByKey(FieldName.PID, pid)
+        return this.ProjList.FindByKey(FIELD_NAME.Pid, pid)
     }
     /**返回当前用户有权限的工程列表 */
     GetProjectListHasAuth(): ProjectSingle[] {
@@ -172,7 +189,7 @@ class ManageDataClass {
             projList = []
             for (var i = 0; i < ManageData.ProjList.length; i++) {
                 var proj = ManageData.ProjList[i]
-                if (proj.UserList.IndexOfByKey(FieldName.Uid, ManageData.CurrUser.Uid) > -1) {
+                if (proj.UserList.IndexOfByKey(FIELD_NAME.Uid, ManageData.CurrUser.Uid) > -1) {
                     projList.push(proj)
                     if (proj.MasterUid == ManageData.CurrUser.Uid) {
                         ManageData.AddMyAuth(AUTH.PROJECT_MANAGE)
@@ -296,7 +313,7 @@ class ManageDataClass {
     SetUserPosnid(user: UserSingle, did: number, posnid: number) {
         var dept: DepartmentSingle = ManageData.DeptDict[did]
         user.Did = dept.Did
-        var posn: PositionSingle = dept.PosnList.FindByKey(FieldName.Posnid, posnid)
+        var posn: PositionSingle = dept.PosnList.FindByKey(FIELD_NAME.Posnid, posnid)
         user.Posnid = posn.Posnid
         posn.UserList.push(user)
     }
@@ -304,7 +321,7 @@ class ManageDataClass {
     GetPosnByName(deptTree: DepartmentSingle[], posnName: string): PositionSingle {
         for (var i = 0; i < deptTree.length; i++) {
             var dept: DepartmentSingle = deptTree[i]
-            var posn = dept.PosnList.FindByKey(FieldName.Name, posnName)
+            var posn = dept.PosnList.FindByKey(FIELD_NAME.Name, posnName)
             if (posn) {
                 return posn
             }
@@ -351,7 +368,7 @@ class ManageDataClass {
     GetPosnByPosnidInDeptTree(posnid: number, deptTree: DepartmentSingle[]): [DepartmentSingle, PositionSingle] {
         for (var i = 0; i < deptTree.length; i++) {
             var dept = deptTree[i]
-            var posn: PositionSingle = dept.PosnList.FindByKey(FieldName.Posnid, posnid)
+            var posn: PositionSingle = dept.PosnList.FindByKey(FIELD_NAME.Posnid, posnid)
             if (posn) {
                 return [dept, posn]
             } else {
@@ -374,7 +391,7 @@ class ManageDataClass {
     PosnListDelUid(uid: number, posnList: PositionSingle[]) {
         for (var i = 0; i < posnList.length; i++) {
             var posn = posnList[i]
-            posn.UserList.RemoveByKey(FieldName.Uid, uid)
+            posn.UserList.RemoveByKey(FIELD_NAME.Uid, uid)
         }
     }
     /**设置工程userList的一些值都设置为这个工程内的 */

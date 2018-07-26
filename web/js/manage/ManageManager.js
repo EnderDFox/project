@@ -42,7 +42,7 @@ var ManageManagerClass = /** @class */ (function () {
         Commond.Register(PB_CMD.MANAGE_POSN_EDIT_SORT, this.PB_PosnEditSort.bind(this));
         Commond.Register(PB_CMD.MANAGE_POSN_EDIT_AUTH, this.PB_PosnEditAuth.bind(this));
         //
-        Commond.Register(PB_CMD.MANAGE_USER_RLAT_EDIT, this.PB_UserRlatEdit.bind(this));
+        Commond.Register(PB_CMD.MANAGE_USER_EDIT_DEPT, this.PB_UserEditDept.bind(this));
         Commond.Register(PB_CMD.MANAGE_PROJ_DEL_USER, this.PB_ProjDelUser.bind(this));
     };
     ManageManagerClass.prototype.PB_ManageView = function (data) {
@@ -95,7 +95,7 @@ var ManageManagerClass = /** @class */ (function () {
         this.Data.ProjList.push(proj);
     };
     ManageManagerClass.prototype.PB_ProjDel = function (data) {
-        this.Data.ProjList.RemoveByKey(FieldName.PID, data.Pid);
+        this.Data.ProjList.RemoveByKey(FIELD_NAME.Pid, data.Pid);
         delete this.Data.ProjDict[data.Pid];
     };
     ManageManagerClass.prototype.PB_ProjEditName = function (data) {
@@ -132,7 +132,7 @@ var ManageManagerClass = /** @class */ (function () {
             if (dept) {
                 var brothers = this.Data.GetBrotherDepartmentList(dept);
                 if (brothers) {
-                    var brotherIndex = ArrayUtil.IndexOfByKey(brothers, FieldName.Did, dept.Did);
+                    var brotherIndex = ArrayUtil.IndexOfByKey(brothers, FIELD_NAME.Did, dept.Did);
                     brothers.splice(brotherIndex, 1);
                 }
                 //
@@ -159,7 +159,7 @@ var ManageManagerClass = /** @class */ (function () {
                 //移动到新表中
                 var oldBrothers = this.Data.GetBrotherDeptListByFid(dept.Fid);
                 if (oldBrothers) {
-                    oldBrothers.RemoveByKey(FieldName.Did, dept.Did); //从自己的表中删除
+                    oldBrothers.RemoveByKey(FIELD_NAME.Did, dept.Did); //从自己的表中删除
                 }
                 dept.Fid = data.Fid;
                 //加入新列表中,后面会把它删除掉的
@@ -216,7 +216,7 @@ var ManageManagerClass = /** @class */ (function () {
     ManageManagerClass.prototype.PB_PosnDel = function (data) {
         var _a = this.Data.GetPosnByPosnid(data.Posnid), dept = _a[0], posn = _a[1];
         if (dept && posn) {
-            dept.PosnList.RemoveByKey(FieldName.Posnid, data.Posnid);
+            dept.PosnList.RemoveByKey(FIELD_NAME.Posnid, data.Posnid);
         }
     };
     ManageManagerClass.prototype.PB_PosnEditName = function (data) {
@@ -260,16 +260,16 @@ var ManageManagerClass = /** @class */ (function () {
             this.Data.FormatPosnAuthidList(posn, data.AuthidList);
         }
     };
-    ManageManagerClass.prototype.PB_UserRlatEdit = function (data) {
+    ManageManagerClass.prototype.PB_UserEditDept = function (data) {
         // this.Data.RemoveUserPosnid(user)
         // this.Data.SetUserPosnid(user, user.Did, posn.Posnid)
-        for (var i = 0; i < data.RlatList.length; i++) {
-            var rlat = data.RlatList[i];
+        for (var i = 0; i < data.UserDeptList.length; i++) {
+            var rlat = data.UserDeptList[i];
             var user = this.Data.UserDict[rlat.Uid];
             if (user) {
                 var proj = this.Data.ProjDict[rlat.Pid];
                 if (proj) {
-                    if (proj.UserList.IndexOfByKey(FieldName.Uid, rlat.Uid) == -1) {
+                    if (proj.UserList.IndexOfByKey(FIELD_NAME.Uid, rlat.Uid) == -1) {
                         //原本不在工程中
                         proj.UserList.push(user);
                     }
@@ -296,7 +296,7 @@ var ManageManagerClass = /** @class */ (function () {
     ManageManagerClass.prototype.PB_ProjDelUser = function (data) {
         var proj = this.Data.ProjDict[data.Pid];
         if (proj) {
-            proj.UserList.RemoveByKey(FieldName.Uid, data.Uid);
+            proj.UserList.RemoveByKey(FIELD_NAME.Uid, data.Uid);
             //职位里也要删除
             this.Data.PosnDelUidInDeptTree(data.Uid, proj.DeptTree);
         }
@@ -305,7 +305,7 @@ var ManageManagerClass = /** @class */ (function () {
     ManageManagerClass.prototype.UrlParamCallback = function () {
         Common.PopupHideAll();
         var pid = UrlParam.Get(URL_PARAM_KEY.PID, 0);
-        var proj = this.Data.GetProjectListHasAuth().FindByKey(FieldName.PID, pid);
+        var proj = this.Data.GetProjectListHasAuth().FindByKey(FIELD_NAME.Pid, pid);
         if (proj) {
             this.ShowProjectEdit();
         }
@@ -427,7 +427,7 @@ var ManageManagerClass = /** @class */ (function () {
                             return;
                         }
                         if (newName != proj.Name) {
-                            if (_this.Data.ProjList.IndexOfByKey(FieldName.Name, newName) > -1) {
+                            if (_this.Data.ProjList.IndexOfByKey(FIELD_NAME.Name, newName) > -1) {
                                 Common.AlertError("\u5373\u5C06\u628A\u9879\u76EE \"" + proj.Name + "\" \u6539\u540D\u4E3A \"" + newName + "\" <br/><br/>\u4F46\u9879\u76EE\u540D\u79F0 \"" + newName + "\" \u5DF2\u7ECF\u5B58\u5728");
                                 e.target.value = proj.Name;
                                 return;
@@ -471,7 +471,7 @@ var ManageManagerClass = /** @class */ (function () {
                             Common.AlertError("\u9879\u76EE\u540D\u79F0 " + newName + " \u4E0D\u53EF\u4EE5\u4E3A\u7A7A");
                             return;
                         }
-                        if (_this.Data.ProjList.IndexOfByKey(FieldName.Name, newName) > -1) {
+                        if (_this.Data.ProjList.IndexOfByKey(FIELD_NAME.Name, newName) > -1) {
                             Common.AlertError("\u9879\u76EE\u540D\u79F0 " + newName + " \u5DF2\u7ECF\u5B58\u5728");
                             return;
                         }
@@ -490,7 +490,7 @@ var ManageManagerClass = /** @class */ (function () {
     };
     ManageManagerClass.prototype.ShowProjectEdit = function () {
         var _this = this;
-        var proj = this.Data.GetProjectListHasAuth().FindByKey(FieldName.PID, UrlParam.Get(URL_PARAM_KEY.PID));
+        var proj = this.Data.GetProjectListHasAuth().FindByKey(FIELD_NAME.Pid, UrlParam.Get(URL_PARAM_KEY.PID));
         this.Data.CurrProj = proj;
         this.Data.FormatUserListInProj(proj);
         Loader.LoadVueTemplateList([this.VuePath + "ProjectEdit"], function (tplList) {
@@ -580,7 +580,7 @@ var ManageManagerClass = /** @class */ (function () {
                             return;
                         }
                         if (newName != dept.Name) {
-                            if (TreeUtil.FindByKey(_this.Data.CurrProj.DeptTree, FieldName.Name, newName)) {
+                            if (TreeUtil.FindByKey(_this.Data.CurrProj.DeptTree, FIELD_NAME.Name, newName)) {
                                 Common.AlertError("\u5373\u5C06\u628A\u90E8\u95E8 \"" + dept.Name + "\" \u6539\u540D\u4E3A \"" + newName + "\" <br/><br/>\u4F46\u804C\u4F4D\u540D\u79F0 \"" + newName + "\" \u5DF2\u7ECF\u5B58\u5728");
                                 e.target.value = dept.Name;
                                 return;
@@ -631,7 +631,7 @@ var ManageManagerClass = /** @class */ (function () {
                         }
                         //从当前父tree中删除
                         var brothers = _this.Data.GetBrotherDepartmentList(dept);
-                        brothers.RemoveByKey(FieldName.Did, dept.Did);
+                        brothers.RemoveByKey(FIELD_NAME.Did, dept.Did);
                         //
                         if (toParentDept == null) {
                             //改为顶级部门
@@ -664,7 +664,7 @@ var ManageManagerClass = /** @class */ (function () {
                             return;
                         }
                         var brothers = _this.Data.GetBrotherDepartmentList(dp);
-                        var brotherIndex = ArrayUtil.IndexOfByKey(brothers, FieldName.Did, dp.Did);
+                        var brotherIndex = ArrayUtil.IndexOfByKey(brothers, FIELD_NAME.Did, dp.Did);
                         var brother = brothers[brotherIndex + 1];
                         brothers.splice(brotherIndex, 1);
                         brothers.splice(brotherIndex + 1, 0, dp);
@@ -674,7 +674,7 @@ var ManageManagerClass = /** @class */ (function () {
                             return;
                         }
                         var brothers = _this.Data.GetBrotherDepartmentList(dp);
-                        var brotherIndex = ArrayUtil.IndexOfByKey(brothers, FieldName.Did, dp.Did);
+                        var brotherIndex = ArrayUtil.IndexOfByKey(brothers, FIELD_NAME.Did, dp.Did);
                         brothers.splice(brotherIndex, 1);
                         brothers.splice(brotherIndex - 1, 0, dp);
                     },
@@ -710,7 +710,7 @@ var ManageManagerClass = /** @class */ (function () {
                             Common.AlertError("\u90E8\u95E8\u540D\u79F0 " + newName + " \u4E0D\u53EF\u4EE5\u4E3A\u7A7A");
                             return;
                         }
-                        if (TreeUtil.FindByKey(_this.Data.CurrProj.DeptTree, FieldName.Name, newName)) {
+                        if (TreeUtil.FindByKey(_this.Data.CurrProj.DeptTree, FIELD_NAME.Name, newName)) {
                             Common.AlertError("\u90E8\u95E8\u540D\u79F0 " + newName + " \u5DF2\u7ECF\u5B58\u5728");
                             return;
                         }
@@ -766,7 +766,7 @@ var ManageManagerClass = /** @class */ (function () {
             onStart: function (evt) {
                 var $curr = $(evt.item);
                 $curr.find('.tag-depth').hide();
-                var dept = _this.Data.DeptDict[parseInt($(evt.item).attr(FieldName.Did))];
+                var dept = _this.Data.DeptDict[parseInt($(evt.item).attr(FIELD_NAME.Did))];
                 $curr.find('.tag-depth-drag').show();
                 _originDepth = parseInt($curr.find('.tag-depth-drag:first').attr('depth'));
                 _lastDepth = dept.Depth;
@@ -774,8 +774,8 @@ var ManageManagerClass = /** @class */ (function () {
             },
             onMove: function (evt) {
                 var $curr = $(evt.dragged);
-                var dept = _this.Data.DeptDict[parseInt($curr.attr(FieldName.Did))];
-                var toDid = parseInt($(evt.to).attr(FieldName.Did));
+                var dept = _this.Data.DeptDict[parseInt($curr.attr(FIELD_NAME.Did))];
+                var toDid = parseInt($(evt.to).attr(FIELD_NAME.Did));
                 var toParentDept = _this.Data.DeptDict[toDid];
                 var depth;
                 if (toParentDept == null) {
@@ -799,9 +799,9 @@ var ManageManagerClass = /** @class */ (function () {
                 $curr.find('.tag-depth-drag').hide();
             },
             onUpdate: function (evt) {
-                var dept = _this.Data.DeptDict[parseInt($(evt.item).attr(FieldName.Did))];
+                var dept = _this.Data.DeptDict[parseInt($(evt.item).attr(FIELD_NAME.Did))];
                 var brothers = _this.Data.GetBrotherDepartmentList(dept);
-                var oldIndex = brothers.IndexOfByKey(FieldName.Did, dept.Did);
+                var oldIndex = brothers.IndexOfByKey(FIELD_NAME.Did, dept.Did);
                 var toIndex = evt.newIndex;
                 oldIndex += 1;
                 if (dept.Fid == 0) {
@@ -830,8 +830,8 @@ var ManageManagerClass = /** @class */ (function () {
                 WSConn.sendMsg(PB_CMD.MANAGE_DEPT_EDIT_SORT, data);
             },
             onAdd: function (evt) {
-                var dept = _this.Data.DeptDict[parseInt($(evt.item).attr(FieldName.Did))];
-                var toParentDid = parseInt($(evt.to).attr(FieldName.Did));
+                var dept = _this.Data.DeptDict[parseInt($(evt.item).attr(FIELD_NAME.Did))];
+                var toParentDid = parseInt($(evt.to).attr(FIELD_NAME.Did));
                 var brothers = _this.Data.GetBrotherDeptListByFid(toParentDid);
                 var toIndex = evt.newIndex;
                 if (toParentDid == 0) {
@@ -884,7 +884,7 @@ var ManageManagerClass = /** @class */ (function () {
     };
     ManageManagerClass.prototype.DeptListCheckSortDown = function (dp, i0) {
         var brothers = this.Data.GetBrotherDepartmentList(dp);
-        var brotherIndex = ArrayUtil.IndexOfByKey(brothers, FieldName.Did, dp.Did);
+        var brotherIndex = ArrayUtil.IndexOfByKey(brothers, FIELD_NAME.Did, dp.Did);
         if (brotherIndex < brothers.length - 1) {
             return true;
         }
@@ -952,14 +952,14 @@ var ManageManagerClass = /** @class */ (function () {
                     },
                     /**检查是否有部门管理权限 */
                     checkDeptMgrChecked: function (posn) {
-                        return posn.AuthList.IndexOfByKey(FieldName.Authid, AUTH.DEPARTMENT_MANAGE) > -1
-                            && posn.AuthList.IndexOfByKey(FieldName.Authid, AUTH.DEPARTMENT_PROCESS) > -1;
+                        return posn.AuthList.IndexOfByKey(FIELD_NAME.Authid, AUTH.DEPARTMENT_MANAGE) > -1
+                            && posn.AuthList.IndexOfByKey(FIELD_NAME.Authid, AUTH.DEPARTMENT_PROCESS) > -1;
                     },
                     /**修改是否有部门管理权限 */
                     onChangeDeptMgrChecked: function (posn) {
                         var _authidList = [];
-                        var has = posn.AuthList.IndexOfByKey(FieldName.Authid, AUTH.DEPARTMENT_MANAGE) > -1
-                            && posn.AuthList.IndexOfByKey(FieldName.Authid, AUTH.DEPARTMENT_PROCESS) > -1;
+                        var has = posn.AuthList.IndexOfByKey(FIELD_NAME.Authid, AUTH.DEPARTMENT_MANAGE) > -1
+                            && posn.AuthList.IndexOfByKey(FIELD_NAME.Authid, AUTH.DEPARTMENT_PROCESS) > -1;
                         for (var i = 0; i < posn.AuthList.length; i++) {
                             var auth = posn.AuthList[i];
                             if (auth.Authid != AUTH.DEPARTMENT_MANAGE && auth.Authid != AUTH.DEPARTMENT_PROCESS) {
@@ -1138,8 +1138,8 @@ var ManageManagerClass = /** @class */ (function () {
             // ghostClass: 'sortable-ghostClass',
             chosenClass: 'sortable-chosenClass',
             onUpdate: function (evt) {
-                var dept = _this.Data.DeptDict[parseInt($(evt.item).attr(FieldName.Did))];
-                var posnid = parseInt($(evt.item).attr(FieldName.Posnid));
+                var dept = _this.Data.DeptDict[parseInt($(evt.item).attr(FIELD_NAME.Did))];
+                var posnid = parseInt($(evt.item).attr(FIELD_NAME.Posnid));
                 var oldIndex = evt.oldIndex;
                 var toIndex = evt.newIndex;
                 var toSort;
@@ -1271,7 +1271,7 @@ var ManageManagerClass = /** @class */ (function () {
                 data: {
                     auth: _this.Data.MyAuth,
                     userList: proj.UserList,
-                    otherUserList: ArrayUtil.SubByAttr(_this.Data.UserList, proj.UserList, FieldName.Uid),
+                    otherUserList: ArrayUtil.SubByAttr(_this.Data.UserList, proj.UserList, FIELD_NAME.Uid),
                     backPosn: backPosn,
                     filterText: filterText,
                     newUserUid: 0,
@@ -1358,7 +1358,7 @@ var ManageManagerClass = /** @class */ (function () {
                         var dp = _this.Data.DeptDict[did];
                         if (dp) {
                             if (posnid > 0) {
-                                var posn = dp.PosnList.FindByKey(FieldName.Posnid, posnid);
+                                var posn = dp.PosnList.FindByKey(FIELD_NAME.Posnid, posnid);
                                 return posn ? posn.Name : '--';
                             }
                             else {
@@ -1372,7 +1372,7 @@ var ManageManagerClass = /** @class */ (function () {
                     ShowUserName: function (uid) {
                         this.newUserUid = uid;
                         if (uid) {
-                            var user = ArrayUtil.FindByKey(this.otherUserList, FieldName.Uid, uid);
+                            var user = ArrayUtil.FindByKey(this.otherUserList, FIELD_NAME.Uid, uid);
                             if (user) {
                                 return user.Name;
                             }
@@ -1393,8 +1393,8 @@ var ManageManagerClass = /** @class */ (function () {
                             var dept = ManageData.DeptDict[dept.Did];
                             var posn;
                             posn = dept.PosnList[0];
-                            WSConn.sendMsg(PB_CMD.MANAGE_USER_RLAT_EDIT, {
-                                RlatList: [
+                            WSConn.sendMsg(PB_CMD.MANAGE_USER_EDIT_DEPT, {
+                                UserDeptList: [
                                     {
                                         Uid: user.Uid,
                                         Pid: _this.Data.CurrProj.Pid,
@@ -1405,8 +1405,8 @@ var ManageManagerClass = /** @class */ (function () {
                             });
                         }
                         else {
-                            WSConn.sendMsg(PB_CMD.MANAGE_USER_RLAT_EDIT, {
-                                RlatList: [
+                            WSConn.sendMsg(PB_CMD.MANAGE_USER_EDIT_DEPT, {
+                                UserDeptList: [
                                     {
                                         Uid: user.Uid,
                                         Pid: _this.Data.CurrProj.Pid,
@@ -1418,8 +1418,8 @@ var ManageManagerClass = /** @class */ (function () {
                         }
                     },
                     onPosChange: function (user, posn) {
-                        WSConn.sendMsg(PB_CMD.MANAGE_USER_RLAT_EDIT, {
-                            RlatList: [
+                        WSConn.sendMsg(PB_CMD.MANAGE_USER_EDIT_DEPT, {
+                            UserDeptList: [
                                 {
                                     Uid: user.Uid,
                                     Pid: user.Pid,
@@ -1448,7 +1448,7 @@ var ManageManagerClass = /** @class */ (function () {
                         }, "\u5373\u5C06\u5220\u9664\u6210\u5458 \"" + user.Name + "\"");
                     },
                     onAddSelect: function () {
-                        _this.ShowSelectUserForProj(proj, ArrayUtil.SubByAttr(_this.Data.UserList, proj.UserList, FieldName.Uid));
+                        _this.ShowSelectUserForProj(proj, ArrayUtil.SubByAttr(_this.Data.UserList, proj.UserList, FIELD_NAME.Uid));
                     },
                 },
             }).$mount();
@@ -1478,8 +1478,8 @@ var ManageManagerClass = /** @class */ (function () {
                 }
             }
             if (rlatList.length) {
-                WSConn.sendMsg(PB_CMD.MANAGE_USER_RLAT_EDIT, {
-                    RlatList: rlatList
+                WSConn.sendMsg(PB_CMD.MANAGE_USER_EDIT_DEPT, {
+                    UserDeptList: rlatList
                 });
             }
         });
@@ -1517,7 +1517,7 @@ var ManageManagerClass = /** @class */ (function () {
             }
             for (var uidStr in checkedDict) {
                 var _uid = parseInt(uidStr);
-                if (posn.UserList.IndexOfByKey(FieldName.Uid, _uid) == -1) {
+                if (posn.UserList.IndexOfByKey(FIELD_NAME.Uid, _uid) == -1) {
                     //原本不在,现在加进来
                     var rlat = {
                         Uid: _uid,
@@ -1529,8 +1529,8 @@ var ManageManagerClass = /** @class */ (function () {
                 }
             }
             if (rlatList.length) {
-                WSConn.sendMsg(PB_CMD.MANAGE_USER_RLAT_EDIT, {
-                    RlatList: rlatList
+                WSConn.sendMsg(PB_CMD.MANAGE_USER_EDIT_DEPT, {
+                    UserDeptList: rlatList
                 });
             }
         });

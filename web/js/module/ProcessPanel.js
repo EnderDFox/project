@@ -640,14 +640,14 @@ var ProcessPanelClass = /** @class */ (function () {
             switch (type) {
                 case 'forward': //上移
                     var _linkList = link.ParentLid ? ProcessData.LinkMap[link.ParentLid].Children : mode.LinkList;
-                    var index0 = ArrayUtil.IndexOfByKey(_linkList, FieldName.Lid, link.Lid);
+                    var index0 = ArrayUtil.IndexOfByKey(_linkList, FIELD_NAME.Lid, link.Lid);
                     if (index0 > 0) {
                         WSConn.sendMsg(C2L.C2L_PROCESS_LINK_SWAP_SORT, { 'Swap': [_linkList[index0 - 1].Lid, link.Lid] });
                     }
                     break;
                 case 'backward': //下移动
                     var _linkList = link.ParentLid ? ProcessData.LinkMap[link.ParentLid].Children : mode.LinkList;
-                    var index0 = ArrayUtil.IndexOfByKey(_linkList, FieldName.Lid, link.Lid);
+                    var index0 = ArrayUtil.IndexOfByKey(_linkList, FIELD_NAME.Lid, link.Lid);
                     if (index0 < _linkList.length - 1) {
                         WSConn.sendMsg(C2L.C2L_PROCESS_LINK_SWAP_SORT, { 'Swap': [link.Lid, _linkList[index0 + 1].Lid] });
                     }

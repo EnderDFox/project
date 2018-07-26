@@ -73,12 +73,13 @@ enum LinkStatusField {
 
 //# const
 
-class FieldName {
-    static PID = "Pid"
+class FIELD_NAME {
+    static Pid = "Pid"
     static Uid = "Uid"
     static Did = "Did"
     static Posnid = "Posnid"
     static Authid = "Authid"
+    static Agid = "Agid"
     static Mid = "Mid"
     static Lid = "Lid"
     static Tmid = "Tmid"
@@ -104,6 +105,8 @@ interface UserSingle {
     Name?: string
     IsDel?: number
     IsHide?: number
+    //
+    AuthGroupDict: { [key: number]: { [key: number]: UserAuthGroupSingle } };//这里包含了该用户所有工程内的权限组, 如果要删除  key0:pid  kye1:agid
 }
 
 interface ProjectSingle {
@@ -116,6 +119,7 @@ interface ProjectSingle {
     DeptTree?: DepartmentSingle[]
     UserList?: UserSingle[]
     ModeList?: ModeSingle[]
+    AuthGroupList?: AuthGroupSingle[]
 }
 
 interface DepartmentSingle {
@@ -135,10 +139,31 @@ interface PositionSingle {
     Did?: DidField
     Name?: string
     Sort?: number,
-    AuthidList?: uint64[]
+    AuthidList?: AUTH[]
     //client
     AuthList?: AuthSingle[]
     UserList?: UserSingle[]
+}
+
+interface AuthGroupSingle {
+    Agid: uint64
+    Pid: uint64
+    Name: string
+    Desc: string
+    Sort: uint32
+    AuthidList: AUTH[]
+    //client
+    AuthList?: AuthSingle[]
+}
+
+interface AuthGroupAuthSingle {
+    Agid: uint64
+    Authid: AUTH
+}
+interface UserAuthGroupSingle {
+    Uid: uint64
+    Pid: uint64
+    Agid: uint64
 }
 
 interface UserDeptSingle {
@@ -157,7 +182,7 @@ interface AuthModSingle {
     CheckedChange?: boolean
 }
 interface AuthSingle {
-    Authid?: int
+    Authid?: AUTH
     Modid?: int
     Name?: string
     Description?: string //dsc/descr
@@ -438,8 +463,9 @@ interface L2C_ManageView {
     UserList?: UserSingle[]
     ProjList?: ProjectSingle[]
     DeptList?: DepartmentSingle[]
-    PosnList?: PositionSingle[]
     UserDeptList?: UserDeptSingle[]
+    AuthGroupList?: AuthGroupSingle[]
+    UserAuthGroupList?: UserAuthGroupSingle[]
 }
 
 interface C2L_ManageProjAdd {
@@ -494,7 +520,7 @@ interface C2L_ManagePosnEditSort {
 }
 interface C2L_ManagePosnEditAuth {
     Posnid: uint64
-    AuthidList: uint64[] //权限id列表 (现有的,旧的新的都在里面就可以了)
+    AuthidList: AUTH[] //权限id列表 (现有的,旧的新的都在里面就可以了)
 }
 
 //#user
@@ -507,6 +533,46 @@ interface C2L_ManageProjDelUser {
     Pid: uint64
     Uid: uint64
 }
+
+interface C2L_ManageUserEditSort {
+    Uid: uint64
+    Pid: uint64
+    Sort: uint32
+}
+
+interface C2L_ManageUserEditAuthGroup {
+    Uid: uint64
+    Pid: uint64
+    AgidList: uint64[]
+}
+
+interface C2L_ManageAuthGroupAdd {
+    Pid: uint64
+    Name: string
+    Dsc: string
+}
+
+interface C2L_ManageAuthGroupDel {
+    Agid: uint64
+}
+
+interface C2L_ManageAuthGroupEditName {
+    Agid: uint64
+    Name: string
+}
+interface C2L_ManageAuthGroupEditDsc {
+    Agid: uint64
+    Dsc: string
+}
+interface C2L_ManageAuthGroupEditSort {
+    Agid: uint64
+    Sort: uint32
+}
+interface C2L_ManageAuthGroupEditAuth {
+    Agid: uint64
+    AuthidList: AUTH[]
+}
+
 
 enum AUTH {
     PROJECT_LIST = 70,

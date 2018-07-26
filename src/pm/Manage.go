@@ -35,7 +35,7 @@ func (this *Manage) View() *L2C_ManageView {
 			SELECT pid,name AS proj_name,create_time FROM ` + config.Pm + `.pm_project WHERE is_del=0
 		)	AS t_proj
 		LEFT JOIN ` + config.Mg + `.mag_department AS t_dept ON t_dept.is_del=0 AND t_dept.pid = t_proj.pid
-	ORDER BY t_proj_dept.pid,t_proj_dept.fid,t_proj_dept.d_sort `)
+		ORDER BY t_dept.pid,t_dept.fid,t_dept.sort `)
 	//
 	defer stmt.Close()
 	db.CheckErr(err)
@@ -73,12 +73,13 @@ func (this *Manage) View() *L2C_ManageView {
 	}
 	//#
 	data := &L2C_ManageView{
-		AuthList:      this.GetAuthList(),
-		UserList:      this.GetUserList(),
-		ProjList:      projList,
-		DeptList:      deptList,
-		UserDeptList:  this.GetUserDeptList(pidList...),
-		AuthGroupList: this.GetAuthGroupListAll(pidList...),
+		AuthList:          this.GetAuthList(),
+		UserList:          this.GetUserList(),
+		ProjList:          projList,
+		DeptList:          deptList,
+		UserDeptList:      this.GetUserDeptList(pidList...),
+		AuthGroupList:     this.GetAuthGroupListAll(pidList...),
+		UserAuthGroupList: this.GetUserAuthGroupList(pidList...),
 	}
 	return data
 }
@@ -97,24 +98,26 @@ func (this *Manage) ProjAdd(name string) *ProjectSingle {
 	// dept := this.DeptAdd(pid, 0, `管理部`)
 	//## 加默认权限组
 	//### 项目管理员
+	var authGroupList []*AuthGroupSingle
 	var authGroupSingle *AuthGroupSingle
 	authGroupSingle = this.AuthGroupAdd(pid, `项目管理员`, `可以管理该项目全部功能`)
+	authGroupList = append(authGroupList, authGroupSingle)
 	//加默认权限
-	authidList := []uint64{AUTH_PROJECT_MANAGE, AUTH_PROJECT_PROCESS, AUTH_COLLATE_EDIT, AUTH_DEPARTMENT_MANAGE, AUTH_DEPARTMENT_PROCESS}
-	this.AuthGroupEditAuth(false, authGroupSingle.Agid, authidList...)
-	authGroupSingle.AuthidList = append(authGroupSingle.AuthidList, authidList...)
+	authGroupSingle.AuthidList = []uint64{AUTH_PROJECT_MANAGE, AUTH_PROJECT_PROCESS, AUTH_COLLATE_EDIT}
+	this.AuthGroupEditAuth(false, authGroupSingle.Agid, authGroupSingle.AuthidList...)
 	//### 部门管理员
 	authGroupSingle = this.AuthGroupAdd(pid, `部门管理员`, `可以管理所属部门全部功能`)
+	authGroupList = append(authGroupList, authGroupSingle)
 	//加默认权限
-	authidList = []uint64{AUTH_DEPARTMENT_MANAGE, AUTH_DEPARTMENT_PROCESS}
-	this.AuthGroupEditAuth(false, authGroupSingle.Agid, authidList...)
-	authGroupSingle.AuthidList = append(authGroupSingle.AuthidList, authidList...)
+	authGroupSingle.AuthidList = []uint64{AUTH_DEPARTMENT_MANAGE, AUTH_DEPARTMENT_PROCESS}
+	this.AuthGroupEditAuth(false, authGroupSingle.Agid, authGroupSingle.AuthidList...)
 	//##
 	//#
 	proj := &ProjectSingle{
-		Pid:        pid,
-		Name:       name,
-		CreateTime: uint32(createTime),
+		Pid:           pid,
+		Name:          name,
+		CreateTime:    uint32(createTime),
+		AuthGroupList: authGroupList,
 		// DeptTree:   []*DepartmentSingle{dept},
 	}
 	return proj
@@ -691,9 +694,9 @@ func (this *Manage) GetAuthGroupListAll(pidList ...uint64) []*AuthGroupSingle {
 	sql := `
 	SELECT t_ag.*,t_aga.authid
 	FROM (
-	SELECT agid,pid,name,description,sort FROM  ` + config.Mg + `mag_auth_group WHERE is_del=0 AND pid IN (` + strings.Join(pidStrList, `,`) + `)
+	SELECT agid,pid,name,description,sort FROM  ` + config.Mg + `.mag_auth_group WHERE is_del=0 AND pid IN (` + strings.Join(pidStrList, `,`) + `)
 	) AS t_ag
-	LEFT JOIN  ` + config.Mg + `mag_auth_group_auth AS t_aga ON t_aga.agid = t_ag.agid
+	LEFT JOIN  ` + config.Mg + `.mag_auth_group_auth AS t_aga ON t_aga.agid = t_ag.agid
 	ORDER BY sort, authid
 	`
 	stmt, err := db.GetDb().Prepare(sql)
@@ -747,7 +750,7 @@ func (this *Manage) GetUserAuthGroupList(pidList ...uint64) []*UserAuthGroupSing
 	for _, pid := range pidList {
 		pidStrList = append(pidStrList, strconv.FormatInt(int64(pid), 10))
 	}
-	sql := `SELECT uid,pid,did FROM ` + config.Mg + `.mag_user_auth_group WHERE pid IN (` + strings.Join(pidStrList, `,`) + `)`
+	sql := `SELECT uid,pid,agid FROM ` + config.Mg + `.mag_user_auth_group WHERE pid IN (` + strings.Join(pidStrList, `,`) + `)`
 	stmt, err := db.GetDb().Prepare(sql)
 	defer stmt.Close()
 	db.CheckErr(err)

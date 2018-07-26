@@ -69,20 +69,21 @@ var LinkStatusField;
     LinkStatusField[LinkStatusField["STORE"] = 1] = "STORE";
 })(LinkStatusField || (LinkStatusField = {}));
 //# const
-var FieldName = /** @class */ (function () {
-    function FieldName() {
+var FIELD_NAME = /** @class */ (function () {
+    function FIELD_NAME() {
     }
-    FieldName.PID = "Pid";
-    FieldName.Uid = "Uid";
-    FieldName.Did = "Did";
-    FieldName.Posnid = "Posnid";
-    FieldName.Authid = "Authid";
-    FieldName.Mid = "Mid";
-    FieldName.Lid = "Lid";
-    FieldName.Tmid = "Tmid";
-    FieldName.Tlid = "Tlid";
-    FieldName.Name = "Name";
-    return FieldName;
+    FIELD_NAME.Pid = "Pid";
+    FIELD_NAME.Uid = "Uid";
+    FIELD_NAME.Did = "Did";
+    FIELD_NAME.Posnid = "Posnid";
+    FIELD_NAME.Authid = "Authid";
+    FIELD_NAME.Agid = "Agid";
+    FIELD_NAME.Mid = "Mid";
+    FIELD_NAME.Lid = "Lid";
+    FIELD_NAME.Tmid = "Tmid";
+    FIELD_NAME.Tlid = "Tlid";
+    FIELD_NAME.Name = "Name";
+    return FIELD_NAME;
 }());
 var AUTH;
 (function (AUTH) {

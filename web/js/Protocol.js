@@ -138,7 +138,7 @@ var PB_CMD = /** @class */ (function () {
     PB_CMD.MANAGE_POSN_EDIT_SORT = 90134;
     PB_CMD.MANAGE_POSN_EDIT_AUTH = 90135;
     //#user
-    PB_CMD.MANAGE_USER_RLAT_EDIT = 90141;
+    PB_CMD.MANAGE_USER_EDIT_DEPT = 90141;
     PB_CMD.MANAGE_PROJ_DEL_USER = 90142;
     return PB_CMD;
 }());
