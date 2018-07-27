@@ -85,7 +85,7 @@ class ProcessDataClass {
 				} else {
 					this.LinkMap[link.Lid] = link
 					this.LinkMap[link.ParentLid] = parentLink
-					if (ArrayUtil.IndexOfByKey(parentLink.Children, FIELD_NAME.Lid, link.Lid) == -1) {
+					if (ArrayUtil.IndexOfAttr(parentLink.Children, FieldName.Lid, link.Lid) == -1) {
 						parentLink.Children.push(link)
 					}
 				}

@@ -1,0 +1,39 @@
+<div>
+    <navbar-comp :currUser="currUser" isProjList="0" @onShowProjList="onShowProjList()">
+        <!-- <div class="collapse navbar-collapse"> -->
+        <div>
+            <ul class="nav navbar-nav">
+                <li class="navbar-text" style="margin-left: 0px;">
+                    <span>/</span>
+                </li>
+                <li class="dropdown">
+                    <a class="dropdown-toggle navbar-brand" :data-toggle="projectList.length>1?'dropdown':'label'" :style="{'cursor':
+                    projectList.length>1?'pointer':'default'}" role="button" aria-haspopup="true" aria-expanded="false">{{project.Name}}
+                        <span class="caret" v-if="projectList.length>1"></span>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li v-for="proj,index in projectList" :key="proj.Pid">
+                            <a @click="onShowProj(proj,index)">{{proj.Name}}</a>
+                        </li>
+                    </ul>
+                </li>
+                <li :class="{'active':currPage==2}" style="margin-left: 100px;">
+                    <a @click="onShowPage(2)">
+                        <span class="glyphicon glyphicon-th-list" aria-hidden="true">
+                            部门
+                        </span>
+                    </a>
+                </li>
+                <li :class="{'active':currPage==1}">
+                    <a @click="onShowPage(1)">
+                        <span class="glyphicon glyphicon-user" aria-hidden="true">
+                            成员
+                        </span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </navbar-comp>
+    <div id="projectEditContent">
+    </div>
+</div>

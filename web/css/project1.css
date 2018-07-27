@@ -1,0 +1,32 @@
+.manager ul {
+    padding-left: 0px;
+}
+
+.manager li {
+    margin-left: 10px;
+}
+
+.manager .body,
+.manager .foot {
+    margin-left: 20px;
+}
+
+.manager .btnSmall1 {
+    width: 30px;
+    height: 30px;
+    line-height: 30px;
+}
+
+.manager .miniDelete{
+    border-radius: 50%;
+    width: 16px;
+    height: 16px;
+    line-height: 12px;
+    font-size: 12px;
+    /* font-family: Arial, Helvetica, sans-serif; */
+    /* font-weight: normal; */
+    color: #FFFFFF;
+    background-color: rgba(0, 0, 0, 0.612);
+    padding: 0px 0px 0px 0px;
+    z-index:100;
+  }

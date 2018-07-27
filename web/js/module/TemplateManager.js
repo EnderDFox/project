@@ -48,14 +48,14 @@ var TemplateManagerClass = /** @class */ (function () {
     };
     TemplateManagerClass.prototype.L2C_ModeEditName = function (data) {
         var modes = this.DataModes;
-        var index = ArrayUtil.IndexOfByKey(modes, FIELD_NAME.Tmid, data.Tmid);
+        var index = ArrayUtil.IndexOfAttr(modes, FieldName.Tmid, data.Tmid);
         if (index > -1) {
             var mode = modes[index].Name = data.Name;
         }
     };
     TemplateManagerClass.prototype.L2C_ModeDelete = function (data) {
         var modes = this.DataModes;
-        var index = ArrayUtil.IndexOfByKey(modes, FIELD_NAME.Tmid, data.Tmid);
+        var index = ArrayUtil.IndexOfAttr(modes, FieldName.Tmid, data.Tmid);
         if (index > -1) {
             //先如果删除的是正在编辑的,则关闭编辑流程列表面板
             if (this.vue_editTplModeDetail && this.vue_editTplModeDetail.mode.Tmid == modes[index].Tmid) {
@@ -71,7 +71,7 @@ var TemplateManagerClass = /** @class */ (function () {
             link.Children = [];
         }
         var modes = this.DataModes;
-        var index = ArrayUtil.IndexOfByKey(modes, FIELD_NAME.Tmid, link.Tmid);
+        var index = ArrayUtil.IndexOfAttr(modes, FieldName.Tmid, link.Tmid);
         if (index == -1) {
             console.log("[debug]", "L2C_LinkAdd index==-1", mode, ":[mode]");
             return;
@@ -110,7 +110,7 @@ var TemplateManagerClass = /** @class */ (function () {
                     return;
                 }
                 else {
-                    var index = ArrayUtil.IndexOfByKey(tlink.Children, FIELD_NAME.Tlid, data.Tlid);
+                    var index = ArrayUtil.IndexOfAttr(tlink.Children, FieldName.Tlid, data.Tlid);
                     if (index > -1) {
                         tlink.Children[index].Name = data.Name;
                         return;
@@ -131,7 +131,7 @@ var TemplateManagerClass = /** @class */ (function () {
                     return;
                 }
                 else {
-                    var index = ArrayUtil.IndexOfByKey(tlink.Children, FIELD_NAME.Tlid, data.Tlid);
+                    var index = ArrayUtil.IndexOfAttr(tlink.Children, FieldName.Tlid, data.Tlid);
                     if (index > -1) {
                         tlink.Children[index].Did = data.Did;
                         return;
@@ -144,7 +144,7 @@ var TemplateManagerClass = /** @class */ (function () {
     TemplateManagerClass.prototype.L2C_LinkEditSort = function (data) {
         var modes = this.DataModes;
         var mode;
-        var index = ArrayUtil.IndexOfByKey(modes, FIELD_NAME.Tmid, data.Tmid);
+        var index = ArrayUtil.IndexOfAttr(modes, FieldName.Tmid, data.Tmid);
         if (index > -1) {
             mode = modes[index];
         }
@@ -157,7 +157,7 @@ var TemplateManagerClass = /** @class */ (function () {
             _linkList = mode.Links;
         }
         else {
-            var parentTlink = ArrayUtil.FindByKey(mode.Links, FIELD_NAME.Tlid, data.ParentTlid);
+            var parentTlink = ArrayUtil.FindOfAttr(mode.Links, FieldName.Tlid, data.ParentTlid);
             if (parentTlink) {
                 _linkList = parentTlink.Children;
             }
@@ -204,7 +204,7 @@ var TemplateManagerClass = /** @class */ (function () {
                     return;
                 }
                 else {
-                    var index = ArrayUtil.IndexOfByKey(tlink.Children, FIELD_NAME.Tlid, data.Tlid);
+                    var index = ArrayUtil.IndexOfAttr(tlink.Children, FieldName.Tlid, data.Tlid);
                     if (index > -1) {
                         tlink.Children.splice(index, 1);
                         return;
@@ -234,7 +234,7 @@ var TemplateManagerClass = /** @class */ (function () {
         var len = modes.length;
         for (var i = 0; i < len; i++) {
             var mode = modes[i];
-            var index = ArrayUtil.IndexOfByKey(mode.Links, FIELD_NAME.Tlid, tlid);
+            var index = ArrayUtil.IndexOfAttr(mode.Links, FieldName.Tlid, tlid);
             if (index > -1) {
                 return mode.Links[tlid];
             }
@@ -308,7 +308,7 @@ var TemplateManagerClass = /** @class */ (function () {
                         },
                         onEditName: function (e, Tmid) {
                             var modes = this.modes;
-                            var index = ArrayUtil.IndexOfByKey(modes, FIELD_NAME.Tmid, Tmid);
+                            var index = ArrayUtil.IndexOfAttr(modes, FieldName.Tmid, Tmid);
                             if (index > -1) {
                                 var mode = modes[index];
                                 var newName = $('#editTplModeList_' + Tmid + '_name').val().trim();
@@ -384,7 +384,7 @@ var TemplateManagerClass = /** @class */ (function () {
         //
         var modes = this.vue_editTplModeList.modes;
         var mode;
-        modeIndex = ArrayUtil.IndexOfByKey(modes, FIELD_NAME.Tmid, showTmid);
+        modeIndex = ArrayUtil.IndexOfAttr(modes, FieldName.Tmid, showTmid);
         if (modeIndex > -1) {
             mode = modes[modeIndex];
         }
@@ -396,7 +396,7 @@ var TemplateManagerClass = /** @class */ (function () {
         //
         var linkIndex;
         if (parentTlink != null) {
-            linkIndex = ArrayUtil.IndexOfByKey(mode.Links, FIELD_NAME.Tlid, parentTlink.Tlid);
+            linkIndex = ArrayUtil.IndexOfAttr(mode.Links, FieldName.Tlid, parentTlink.Tlid);
             if (linkIndex > -1) {
             }
             else {
@@ -513,7 +513,7 @@ var TemplateManagerClass = /** @class */ (function () {
                                 _vue.newDid = newDid;
                             }
                             else {
-                                var index = ArrayUtil.IndexOfByKey(_vue.linkList, FIELD_NAME.Tlid, tlid);
+                                var index = ArrayUtil.IndexOfAttr(_vue.linkList, FieldName.Tlid, tlid);
                                 if (index > -1) { //第一个不需要上移了
                                     _vue.linkList[index].Did = newDid;
                                     WSConn.sendMsg(C2L.C2L_TPL_LINK_EDIT_DID, {

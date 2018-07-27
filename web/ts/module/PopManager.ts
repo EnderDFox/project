@@ -14,7 +14,7 @@ class PopManagerClass {
     }
     /**注册外部点击事件*/
     RegisterMouseOut(selector, callback) {
-        var oldIndxe = ArrayUtil.IndexOfByKey(this.mouseOutList, "selector", selector)
+        var oldIndxe = ArrayUtil.IndexOfAttr(this.mouseOutList, "selector", selector)
         if (oldIndxe == -1) {
             //延迟一下 避免刚取消就加进来了,因为冒泡会导致这里重复调用
             setTimeout(() => {
@@ -24,7 +24,7 @@ class PopManagerClass {
     }
     /**注销外部点击事件*/
     CancelMouseOut(selector) {
-        var oldIndxe = ArrayUtil.IndexOfByKey(this.mouseOutList, "selector", selector)
+        var oldIndxe = ArrayUtil.IndexOfAttr(this.mouseOutList, "selector", selector)
         if (oldIndxe > -1) {
             this.mouseOutList.splice(oldIndxe, 1)
         }

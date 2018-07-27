@@ -7,18 +7,6 @@ type uint32 = number
 type uint64 = number
 type char = string
 
-/**
- * 网址参数使用的key
- */
-class URL_PARAM_KEY {
-    static UID = 'uid'
-    static PID = 'pid'
-    static PAGE = 'page'
-    static DID = 'did'
-    /**search key */
-    static FKEY = 'fkey'
-}
-
 //项目id  pm_project.pid
 enum PidFeild {
     AGAME = 1,
@@ -73,19 +61,15 @@ enum LinkStatusField {
 
 //# const
 
-class FIELD_NAME {
-    static Pid = "Pid"
-    static Uid = "Uid"
+class FieldName {
     static Did = "Did"
-    static Posnid = "Posnid"
-    static Authid = "Authid"
-    static Agid = "Agid"
+    static Uid = "Uid"
     static Mid = "Mid"
     static Lid = "Lid"
     static Tmid = "Tmid"
     static Tlid = "Tlid"
+    static Posid = "Posid"
     static Name = "Name"
-    static Sort = "Sort"
 }
 
 
@@ -97,30 +81,12 @@ interface IXY {
 
 interface UserSingle {
     Uid?: number
-    //只有在当前项目选定后才会有下面的设定
     Pid?: PidFeild
     Did?: DidField
-    Posnid?: DidField
-    Sort?: number
-    //
+    Posid?: DidField
     Name?: string
     IsDel?: number
     IsHide?: number
-    //
-    AuthGroupDict: { [key: number]: { [key: number]: UserAuthGroupSingle } };//这里包含了该用户所有工程内的权限组, 如果要删除  key0:pid  kye1:agid
-}
-
-interface ProjectSingle {
-    Pid?: number
-    Name?: string
-    CreateTime?: number
-    //负责人id
-    MasterUid?: number
-    //client cache data
-    DeptTree?: DepartmentSingle[]
-    UserList?: UserSingle[]
-    ModeList?: ModeSingle[]
-    AuthGroupList?: AuthGroupSingle[]
 }
 
 interface DepartmentSingle {
@@ -128,68 +94,31 @@ interface DepartmentSingle {
     Pid?: PidFeild
     Fid?: DidField//上级部门
     Name?: string
-    Sort?: number
     //client
     Depth?: number
     Children?: DepartmentSingle[]
-    PosnList?: PositionSingle[]
+    PositionList?:PositionSingle[]
 }
 
 interface PositionSingle {
-    Posnid?: int
+    Posid?: int
     Did?: DidField
     Name?: string
-    Sort?: number,
-    AuthidList?: AUTH[]
-    //client
-    AuthList?: AuthSingle[]
-    UserList?: UserSingle[]
+    AuthorityList?: AuthoritySingle[]
 }
-
-interface AuthGroupSingle {
-    Agid: uint64
-    Pid: uint64
-    Name: string
-    Desc: string
-    Sort: uint32
-    AuthidList: AUTH[]
-    //client
-    UserList: UserSingle[]
-}
-
-interface AuthGroupAuthSingle {
-    Agid: uint64
-    Authid: AUTH
-}
-interface UserAuthGroupSingle {
-    Uid: uint64
-    Pid: uint64
-    Agid: uint64
-}
-
-interface UserDeptSingle {
-    Uid: uint64
-    Pid: uint64
-    Did: uint64
-    Posnid: uint64
-}
-
-interface AuthModSingle {
+interface AuthorityModuleSingle {
     Modid?: int
     Name?: string
-    AuthList?: AuthSingle[]
-    Description?: string //dsc/descr
+    AuthorityList?: AuthoritySingle[]
     //client
-    CheckedChange?: boolean
+    CheckedChange?:boolean
 }
-interface AuthSingle {
-    Authid?: AUTH
+interface AuthoritySingle {
+    Authid?: int
     Modid?: int
     Name?: string
-    Description?: string //dsc/descr
-    Sort?: number
     //client
-    CheckedChange?: boolean
+    CheckedChange?:boolean
 }
 
 interface DepartmentInfo {
@@ -198,6 +127,16 @@ interface DepartmentInfo {
     user?: UserSingle[]
 }
 
+interface ProjectSingle {
+    Pid?: number
+    Name?: string
+    //负责人id
+    MasterUid?:number   
+    CreateTime:number
+    //client cache data
+    ModeList?: ModeSingle[]
+    UserList?:UserSingle[]
+}
 
 interface ModeSingle {
     Mid?: number
@@ -459,135 +398,8 @@ interface L2C_ProcessPublishDelete {
     DateLine?: string
 }
 
-interface L2C_ManageView {
-    AuthList?: AuthSingle[]
-    UserList?: UserSingle[]
-    ProjList?: ProjectSingle[]
-    DeptList?: DepartmentSingle[]
-    UserDeptList?: UserDeptSingle[]
-    AuthGroupList?: AuthGroupSingle[]
-    UserAuthGroupList?: UserAuthGroupSingle[]
-}
 
-interface C2L_ManageProjAdd {
-    Name: string
-}
-
-interface C2L_ManageProjDel {
-    Pid: uint64
-}
-
-interface C2L_ManageProjEditName {
-    Pid: uint64
-    Name: string
-}
-
-interface C2L_ManageDeptAdd {
-    Pid: uint64
-    Name: string
-    Fid?: uint64
-}
-interface C2L_ManageDeptDel {
-    DidList: uint64[]
-}
-interface C2L_ManageDeptEditName {
-    Did: uint64
-    Name: string
-}
-interface C2L_ManageDeptEditSort {
-    Did: uint64
-    /**新的父部门did */
-    Fid: uint64
-    /**新位置sort值, 之后的sort都会增加+1 */
-    Sort: uint32
-}
-
-
-//#posn
-interface C2L_ManagePosnAdd {
-    Did: uint64
-    Name: string
-}
-interface C2L_ManagePosnDel {
-    Posnid: uint64
-}
-interface C2L_ManagePosnEditName {
-    Posnid: uint64
-    Name: string
-}
-interface C2L_ManagePosnEditSort {
-    Posnid: uint64
-    Sort: uint32 //目标sort
-}
-interface C2L_ManagePosnEditAuth {
-    Posnid: uint64
-    AuthidList: AUTH[] //权限id列表 (现有的,旧的新的都在里面就可以了)
-}
-
-//#user
-/**工程 增加用户  用户修改部门职位都用这个 */
-interface C2L_ManageUserEditDept {
-    UserDeptList: UserDeptSingle[]
-}
-/**Proj删除用户 */
-interface C2L_ManageProjDelUser {
-    Pid: uint64
-    Uid: uint64
-}
-
-interface C2L_ManageUserEditSort {
-    Uid: uint64
-    Pid: uint64
-    Sort: uint32
-}
-
-interface C2L_ManageUserEditAuthGroup {
-    Uid: uint64
-    Pid: uint64
-    AgidList: uint64[]
-}
-
-interface C2L_ManageAuthGroupAdd {
-    Pid: uint64
-    Name: string
-    Dsc: string
-}
-
-interface C2L_ManageAuthGroupDel {
-    Agid: uint64
-}
-
-interface C2L_ManageAuthGroupEditName {
-    Agid: uint64
-    Name: string
-}
-interface C2L_ManageAuthGroupEditDsc {
-    Agid: uint64
-    Dsc: string
-}
-interface C2L_ManageAuthGroupEditSort {
-    Agid: uint64
-    Sort: uint32
-}
-interface C2L_ManageAuthGroupEditAuth {
-    Agid: uint64
-    AuthidList: AUTH[]
-}
-
-interface C2L_ManageAuthGroupEditUser {
-    Agid: uint64
-    Pid: uint64
-    UidList: uint64[]
-}
-
-
-enum AUTH {
-    PROJECT_LIST = 70,
-    //后台
-    PROJECT_MANAGE = 101,
-    DEPARTMENT_MANAGE = 110, //所属部门的管理权限
-    //前台
-    PROJECT_PROCESS = 201, //所属项目的前台
-    DEPARTMENT_PROCESS = 210, //所属部门的后台
-    COLLATE_EDIT = 230, //晨会权限 修改状态
+enum Auth {
+    PROJECT_LIST = 1,
+    PROJECT_EDIT = 2,
 }

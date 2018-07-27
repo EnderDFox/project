@@ -6,7 +6,6 @@ var (
 	process_manager  = NewProcessManager()
 	template_manager = NewTemplateManager()
 	collate_manager  = NewCollateManager()
-	manage_manager   = NewManageManager()
 	save_manager     = NewSaveManager()
 	upload_manager   = NewUploadManager()
 	version_manager  = NewVersionManager()
@@ -32,8 +31,6 @@ func (this *Dispather) Retister() {
 	template_manager.RegisterFunction()
 	//晨会管理注册
 	collate_manager.RegisterFunction()
-	//后台管理
-	manage_manager.RegisterFunction()
 	//保存业务注册
 	save_manager.RegisterFunction()
 	//上传业务

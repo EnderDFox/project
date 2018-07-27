@@ -3,12 +3,9 @@
 //------Array扩展
 interface Array<T> {
     findIndex(predicateFn: (item: T, index?: number, arr?: T[]) => boolean, thisArg?: any): number
-    IndexOfByKey(key: string, value: any): number
-    FindByKey<T>(key: string, value: any): T
-    RemoveByKey(key: string, value: any): number
-    SortBy(key: string): void
-    SortBy(key: string, isDesc: boolean): void
-    SortBy(key: string, isDesc: boolean, forceNum: boolean): void
+    IndexOfAttr(key: string, value: any): number
+    FindOfAttr<T>(key: string, value: any): T
+    RemoveByAttr(key: string, value: any): number
 }
 //------Date扩展
 interface Date {
@@ -46,26 +43,6 @@ declare type CombinedVueInstance1<Data> = Vue & Data;
 declare var echarts: {
     init: (el: HTMLElement) => any
 }
-
-
-//# Sortable
-interface SortableStatic {
-    create(ele: HTMLElement | Vue | Element | Vue[] | Element[], opt: any): Sortable
-}
-interface Sortable {
-    destroy()
-}
-interface SortableEvent extends Event {
-    to: HTMLElement;
-    from: HTMLElement
-    item: HTMLElement
-    dragged: HTMLElement
-    clone: HTMLElement
-    oldIndex: number
-    newIndex: number
-}
-declare const Sortable: SortableStatic
-
 
 
 

@@ -1,17 +1,3 @@
-/**
- * 网址参数使用的key
- */
-var URL_PARAM_KEY = /** @class */ (function () {
-    function URL_PARAM_KEY() {
-    }
-    URL_PARAM_KEY.UID = 'uid';
-    URL_PARAM_KEY.PID = 'pid';
-    URL_PARAM_KEY.PAGE = 'page';
-    URL_PARAM_KEY.DID = 'did';
-    /**search key */
-    URL_PARAM_KEY.FKEY = 'fkey';
-    return URL_PARAM_KEY;
-}());
 //项目id  pm_project.pid
 var PidFeild;
 (function (PidFeild) {
@@ -69,32 +55,22 @@ var LinkStatusField;
     LinkStatusField[LinkStatusField["STORE"] = 1] = "STORE";
 })(LinkStatusField || (LinkStatusField = {}));
 //# const
-var FIELD_NAME = /** @class */ (function () {
-    function FIELD_NAME() {
+var FieldName = /** @class */ (function () {
+    function FieldName() {
     }
-    FIELD_NAME.Pid = "Pid";
-    FIELD_NAME.Uid = "Uid";
-    FIELD_NAME.Did = "Did";
-    FIELD_NAME.Posnid = "Posnid";
-    FIELD_NAME.Authid = "Authid";
-    FIELD_NAME.Agid = "Agid";
-    FIELD_NAME.Mid = "Mid";
-    FIELD_NAME.Lid = "Lid";
-    FIELD_NAME.Tmid = "Tmid";
-    FIELD_NAME.Tlid = "Tlid";
-    FIELD_NAME.Name = "Name";
-    FIELD_NAME.Sort = "Sort";
-    return FIELD_NAME;
+    FieldName.Did = "Did";
+    FieldName.Uid = "Uid";
+    FieldName.Mid = "Mid";
+    FieldName.Lid = "Lid";
+    FieldName.Tmid = "Tmid";
+    FieldName.Tlid = "Tlid";
+    FieldName.Posid = "Posid";
+    FieldName.Name = "Name";
+    return FieldName;
 }());
-var AUTH;
-(function (AUTH) {
-    AUTH[AUTH["PROJECT_LIST"] = 70] = "PROJECT_LIST";
-    //后台
-    AUTH[AUTH["PROJECT_MANAGE"] = 101] = "PROJECT_MANAGE";
-    AUTH[AUTH["DEPARTMENT_MANAGE"] = 110] = "DEPARTMENT_MANAGE";
-    //前台
-    AUTH[AUTH["PROJECT_PROCESS"] = 201] = "PROJECT_PROCESS";
-    AUTH[AUTH["DEPARTMENT_PROCESS"] = 210] = "DEPARTMENT_PROCESS";
-    AUTH[AUTH["COLLATE_EDIT"] = 230] = "COLLATE_EDIT";
-})(AUTH || (AUTH = {}));
+var Auth;
+(function (Auth) {
+    Auth[Auth["PROJECT_LIST"] = 1] = "PROJECT_LIST";
+    Auth[Auth["PROJECT_EDIT"] = 2] = "PROJECT_EDIT";
+})(Auth || (Auth = {}));
 //# sourceMappingURL=Define.js.map

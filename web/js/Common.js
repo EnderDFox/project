@@ -135,15 +135,10 @@ var CommonClass = /** @class */ (function () {
         });
     };
     /**在window内居中 */
-    CommonClass.prototype.AlginCenterInWindow = function (dom, useScorll) {
-        if (useScorll === void 0) { useScorll = true; }
+    CommonClass.prototype.AlginCenterInWindow = function (dom) {
         var $dom = $(dom);
-        var winLeft = 0;
-        var winTop = 0;
-        if (useScorll) {
-            winLeft = $(window).scrollLeft();
-            winTop = $(window).scrollTop();
-        }
+        var winLeft = $(window).scrollLeft();
+        var winTop = $(window).scrollTop();
         $dom.css('position', 'absolute');
         $dom.xy(winLeft + $(window).innerWidth() / 2 - $dom.width() / 2, winTop + $(window).innerHeight() / 2 - $dom.height() / 2);
     };
@@ -206,16 +201,11 @@ var CommonClass = /** @class */ (function () {
             $(this.VuePullDownMenu.$el).hide();
         }
     };
-    CommonClass.prototype.PopupHideAll = function () {
-        if (this.CurrPopupDom) {
-            $(this.CurrPopupDom).remove();
-        }
-    };
+    /**popup */
     CommonClass.prototype.Popup = function (dom) {
         var $dom = $(dom);
-        this.CurrPopupDom = $dom;
         Common.InsertBeforeDynamicDom($dom);
-        this.AlginCenterInWindow($dom.find('.popup_content'), false);
+        this.AlginCenterInWindow($dom.find('.popup_content'));
     };
     CommonClass.prototype.Alert = function (arg) {
         var _this = this;
@@ -231,7 +221,7 @@ var CommonClass = /** @class */ (function () {
             _arg[key] = arg[key];
         }
         if (_arg.Title.trim() == "") {
-            _arg.Title = "&nbsp;"; //没有内容 会导致heading div高度不够
+            _arg.Title = "&nbsp;";
         }
         //
         if (this.VueAlert) {
@@ -245,18 +235,15 @@ var CommonClass = /** @class */ (function () {
             },
             methods: {
                 OnOk: function () {
-                    $(_this.VueAlert.$el).remove();
-                    _this.VueAlert = null;
                     if (_arg.CallbackOk) {
                         _arg.CallbackOk();
                     }
+                    $(_this.VueAlert.$el).remove();
+                    _this.VueAlert = null;
                 },
                 OnClose: function () {
                     $(_this.VueAlert.$el).remove();
                     _this.VueAlert = null;
-                    if (_arg.CallbackCancel) {
-                        _arg.CallbackCancel();
-                    }
                 },
             }
         }).$mount();
@@ -274,10 +261,7 @@ var CommonClass = /** @class */ (function () {
     };
     CommonClass.prototype.AlertError = function (content, title) {
         if (content === void 0) { content = ""; }
-        if (title === void 0) { title = null; }
-        if (title == null) {
-            title = "错误";
-        }
+        if (title === void 0) { title = "错误"; }
         var arg = {
             Title: title,
             Content: content,
@@ -289,10 +273,7 @@ var CommonClass = /** @class */ (function () {
     };
     CommonClass.prototype.AlertWarning = function (content, title) {
         if (content === void 0) { content = ""; }
-        if (title === void 0) { title = null; }
-        if (title == null) {
-            title = "警告";
-        }
+        if (title === void 0) { title = "警告"; }
         var arg = {
             Title: title,
             Content: content,
@@ -302,19 +283,14 @@ var CommonClass = /** @class */ (function () {
         };
         this.Alert(arg);
     };
-    CommonClass.prototype.ConfirmWarning = function (content, title, callbackOk, callbackCancel) {
+    CommonClass.prototype.ConfirmWarning = function (content, title, callbackOk) {
         if (content === void 0) { content = ""; }
-        if (title === void 0) { title = null; }
-        if (callbackCancel === void 0) { callbackCancel = null; }
-        if (title == null) {
-            title = "请确认";
-        }
+        if (title === void 0) { title = ""; }
         var arg = {
             Title: title,
             Content: content,
             Theme: "warning",
             CallbackOk: callbackOk,
-            CallbackCancel: callbackCancel,
         };
         this.Alert(arg);
     };
@@ -325,21 +301,6 @@ var CommonClass = /** @class */ (function () {
     };
     CommonClass.prototype.InitUrlParams = function () {
         this.UrlParamDict = {};
-        UrlParam.Init();
-    };
-    return CommonClass;
-}());
-var Common = new CommonClass();
-var UrlParamClass = /** @class */ (function () {
-    function UrlParamClass() {
-        this.ParamDict = {};
-    }
-    UrlParamClass.prototype.Init = function () {
-        window.addEventListener('popstate', this._parse.bind(this));
-        this._parse();
-    };
-    UrlParamClass.prototype._parse = function () {
-        this.ParamDict = {};
         var str = window.location.href.toLowerCase();
         var index0 = str.indexOf('?');
         if (index0 > -1) {
@@ -352,151 +313,14 @@ var UrlParamClass = /** @class */ (function () {
                 if (equrlIndex > 0) //如果=在第一个也不能要
                     var key = spi.substring(0, equrlIndex);
                 var val = spi.substring(equrlIndex + 1, spi.length);
-                val = decodeURI(val);
                 console.log("[debug]", key, ":[key]", val, ":[val]");
-                this.ParamDict[key.toLowerCase()] = val;
+                this.UrlParamDict[key.toLowerCase()] = val;
             }
         }
-        if (this.Callback != null) {
-            this.Callback();
-        }
     };
-    /**重新生成url参数 */
-    UrlParamClass.prototype.Reset = function () {
-        var rs = [];
-        for (var key in this.ParamDict) {
-            rs.push(key + '=' + this.ParamDict[key]);
-        }
-        var param = rs.join('&');
-        var paramEncode = encodeURI(param);
-        history.pushState(param, null, '?' + paramEncode);
-        return this;
-    };
-    UrlParamClass.prototype.RemoveAll = function () {
-        var isChange = false;
-        for (var key in this.ParamDict) {
-            if (key == URL_PARAM_KEY.UID) {
-                //本项目略过这个
-            }
-            else {
-                delete this.ParamDict[key];
-                isChange = true;
-            }
-        }
-        if (isChange) {
-            // this.ResetUrlParam()
-        }
-        return this;
-    };
-    UrlParamClass.prototype.Remove = function (key) {
-        this.Set(key, null);
-        return this;
-    };
-    UrlParamClass.prototype.Set = function (key, val) {
-        this.SetArr({ key: key, val: val });
-        return this;
-    };
-    UrlParamClass.prototype.SetArr = function () {
-        var args = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            args[_i] = arguments[_i];
-        }
-        var isChange = false;
-        for (var i = 0; i < args.length; i++) {
-            var arg = args[i];
-            if (arg.val == null) {
-                if (this.ParamDict.hasOwnProperty(arg.key)) {
-                    delete this.ParamDict[arg.key];
-                    isChange = true;
-                }
-            }
-            else {
-                if (this.ParamDict[arg.key] != arg.val) {
-                    this.ParamDict[arg.key] = arg.val;
-                    isChange = true;
-                }
-            }
-        }
-        return this;
-        /* 	if (isChange) {
-                this.ResetUrlParam()
-            } */
-    };
-    UrlParamClass.prototype.f = function (a) {
-        return 'a';
-    };
-    UrlParamClass.prototype.Get = function (key) {
-        var args = [];
-        for (var _i = 1; _i < arguments.length; _i++) {
-            args[_i - 1] = arguments[_i];
-        }
-        var _a = this._parseGetParam(args), defaultVal = _a[0], enabledValArr = _a[1];
-        var val;
-        if (this.ParamDict.hasOwnProperty(key)) {
-            val = this.ParamDict[key];
-            var valNumber = parseFloat(val);
-            if (valNumber.toString() == val) {
-                //是数字需要转换成数字
-                val = valNumber;
-            }
-        }
-        else {
-            val = defaultVal;
-        }
-        if (enabledValArr && enabledValArr.length > 0) {
-            if (enabledValArr.indexOf(val) > -1) { //有这个值就返回,否则返回默认值
-                return val;
-            }
-            else {
-                return defaultVal;
-            }
-        }
-        else {
-            return val;
-        }
-    };
-    UrlParamClass.prototype._parseGetParam = function (args) {
-        var defaultVal;
-        var enabledValArr;
-        switch (args.length) {
-            case 0:
-                defaultVal = null;
-                break;
-            case 1:
-                if (typeof (args[0]) == 'object') {
-                    enabledValArr = args[0];
-                    defaultVal = enabledValArr[0];
-                }
-                else {
-                    defaultVal = args[0];
-                }
-                break;
-            case 2:
-                defaultVal = args[0];
-                enabledValArr = args[1];
-                break;
-        }
-        return [defaultVal, enabledValArr];
-    };
-    return UrlParamClass;
+    return CommonClass;
 }());
-var UrlParam = new UrlParamClass();
-var StringUtil = /** @class */ (function () {
-    function StringUtil() {
-    }
-    /**val中是否包含 keyArr 中的某一个值, 如果有,返回该值在val中的位置*/
-    StringUtil.IndexOfKeyArr = function (val, keyArr) {
-        for (var i = 0; i < keyArr.length; i++) {
-            var key = keyArr[i];
-            var index = val.indexOf(key);
-            if (index > -1) {
-                return index;
-            }
-        }
-        return -1;
-    };
-    return StringUtil;
-}());
+var Common = new CommonClass();
 //
 var ArrayUtil = /** @class */ (function () {
     function ArrayUtil() {
@@ -505,21 +329,37 @@ var ArrayUtil = /** @class */ (function () {
      * arr是item为对象的数组, 通过item中的某个值 寻找它在数组中的index
      * e.g. arr : [{a:"2"},{a:"3"}]     ArrayUtil.IndexOfAttr(arr,'a',3)  return 1
     */
-    ArrayUtil.IndexOfByKey = function (arr, key, value) {
-        return arr.IndexOfByKey(key, value);
+    ArrayUtil.IndexOfAttr = function (arr, key, value) {
+        var len = arr.length;
+        for (var i = 0; i < len; i++) {
+            if ((key == null && arr[key] == value) || arr[i][key] == value) {
+                return i;
+            }
+        }
+        return -1;
     };
-    ArrayUtil.FindByKey = function (arr, key, value) {
-        return arr.FindByKey(key, value);
+    ArrayUtil.FindOfAttr = function (arr, key, value) {
+        var len = arr.length;
+        for (var i = 0; i < len; i++) {
+            if ((key == null && arr[key] == value) || arr[i][key] == value) {
+                return arr[i];
+            }
+        }
+        return null;
     };
-    ArrayUtil.RemoveByKey = function (arr, key, value) {
-        return arr.RemoveByKey(key, value);
+    ArrayUtil.RemoveByAttr = function (arr, key, value) {
+        var index = ArrayUtil.IndexOfAttr(arr, key, value);
+        if (index > -1) {
+            arr.splice(index, 1);
+        }
+        return index;
     };
     /**用一个数组减去另一个数组 */
     ArrayUtil.SubByAttr = function (arr0, arr1, key) {
         var rs = [];
         for (var i = 0; i < arr0.length; i++) {
             var item0 = arr0[i];
-            var index0 = ArrayUtil.IndexOfByKey(arr1, key, item0[key]);
+            var index0 = ArrayUtil.IndexOfAttr(arr1, key, item0[key]);
             if (index0 == -1) {
                 rs.push(item0);
             }
@@ -527,135 +367,5 @@ var ArrayUtil = /** @class */ (function () {
         return rs;
     };
     return ArrayUtil;
-}());
-/* interface TreeItem {
-    Children?: TreeItem[]
-}
-interface Tree<T extends TreeItem> extends Array<T> {
-} */
-/*树 型 数组 的处理, 子数组名必须是Children */
-var TreeUtil = /** @class */ (function () {
-    function TreeUtil() {
-    }
-    TreeUtil.Length = function (tree) {
-        var len = tree.length;
-        for (var i = 0; i < tree.length; i++) {
-            var item = tree[i];
-            if (item.Children) {
-                len += TreeUtil.Length(item.Children);
-            }
-        }
-        return len;
-    };
-    /**
-     * map() 方法返回一个新数组，数组中的元素为原始数组元素调用函数处理后的值。
-     * 	map() 方法按照原始数组元素顺序依次处理元素。
-     * callbackfn 如果 是null则不作处理,将所有TreeItem都返回
-     * */
-    TreeUtil.Map = function (tree, callbackfn, rs) {
-        if (callbackfn === void 0) { callbackfn = null; }
-        if (rs === void 0) { rs = null; }
-        rs = rs || [];
-        for (var i = 0; i < tree.length; i++) {
-            var item = tree[i];
-            var newItem = callbackfn ? callbackfn(item, i, tree) : item;
-            rs.push(newItem);
-            if (item.Children) {
-                TreeUtil.Map(item.Children, callbackfn, rs);
-            }
-        }
-        return rs;
-    };
-    /**返回 使用 在每个tree/Children的位置数组 例如   2.1.3   没找到则返回length=0的数组*/
-    TreeUtil.IndexOfByKey = function (tree, key, value, indexArr) {
-        indexArr = indexArr || [];
-        for (var i = 0; i < tree.length; i++) {
-            var item = tree[i];
-            if ((key == null && item == value) || item[key] == value) {
-                indexArr.push(i);
-                return indexArr;
-            }
-            else { //没有匹配,则继续找子
-                if (item.Children) {
-                    var rs = TreeUtil.FindByKey(item.Children, key, value, indexArr);
-                    if (rs) {
-                        //Children中找到了, 直接返回吧
-                        return indexArr;
-                    }
-                }
-            }
-        }
-        return indexArr;
-    };
-    TreeUtil.FindByKey = function (tree, key, value, indexArr) {
-        if (indexArr === void 0) { indexArr = null; }
-        indexArr = indexArr || [];
-        for (var i = 0; i < tree.length; i++) {
-            var item = tree[i];
-            if ((key == null && item == value) || item[key] == value) {
-                indexArr.push(i);
-                return item;
-            }
-            else { //没有匹配,则继续找子
-                if (item.Children) {
-                    var rs = TreeUtil.FindByKey(item.Children, key, value, indexArr);
-                    if (rs) {
-                        //Children中找到了, 直接返回吧
-                        return rs;
-                    }
-                }
-            }
-        }
-        return null;
-    };
-    TreeUtil.RemoveByKey = function (tree, key, value, indexArr) {
-        if (indexArr === void 0) { indexArr = null; }
-        indexArr = indexArr || [];
-        for (var i = 0; i < tree.length; i++) {
-            var item = tree[i];
-            if ((key == null && item == value) || item[key] == value) {
-                indexArr.push(i);
-                tree.splice(i, 1);
-                return item;
-            }
-            else { //没有匹配,则继续找子
-                if (item.Children) {
-                    var rs = TreeUtil.RemoveByKey(item.Children, key, value, indexArr);
-                    if (rs) {
-                        //Children中找到了, 直接返回吧
-                        return rs;
-                    }
-                }
-            }
-        }
-        return null;
-    };
-    /**every() 方法用于检测数组所有元素是否都符合指定条件（通过函数提供）。
-
-every() 方法使用指定函数检测数组中的所有元素：
-
-如果数组中检测到有一个元素不满足，则整个表达式返回 false ，且剩余的元素不会再进行检测。
-如果所有元素都满足条件，则返回 true。 */
-    TreeUtil.Every = function (tree, callbackfn, depth) {
-        if (depth === void 0) { depth = 0; }
-        for (var i = 0; i < tree.length; i++) {
-            var item = tree[i];
-            var rs = callbackfn(item, i, tree, depth);
-            if (!rs) {
-                return false;
-            }
-            else { //没有匹配,则继续找 子Tree
-                if (item.Children) {
-                    var rs = TreeUtil.Every(item.Children, callbackfn, depth + 1);
-                    if (rs = false) {
-                        //Children中找到了, 直接返回吧
-                        return false;
-                    }
-                }
-            }
-        }
-        return true;
-    };
-    return TreeUtil;
 }());
 //# sourceMappingURL=Common.js.map

@@ -24,20 +24,22 @@ class LoaderClass {
     Lang = ['zh']
     //需要加载的css文件列表
     //     <link rel="stylesheet" href="css/common.css?v=v1.3.59" />
-    CssList: ILoadGroup[] = []
+    CssList: ILoadGroup[] = [
+        { path: "", files: ['common', 'project', 'project1'] }
+    ]
     //需要加载的js文件列表  jquery必须提前加载
     //< script src = "js/Loader1.js?v=v1.3.59" > </script>
     JsList: ILoadGroup[] = [
         { path: "", files: ['Define', 'JQueryExtend', 'Protocol', 'Config', 'WSConn', 'Commond', 'Common', 'DateTime', 'Templet', 'Data', 'Main'] },
-        { path: "lib", files: ['vue', 'Echarts.min', 'Cookie', 'jquery.md5', 'Sortable'] },
-        { path: "common", files: ['PrototypeExtend', 'VueManager', 'PopManager',] },
+        { path: "lib", files: ['vue', 'Echarts.min', 'Cookie', 'jquery.md5'] },
+        { path: "common", files: ['PrototypeExtend', 'VueManager'] },
         {
             path: "module", files: ['User', 'ProjectNav', 'FileManager',
                 'ProcessData', 'ProcessManager', 'ProcessPanel', 'ProcessFilter',
                 'CollateData', 'CollateManager', 'CollatePanel', 'CollateFilter',
                 'NoticeData', 'NoticeManager', 'NoticePanel',
                 'ProfileData', 'ProfileManager', 'ProfilePanel',
-                'TemplateManager', 'UploadManager', 'VersionManager',]
+                'TemplateManager', 'PopManager', 'UploadManager', 'VersionManager']
         },
         {
             path: "tests", files: []
@@ -47,18 +49,8 @@ class LoaderClass {
     LoadFileSum = 0
     //加载状态
     IsComplete = false
-    /** Loader初始化后需要进入的入口名 */
-    private MainName: string
-    NeedloadBootstrapCss: boolean = false
     //初始化
-    Init(mainName: string, extendCssList: ILoadGroup[], extendJsList: ILoadGroup[]) {
-        this.MainName = mainName
-        if (extendCssList) {
-            this.ExtendLoadGroupArr(this.CssList, extendCssList)
-        }
-        if (extendJsList) {
-            this.ExtendLoadGroupArr(this.JsList, extendJsList)
-        }
+    Init() {
         Loader.CheckEnviroment()
         var scripts = window.document.head.getElementsByTagName('script')
         var len = scripts.length
@@ -78,24 +70,6 @@ class LoaderClass {
         }
         //加载脚本
         this.LoadAll()
-    }
-    ExtendLoadGroupArr(originArr: ILoadGroup[], extendArr: ILoadGroup[]) {
-        for (var i = 0; i < extendArr.length; i++) {
-            var extendItem: ILoadGroup = extendArr[i]
-            var originItem: ILoadGroup = null
-            originArr.every((_originItem: ILoadGroup): boolean => {
-                if (_originItem.path == extendItem.path) {
-                    originItem = _originItem
-                    return false
-                }
-                return true
-            })
-            if (originItem) {
-                originItem.files = originItem.files.concat(extendItem.files)
-            } else {
-                originArr.push(extendItem)
-            }
-        }
     }
     //注册函数
     RegisterFunc() {
@@ -182,17 +156,7 @@ class LoaderClass {
         }
     }
     //脚本加载完毕
-    private OnLoadCssComplete() {
-        this.LoadFileSum = 0
-        for (var i in this.JsList) {
-            this.LoadFileSum += this.JsList[i].files.length
-        }
-        for (var i in this.JsList) {
-            var item = this.JsList[i]
-            this.AsyncScript(item.files, item.path + '/')
-        }
-    }
-    private OnLoadJsComplete() {
+    private OnLoadJsCssComplete() {
         VueManager.Init(this.OnInitVueComplete.bind(this))
     }
     private OnInitVueComplete() {
@@ -214,7 +178,7 @@ class LoaderClass {
             this.loadSingleCss(path + v, () => {
                 this.LoadFileSum--
                 if (this.LoadFileSum == 0) {
-                    this.OnLoadCssComplete()
+                    this.OnLoadJsCssComplete()
                 }
             })
         }
@@ -228,7 +192,7 @@ class LoaderClass {
                 this.LoadFileSum--
                 if (this.LoadFileSum == 0) {
                     //脚本加载完毕
-                    this.OnLoadJsComplete()
+                    this.OnLoadJsCssComplete()
                 }
             })
             //方法2 这样无法断点  浏览器console中显示的位置也是VM的位置
@@ -270,27 +234,24 @@ class LoaderClass {
     }
     //加载脚本
     LoadAll() {
-        //先加载bootstrap.css和jquery否则需要他的资源无法使用
+        //先加载jquery否则需要他的资源无法使用
         this.loadSingleScript("lib/jquery-3.2.1.min", () => {
-            var _doLoad = () => {
-                //计算总数
-                this.LoadFileSum = 0
-                for (var i in this.CssList) {
-                    this.LoadFileSum += this.CssList[i].files.length
-                }
-                //开始加载
-                for (var i in this.CssList) {
-                    var item = this.CssList[i]
-                    this.AsyncCss(item.files, item.path + '/')
-                }
+            //计算总数
+            this.LoadFileSum = 0
+            for (var i in this.CssList) {
+                this.LoadFileSum += this.CssList[i].files.length
             }
-            if (this.NeedloadBootstrapCss) {
-                // bootstrap.css必须先加载, 否则字体无法加载成功
-                this.loadSingleCss('bootstrap', () => {
-                    _doLoad()
-                })
-            } else {
-                _doLoad()
+            for (var i in this.JsList) {
+                this.LoadFileSum += this.JsList[i].files.length
+            }
+            //开始加载
+            for (var i in this.CssList) {
+                var item = this.CssList[i]
+                this.AsyncCss(item.files, item.path + '/')
+            }
+            for (var i in this.JsList) {
+                var item = this.JsList[i]
+                this.AsyncScript(item.files, item.path + '/')
             }
         })
     }
@@ -317,18 +278,8 @@ class LoaderClass {
     }
     //消息回调
     MsgCall() {
-        switch (this.MainName) {
-            case 'Main':
-                //程序入口
-                Main.Init()
-                break
-            case 'ManageMain':
-                ManageMain.Init()
-                break;
-            default:
-                console.log("[fatal]", "Error MainName:", this.MainName)
-                break;
-        }
+        //程序入口
+        Main.Init()
     }
     //消息同步完成
     MsgAsync(cid: number): void {

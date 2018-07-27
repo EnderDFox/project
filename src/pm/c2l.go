@@ -50,7 +50,7 @@ const (
 	C2L_VERSION_CHANGE_NAME    = 80104
 	C2L_VERSION_CHANGE_PUBLISH = 80105
 	C2L_VERSION_CHANGE_SORT    = 80106
-	C2L_TEST_1                 = 99101
+	C2L_TEST_1                 = 90101
 )
 
 type C2L_SessionLogin struct {
@@ -288,116 +288,4 @@ type C2L_UpdateWorkAdd struct {
 type C2L_UpdateWorkDelete struct {
 	Wid  uint64
 	Fids []uint64
-}
-
-//#proj
-type C2L_ManageProjAdd struct {
-	Name string
-}
-
-type C2L_ManageProjDel struct {
-	Pid uint64
-}
-
-type C2L_ManageProjEditName struct {
-	Pid  uint64
-	Name string
-}
-
-//#dept
-type C2L_ManageDeptAdd struct {
-	Pid  uint64
-	Name string
-	Fid  uint64
-}
-
-type C2L_ManageDeptDel struct {
-	DidList []uint64
-}
-
-type C2L_ManageDeptEditName struct {
-	Did  uint64
-	Name string
-}
-
-type C2L_ManageDeptEditSort struct {
-	Did  uint64
-	Fid  uint64 //新的fid
-	Sort uint32 //目标sort
-}
-
-//#posn
-type C2L_ManagePosnAdd struct {
-	Did  uint64
-	Name string
-}
-type C2L_ManagePosnDel struct {
-	Posnid uint64
-}
-type C2L_ManagePosnEditName struct {
-	Posnid uint64
-	Name   string
-}
-type C2L_ManagePosnEditSort struct {
-	Posnid uint64
-	Sort   uint32 //目标sort
-}
-type C2L_ManagePosnEditAuth struct {
-	Posnid     uint64
-	AuthidList []uint64 //权限id列表 (现有的,旧的新的都在里面就可以了)
-}
-
-//#user
-type C2L_ManageUserEditDept struct {
-	UserDeptList []*UserDeptSingle
-}
-
-type C2L_ManageProjDelUser struct {
-	Pid uint64
-	Uid uint64
-}
-
-type C2L_ManageUserEditSort struct {
-	Uid  uint64
-	Pid  uint64
-	Sort uint32
-}
-
-type C2L_ManageUserEditAuthGroup struct {
-	Uid      uint64
-	Pid      uint64
-	AgidList []uint64
-}
-
-type C2L_ManageAuthGroupAdd struct {
-	Pid  uint64
-	Name string
-	Dsc  string
-}
-
-type C2L_ManageAuthGroupDel struct {
-	Agid uint64
-}
-
-type C2L_ManageAuthGroupEditName struct {
-	Agid uint64
-	Name string
-}
-type C2L_ManageAuthGroupEditDsc struct {
-	Agid uint64
-	Dsc  string
-}
-type C2L_ManageAuthGroupEditSort struct {
-	Agid uint64
-	Sort uint32
-}
-type C2L_ManageAuthGroupEditAuth struct {
-	Agid       uint64
-	AuthidList []uint64
-}
-
-type C2L_ManageAuthGroupEditUser struct {
-	Agid    uint64
-	Pid     uint64
-	UidList []uint64
 }

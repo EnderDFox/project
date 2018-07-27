@@ -42,7 +42,7 @@ var VersionManagerClass = /** @class */ (function () {
         ProcessData.VersionMap[v.Vid] = v;
     };
     VersionManagerClass.prototype.onL2C_VersionDelete = function (data) {
-        var index = ArrayUtil.IndexOfByKey(this.VersionList, "Vid", data.Vid);
+        var index = ArrayUtil.IndexOfAttr(this.VersionList, "Vid", data.Vid);
         if (index >= -1) {
             //其他的修改sort, 新增的sort最大, 所以如果删掉一个, 
             for (var i = index + 1; i < this.VersionList.length; i++) {
@@ -315,7 +315,7 @@ var VersionManagerClass = /** @class */ (function () {
                 pageX = uiList.x() + uiList.width() - 175;
                 pageY = uiList.y();
                 //
-                var index = ArrayUtil.IndexOfByKey(_this.VueVersionList.versions, 'Vid', version.Vid);
+                var index = ArrayUtil.IndexOfAttr(_this.VueVersionList.versions, 'Vid', version.Vid);
                 // console.log("[info]",index,":[index]",version.Vid,":[version.Vid]",version.Ver,":[version.Ver]")
                 if (index > -1) {
                     var btnEdit = uiList.find('.btnEdit').get(index); //放到编辑按钮下面

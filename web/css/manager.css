@@ -1,0 +1,74 @@
+a {
+    cursor: pointer;
+}
+
+/* .table>thead>tr>th,
+.table>tbody>tr>th,
+.table>tfoot>tr>th{
+    text-align: center;
+    vertical-align: middle;
+}
+ */
+
+.popup {
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    height: 100%;
+    z-index: 1000;
+}
+
+.popup .popup_bg {
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    height: 100%;
+    background: rgb(85, 85, 85);
+    filter: alpha(opacity=62);
+    opacity: 0.62;
+}
+
+.btn.disabled, .btn[disabled], fieldset[disabled] .btn {
+    cursor: not-allowed;
+    filter: alpha(opacity=28);
+    -webkit-box-shadow: none;
+    box-shadow: none;
+    opacity: .28;
+}
+
+.td_id {
+    text-align: center;
+    /* 没有important优先级不够 真奇怪  */
+    vertical-align: middle !important;
+    font-weight: bold;
+}
+
+.text-middle {
+    vertical-align: middle !important;
+    /* 没有important优先级不够 真奇怪 */
+}
+
+/*vue transition-group*/
+
+.list-complete-item_none {
+    transition: all 0s;
+}
+
+.list-complete-item {
+    transition: all 0.4s;
+}
+
+.list-complete-enter {
+    opacity: 0;
+}
+
+.list-complete-leave-active {
+    position: absolute;
+}
+
+.list-complete-leave-to {
+    opacity: 0;
+    transition: all 0s;
+}

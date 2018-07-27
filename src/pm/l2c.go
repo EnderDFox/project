@@ -246,13 +246,3 @@ type L2C_UpdateWorkDelete struct {
 	Wid  uint64
 	Fids []uint64
 }
-
-type L2C_ManageView struct {
-	AuthList          []*AuthSingle
-	UserList          []*UserSingle
-	ProjList          []*ProjectSingle
-	DeptList          []*DepartmentSingle
-	UserDeptList      []*UserDeptSingle
-	AuthGroupList     []*AuthGroupSingle
-	UserAuthGroupList []*UserAuthGroupSingle
-}

@@ -25,7 +25,6 @@ type User struct {
 	profilePtr  *Profile
 	processPtr  *Process
 	collatePtr  *Collate
-	managePtr   *Manage
 	savePtr     *Save
 	versionPtr  *Version
 	uploadPtr   *Upload
@@ -64,10 +63,6 @@ func (this *User) Collate() *Collate {
 	return this.collatePtr
 }
 
-func (this *User) Manage() *Manage {
-	return this.managePtr
-}
-
 func (this *User) Save() *Save {
 	return this.savePtr
 }
@@ -92,8 +87,6 @@ func (this *User) Init() {
 	this.processPtr = NewProcess(this)
 	//晨会模块
 	this.collatePtr = NewCollate(this)
-	//后台管理
-	this.managePtr = NewManage(this)
 	//保存模块
 	this.savePtr = NewSave(this)
 	//
