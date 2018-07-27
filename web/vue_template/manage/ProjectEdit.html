@@ -27,17 +27,24 @@
                             </span>
                         </a>
                     </li>
-                    <li :class="{'active':currPage==2}">
+                    <!--  <li :class="{'active':currPage==2}">
                         <a @click="onShowPage(2)">
                             <span class="glyphicon glyphicon-th-list" aria-hidden="true">
                                 职位
                             </span>
                         </a>
-                    </li>
+                    </li> -->
                     <li :class="{'active':currPage==3}">
                         <a @click="onShowPage(3)">
                             <span class="glyphicon glyphicon-user" aria-hidden="true">
                                 成员
+                            </span>
+                        </a>
+                    </li>
+                    <li :class="{'active':currPage==4}">
+                        <a @click="onShowPage(4)">
+                            <span class="glyphicon glyphicon-th-list" aria-hidden="true">
+                                权限组
                             </span>
                         </a>
                     </li>

@@ -395,3 +395,9 @@ type C2L_ManageAuthGroupEditAuth struct {
 	Agid       uint64
 	AuthidList []uint64
 }
+
+type C2L_ManageAuthGroupEditUser struct {
+	Agid    uint64
+	Pid     uint64
+	UidList []uint64
+}

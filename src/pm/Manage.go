@@ -151,8 +151,9 @@ func (this *Manage) DeptAdd(pid uint64, fid uint64, name string) *DepartmentSing
 	stmt, err := db.GetDb().Prepare(`INSERT INTO ` + config.Mg + `.mag_department (pid,fid,name,sort) VALUES (?,?,?,(
 			(SELECT IFNULL(
 				(SELECT ms FROM(SELECT max(sort)+1 AS ms FROM ` + config.Mg + `.mag_department WHERE pid=? AND fid=?) m)
-			,IF(?,1,0)))
+			,1))
 	))`)
+	// ,IF(?,1,0)))
 	defer stmt.Close()
 	db.CheckErr(err)
 	res, err := stmt.Exec(pid, fid, name, pid, fid, fid)
@@ -459,14 +460,14 @@ func (this *Manage) AuthGroupEditAuth(removeOld bool, agid uint64, authidList ..
 	var list []*AuthGroupAuthSingle
 	//先删除旧的
 	if removeOld {
-		stmt, err := db.GetDb().Prepare(`DELETE FROM ` + config.Mg + `.mag_auth_group WHERE agid = ?`)
+		stmt, err := db.GetDb().Prepare(`DELETE FROM ` + config.Mg + `.mag_auth_group_auth WHERE agid = ?`)
 		defer stmt.Close()
 		db.CheckErr(err)
 		_, err = stmt.Exec(agid)
 		db.CheckErr(err)
 	}
 	for _, authid := range authidList {
-		stmt, err := db.GetDb().Prepare(`REPLACE INTO ` + config.Mg + `.mag_auth_group (agid,authid) VALUES (?,?)`)
+		stmt, err := db.GetDb().Prepare(`REPLACE INTO ` + config.Mg + `.mag_auth_group_auth (agid,authid) VALUES (?,?)`)
 		defer stmt.Close()
 		db.CheckErr(err)
 		_, err = stmt.Exec(agid, authid)
@@ -480,24 +481,70 @@ func (this *Manage) AuthGroupEditAuth(removeOld bool, agid uint64, authidList ..
 	return list
 }
 
-/**工程新增user 或者 修改 user的职位*/
-func (this *Manage) UserEditDept(userDeptList ...*UserDeptSingle) int64 {
-	var numAll int64
-	for _, userDept := range userDeptList {
-		stmt, err := db.GetDb().Prepare(`REPLACE INTO ` + config.Mg + `.mag_user_dept (uid,pid,did,sort) VALUES (?,?,?,(
-			(SELECT IFNULL(
-				(SELECT ms FROM(SELECT max(sort)+1 AS ms FROM ` + config.Mg + `.mag_user_dept WHERE pid=?) m)
-			,1))
-		))`)
+func (this *Manage) AuthGroupEditUser(removeOld bool, agid uint64, pid uint64, uidList ...uint64) []*UserAuthGroupSingle {
+	//先删除旧的
+	if removeOld {
+		stmt, err := db.GetDb().Prepare(`DELETE FROM ` + config.Mg + `.mag_user_auth_group WHERE agid = ? AND pid = ?`)
 		defer stmt.Close()
 		db.CheckErr(err)
-		res, err := stmt.Exec(userDept.Uid, userDept.Pid, userDept.Did)
+		_, err = stmt.Exec(agid)
 		db.CheckErr(err)
-		num, err := res.RowsAffected()
-		db.CheckErr(err)
-		numAll += num
 	}
-	return 0
+	var list []*UserAuthGroupSingle
+	for _, uid := range uidList {
+		stmt, err := db.GetDb().Prepare(`REPLACE INTO ` + config.Mg + `.mag_user_auth_group (uid,pid,agid) VALUES (?,?,?)`)
+		defer stmt.Close()
+		db.CheckErr(err)
+		_, err = stmt.Exec(uid, pid, agid, agid)
+		db.CheckErr(err)
+		single := &UserAuthGroupSingle{
+			Uid:  uid,
+			Pid:  pid,
+			Agid: agid,
+		}
+		list = append(list, single)
+	}
+	return list
+}
+
+/**工程新增user 或者 修改 user的职位*/
+func (this *Manage) UserEditDept(userDeptList ...*UserDeptSingle) int64 {
+	var maxSort uint32
+	//
+	var numAll int64
+	for _, userDept := range userDeptList {
+		old := this.GetUserDeptSingle(userDept.Uid, userDept.Pid)
+		// log.Println("[log]", old, ":[old]", old.Uid, ":[old.Uid]", old.Pid, ":[old.Pid]", old.Did, ":[old.Did]", old.Sort, ":[old.Sort]")
+		if old.Sort == 0 { //新增
+			if maxSort == 0 {
+				//计算当前最大sort
+				stmt, err := db.GetDb().Prepare(`SELECT IFNULL(
+		(SELECT ms FROM(SELECT max(sort) AS ms FROM ` + config.Mg + `.mag_user_dept WHERE pid=?) m)
+	,0)`)
+				defer stmt.Close()
+				db.CheckErr(err)
+				stmt.QueryRow(userDeptList[0].Pid).Scan(&maxSort)
+				// log.Println("[log]", maxSort, ":[maxSort]")
+			}
+			// log.Println("[log]", userDept, ":[userDept]")
+			stmt, err := db.GetDb().Prepare(`INSERT INTO ` + config.Mg + `.mag_user_dept (uid,pid,did,sort) VALUES (?,?,?,?)`)
+			defer stmt.Close()
+			db.CheckErr(err)
+			_, err = stmt.Exec(userDept.Uid, userDept.Pid, userDept.Did, maxSort+1)
+			maxSort = maxSort + 1
+			db.CheckErr(err)
+		} else { //改部门
+			stmt, err := db.GetDb().Prepare(`UPDATE ` + config.Mg + `.mag_user_dept SET did=? WHERE uid=? AND pid=?`)
+			defer stmt.Close()
+			db.CheckErr(err)
+			res, err := stmt.Exec(userDept.Did, userDept.Uid, userDept.Pid)
+			db.CheckErr(err)
+			num, err := res.RowsAffected()
+			db.CheckErr(err)
+			numAll += num
+		}
+	}
+	return numAll
 }
 
 /**工程移除user*/
@@ -655,6 +702,14 @@ func (this *Manage) GetPosnSingle(posnid uint64) *PositionSingle {
 	stmt.QueryRow(posnid).Scan(&single.Posnid, &single.Did, &single.Name, &single.Sort)
 	return single
 }
+func (this *Manage) GetUserDeptSingle(uid uint64, pid uint64) *UserDeptSingle {
+	stmt, err := db.GetDb().Prepare(`SELECT uid,pid,did,sort FROM ` + config.Mg + `.mag_user_dept WHERE uid=? AND pid = ?`)
+	defer stmt.Close()
+	db.CheckErr(err)
+	single := &UserDeptSingle{}
+	stmt.QueryRow(uid, pid).Scan(&single.Uid, &single.Pid, &single.Did, &single.Sort)
+	return single
+}
 func (this *Manage) GetAuthGroupSingle(agid uint64) *AuthGroupSingle {
 	stmt, err := db.GetDb().Prepare(`SELECT agid,pid,name,description,sort FROM ` + config.Mg + `.mag_auth_group WHERE agid = ?`)
 	defer stmt.Close()
@@ -711,11 +766,12 @@ func (this *Manage) GetAuthGroupListAll(pidList ...uint64) []*AuthGroupSingle {
 		authGroupSingle := &AuthGroupSingle{}
 		var authid uint64
 		rows.Scan(&authGroupSingle.Agid, &authGroupSingle.Pid, &authGroupSingle.Name, &authGroupSingle.Desc, &authGroupSingle.Sort, &authid)
-		//只添加一次
-		if _, ok := aughGroupMap[authGroupSingle.Pid]; !ok {
-			aughGroupMap[authGroupSingle.Pid] = authGroupSingle
+		//authGroupSingle 只添加一次
+		if _, ok := aughGroupMap[authGroupSingle.Agid]; !ok {
+			aughGroupMap[authGroupSingle.Agid] = authGroupSingle
 			list = append(list, authGroupSingle)
 		}
+		authGroupSingle = aughGroupMap[authGroupSingle.Agid]
 		//有权限就加入权限
 		if authid > 0 {
 			authGroupSingle.AuthidList = append(authGroupSingle.AuthidList, authid)

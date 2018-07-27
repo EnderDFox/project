@@ -149,6 +149,29 @@ fieldset[disabled] .btn {
     white-space: nowrap;
 }
 
+/* 名称 */
+.AuthGroupList-row>div:nth-child(1) {
+    width: 200px;
+    max-width: 200px;
+    overflow: hidden;
+    white-space: nowrap;
+}
+/* 权限 */
+.AuthGroupList-row>div:nth-child(2) {
+    width: 100px;
+}
+/* 成员 */
+.AuthGroupList-row>div:nth-child(3) {
+    width: 100px;
+}
+/* 排序 */
+.AuthGroupList-row>div:nth-child(4) {
+    width: 180px;
+    max-width: 180px;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
 /*Sortable.js*/
 .btn-drag {
     cursor: move !important;

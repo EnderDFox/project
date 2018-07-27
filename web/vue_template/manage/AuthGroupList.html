@@ -1,0 +1,28 @@
+<!-- 权限组 -->
+<div>
+    <!--  -->
+    <div>
+        <!-- title -->
+        <div class="divrow AuthGroupList-row" style="font-weight: bold;">
+            <div>权限组名称</div>
+            <div>权限管理</div>
+            <div>成员管理</div>
+            <!-- <div>描述</div> -->
+            <div>拖动排序</div>
+            <div>删除</div>
+        </div>
+        <!-- content -->
+        <AuthGroupListComp :authGroupList="authGroupList"></AuthGroupListComp>
+        <!-- 新增 -->
+        <div class="divrow AuthGroupList-row" v-if="auth['PROJECT_MANAGE']">
+            <div>
+                <input type="text " class="form-control" placeholder="输入新权限组名称 " aria-describedby="basic-addon1 " v-model.trim="newName" @keyup.enter="onAdd()" />
+            </div>
+            <div>
+                <button class="btn btn-success " type="button" @click="onAdd()">
+                    <span class="glyphicon glyphicon-plus " aria-hidden="true "></span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

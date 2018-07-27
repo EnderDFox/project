@@ -147,6 +147,7 @@ var ManageDataClass = /** @class */ (function () {
         this.AuthGroupDict = {};
         //
         agList.forEach(function (ag, index) {
+            _this.FormatAuthGroupSingle(ag);
             _this.AuthGroupDict[ag.Agid] = ag;
             _this.ProjDict[ag.Pid].AuthGroupList.push(ag);
         });
@@ -354,6 +355,10 @@ var ManageDataClass = /** @class */ (function () {
                 posn.AuthList.push(this.AuthDict[authid]);
             }
         }
+    };
+    ManageDataClass.prototype.FormatAuthGroupSingle = function (ag) {
+        ag.UserList = ag.UserList || [];
+        ag.AuthidList == null ? ag.AuthidList = [] : undefined;
     };
     /**根据posnid获取posn */
     ManageDataClass.prototype.GetPosnByPosnid = function (posnid) {

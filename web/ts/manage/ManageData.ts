@@ -153,16 +153,17 @@ class ManageDataClass {
             }
         }
     }
-    private InitAughGroupData(agList:AuthGroupSingle[]){
+    private InitAughGroupData(agList: AuthGroupSingle[]) {
         this.AuthGroupDict = {}
         //
-        agList.forEach((ag:AuthGroupSingle,index,)=>{
+        agList.forEach((ag: AuthGroupSingle, index, ) => {
+            this.FormatAuthGroupSingle(ag)
             this.AuthGroupDict[ag.Agid] = ag
             this.ProjDict[ag.Pid].AuthGroupList.push(ag)
         })
     }
-    private InitUserAughGroupData(uagList:UserAuthGroupSingle[]){
-        uagList.forEach((uag:UserAuthGroupSingle)=>{
+    private InitUserAughGroupData(uagList: UserAuthGroupSingle[]) {
+        uagList.forEach((uag: UserAuthGroupSingle) => {
             var user = this.UserDict[uag.Uid]
             user.AuthGroupDict[uag.Pid][uag.Agid] = uag
         })
@@ -354,6 +355,10 @@ class ManageDataClass {
             }
         }
     }
+    FormatAuthGroupSingle(ag: AuthGroupSingle) {
+        ag.UserList = ag.UserList || []
+        ag.AuthidList == null ? ag.AuthidList = [] : undefined
+    }
     /**根据posnid获取posn */
     GetPosnByPosnid(posnid: number): [DepartmentSingle, PositionSingle] {
         for (var i = 0; i < this.ProjList.length; i++) {
@@ -414,7 +419,7 @@ class ManageDataClass {
     private FormatUserListInPosnList(posnList: PositionSingle[]) {
         for (var i = 0; i < posnList.length; i++) {
             var posn = posnList[i]
-            posn.UserList.every((user:UserSingle):boolean=>{
+            posn.UserList.every((user: UserSingle): boolean => {
                 user.Did = posn.Did
                 user.Posnid = posn.Posnid
                 return true

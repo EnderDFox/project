@@ -153,7 +153,7 @@ interface AuthGroupSingle {
     Sort: uint32
     AuthidList: AUTH[]
     //client
-    AuthList?: AuthSingle[]
+    UserList: UserSingle[]
 }
 
 interface AuthGroupAuthSingle {
@@ -571,6 +571,12 @@ interface C2L_ManageAuthGroupEditSort {
 interface C2L_ManageAuthGroupEditAuth {
     Agid: uint64
     AuthidList: AUTH[]
+}
+
+interface C2L_ManageAuthGroupEditUser {
+    Agid: uint64
+    Pid: uint64
+    UidList: uint64[]
 }
 
 

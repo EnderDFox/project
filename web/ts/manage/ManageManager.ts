@@ -3,6 +3,7 @@ enum ProjectEditPageIndex {
     Department = 1,
     Position = 2,
     User = 3,
+    AuthGroup = 4,
 }
 /**部门下拉列表可用性 */
 enum DeptDropdownItemEnabled {
@@ -22,8 +23,9 @@ class ManageManagerClass {
     VueProjectList: CombinedVueInstance1<{ auth: { [key: number]: boolean }, projectList: ProjectSingle[], newName: string }>
     VueProjectEdit: CombinedVueInstance1<{ projectList: ProjectSingle[], project: ProjectSingle, newName: string, dpTree: DepartmentSingle[], currPage: ProjectEditPageIndex }>
     VueUserList: CombinedVueInstance1<{ userList: UserSingle[], newUserUid: number, filterText: string }>
-    VueDepartmentList: CombinedVueInstance1<{ newName: string }>
+    VueDeptList: CombinedVueInstance1<{ newName: string }>
     VuePosnList: CombinedVueInstance1<{ newName: string }>
+    VueAuthGroupList: CombinedVueInstance1<{ authGroupList: AuthGroupSingle[], newName: string }>
     VueAuthList: CombinedVueInstance1<{ checkedChange: boolean }>
     VueSelectUser: CombinedVueInstance1<{ checkedChange: boolean, filterText: string }>
     Init() {
@@ -490,7 +492,7 @@ class ManageManagerClass {
         this.Data.CurrProj = proj
         this.Data.FormatUserListInProj(proj)
         Loader.LoadVueTemplateList([`${this.VuePath}ProjectEdit`], (tplList: string[]) => {
-            var currPage = UrlParam.Get(URL_PARAM_KEY.PAGE, [ProjectEditPageIndex.Department, ProjectEditPageIndex.Position, ProjectEditPageIndex.User])
+            var currPage = this.GetCurrpageFromUrlParam()
             TreeUtil.Every(this.Data.CurrProj.DeptTree, (dept: DepartmentSingle): boolean => {
                 dept.Pid = proj.Pid
                 return true
@@ -517,7 +519,7 @@ class ManageManagerClass {
                             }
                         },
                         onShowProj: (proj: ProjectSingle, index: number) => {
-                            UrlParam.Set(URL_PARAM_KEY.PID, proj.Pid).Set(URL_PARAM_KEY.PAGE, ProjectEditPageIndex.Department).Reset()
+                            UrlParam.Set(URL_PARAM_KEY.PID, proj.Pid).Set(URL_PARAM_KEY.PAGE, this.GetCurrpageFromUrlParam()).Reset()
                             this.ShowProjectEdit()
                         },
                         onShowPage: (page: ProjectEditPageIndex) => {
@@ -534,8 +536,11 @@ class ManageManagerClass {
             this.SwitchProjectEditPageContent()
         })
     }
+    GetCurrpageFromUrlParam():ProjectEditPageIndex{
+        return UrlParam.Get(URL_PARAM_KEY.PAGE, [ProjectEditPageIndex.Department, ProjectEditPageIndex.Position, ProjectEditPageIndex.User, ProjectEditPageIndex.AuthGroup])
+    }
     SwitchProjectEditPageContent() {
-        var currPage: ProjectEditPageIndex = UrlParam.Get(URL_PARAM_KEY.PAGE, [ProjectEditPageIndex.Department, ProjectEditPageIndex.Position, ProjectEditPageIndex.User])
+        var currPage = this.GetCurrpageFromUrlParam()
         switch (currPage) {
             case ProjectEditPageIndex.Department:
                 this.ShowDepartmentList()
@@ -545,6 +550,9 @@ class ManageManagerClass {
                 break;
             case ProjectEditPageIndex.User:
                 this.ShowUserList()
+                break;
+            case ProjectEditPageIndex.AuthGroup:
+                this.ShowAuthGroupList()
                 break;
         }
     }
@@ -599,7 +607,7 @@ class ManageManagerClass {
                         var data: C2L_ManageDeptAdd = {
                             Pid: this.Data.CurrProj.Pid,
                             Fid: parentDp.Did,
-                            Name: this.VueDepartmentList.newName.toString(),
+                            Name: this.VueDeptList.newName.toString(),
                         }
                         WSConn.sendMsg(PB_CMD.MANAGE_DEPT_ADD, data)
                     },
@@ -699,7 +707,7 @@ class ManageManagerClass {
                     },
                     methods: {
                         onAdd: () => {
-                            var newName: string = this.VueDepartmentList.newName.toString().trim()
+                            var newName: string = this.VueDeptList.newName.toString().trim()
                             if (!newName) {
                                 Common.AlertError(`部门名称 ${newName} 不可以为空`)
                                 return
@@ -712,13 +720,13 @@ class ManageManagerClass {
                                 Pid: this.Data.CurrProj.Pid,
                                 Name: newName,
                             }
-                            this.VueDepartmentList.newName = ''
+                            this.VueDeptList.newName = ''
                             WSConn.sendMsg(PB_CMD.MANAGE_DEPT_ADD, data)
                         },
                     },
                 }
             ).$mount()
-            this.VueDepartmentList = vue
+            this.VueDeptList = vue
             //#show
             Common.InsertIntoDom(vue.$el, this.VueProjectEdit.$refs.pageContent)
             //
@@ -938,7 +946,12 @@ class ManageManagerClass {
                         }
                     },
                     onEditAuth: (dept: DepartmentSingle, posn: PositionSingle, index: number) => {
-                        this.ShowAuthList(posn)
+                        this.ShowAuthList(posn.AuthidList, (_authidList: number[]) => {
+                            WSConn.sendMsg<C2L_ManagePosnEditAuth>(PB_CMD.MANAGE_POSN_EDIT_AUTH, {
+                                Posnid: posn.Posnid,
+                                AuthidList: _authidList,
+                            })
+                        })
                     },
                     /**检查是否有部门管理权限 */
                     checkDeptMgrChecked: (posn: PositionSingle) => {
@@ -1108,6 +1121,127 @@ class ManageManagerClass {
             this.DoPosnListSortabled()
         })
     }
+    /**权限组 列表 */
+    ShowAuthGroupList() {
+        this.VueProjectEdit.currPage = ProjectEditPageIndex.AuthGroup
+        Loader.LoadVueTemplateList([`${this.VuePath}AuthGroupList`, `${this.VuePath}AuthGroupListComp`], (tplList: string[]) => {
+            Vue.component(`AuthGroupListComp`, {
+                template: tplList[1],
+                props: {
+                    authGroupList: Array,
+                },
+                data: () => {
+                    return {
+                        auth: this.Data.MyAuth,
+                    }
+                },
+                methods: {
+                    onEditName: (e: Event, ag: AuthGroupSingle, index: number) => {
+                        var newName = (e.target as HTMLInputElement).value.trim()
+                        if (!newName) {
+                            (e.target as HTMLInputElement).value = ag.Name
+                            return
+                        }
+                        if (newName != ag.Name) {
+                            if (this.Data.CurrProj.AuthGroupList.FindByKey(FIELD_NAME.Name, newName)) {
+                                Common.AlertError(`即将把权限组 "${ag.Name}" 改名为 "${newName}" <br/><br/>但该名称 "${newName}" 已经存在`);
+                                (e.target as HTMLInputElement).value = ag.Name;
+                                return
+                            }
+                            Common.ConfirmWarning(`即将把职位 "${ag.Name}" 改名为 "${newName}"`, null, () => {
+                                WSConn.sendMsg<C2L_ManageAuthGroupEditName>(PB_CMD.MANAGE_AUTH_GROUP_EDIT_NAME, {
+                                    Agid: ag.Agid,
+                                    Name: newName,
+                                })
+                            }, () => {
+                                (e.target as HTMLInputElement).value = ag.Name
+                            })
+                        }
+                    },
+                    onEditAuth: (ag: AuthGroupSingle, index: number) => {
+                        this.ShowAuthList(ag.AuthidList, (_authidList: number[]) => {
+                            WSConn.sendMsg<C2L_ManageAuthGroupEditAuth>(PB_CMD.MANAGE_AUTH_GROUP_EDIT_AUTH, {
+                                Agid: ag.Agid,
+                                AuthidList: _authidList,
+                            })
+                        })
+                    },
+                    /**检查是否有部门管理权限 */
+                    checkDeptMgrChecked: (ag: AuthGroupSingle) => {
+                        return ag.AuthidList.indexOf(AUTH.DEPARTMENT_MANAGE) > -1
+                            && ag.AuthidList.indexOf(AUTH.DEPARTMENT_PROCESS) > -1
+                    },
+                    /**修改是否有部门管理权限 */
+                    onChangeDeptMgrChecked: (ag: AuthGroupSingle) => {
+                        var _authidList: number[] = []
+                        var has = ag.AuthidList.indexOf(AUTH.DEPARTMENT_MANAGE) > -1
+                            && ag.AuthidList.indexOf(AUTH.DEPARTMENT_PROCESS) > -1
+                        for (var i = 0; i < ag.AuthidList.length; i++) {
+                            var authid: number = ag.AuthidList[i]
+                            if (authid != AUTH.DEPARTMENT_MANAGE && authid != AUTH.DEPARTMENT_PROCESS) {
+                                _authidList.push(authid)
+                            }
+                        }
+                        if (!has) {
+                            //无 改成 有
+                            _authidList.push(AUTH.DEPARTMENT_MANAGE)
+                            _authidList.push(AUTH.DEPARTMENT_PROCESS)
+                        }
+                        WSConn.sendMsg<C2L_ManageAuthGroupEditAuth>(PB_CMD.MANAGE_AUTH_GROUP_EDIT_AUTH, {
+                            Agid: ag.Agid,
+                            AuthidList: _authidList,
+                        })
+                    },
+                    onEditUserList: (ag: AuthGroupSingle) => {
+                        this.ShowSelectUserForAuthGroup(ag)
+                    },
+                    onDel: (ag: AuthGroupSingle, index: int) => {
+                        Common.ConfirmDelete(() => {
+                            var data: C2L_ManageAuthGroupDel = {
+                                Agid: ag.Agid,
+                            }
+                            WSConn.sendMsg(PB_CMD.MANAGE_AUTH_GROUP_DEL, data)
+                        }, `即将删除职位 "${ag.Name}"`)
+                    },
+                },
+            })
+            var vue = new Vue(
+                {
+                    template: tplList[0],
+                    data: {
+                        auth: this.Data.MyAuth,
+                        authGroupList: this.Data.CurrProj.AuthGroupList,
+                        newName: ``,
+                    },
+                    methods: {
+                        onAdd: () => {
+                            var newName: string = this.VueAuthGroupList.newName.toString().trim()
+                            if (!newName) {
+                                Common.AlertError(`权限组名称 ${newName} 不可以为空`)
+                                return
+                            }
+                            if (this.Data.CurrProj.AuthGroupList.FindByKey(FIELD_NAME.Name, newName)) {
+                                Common.AlertError(`权限组名称 ${newName} 已经存在`)
+                                return
+                            }
+                            var data: C2L_ManageAuthGroupAdd = {
+                                Pid: this.Data.CurrProj.Pid,
+                                Name: newName,
+                                Dsc: '',
+                            }
+                            this.VueAuthGroupList.newName = ''
+                            WSConn.sendMsg(PB_CMD.MANAGE_AUTH_GROUP_ADD, data)
+                        },
+                    },
+                }
+            ).$mount()
+            this.VueAuthGroupList = vue
+            //#show
+            Common.InsertIntoDom(vue.$el, this.VueProjectEdit.$refs.pageContent)
+            //
+            this.DoPosnListSortabled()
+        })
+    }
     /**设置可以排序 */
     private PosnListSortableArr: Sortable[]
     DoPosnListSortabled() {
@@ -1160,12 +1294,11 @@ class ManageManagerClass {
             this.PosnListSortableArr.push(Sortable.create($listComp.get(i), opt))
         }
     }
-    ShowAuthList(posn: PositionSingle) {
+    ShowAuthList(authidList: number[], onOkCb: (authidList: number[]) => void) {
         Loader.LoadVueTemplate(this.VuePath + "AuthList", (tpl: string) => {
-            var checkedDict: { [key: number]: AuthSingle } = {};
-            for (var i = 0; i < posn.AuthList.length; i++) {
-                var auth: AuthSingle = posn.AuthList[i]
-                checkedDict[auth.Authid] = auth
+            var checkedDict: { [key: number]: number } = {};
+            for (var i = 0; i < authidList.length; i++) {
+                checkedDict[authidList[i]] = authidList[i]
             }
             var _checkModChecked = (_, mod: AuthModSingle): boolean => {
                 // console.log("[debug]", '_checkAllModSelected')
@@ -1181,7 +1314,6 @@ class ManageManagerClass {
                 template: tpl,
                 data: {
                     auth: this.Data.MyAuth,
-                    posn: posn,
                     authorityModuleList: this.Data.AuthModList,
                     checkedChange: false,//为了让check函数被触发,
                 },
@@ -1197,7 +1329,7 @@ class ManageManagerClass {
                             if (allSelected) {
                                 delete checkedDict[auth.Authid]
                             } else {
-                                checkedDict[auth.Authid] = auth
+                                checkedDict[auth.Authid] = auth.Authid
                             }
                         }
                         this.VueAuthList.checkedChange = !this.VueAuthList.checkedChange
@@ -1206,21 +1338,18 @@ class ManageManagerClass {
                         if (checkedDict[auth.Authid]) {
                             delete checkedDict[auth.Authid]
                         } else {
-                            checkedDict[auth.Authid] = auth
+                            checkedDict[auth.Authid] = auth.Authid
                         }
                         // auth.CheckedChange = !auth.CheckedChange
                         this.VueAuthList.checkedChange = !this.VueAuthList.checkedChange
                     },
                     onSave: () => {
                         // posn.AuthList.splice(0, posn.AuthList.length)
-                        var authidList: number[] = []
+                        var _authidList: number[] = []
                         for (var authIdStr in checkedDict) {
-                            authidList.push(parseInt(authIdStr))
+                            _authidList.push(parseInt(authIdStr))
                         }
-                        WSConn.sendMsg<C2L_ManagePosnEditAuth>(PB_CMD.MANAGE_POSN_EDIT_AUTH, {
-                            Posnid: posn.Posnid,
-                            AuthidList: authidList,
-                        })
+                        onOkCb(_authidList)
                         //
                         this.VueAuthList.$el.remove()
                         this.VueAuthList = null
@@ -1229,9 +1358,8 @@ class ManageManagerClass {
                         for (var authIdStr in checkedDict) {
                             delete checkedDict[authIdStr]
                         }
-                        for (var i = 0; i < posn.AuthList.length; i++) {
-                            var auth: AuthSingle = posn.AuthList[i]
-                            checkedDict[auth.Authid] = auth
+                        for (var i = 0; i < authidList.length; i++) {
+                            checkedDict[authidList[i]] = authidList[i]
                         }
                         this.VueAuthList.checkedChange = !this.VueAuthList.checkedChange
                     }
@@ -1507,6 +1635,40 @@ class ManageManagerClass {
             if (rlatList.length) {
                 WSConn.sendMsg<C2L_ManageUserEditDept>(PB_CMD.MANAGE_USER_EDIT_DEPT, {
                     UserDeptList: rlatList
+                })
+            }
+        })
+    }
+    ShowSelectUserForAuthGroup(ag: AuthGroupSingle) {
+        var userList = this.Data.CurrProj.UserList
+        if (userList.length == 0) {
+            Common.ConfirmWarning(`项目中还没有成员, 是否去 "成员页面" 添加新成员?`, null, () => {
+                UrlParam.Set(URL_PARAM_KEY.PAGE, ProjectEditPageIndex.User).Reset()
+                this.ShowUserList()
+            })
+            return
+        }
+        //已经勾选的user
+        var checkedUserList: UserSingle[] = []
+        this.Data.CurrProj.UserList.forEach(user => {
+            if (user.AuthGroupDict[this.Data.CurrProj.Pid][ag.Agid]) {
+                checkedUserList.push(user)
+            }
+        });
+        /* user.AuthGroupDict[uag.Pid] */
+        this.ShowSelectUser(userList, checkedUserList, (checkedDict: { [key: number]: UserSingle }) => {
+            var list: C2L_ManageUserEditAuthGroup[] = []
+            var uidList: number[] = []
+            //原本没有, 现在勾上了
+            for (var uidStr in checkedDict) {
+                var uid = parseInt(uidStr)
+                uidList.push(uid)
+            }
+            if (list.length) {
+                WSConn.sendMsg<C2L_ManageAuthGroupEditUser>(PB_CMD.MANAGE_AUTH_GROUP_EDIT_USER, {
+                    Agid: ag.Agid,
+                    Pid: this.Data.CurrProj.Pid,
+                    UidList: uidList,
                 })
             }
         })

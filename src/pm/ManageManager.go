@@ -43,6 +43,7 @@ func (this *ManageManager) RegisterFunction() {
 	command.Register(PB_CMD_MANAGE_AUTH_GROUP_EDIT_DSC, &C2L_M_MANAGE_AUTH_GROUP_EDIT_DSC{})
 	command.Register(PB_CMD_MANAGE_AUTH_GROUP_EDIT_SORT, &C2L_M_MANAGE_AUTH_GROUP_EDIT_SORT{})
 	command.Register(PB_CMD_MANAGE_AUTH_GROUP_EDIT_AUTH, &C2L_M_MANAGE_AUTH_GROUP_EDIT_AUTH{})
+	command.Register(PB_CMD_MANAGE_AUTH_GROUP_EDIT_USER, &C2L_M_MANAGE_AUTH_GROUP_EDIT_USER{})
 }
 
 //
@@ -456,5 +457,22 @@ func (this *C2L_M_MANAGE_AUTH_GROUP_EDIT_AUTH) execute(client *websocket.Conn, m
 	}
 	user.Manage().AuthGroupEditAuth(true, param.Agid, param.AuthidList...)
 	user.SendToAll(PB_CMD_MANAGE_AUTH_GROUP_EDIT_AUTH, param)
+	return true
+}
+
+type C2L_M_MANAGE_AUTH_GROUP_EDIT_USER struct{}
+
+func (this *C2L_M_MANAGE_AUTH_GROUP_EDIT_USER) execute(client *websocket.Conn, msg *Message) bool {
+	param := &C2L_ManageAuthGroupEditUser{}
+	err := json.Unmarshal([]byte(msg.Param), param)
+	if err != nil {
+		return false
+	}
+	user := session.GetUser(msg.Uid)
+	if user == nil {
+		return false
+	}
+	user.Manage().AuthGroupEditUser(true, param.Agid, param.Pid, param.UidList...)
+	user.SendToAll(PB_CMD_MANAGE_AUTH_GROUP_EDIT_USER, param)
 	return true
 }

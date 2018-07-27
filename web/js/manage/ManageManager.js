@@ -4,6 +4,7 @@ var ProjectEditPageIndex;
     ProjectEditPageIndex[ProjectEditPageIndex["Department"] = 1] = "Department";
     ProjectEditPageIndex[ProjectEditPageIndex["Position"] = 2] = "Position";
     ProjectEditPageIndex[ProjectEditPageIndex["User"] = 3] = "User";
+    ProjectEditPageIndex[ProjectEditPageIndex["AuthGroup"] = 4] = "AuthGroup";
 })(ProjectEditPageIndex || (ProjectEditPageIndex = {}));
 /**部门下拉列表可用性 */
 var DeptDropdownItemEnabled;
@@ -494,7 +495,7 @@ var ManageManagerClass = /** @class */ (function () {
         this.Data.CurrProj = proj;
         this.Data.FormatUserListInProj(proj);
         Loader.LoadVueTemplateList([this.VuePath + "ProjectEdit"], function (tplList) {
-            var currPage = UrlParam.Get(URL_PARAM_KEY.PAGE, [ProjectEditPageIndex.Department, ProjectEditPageIndex.Position, ProjectEditPageIndex.User]);
+            var currPage = _this.GetCurrpageFromUrlParam();
             TreeUtil.Every(_this.Data.CurrProj.DeptTree, function (dept) {
                 dept.Pid = proj.Pid;
                 return true;
@@ -520,7 +521,7 @@ var ManageManagerClass = /** @class */ (function () {
                         }
                     },
                     onShowProj: function (proj, index) {
-                        UrlParam.Set(URL_PARAM_KEY.PID, proj.Pid).Set(URL_PARAM_KEY.PAGE, ProjectEditPageIndex.Department).Reset();
+                        UrlParam.Set(URL_PARAM_KEY.PID, proj.Pid).Set(URL_PARAM_KEY.PAGE, _this.GetCurrpageFromUrlParam()).Reset();
                         _this.ShowProjectEdit();
                     },
                     onShowPage: function (page) {
@@ -536,8 +537,11 @@ var ManageManagerClass = /** @class */ (function () {
             _this.SwitchProjectEditPageContent();
         });
     };
+    ManageManagerClass.prototype.GetCurrpageFromUrlParam = function () {
+        return UrlParam.Get(URL_PARAM_KEY.PAGE, [ProjectEditPageIndex.Department, ProjectEditPageIndex.Position, ProjectEditPageIndex.User, ProjectEditPageIndex.AuthGroup]);
+    };
     ManageManagerClass.prototype.SwitchProjectEditPageContent = function () {
-        var currPage = UrlParam.Get(URL_PARAM_KEY.PAGE, [ProjectEditPageIndex.Department, ProjectEditPageIndex.Position, ProjectEditPageIndex.User]);
+        var currPage = this.GetCurrpageFromUrlParam();
         switch (currPage) {
             case ProjectEditPageIndex.Department:
                 this.ShowDepartmentList();
@@ -547,6 +551,9 @@ var ManageManagerClass = /** @class */ (function () {
                 break;
             case ProjectEditPageIndex.User:
                 this.ShowUserList();
+                break;
+            case ProjectEditPageIndex.AuthGroup:
+                this.ShowAuthGroupList();
                 break;
         }
     };
@@ -603,7 +610,7 @@ var ManageManagerClass = /** @class */ (function () {
                         var data = {
                             Pid: _this.Data.CurrProj.Pid,
                             Fid: parentDp.Did,
-                            Name: _this.VueDepartmentList.newName.toString(),
+                            Name: _this.VueDeptList.newName.toString(),
                         };
                         WSConn.sendMsg(PB_CMD.MANAGE_DEPT_ADD, data);
                     },
@@ -705,7 +712,7 @@ var ManageManagerClass = /** @class */ (function () {
                 },
                 methods: {
                     onAdd: function () {
-                        var newName = _this.VueDepartmentList.newName.toString().trim();
+                        var newName = _this.VueDeptList.newName.toString().trim();
                         if (!newName) {
                             Common.AlertError("\u90E8\u95E8\u540D\u79F0 " + newName + " \u4E0D\u53EF\u4EE5\u4E3A\u7A7A");
                             return;
@@ -718,12 +725,12 @@ var ManageManagerClass = /** @class */ (function () {
                             Pid: _this.Data.CurrProj.Pid,
                             Name: newName,
                         };
-                        _this.VueDepartmentList.newName = '';
+                        _this.VueDeptList.newName = '';
                         WSConn.sendMsg(PB_CMD.MANAGE_DEPT_ADD, data);
                     },
                 },
             }).$mount();
-            _this.VueDepartmentList = vue;
+            _this.VueDeptList = vue;
             //#show
             Common.InsertIntoDom(vue.$el, _this.VueProjectEdit.$refs.pageContent);
             //
@@ -948,7 +955,12 @@ var ManageManagerClass = /** @class */ (function () {
                         }
                     },
                     onEditAuth: function (dept, posn, index) {
-                        _this.ShowAuthList(posn);
+                        _this.ShowAuthList(posn.AuthidList, function (_authidList) {
+                            WSConn.sendMsg(PB_CMD.MANAGE_POSN_EDIT_AUTH, {
+                                Posnid: posn.Posnid,
+                                AuthidList: _authidList,
+                            });
+                        });
                     },
                     /**检查是否有部门管理权限 */
                     checkDeptMgrChecked: function (posn) {
@@ -1120,6 +1132,126 @@ var ManageManagerClass = /** @class */ (function () {
             _this.DoPosnListSortabled();
         });
     };
+    /**权限组 列表 */
+    ManageManagerClass.prototype.ShowAuthGroupList = function () {
+        var _this = this;
+        this.VueProjectEdit.currPage = ProjectEditPageIndex.AuthGroup;
+        Loader.LoadVueTemplateList([this.VuePath + "AuthGroupList", this.VuePath + "AuthGroupListComp"], function (tplList) {
+            Vue.component("AuthGroupListComp", {
+                template: tplList[1],
+                props: {
+                    authGroupList: Array,
+                },
+                data: function () {
+                    return {
+                        auth: _this.Data.MyAuth,
+                    };
+                },
+                methods: {
+                    onEditName: function (e, ag, index) {
+                        var newName = e.target.value.trim();
+                        if (!newName) {
+                            e.target.value = ag.Name;
+                            return;
+                        }
+                        if (newName != ag.Name) {
+                            if (_this.Data.CurrProj.AuthGroupList.FindByKey(FIELD_NAME.Name, newName)) {
+                                Common.AlertError("\u5373\u5C06\u628A\u6743\u9650\u7EC4 \"" + ag.Name + "\" \u6539\u540D\u4E3A \"" + newName + "\" <br/><br/>\u4F46\u8BE5\u540D\u79F0 \"" + newName + "\" \u5DF2\u7ECF\u5B58\u5728");
+                                e.target.value = ag.Name;
+                                return;
+                            }
+                            Common.ConfirmWarning("\u5373\u5C06\u628A\u804C\u4F4D \"" + ag.Name + "\" \u6539\u540D\u4E3A \"" + newName + "\"", null, function () {
+                                WSConn.sendMsg(PB_CMD.MANAGE_AUTH_GROUP_EDIT_NAME, {
+                                    Agid: ag.Agid,
+                                    Name: newName,
+                                });
+                            }, function () {
+                                e.target.value = ag.Name;
+                            });
+                        }
+                    },
+                    onEditAuth: function (ag, index) {
+                        _this.ShowAuthList(ag.AuthidList, function (_authidList) {
+                            WSConn.sendMsg(PB_CMD.MANAGE_AUTH_GROUP_EDIT_AUTH, {
+                                Agid: ag.Agid,
+                                AuthidList: _authidList,
+                            });
+                        });
+                    },
+                    /**检查是否有部门管理权限 */
+                    checkDeptMgrChecked: function (ag) {
+                        return ag.AuthidList.indexOf(AUTH.DEPARTMENT_MANAGE) > -1
+                            && ag.AuthidList.indexOf(AUTH.DEPARTMENT_PROCESS) > -1;
+                    },
+                    /**修改是否有部门管理权限 */
+                    onChangeDeptMgrChecked: function (ag) {
+                        var _authidList = [];
+                        var has = ag.AuthidList.indexOf(AUTH.DEPARTMENT_MANAGE) > -1
+                            && ag.AuthidList.indexOf(AUTH.DEPARTMENT_PROCESS) > -1;
+                        for (var i = 0; i < ag.AuthidList.length; i++) {
+                            var authid = ag.AuthidList[i];
+                            if (authid != AUTH.DEPARTMENT_MANAGE && authid != AUTH.DEPARTMENT_PROCESS) {
+                                _authidList.push(authid);
+                            }
+                        }
+                        if (!has) {
+                            //无 改成 有
+                            _authidList.push(AUTH.DEPARTMENT_MANAGE);
+                            _authidList.push(AUTH.DEPARTMENT_PROCESS);
+                        }
+                        WSConn.sendMsg(PB_CMD.MANAGE_AUTH_GROUP_EDIT_AUTH, {
+                            Agid: ag.Agid,
+                            AuthidList: _authidList,
+                        });
+                    },
+                    onEditUserList: function (ag) {
+                        _this.ShowSelectUserForAuthGroup(ag);
+                    },
+                    onDel: function (ag, index) {
+                        Common.ConfirmDelete(function () {
+                            var data = {
+                                Agid: ag.Agid,
+                            };
+                            WSConn.sendMsg(PB_CMD.MANAGE_AUTH_GROUP_DEL, data);
+                        }, "\u5373\u5C06\u5220\u9664\u804C\u4F4D \"" + ag.Name + "\"");
+                    },
+                },
+            });
+            var vue = new Vue({
+                template: tplList[0],
+                data: {
+                    auth: _this.Data.MyAuth,
+                    authGroupList: _this.Data.CurrProj.AuthGroupList,
+                    newName: "",
+                },
+                methods: {
+                    onAdd: function () {
+                        var newName = _this.VueAuthGroupList.newName.toString().trim();
+                        if (!newName) {
+                            Common.AlertError("\u6743\u9650\u7EC4\u540D\u79F0 " + newName + " \u4E0D\u53EF\u4EE5\u4E3A\u7A7A");
+                            return;
+                        }
+                        if (_this.Data.CurrProj.AuthGroupList.FindByKey(FIELD_NAME.Name, newName)) {
+                            Common.AlertError("\u6743\u9650\u7EC4\u540D\u79F0 " + newName + " \u5DF2\u7ECF\u5B58\u5728");
+                            return;
+                        }
+                        var data = {
+                            Pid: _this.Data.CurrProj.Pid,
+                            Name: newName,
+                            Dsc: '',
+                        };
+                        _this.VueAuthGroupList.newName = '';
+                        WSConn.sendMsg(PB_CMD.MANAGE_AUTH_GROUP_ADD, data);
+                    },
+                },
+            }).$mount();
+            _this.VueAuthGroupList = vue;
+            //#show
+            Common.InsertIntoDom(vue.$el, _this.VueProjectEdit.$refs.pageContent);
+            //
+            _this.DoPosnListSortabled();
+        });
+    };
     ManageManagerClass.prototype.DoPosnListSortabled = function () {
         var _this = this;
         if (this.PosnListSortableArr) {
@@ -1173,13 +1305,12 @@ var ManageManagerClass = /** @class */ (function () {
             this.PosnListSortableArr.push(Sortable.create($listComp.get(i), opt));
         }
     };
-    ManageManagerClass.prototype.ShowAuthList = function (posn) {
+    ManageManagerClass.prototype.ShowAuthList = function (authidList, onOkCb) {
         var _this = this;
         Loader.LoadVueTemplate(this.VuePath + "AuthList", function (tpl) {
             var checkedDict = {};
-            for (var i = 0; i < posn.AuthList.length; i++) {
-                var auth = posn.AuthList[i];
-                checkedDict[auth.Authid] = auth;
+            for (var i = 0; i < authidList.length; i++) {
+                checkedDict[authidList[i]] = authidList[i];
             }
             var _checkModChecked = function (_, mod) {
                 // console.log("[debug]", '_checkAllModSelected')
@@ -1195,7 +1326,6 @@ var ManageManagerClass = /** @class */ (function () {
                 template: tpl,
                 data: {
                     auth: _this.Data.MyAuth,
-                    posn: posn,
                     authorityModuleList: _this.Data.AuthModList,
                     checkedChange: false,
                 },
@@ -1212,7 +1342,7 @@ var ManageManagerClass = /** @class */ (function () {
                                 delete checkedDict[auth.Authid];
                             }
                             else {
-                                checkedDict[auth.Authid] = auth;
+                                checkedDict[auth.Authid] = auth.Authid;
                             }
                         }
                         _this.VueAuthList.checkedChange = !_this.VueAuthList.checkedChange;
@@ -1222,21 +1352,18 @@ var ManageManagerClass = /** @class */ (function () {
                             delete checkedDict[auth.Authid];
                         }
                         else {
-                            checkedDict[auth.Authid] = auth;
+                            checkedDict[auth.Authid] = auth.Authid;
                         }
                         // auth.CheckedChange = !auth.CheckedChange
                         _this.VueAuthList.checkedChange = !_this.VueAuthList.checkedChange;
                     },
                     onSave: function () {
                         // posn.AuthList.splice(0, posn.AuthList.length)
-                        var authidList = [];
+                        var _authidList = [];
                         for (var authIdStr in checkedDict) {
-                            authidList.push(parseInt(authIdStr));
+                            _authidList.push(parseInt(authIdStr));
                         }
-                        WSConn.sendMsg(PB_CMD.MANAGE_POSN_EDIT_AUTH, {
-                            Posnid: posn.Posnid,
-                            AuthidList: authidList,
-                        });
+                        onOkCb(_authidList);
                         //
                         _this.VueAuthList.$el.remove();
                         _this.VueAuthList = null;
@@ -1245,9 +1372,8 @@ var ManageManagerClass = /** @class */ (function () {
                         for (var authIdStr in checkedDict) {
                             delete checkedDict[authIdStr];
                         }
-                        for (var i = 0; i < posn.AuthList.length; i++) {
-                            var auth = posn.AuthList[i];
-                            checkedDict[auth.Authid] = auth;
+                        for (var i = 0; i < authidList.length; i++) {
+                            checkedDict[authidList[i]] = authidList[i];
                         }
                         _this.VueAuthList.checkedChange = !_this.VueAuthList.checkedChange;
                     }
@@ -1531,6 +1657,41 @@ var ManageManagerClass = /** @class */ (function () {
             if (rlatList.length) {
                 WSConn.sendMsg(PB_CMD.MANAGE_USER_EDIT_DEPT, {
                     UserDeptList: rlatList
+                });
+            }
+        });
+    };
+    ManageManagerClass.prototype.ShowSelectUserForAuthGroup = function (ag) {
+        var _this = this;
+        var userList = this.Data.CurrProj.UserList;
+        if (userList.length == 0) {
+            Common.ConfirmWarning("\u9879\u76EE\u4E2D\u8FD8\u6CA1\u6709\u6210\u5458, \u662F\u5426\u53BB \"\u6210\u5458\u9875\u9762\" \u6DFB\u52A0\u65B0\u6210\u5458?", null, function () {
+                UrlParam.Set(URL_PARAM_KEY.PAGE, ProjectEditPageIndex.User).Reset();
+                _this.ShowUserList();
+            });
+            return;
+        }
+        //已经勾选的user
+        var checkedUserList = [];
+        this.Data.CurrProj.UserList.forEach(function (user) {
+            if (user.AuthGroupDict[_this.Data.CurrProj.Pid][ag.Agid]) {
+                checkedUserList.push(user);
+            }
+        });
+        /* user.AuthGroupDict[uag.Pid] */
+        this.ShowSelectUser(userList, checkedUserList, function (checkedDict) {
+            var list = [];
+            var uidList = [];
+            //原本没有, 现在勾上了
+            for (var uidStr in checkedDict) {
+                var uid = parseInt(uidStr);
+                uidList.push(uid);
+            }
+            if (list.length) {
+                WSConn.sendMsg(PB_CMD.MANAGE_AUTH_GROUP_EDIT_USER, {
+                    Agid: ag.Agid,
+                    Pid: _this.Data.CurrProj.Pid,
+                    UidList: uidList,
                 });
             }
         });
