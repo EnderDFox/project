@@ -6,6 +6,9 @@ interface Array<T> {
     IndexOfByKey(key: string, value: any): number
     FindByKey<T>(key: string, value: any): T
     RemoveByKey(key: string, value: any): number
+    SortBy(key: string): void
+    SortBy(key: string, isDesc: boolean): void
+    SortBy(key: string, isDesc: boolean, forceNum: boolean): void
 }
 //------Date扩展
 interface Date {

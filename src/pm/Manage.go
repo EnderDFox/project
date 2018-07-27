@@ -725,7 +725,7 @@ func (this *Manage) GetUserDeptList(pidList ...uint64) []*UserDeptSingle {
 	for _, pid := range pidList {
 		pidStrList = append(pidStrList, strconv.FormatInt(int64(pid), 10))
 	}
-	sql := `SELECT uid,pid,did FROM ` + config.Mg + `.mag_user_dept WHERE pid IN (` + strings.Join(pidStrList, `,`) + `)`
+	sql := `SELECT uid,pid,did,sort FROM ` + config.Mg + `.mag_user_dept WHERE pid IN (` + strings.Join(pidStrList, `,`) + `)`
 	stmt, err := db.GetDb().Prepare(sql)
 	defer stmt.Close()
 	db.CheckErr(err)
@@ -735,7 +735,7 @@ func (this *Manage) GetUserDeptList(pidList ...uint64) []*UserDeptSingle {
 	var list []*UserDeptSingle
 	for rows.Next() {
 		single := &UserDeptSingle{}
-		rows.Scan(&single.Uid, &single.Pid, &single.Did)
+		rows.Scan(&single.Uid, &single.Pid, &single.Did, &single.Sort)
 		list = append(list, single)
 	}
 	return list

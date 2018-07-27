@@ -83,6 +83,7 @@ var FIELD_NAME = /** @class */ (function () {
     FIELD_NAME.Tmid = "Tmid";
     FIELD_NAME.Tlid = "Tlid";
     FIELD_NAME.Name = "Name";
+    FIELD_NAME.Sort = "Sort";
     return FIELD_NAME;
 }());
 var AUTH;

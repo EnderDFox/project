@@ -108,12 +108,13 @@ class ManageDataClass {
                 }
             }
         }
-        //再重新计算深度
+        //再重新计算工程的一些参数
         for (var i = 0; i < this.ProjList.length; i++) {
             var proj = this.ProjList[i]
             this.ReCountDeptTreeDepth(proj.DeptTree)
         }
     }
+    //重算dept深度
     ReCountDeptTreeDepth(deptTree: DepartmentSingle[], depth = 0) {
         for (var i = 0; i < deptTree.length; i++) {
             var dept = deptTree[i]
@@ -151,6 +152,11 @@ class ManageDataClass {
                     //超级管理员记录 TODO:
                 }
             }
+        }
+        //再重新排序
+        for (var i = 0; i < this.ProjList.length; i++) {
+            var proj = this.ProjList[i]
+            proj.UserList.SortBy(FIELD_NAME.Sort)
         }
     }
     private InitAughGroupData(agList: AuthGroupSingle[]) {

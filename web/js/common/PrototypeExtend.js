@@ -49,6 +49,22 @@ if (!Array.prototype.RemoveByKey) {
 		return index
 	}
 }
+if (!Array.prototype.SortBy) {
+	Array.prototype.SortBy = function (key, isDesc, isNum) {
+		var orderKind = isDesc ? -1 : 1
+		var _self = this
+		this.sort(function (a, b) {
+			var av = isNum ? parseInt(a[key]) : a[key]
+			var bv = isNum ? parseInt(b[key]) : b[key]
+			if (av < bv) {
+				return -orderKind
+			} else if (av > bv) {
+				return orderKind
+			}
+			return 0
+		})
+	}
+}
 //# Date扩展
 Date.prototype.format = function (format) {
 	if (!format) {

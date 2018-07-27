@@ -52,6 +52,16 @@ class ManageManagerClass {
         //
         Commond.Register(PB_CMD.MANAGE_USER_EDIT_DEPT, this.PB_UserEditDept.bind(this))
         Commond.Register(PB_CMD.MANAGE_PROJ_DEL_USER, this.PB_ProjDelUser.bind(this))
+        // Commond.Register(PB_CMD.MANAGE_USER_EDIT_SORT, this.PB_UserEditSort.bind(this))
+        // Commond.Register(PB_CMD.MANAGE_USER_EDIT_AUTH_GROUP, this.PB_UserEditAuthGroup.bind(this))
+        // //
+        // Commond.Register(PB_CMD.MANAGE_AUTH_GROUP_ADD, this.PB_AuthGroup.bind(this))
+        // Commond.Register(PB_CMD.MANAGE_AUTH_GROUP_DEL, this.PB_AuthGroup.bind(this))
+        // Commond.Register(PB_CMD.MANAGE_AUTH_GROUP_EDIT_NAME, this.PB_AuthGroup.bind(this))
+        // Commond.Register(PB_CMD.MANAGE_AUTH_GROUP_EDIT_DSC, this.PB_AuthGroup.bind(this))
+        // Commond.Register(PB_CMD.MANAGE_AUTH_GROUP_EDIT_SORT, this.PB_AuthGroup.bind(this))
+        // Commond.Register(PB_CMD.MANAGE_AUTH_GROUP_EDIT_AUTH, this.PB_AuthGroup.bind(this))
+        // Commond.Register(PB_CMD.MANAGE_AUTH_GROUP_EDIT_USER, this.PB_AuthGroup.bind(this))
     }
     PB_ManageView(data: L2C_ManageView) {
         if (this.Data.IsInit == false) {//第一次

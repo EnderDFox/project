@@ -94,12 +94,13 @@ var ManageDataClass = /** @class */ (function () {
                 }
             }
         }
-        //再重新计算深度
+        //再重新计算工程的一些参数
         for (var i = 0; i < this.ProjList.length; i++) {
             var proj = this.ProjList[i];
             this.ReCountDeptTreeDepth(proj.DeptTree);
         }
     };
+    //重算dept深度
     ManageDataClass.prototype.ReCountDeptTreeDepth = function (deptTree, depth) {
         if (depth === void 0) { depth = 0; }
         for (var i = 0; i < deptTree.length; i++) {
@@ -140,6 +141,11 @@ var ManageDataClass = /** @class */ (function () {
                     //超级管理员记录 TODO:
                 }
             }
+        }
+        //再重新排序
+        for (var i = 0; i < this.ProjList.length; i++) {
+            var proj = this.ProjList[i];
+            proj.UserList.SortBy(FIELD_NAME.Sort);
         }
     };
     ManageDataClass.prototype.InitAughGroupData = function (agList) {

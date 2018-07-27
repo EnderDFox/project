@@ -1,3 +1,9 @@
+# 备份 db  crontab -l
+# 0 * * * * /root/backup/db
+# 执行 /root/backup/db
+# 从 /root/backup中把最后的sql拿出来  
+# pwd是读取当前路径
+
 
 # mysql 正式服务器
 /bin/sh /usr/bin/mysqld_safe --datadir=/var/lib/mysql --socket=/var/lib/mysql/mysql.sock --pid-file=/var/run/mysqld/mysqld.pid --basedir=/usr --user=mysql

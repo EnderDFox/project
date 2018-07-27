@@ -85,6 +85,7 @@ class FIELD_NAME {
     static Tmid = "Tmid"
     static Tlid = "Tlid"
     static Name = "Name"
+    static Sort = "Sort"
 }
 
 
